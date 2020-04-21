@@ -1,0 +1,171 @@
+﻿@{
+    ViewBag.Title = "Search Leave Request";
+    ViewBag.Module = "LeaveRequest Mng";
+
+    string userManualUrl = string.Empty;
+    if (System.IO.File.Exists(Server.MapPath("~/UserManual/" + ViewBag.ModuleCode + ".pdf")))
+    {
+        userManualUrl = "/UserManual/" + ViewBag.ModuleCode + ".pdf";
+    }
+
+}
+
+<div class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-search-filter" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Search Result</h2>
+                <div class="widget-toolbar">
+                    <div class="smart-form">
+                        <div class="inline-group">
+                            <label class="radio">
+                                <input name="hasleft" type="radio" ng-model="filters.HasLeft" value="false" ng-change="event.reload()">
+                                <i></i>Active
+                            </label>
+                            <label class="radio">
+                                <input name="hasleft" type="radio" ng-model="filters.HasLeft" value="true" ng-change="event.reload()">
+                                <i></i>Not active
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            <div>
+                <div class="widget-body">
+                    <div class="smart-form">
+                        <fieldset>
+                            <div class="row">
+                                <section class="col col-3">
+                                    <label class="label">Requester Code</label>
+                                    <label class="input">
+                                        <input class="search-filter" type="text" ng-model="filters.RequesterUD" required />
+                                    </label>
+                                </section>
+                                <section class="col col-3">
+                                    <label class="label">Requester Name</label>
+                                    <label class="input">
+                                        <input class="search-filter" type="text" ng-model="filters.RequesterNM" required />
+                                    </label>
+                                </section>
+                                <section class="col col-3">
+                                    <label class="label">Is Approved</label>
+                                    <label class="select">
+                                        <select class="form-control search-filter" ng-model="filters.IsApproved" ng-options="standard.yesNoValue as standard.yesNoText for standard in yesNoValues">
+                                            <option value=""></option>
+                                        </select>
+                                        <i></i>
+                                    </label>
+                                </section>
+                                <section class="col col-3">
+                                    <label class="label">Is Denied</label>
+                                    <label class="select">
+                                        <select class="form-control search-filter" ng-model="filters.IsDenied" ng-options="standard.yesNoValue as standard.yesNoText for standard in yesNoValues">
+                                            <option value=""></option>
+                                        </select>
+                                        <i></i>
+                                    </label>
+                                </section>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-0" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Search Result</h2>
+            </header>
+
+            <div>
+                <div class="widget-body">
+                    <div id="searchResult" class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header" style="width: 1400px;">
+                                <div style="width: 150px;"></div>
+                                <div style="width: 150px;" class="sorting">Requester Name</div>
+                                <div style="width: 200px;">From Date - To Date</div>
+                                <div style="width: 100px;">Time</div>
+                                <div style="width: 120px;" data-colname="TotalDays">Total Days</div>
+                                <div style="width: 100px;" data-colname="IsApproved">Approved</div>
+                                <div style="width: 100px;" data-colname="IsDenied">Denied</div>
+                                <div style="width: 150px;" data-colname="ManagerApprovedBy">Approved By Manager</div>
+                                <div style="width: 150px;" data-colname="DirectorApprovedBy">Approved By Director</div>
+                                <div data-colname="DenialComment">Denial Comment</div>
+                            </div>
+                            <div class="tilsoft-table-body" style="width: 1400px;">
+                                <table>
+                                    <tr ng-repeat="model in data">
+                                        <td style="text-align: center; width: 150px;">
+                                            @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current) == "disabled")
+                                            {
+                                                <a class="btn btn-primary btn-xs font-11" target="_blank" href="@Url.Action("Edit", "LeaveRequestMng")/{{model.leaveRequestID title=" title=" view (read only)"><i class="fa fa-folder-open"></i> View</a>
+                                            }
+                                            else
+                                            {
+                                                <a class="btn btn-primary btn-xs font-11" target="_blank" href="@Url.Action("Edit", "LeaveRequestMng")/{{model.leaveRequestID}}" title="Edit"><i class="fa fa-pencil"></i> View</a>
+                                            }
+                                            @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current) != "disabled")
+                                            {
+                                                <a class="btn btn-danger btn-xs font-11" href="javascript:void(0)" ng-click="event.delete(model.leaveRequestID)" title="Delete"><i class="fa fa-times"></i> Delete</a>
+                                            }
+                                        </td>
+                                        <td style="text-align: center; width: 150px;">{{model.requesterNM}}</td>
+                                        <td style="text-align: center; width: 200px;">{{model.fromDate}} - {{model.toDate}}</td>
+                                        <td style="text-align: center; width: 100px;">{{model.toTime}}</td>
+                                        <td style="text-align: center; width: 120px;">{{model.totalDays}}</td>
+                                        <td style="text-align: center; width:100px"><input type="checkbox" disabled ng-model="model.isApproved" /></td>
+                                        <td style="text-align: center; width:100px"><input type="checkbox" disabled ng-model="model.isDenied" /></td>
+                                        <td style="text-align: center; width: 150px;">{{model.managerNM}}</td>
+                                        <td style="text-align: center; width: 150px;">{{model.directorNM}}</td>
+                                        <td>{{model.denialComment}}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction {
+<ul id="sparks">
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default" title="Search" ng-click="event.reload()"><i class="fa fa-search"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default" title="Refresh" ng-click="event.reload()"><i class="fa fa-refresh"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="@Url.Action("Edit", "LeaveRequestMng")/0" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="New"><i class="fa fa-file-o"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default disabled" title="Print"><i class="fa fa-print"></i></a>
+    </li>
+
+    @if (!string.IsNullOrEmpty(userManualUrl))
+    {
+        <li class="sparks-info">
+            <a target="_blank" href="@userManualUrl" class="btn btn-default" title="Help"><i class="fa fa-info"></i></a>
+        </li>
+    }
+</ul>
+}
+
+@section pagejs {
+    <script src="~/Angular/app/jsonService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script type="text/javascript">
+        jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/leaverequestmng/';
+        jsonService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+        jsonService.searchFilter.pageSize = @System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"];
+        var context = {
+            backendReportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]'
+        }
+    </script>
+    <script src="~/Angular/app/LeaveRequestMng/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/LeaveRequestMng/index.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}

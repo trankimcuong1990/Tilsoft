@@ -1,0 +1,405 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var supportServiceRoot = (System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"]);
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+
+    var modelID = ViewBag.ModelID;
+    var sampleProductID = ViewBag.SampleProductID;
+
+    ViewBag.Title = "Product Break Down(PAL)";
+    ViewBag.Module = "Product Break Down(PAL)";
+    ViewBag.Icon = "fa-database";
+}
+
+<div class="row" name="editForm" style="margin-top: {{openSubForm == true ? 3 : 0}}px">
+    <article class="col col-sm-12">
+        <div class="jarviswidget" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>View Product Break Down(PAL)</h2>
+            </header>
+            <div class="no-padding" ng-if="!openSubForm">
+                <div class="widget-body" style="padding-bottom: 0px">
+                    <div class="smart-form">
+                        <fieldset>
+                            <section class="col col-sm-1">
+                                <label>Model</label>
+                                <label class="input">
+                                    <input type="text" class="form-control" style="height: 30px; font-family: Arial" readonly ng-model="data.modelUD" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-5" style="padding-left: 0px">
+                                <label>&nbsp;</label>
+                                <label class="input">
+                                    <input type="text" class="form-control" style="height: 30px; font-family: Arial" readonly ng-model="data.modelNM" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label>Product</label>
+                                <label class="input">
+                                    <input type="text" class="form-control" style="height: 30px; font-family: Arial" ng-if="data.sampleProductID != null && data.productID == null" readonly ng-model="data.sampleProductUD" />
+                                    <input type="text" class="form-control" style="height: 30px; font-family: Arial" ng-if="data.productID != null && data.sampleProductID == null" readonly ng-model="data.articleCode" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-4" style="padding-left: 0px">
+                                <label>&nbsp;</label>
+                                <label class="input">
+                                    <input type="text" class="form-control" style="height: 30px; font-family: Arial" ng-if="data.sampleProductID != null && data.productID == null" readonly ng-model="data.articleDescription" />
+                                    <input type="text" class="form-control" style="height: 30px; font-family: Arial" ng-if="data.productID != null && data.sampleProductID == null" readonly ng-model="data.description" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label>Item Size</label>
+                                <label class="input">
+                                    <input type="text" class="form-control" style="height: 30px; font-family: Arial" readonly ng-model="data.itemSize" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label>Carton Size</label>
+                                <label class="input">
+                                    <input type="text" class="form-control" style="height: 30px; font-family: Arial" readonly ng-model="data.cartonSize" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label>Frame Desceiption</label>
+                                <label class="input">
+                                    <input type="text" class="form-control" style="height: 30px; font-family: Arial" readonly ng-model="data.frameDescription" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label>Cushion Desceiption</label>
+                                <label class="input">
+                                    <input type="text" class="form-control" style="height: 30px; font-family: Arial" readonly ng-model="data.cushionDescription" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-4">
+                                <label>Remark</label>
+                                <label class="input">
+                                    <input type="text" class="form-control" style="height: 30px; font-family: Arial" readonly ng-model="data.remark" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label>Currency</label>
+                                <label class="input">
+                                    <input class="form-control" style="height: 30px; font-family: Arial;" readonly ng-model="data.currencyNM" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label>Exchange Rate</label>
+                                <label class="input">
+                                    <input class="form-control" style="height: 30px; font-family: Arial; text-align: right;" readonly avs-number ng-data-source="data.exchangeRate" ng-decimal="0" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label>Season Spec(%)</label>
+                                <label class="input">
+                                    <input type="text" class="form-control" style="height: 30px; font-family: Arial; text-align: right;" readonly avs-number ng-data-source="data.seasonSpec" ng-decimal="2" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label>Total Amount</label>
+                                <label class="input">
+                                    <input type="text" class="form-control" style="height: 30px; font-family: Arial; text-align: right;" readonly avs-number ng-data-source="event.getTotalAmountPAL()" ng-decimal="0" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label>Price Amount</label>
+                                <label class="input">
+                                    <input type="text" class="form-control" style="height: 30px; font-family: Arial; text-align: right;" readonly avs-number ng-data-source="event.getTotalPricePAL()" ng-decimal="0" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label>Price Amount({{data.currencyNM}})</label>
+                                <label class="input">
+                                    <input class="form-control" style="height: 30px; font-family: Arial; text-align: right" type="text" readonly avs-number ng-data-source="event.getTotalPricePALExchange()" ng-decimal="4" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label>Client</label>
+                                <label class="input">
+                                    <input type="text" class="form-control" style="height: 30px; font-family: Arial" readonly ng-model="data.clientUD" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label>Price Date</label>
+                                <label class="input-group">
+                                    <input type="text" class="form-control" style="height: 30px; font-family: Arial" readonly ng-model="data.priceDate" />
+                                    <span class="input-group-addon">
+                                        <i class="fa fa-calendar"></i>
+                                    </span>
+                                </label>
+                            </section>
+                        </fieldset>
+                    </div>
+                    <div avs-scrollable-table class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header" style="width: 1415px">
+                                <div style="width: 60px">TOTAL<br /><b style="color: #0026ff">{{data.productBreakDownCategoryAmountPAL.length | number}}</b></div>
+                                <div style="width: 55px">#</div>
+                                <div style="width: 200px">Name</div>
+                                <div style="width: 80px">Type</div>
+                                <div style="width: 120px">Qnt</div>
+                                <div style="width: 120px">Price</div>
+                                <div style="width: 120px">Percent<br />Wastage</div>
+                                <div style="width: 120px">Amount</div>
+                                <div style="width: 300px">Remark</div>
+                                <div style="width: 350px">Image</div>
+                                <div style="border-bottom: none"></div>
+                            </div>
+                            <div class="tilsoft-table-totalrow" style="width: {{data.productBreakDownCategoryAmountPAL.length > 0 ? 1656 : 1673}}px; margin-top: 50px">
+                                <div style="width: 395px">SubTotal Of Amount</div>
+                                <div style="width: 120px">{{event.getTotalAmountQntPAL() | number : 4}}</div>
+                                <div style="width: 120px">{{event.getTotalAmountPricePAL() | number : 0}}</div>
+                                <div style="width: 120px"></div>
+                                <div style="width: 120px">{{event.getTotalAmountDetailPAL() | number : 0}}</div>
+                                <div style="width: 650px"></div>
+                                <div style="border-bottom: none"></div>
+                            </div>
+                            <div class="tilsoft-table-body" style="width: 1415px; margin-top: 80px">
+                                <table>
+                                    <tbody>
+                                        <tr ng-repeat="itemAmount in data.productBreakDownCategoryAmountPAL | orderBy : 'displayOrder'">
+                                            <td style="text-align: center; width: 60px"></td>
+                                            <td style="text-align: center; width: 55px">
+                                                <label ng-if="data.isConfirmed">{{itemAmount.displayOrder}}</label>
+                                            </td>
+                                            <td style="text-align: center; width: 200px">
+                                                <div class="input-group">
+                                                    <input type="text" class="form-control" style="height: 30px" ng-model="itemAmount.productBreakDownCategoryNM" ng-readonly="data.isConfirmed" />
+                                                    <a href="javascript:void(0)" class="btn btn-default input-group-addon" ng-click="event.getFormDetail(itemAmount)">
+                                                        <i class="fa fa-list"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                            <td style="text-align: center; width: 80px">{{itemAmount.productBreakDownCalculationTypeNM}}</td>
+                                            <td style="width: 120px">
+                                                <label style="text-align: right" ng-if="data.isConfirmed">{{itemAmount.quantity | number : 4}}</label>
+                                            </td>
+                                            <td style="width: 120px">
+                                                <label style="text-align: right" ng-if="data.isConfirmed">{{itemAmount.unitPrice | number : 0}}</label>
+                                            </td>
+                                            <td style="width: 120px; text-align: right;">
+                                                {{itemAmount.percentWastage | number : 0}}
+                                            </td>
+                                            <td style="text-align: right; width: 120px">
+                                                {{method.getBaseAmount(itemAmount, 1) | number : 0}}
+                                            </td>
+                                            <td style="text-align: center; width: 300px">
+                                                <label style="text-align: left" ng-model="itemAmount.remark"></label>
+                                            </td>
+                                            <td style="width: 350px">
+                                                <section class="col col-sm-12 no-padding" ng-if="itemAmount.productBreakDownCategoryImagePAL.length > 0">
+                                                    <div ng-repeat="image in itemAmount.productBreakDownCategoryImagePAL">
+                                                        <div class="input-group" style="margin-bottom: {{itemAmount.productBreakDownCategoryImagePAL.indexOf(image) == (itemAmount.productBreakDownCategoryImagePAL.length - 1) ? 0 : 5}}px">
+                                                            <input type="text" class="form-control" style="height: 30px" readonly ng-model="image.friendlyName" />
+                                                            <a href="javascript:void(0)" class="btn btn-default btn-sm input-group-addon" ng-click="event.downloadImage(image)">
+                                                                <i class="fa fa-download"></i>
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </section>
+                                            </td>
+                                            <td style="border-bottom: none"></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div avs-scrollable-table class="tilsoft-table-wrapper" style="margin-top: {{(data.isConfirmed) ? 15 : 0}}px">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header" style="width: 1415px">
+                                <div style="width: 60px">TOTAL<br /><b style="color: #0026ff">{{data.productBreakDownCategoryPercentPAL.length | number}}</b></div>
+                                <div style="width: 55px">#</div>
+                                <div style="width: 200px">Name</div>
+                                <div style="width: 80px">Type</div>
+                                <div style="width: 120px">Qnt</div>
+                                <div style="width: 120px">Price</div>
+                                <div style="width: 120px">Amount</div>
+                                <div style="width: 300px">Remark</div>
+                                <div style="width: 350px">Image</div>
+                                <div style="border-bottom: none"></div>
+                            </div>
+                            <div class="tilsoft-table-totalrow" style="width: {{data.productBreakDownCategoryPercentPAL.length > 0 ? 1656 : 1673}}px; margin-top: 50px">
+                                <div style="width: 395px">SubTotal Of Percent</div>
+                                <div style="width: 120px">{{event.getTotalPercentQntPAL() | number : 4}}</div>
+                                <div style="width: 120px"></div>
+                                <div style="width: 120px">{{event.getTotalPercentDetailPAL() | number : 0}}</div>
+                                <div style="width: 650px"></div>
+                                <div style="border-bottom: none"></div>
+                            </div>
+                            <div class="tilsoft-table-body" style="width: 1415px; margin-top: 80px">
+                                <table>
+                                    <tbody>
+                                        <tr ng-repeat="itemPercent in data.productBreakDownCategoryPercentPAL | orderBy : 'displayOrder'">
+                                            <td style="text-align: center; width: 60px"></td>
+                                            <td style="text-align: center; width: 55px">
+                                                <label ng-if="data.isConfirmed">{{itemPercent.displayOrder}}</label>
+                                            </td>
+                                            <td style="text-align: center; width: 200px">
+                                                <div class="input-group">
+                                                    <input type="text" class="form-control" style="height: 30px" ng-model="itemPercent.productBreakDownCategoryNM" ng-readonly="data.isConfirmed" />
+                                                    <a href="javascript:void(0)" class="btn btn-default input-group-addon" ng-click="event.getFormDetail(itemPercent)">
+                                                        <i class="fa fa-list"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                            <td style="text-align: center; width: 80px">{{itemPercent.productBreakDownCalculationTypeNM}}</td>
+                                            <td style="width: 120px">
+                                                <label style="text-align: right" ng-if="data.isConfirmed">{{itemPercent.quantity | number : 4}}</label>
+                                            </td>
+                                            <td style="text-align: right; width: 120px">
+                                                {{itemPercent.unitPrice | number : 0}}
+                                            </td>
+                                            <td style="text-align: right; width: 120px">
+                                                {{method.getBaseAmount(itemPercent, 2) | number : 0}}
+                                            </td>
+                                            <td style="text-align: center; width: 300px">
+                                                <label ng-if="data.isConfirmed">{{itemPercent.remark}}</label>
+                                            </td>
+                                            <td style="width: 350px">
+                                                <section class="col col-sm-12 no-padding" ng-if="itemPercent.productBreakDownCategoryImagePAL.length > 0">
+                                                    <div ng-repeat="image in itemPercent.productBreakDownCategoryImagePAL">
+                                                        <div class="input-group" style="margin-bottom: {{itemPercent.productBreakDownCategoryImagePAL.indexOf(image) == (itemPercent.productBreakDownCategoryImagePAL.length - 1) ? 0 : 5}}px">
+                                                            <input type="text" class="form-control" style="height: 30px" readonly ng-model="image.friendlyName" />
+                                                            <a href="javascript:void(0)" class="btn btn-default btn-sm input-group-addon" ng-click="event.downloadImage(image)">
+                                                                <i class="fa fa-download"></i>
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </section>
+                                            </td>
+                                            <td style="border-bottom: none"></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="no-padding" ng-if="openSubForm">
+                <div class="widget-body" style="padding-bottom: 0px">
+                    <div class="smart-form">
+                        <fieldset>
+                            <section class="col col-sm-6" style="text-align: left"></section>
+                            <section class="col col-sm-6" style="text-align: right">
+                                <a href="javascript:void(0)" class="btn btn-default btn-sm btn-danger" style="height: 30px" ng-click="event.closeFormDetail(dataDetail)">
+                                    <i class="fa fa-times"></i> Close
+                                </a>
+                            </section>
+                        </fieldset>
+                    </div>
+                    <div avs-scrollable-table class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header" style="width: 1150px">
+                                <div style="width: 65px">Total<br /><b style="color: #0026ff">{{dataDetail.productBreakDownCategoryTypePAL.length | number}}</b></div>
+                                <div style="width: 45px">#</div>
+                                <div style="width: 250px">Name</div>
+                                <div style="width: 250px">Vietnamese Name</div>
+                                <div style="width: 80px">Unit</div>
+                                <div style="width: 90px">Qnt</div>
+                                <div style="width: 90px">Price<br />(VND)</div>
+                                <div style="width: 90px">Price<br />(USD)</div>
+                                <div style="width: 90px">Amount<br />(VND)</div>
+                                <div style="width: 90px">Amount<br />(USD)</div>
+                                <div style="border-bottom: none"></div>
+                            </div>
+                            <div class="tilsoft-table-body" style="width: 1150px; margin-top: 50px">
+                                <table>
+                                    <tbody ng-repeat="categoryType in dataDetail.productBreakDownCategoryTypePAL">
+                                        <tr>
+                                            <th style="text-align: center; width: 65px">
+                                                &nbsp;
+                                            </th>
+                                            <th colspan="{{categoryType.productBreakDownDetailPAL.length > 0 ? 4 : 0}}" style="width: 625px">
+                                                {{categoryType.productBreakDownCategoryTypeNM}}
+                                            </th>
+                                            <th style="width: 90px"></th>
+                                            <th style="width: 90px"></th>
+                                            <th style="width: 90px"></th>
+                                            <th style="width: 90px"></th>
+                                            <th style="width: 90px"></th>
+                                            <th style="border-bottom: 0px"></th>
+                                        </tr>
+                                        <tr style="background: #eff7f7">
+                                            <th colspan="{{categoryType.productBreakDownDetailPAL.length > 0 ? 5 : 2}}" style="text-align: right; color: #666; background: #eff7f7;"><b>TOTAL OF {{categoryType.productBreakDownCategoryTypeNM}}</b></th>
+                                            <th style="text-align: right; background: #eff7f7">{{method.getTotalQntDetailPAL(categoryType) | number:4}}</th>
+                                            <th style="text-align: right; background: #eff7f7"></th>
+                                            <th style="text-align: right; background: #eff7f7"></th>
+                                            <th style="text-align: right; background: #eff7f7">{{method.getTotalAmountDetailPAL(categoryType) | number : 0}}</th>
+                                            <th style="text-align: right; background: #eff7f7"><label ng-if="method.getTotalAmountDetailPALUSD(categoryType) > 0">$ {{method.getTotalAmountDetailPALUSD(categoryType) | number : 2}}</label></th>
+                                            <th style="background: #eff7f7; border-bottom: none"></th>
+                                        </tr>
+                                        <tr ng-repeat="detailData in categoryType.productBreakDownDetailPAL | orderBy: 'displayOrder'">
+                                            <td style="width: 65px; text-align: center">
+                                                &nbsp;
+                                            </td>
+                                            <td style="width: 45px; text-align: center">
+                                                {{detailData.displayOrder | number : 0}}
+                                            </td>
+                                            <td style="width: 250px;">
+                                                {{detailData.productBreakDownDetailNM}}
+                                            </td>
+                                            <td style="width: 250px;">
+                                                {{detailData.productBreakDownDetailVNNM}}
+                                            </td>
+                                            <td style="width: 80px; text-align: center">
+                                                {{detailData.unitNM}}
+                                            </td>
+                                            <td style="text-align:right;">
+                                                {{detailData.quantity | number : 4}}
+                                            </td>
+                                            <td style="text-align:right;">
+                                                {{detailData.unitPrice | number : 0}}
+                                            </td>
+                                            <td style="text-align:right;">
+                                                <label ng-if="detailData.unitPrice != null && detailData.unitPrice != ''">$ {{method.getPriceUSDInDetailMaterialItem(detailData, data.exchangeRate) | number : 2}}</label>
+                                            </td>
+                                            <td style="text-align: right">
+                                                <label ng-if="detailData.amount > 0">{{detailData.amount | number : 0}}</label>
+                                            </td>
+                                            <td style="text-align: right">
+                                                <label ng-if="detailData.amount > 0">$ {{(data.exchangeRate == null || data.exchangeRate == '') ? (detailData.amount / 1) : (detailData.amount / data.exchangeRate) | number : 2}}</label>
+                                            </td>
+                                            <td style="border-bottom: none"></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction{
+    <ul id="sparks">
+        <li class="sparks-info" ng-if="!openSubForm">
+            <a href="javascript:void(0)" class="btn btn-default btn-sm" ng-click="event.backUrl()">
+                <i class="fa fa-arrow-left"></i> Back
+            </a>
+        </li>
+    </ul>
+}
+
+@section pagejs{
+    <script type="text/javascript">
+        var context = {
+            id: '@ViewBag.ID',
+            modelID: '@modelID',
+            sampleProductID: '@sampleProductID',
+            token: '@token',
+            backUrl: '@Url.Action("Index", "ProductBreakDownPALMng")',
+            serviceUrl: '@(serviceRoot)/api/productbreakdown-pal/'
+        }
+    </script>
+    <script type="text/javascript" src="~/Views/ProductBreakDownPALMng/view.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Views/ProductBreakDownPALMng/service.js?v=@guid"></script>
+}

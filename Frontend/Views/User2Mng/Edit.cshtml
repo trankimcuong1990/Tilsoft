@@ -1,0 +1,118 @@
+﻿@{
+    ViewBag.Title = "Create New Account";
+    ViewBag.Icon = "fa-pencil-square-o";
+    ViewBag.Module = "Account";
+}
+<!-- TEST MERGE -->
+<form class="row" name="editForm" id="main-form">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-0" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>&nbsp;</header>
+            <div>
+                <div class="widget-body">
+                    <div class="smart-form">
+                        <fieldset>
+                            <div class="row">
+                                <section class="col col-4">
+                                    <label class="label">
+                                        <i class="fa fa-user"></i> Username
+                                        <em ng-show="editForm.username.$error.required" class="note note-error">(Required)</em>
+                                    </label>
+                                    <label class="input" ng-class="{'state-error': editForm.username.$error.required}">
+                                        <input name="username" type="text" ng-model="data.username" required autocomplete="off" />
+                                    </label>
+                                </section>
+                                <section class="col col-4">
+                                    <label class="label">
+                                        <i class="fa fa-envelope-o"></i> Email
+                                        <em ng-show="editForm.email.$error.required" class="note note-error">(Required)</em>
+                                        <em ng-show="editForm.email.$error.email" class="note note-error">(Invalid email)</em>
+                                    </label>
+                                    <label class="input" ng-class="{'state-error': editForm.email.$error.required || editForm.email.$error.email}">
+                                        <input name="email" type="email" ng-model="data.email" required />
+                                    </label>
+                                </section>
+                                <section class="col col-4">
+                                    <label class="label">
+                                        <i class="fa fa-users"></i> User Group
+                                        <em ng-show="editForm.group.$error.required" class="note note-error">(Required)</em>
+                                    </label>
+                                    <label class="select" ng-class="{'state-error': editForm.group.$error.required}">
+                                        <select name="group" required ng-model="data.userGroupID" ng-options="group.userGroupID as group.userGroupNM for group in userGroups">
+                                            <option></option>
+                                        </select>
+                                        <i></i>
+                                    </label>
+                                </section>                               
+                            </div>
+                            <section>
+                                <label class="label">
+                                    <i class="fa fa-users"></i> Employee
+                                </label>
+                                <label class="select">
+                                    <select ui-select2 ng-model="data.employeeID" class="select2">
+                                        <option value="">--CREATE NEW EMPLOYEE--</option>
+                                        <option ng-repeat="employee in employees | orderBy: 'employeeNM'" value="{{employee.employeeID}}">{{employee.employeeNM}}</option>
+                                    </select>
+                                </label>
+                            </section>
+                            <div class="row">
+                                <section class="col col-6">
+                                    <label class="label">
+                                        <i class="fa fa-lock"></i> Password
+                                        <em ng-show="editForm.password.$error.required" class="note note-error">(Required)</em>
+                                        <em ng-show="editForm.password.$error.minlength" class="note note-error">(Password must be at least 7 chars length)</em>
+                                    </label>
+                                    <label class="input" ng-class="{'state-error': editForm.password.$error.required || editForm.password.$error.minlength}">
+                                        <input name="password" type="password" ng-model="data.password" required autocomplete="off" ng-minlength="7" />
+                                    </label>
+                                </section>
+                                <section class="col col-6">
+                                    <label class="label">
+                                        <i class="fa fa-lock"></i> Password Confirmation
+                                        <em ng-show="editForm.confirmation.$error.required" class="note note-error">(Required)</em>
+                                        <em ng-show="editForm.confirmation.$error.minlength" class="note note-error">(Password must be at least 7 chars length)</em>
+                                    </label>
+                                    <label class="input" ng-class="{'state-error': editForm.confirmation.$error.required || editForm.confirmation.$error.minlength}">
+                                        <input name="confirmation" type="password" ng-model="data.confirmation" required autocomplete="off" ng-minlength="7" />
+                                    </label>
+                                </section>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "User2Mng")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="event.create()"><i class="fa fa-save"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script type="text/javascript">
+        var context = {
+            id: @ViewBag.ID,
+            errMsg: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED',
+            backUrl: '@Url.Action("Index", "User2Mng")',
+            refreshUrl: '@Url.Action("View", "User2Mng", new { id = UrlParameter.Optional })/',
+
+            backendReportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]',
+            serviceUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/user2mng/',
+            token: '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]',
+            supportServiceUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/support/',
+        };
+    </script>
+    <script src="~/Views/User2Mng/edit.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/jsonService2.js"></script>
+    <script src="~/Views/User2Mng/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}
+

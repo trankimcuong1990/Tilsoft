@@ -1,0 +1,625 @@
+﻿@{
+    ViewBag.Title = "Search client";
+    ViewBag.Module = "Client";
+
+    string userManualUrl = string.Empty;
+    if (System.IO.File.Exists(Server.MapPath("~/UserManual/" + ViewBag.ModuleCode + ".pdf")))
+    {
+        userManualUrl = "/UserManual/" + ViewBag.ModuleCode + ".pdf";
+    }
+}
+
+<style>
+    .select2-container{
+        border:none !important;
+    }
+</style>
+
+<div class="row">
+
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-search-result" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Client search result</h2>
+                <div class="widget-toolbar">
+                    <div class="smart-form">
+                        <div class="inline-group">
+                            <label class="radio">
+                                <input name="active" type="radio" ng-model="filters.IsActive" value="true" ng-change="event.reload()">
+                                <i></i>Active
+                            </label>
+                            <label class="radio">
+                                <input name="active" type="radio" ng-model="filters.IsActive" value="false" ng-change="event.reload()">
+                                <i></i>Inactive
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div class="smart-form">
+
+                        <div avs-scroll grid-handler="gridHandler"  class="tilsoft-table-wrapper" id="clientTableContent">
+                            <div class="tilsoft-table">                                
+                                    <div class="tilsoft-table-header" style="width: 2520px;">
+                                    <div style="width: 70px;">
+                                        <strong>Found: </strong> <span style="color: #a90329;">{{totalRows}}</span>
+                                    </div>
+                                    <div style="width: 40px">#</div>
+                                    <div style="width: 100px;">Logo</div>
+                                    <div style="width: 60px;" class="sorting" data-colname="clientUD">Client Code</div>
+                                    <div style="width: 200px;" class="sorting" data-colname="clientNM">Client Name</div>
+                                    <div style="width: 120px;" class="sorting" data-colname="BuyingOrganization">Buying Org</div>
+                                    <div style="width: 100px;" class="sorting" data-colname="ClientRelationshipTypeNM">Relation ship Type</div>
+                                    <div style="width: 90px;">Has TurnOver</div>
+
+                                    <div style="width: 170px;" class="sorting_desc" data-colname="piConfirmedSaleAmountThisYear">Proforma Invoice Confirmed {{currentSeason}}</div>
+                                    <div style="width: 200px;" class="sorting" data-colname="piConfirmedDelta9AmountThisYear" ng-show="hasPermissionOnGrossMargin"> &delta;9 ON PI CONFIMRED<br />{{currentSeason}}</div>
+                                    <div style="width: 90px;"  class="sorting" data-colname="piConfirmedDelta9PercentThisYear" ng-show="hasPermissionOnGrossMargin">&delta;9 % ON PI CONF</div>
+
+                                    <div style="width: 100px;" class="sorting" data-colname="saleNM"><i class="fa fa-user"></i> Acc Manager</div>
+                                    <div style="width: 100px;" class="sorting" data-colname="Sale2NM"><i class="fa fa-user"></i> Sales Assitant</div>
+                                    <div style="width: 100px;" class="sorting" data-colname="SaleVNName"><i class="fa fa-user"></i> VN merchand</div>
+                                    <div style="width: 120px;" class="sorting" data-colname="SaleMerAssistNM"><i class="fa fa-user"></i> VN merch. assist</div>
+                                    <div style="width: 110px;" class="sorting" data-colname="SaleVN2Name"><i class="fa fa-user"></i> VN Log. Assist</div>
+                                    <div style="width: 100px;" class="sorting" data-colname="agentNM"><i class="fa fa-user"></i> Agent</div>
+                                    <div style="width: 300px;" class="sorting" data-colname="streetAddress1">Address</div>
+                                    <div style="width: 150px" class="sorting" data-colname="clientCountryNM">Country</div>
+                                    <div>Other Info</div>
+                                </div>
+                                
+                                <div class="tilsoft-table-filter" style="width: 2520px;">
+                                    <div style="width: 70px;"></div>
+                                    <div style="width:40px"></div>
+                                    <div style="width: 100px;"></div>
+                                    <div style="width: 60px;" class="sorting" data-colname="clientUD">
+                                        <input class="search-filter" type="text" ng-model="filters.ClientUD">
+                                    </div>
+                                    <div style="width: 200px;" class="sorting" data-colname="clientNM">
+                                        <input class="search-filter" type="text" ng-model="filters.ClientNM">
+                                    </div>
+                                    <div style="width: 120px;" class="sorting" data-colname="BuyingOrganization">
+                                        <input class="search-filter" type="text" ng-model="filters.BuyingOrganization">
+                                    </div>
+                                    <div style="width: 100px;" class="sorting" data-colname="ClientRelationshipTypeNM">
+                                        <select class="search-filter" ng-model="filters.RelationshipTypeID" ng-options="item.clientRelationshipTypeID as item.clientRelationshipTypeNM for item in clientRelationshipTypes">
+                                            <option value=""></option>
+                                        </select>
+                                    </div>
+                                    <div style="width: 90px;" class="sorting">
+                                        <select class="search-filter" ng-model="filters.IsBuyClient" ng-options="item.yesNoValue as item.yesNoText for item in buyingClient"></select>
+                                    </div>
+
+                                    <div style="width: 110px;" class="sorting_desc" data-colname="piConfirmedSaleAmountThisYear">AMOUNT</div>
+                                    <div style="width: 60px;" class="sorting" data-colname="PiConfirmedContThisYear">CONT</div>
+                                    <div style="width: 100px;" class="sorting" data-colname="PiConfirmedDelta9AmountThisYear" ng-show="hasPermissionOnGrossMargin">USD</div>
+                                    <div style="width: 100px;" class="sorting" data-colname="PiConfirmedDelta9AmountThisYear" ng-show="hasPermissionOnGrossMargin">EUR</div>
+                                    <div style="width: 90px;" class="sorting" data-colname="PiConfirmedDelta9PercentThisYear" ng-show="hasPermissionOnGrossMargin">{{currentSeason}}</div>
+                                    
+                                    <div style="width: 100px;" class="sorting" data-colname="saleNM">
+                                        <select class="search-filter" ng-model="filters.SaleID" ng-options="item.userID as item.employeeNM for item in saler | filter : {isAccountManager: true}">
+                                            <option value=""></option>
+                                        </select>
+                                    </div>
+                                    <div style="width: 100px;" class="sorting" data-colname="Sale2NM">
+                                        <select class="search-filter" ng-model="filters.Sale2ID" ng-options="item.userID as item.employeeNM for item in saler | filter : {isAccountManagerAssistant: true}">
+                                            <option value=""></option>
+                                        </select>
+                                    </div>
+                                    <div style="width: 100px;" class="sorting" data-colname="SaleVNName">
+                                        <select class="search-filter" ng-model="filters.SaleVNID" ng-options="item.userID as item.employeeNM for item in saler | filter : {isvnAssistant: true}">
+                                            <option value=""></option>
+                                        </select>
+                                    </div>
+
+                                    <div style="width: 120px;" class="sorting" data-colname="SaleMerAssistNM">
+                                        <select class="search-filter" ng-model="filters.SaleMerAssistID" ng-options="item.userID as item.employeeNM for item in saler | filter : {isvnAssistant: true}">
+                                            <option value=""></option>
+                                        </select>
+                                    </div>
+
+                                    <div style="width: 110px;" class="sorting" data-colname="SaleVN2Name">
+                                        <select class="search-filter" ng-model="filters.SaleVN2ID" ng-options="item.userID as item.employeeNM for item in saler | filter : {isvnLogisticAssistant: true}">
+                                            <option value=""></option>
+                                        </select>
+                                    </div>
+                                    <div style="width: 100px;" class="sorting" data-colname="agentNM">
+                                        <select class="search-filter" ng-model="filters.AgentID" ng-options="item.agentID as item.agentNM for item in agents">
+                                            <option value=""></option>
+                                        </select>
+                                    </div>
+
+                                    <div style="width: 300px;" class="sorting" data-colname="streetAddress1">
+                                        <input class="search-filter" type="text" ng-model="filters.streetAddress1">
+                                    </div>
+                                    <div style="width: 150px" class="sorting" data-colname="ClientCountryNM">
+                                        <select style="width:100%;padding-top:0px" ui-select2 ng-model="filters.ClientCountryNM" class="select2 search-filter" @*ng-options="item.clientCountryNM as item.clientCountryNM for item in countries"*@>
+                                            <option value=""></option>
+                                            <option ng-repeat="item in countries" value="{{item.clientCountryNM}}">{{item.clientCountryNM}}</option>
+                                        </select>
+                                    </div>
+                                    <div>&nbsp;</div>
+                                </div>
+
+                                <div class="tilsoft-table-totalrow" style="width: 2520px;">
+                                    <div style="width: 70px;"></div>
+                                    <div style="width:40px"></div>
+                                    <div style="width: 100px;"></div>
+                                    <div style="width: 60px;" class="sorting" data-colname="clientUD"></div>
+                                    <div style="width: 200px;" class="sorting" data-colname="clientNM"></div>
+                                    <div style="width: 120px;" class="sorting" data-colname="BuyingOrganization"></div>
+                                    <div style="width: 100px;" class="sorting" data-colname="ClientRelationshipTypeNM"></div>
+                                    <div style="width: 90px;" class="sorting">Total</div>
+
+                                    <div style="width: 110px;" class="sorting_desc" data-colname="piConfirmedSaleAmountThisYear">{{piConfirmedSaleAmountThisYear_Total | currency:'$':0}}</div>
+                                    <div style="width: 60px;" class="sorting" data-colname="totalQnt40HC">{{piConfirmedContThisYear_Total | number:1}}</div>
+
+                                    <div style="width: 100px;" class="sorting_desc" data-colname="GrossMarginAfterCommission" ng-show="hasPermissionOnGrossMargin">
+                                        {{piConfirmedDelta9AmountThisYear_Total | currency:'$':0}}
+                                    </div>
+                                    <div style="width: 100px;" class="sorting_desc" data-colname="GrossMarginAfterCommission" ng-show="hasPermissionOnGrossMargin">
+                                        {{piConfirmedDelta9AmountThisYear_Total/exRate | currency:'&euro;':0}}
+                                    </div>
+
+                                    <div style="width: 90px;" class="sorting" data-colname="GrossMarginAfterCommissionPercent" ng-show="hasPermissionOnGrossMargin">
+                                        {{piConfirmedDelta9PercentThisYear_Total | number:2}} %
+                                    </div>
+                                    <div style="width: 100px;" class="sorting" data-colname="saleNM"></div>
+                                    <div style="width: 100px;" class="sorting" data-colname="Sale2NM"></div>
+                                    <div style="width: 100px;" class="sorting" data-colname="SaleVNName"></div>
+                                    <div style="width: 120px;" class="sorting" data-colname="SaleMerAssistNM"></div>
+                                    <div style="width: 110px;" class="sorting" data-colname="SaleVN2Name"></div>
+                                    <div style="width: 100px;" class="sorting" data-colname="agentNM"></div>
+                                    <div style="width: 300px;" class="sorting" data-colname="streetAddress1"></div>
+                                    <div style="width: 150px" class="sorting" data-colname="clientCountryNM"></div>
+                                    <div></div>
+                                </div>
+
+                                <div class="tilsoft-table-subtotalrow" style="width: 2520px;">
+                                    <div style="width: 70px;"></div>
+                                    <div style="width: 40px"></div>
+                                    <div style="width: 100px;"></div>
+                                    <div style="width: 60px;" class="sorting" data-colname="clientUD"></div>
+                                    <div style="width: 200px;" class="sorting" data-colname="clientNM"></div>
+                                    <div style="width: 120px;" class="sorting" data-colname="BuyingOrganization"></div>
+                                    <div style="width: 100px;" class="sorting" data-colname="ClientRelationshipTypeNM"></div>
+                                    <div style="width: 90px;" class="sorting">Sub Total</div>
+                                    <div style="width: 110px;" class="sorting_desc" data-colname="piConfirmedSaleAmountThisYear">
+                                        {{piConfirmedSaleAmountThisYear_SubTotal | currency:'$':0}}
+                                    </div>
+                                    <div style="width: 60px;" class="sorting" data-colname="totalQnt40HC">
+                                        {{piConfirmedContThisYear_SubTotal | number:1}}
+                                    </div>
+
+                                    <div style="width: 100px;" class="sorting_desc" data-colname="GrossMarginAfterCommission" ng-show="hasPermissionOnGrossMargin">
+                                        {{piConfirmedDelta9AmountThisYear_SubTotal | currency:'$':0}}
+                                    </div>
+                                    <div style="width: 100px;" class="sorting_desc" data-colname="GrossMarginAfterCommission" ng-show="hasPermissionOnGrossMargin">
+                                        {{piConfirmedDelta9AmountThisYear_SubTotal/exRate | currency:'&euro;':0}}
+                                    </div>
+                                    
+                                    <div style="width: 90px;" class="sorting" data-colname="GrossMarginAfterCommissionPercent" ng-show="hasPermissionOnGrossMargin">
+                                        {{piConfirmedDelta9PercentThisYear_SubTotal | number:2}} %
+                                    </div>
+
+                                    <div style="width: 100px;" class="sorting" data-colname="saleNM"></div>
+                                    <div style="width: 100px;" class="sorting" data-colname="Sale2NM"></div>
+                                    <div style="width: 100px;" class="sorting" data-colname="SaleVNName"></div>
+                                    <div style="width: 120px;" class="sorting" data-colname="saleMerAssistNM"></div>
+                                    <div style="width: 110px;" class="sorting" data-colname="SaleVN2Name"></div>
+                                    <div style="width: 100px;" class="sorting" data-colname="agentNM"></div>
+                                    <div style="width: 300px;" class="sorting" data-colname="streetAddress1"></div>
+                                    <div style="width: 150px;" class="sorting" data-colname="clientCountryNM"></div>
+                                    <div></div>
+                                </div>
+                                
+                                <div class="tilsoft-table-body" style="width: 2520px;height:500px">
+                                    <table>
+                                        <tr ng-repeat="item in data">
+                                            <td style="text-align: center; width: 69px;" class="col-action">
+                                                <a class="btn btn-default btn-xs font-11" href="@Url.Action("Overview", "Client")/{{item.clientID}}" title="Overview" target="_blank" style="margin-bottom:2px"><i class="fa fa-list-ul"></i> View</a>
+
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current) != "disabled")
+                                                {
+                                                    <a class="btn btn-default btn-xs font-11" href="@Url.Action("Edit", "Client")/{{item.clientID}}" title="Edit" target="_blank" style="margin-bottom:2px"><i class="fa fa-pencil"></i>&nbsp;&nbsp;&nbsp;Edit</a>
+                                                }
+
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current) != "disabled")
+                                                {
+                                                    <a class="btn btn-danger btn-xs font-11" href="#" ng-click="delete(item.clientID,$event)" title="Delete"><i class="fa fa-times"></i>&nbsp;&nbsp;&nbsp;Del</a>
+                                                }
+                                            </td>
+                                            <td style="width:40px;text-align:center">{{$index+1}}</td>
+                                            <td style="width: 100px;">
+                                                <a href="{{item.fileLocation}}" data-featherlight="image">
+                                                    <img src="{{item.thumbnailLocation}}" style="width: 100%;" />
+                                                </a>
+                                            </td>
+                                            <td style="width: 60px; text-align:center">{{item.clientUD}}</td>
+                                            <td style="width: 200px;">
+                                                {{item.clientNM}}
+                                                <br />
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Print, HttpContext.Current) != "disabled")
+                                                {
+                                                    <a style="margin-top: 5px;" class="btn btn-default btn-xs font-11" href="#" ng-click="event.printCIS(item.clientID)" title="CIS"><i class="fa fa-bar-chart-o"></i> CIS Report</a>
+                                                }
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Print, HttpContext.Current) != "disabled")
+                                                {
+                                                    <a ng-if="!item.isActive" style="margin-top: 5px;" class="btn btn-primary btn-xs font-11" href="javascript:void(0)" title="Activate" ng-click="event.activate(item)"><i class="fa fa-link"></i> Activate</a>
+                                                    <a ng-if="item.isActive" style="margin-top: 5px;" class="btn btn-warning btn-xs font-11" href="javascript:void(0)" title="De-Activate" ng-click="event.deactivate(item)"><i class="fa fa-unlink"></i> De-Activate</a>
+                                                }
+                                            </td>
+                                            <td style="width: 120px; text-align:left">{{item.buyingOrganization}}</td>
+
+                                            <td style="width: 100px; text-align:left">{{item.clientRelationshipTypeNM}}</td>
+                                            <td style="width: 90px;text-align:center">{{(item.piConfirmedSaleAmountThisYear) > 0 ? 'YES' : 'NO'}}</td>
+
+                                            <td style="width: 110px; text-align: right;">{{item.piConfirmedSaleAmountThisYear | currency:'$':2}}</td>
+                                            <td style="width: 60px; text-align: right;">{{item.piConfirmedContThisYear | number:1}}</td>
+
+                                            <td style="width: 100px; text-align: right;" ng-show="hasPermissionOnGrossMargin">{{item.piConfirmedDelta9AmountThisYear | currency:'$':2}}</td>
+                                            <td style="width: 100px; text-align: right;" ng-show="hasPermissionOnGrossMargin">{{item.piConfirmedDelta9AmountThisYear/exRate | currency:'&euro;':2}}</td>
+
+                                            <td style="width: 90px; text-align: right;" ng-show="hasPermissionOnGrossMargin">{{item.piConfirmedDelta9PercentThisYear | number:2}} %</td>
+
+                                            <td style="width: 100px;">
+                                                <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.saleUserID}}" data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                    {{item.saleNM}}
+                                                </a>
+                                            </td>
+                                            <td style="width: 100px;">
+                                                <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.sale2UserID}}" data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                    {{item.sale2NM}}
+                                                </a>
+                                            </td>
+                                            <td style="width: 100px;">
+                                                <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.saleVNUserID}}" data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                    {{item.saleVNName}}
+                                                </a>
+                                            </td>
+                                            <td style="width: 120px;">
+                                                <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.saleMerAssistID}}" data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                    {{item.saleMerAssistNM}}
+                                                </a>
+                                            </td>
+                                            <td style="width: 110px;">
+                                                <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.saleVN2UserID}}" data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                    {{item.saleVN2Name}}
+                                                </a>
+                                            </td>
+                                            <td style="width: 100px;">{{item.agentNM}}</td>
+
+
+
+                                            <td style="width: 300px; ">
+                                                {{item.streetAddress1}}<br />
+                                                {{item.zipCode}} - {{item.clientCityNM}} <br />
+                                                {{item.clientCountryNM}}<br />
+                                                {{item.telephone}} - <strong>Fax:</strong> {{item.fax}} <br />
+                                                {{item.email}}<br />
+                                                <a href="{{item.website}}" target="_blank">{{item.website}}</a>
+                                            </td>
+                                            <td style="width: 150px; ">{{item.clientCountryNM}}</td>
+                                            <td>
+                                                <br />
+                                                <strong>Business from:</strong> {{item.haveBusinessRelationshipFromYear}}
+                                                <br />
+                                                <strong>Rating:</strong> {{item.rating}}
+                                                <br />
+                                                <strong>Qnt of store:</strong> {{item.qntOfStore}}
+                                                <br />
+                                                <strong>VAT No:</strong> {{item.vatNo}}
+                                                <br />
+                                                <strong>Payment Term:</strong> {{item.paymentTermNM}}
+                                                <br />
+                                                <strong>Delivery Term:</strong> {{item.deliveryTermNM}}
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                
+                </div>
+            
+            </div>
+        </div>
+    </article>
+</div>
+
+
+@section pagepopup
+{
+}
+
+
+@section FormAction {
+<ul id="sparks">
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default" title="Search" ng-click="event.reload()"><i class=" fa fa-search"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default" title="Refresh" ng-click="event.reload()"><i class="fa fa-refresh"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="@Url.Action("Edit", "Client")/0" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="New"><i class="fa fa-file-o"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default" title="Export Excel" style="color: #31B404" ng-click="event.exportExcel($event)"><i class="fa fa-file-excel-o"></i></a>
+    </li>
+    @if (!string.IsNullOrEmpty(userManualUrl))
+    {
+        <li class="sparks-info">
+            <a target="_blank" href="@userManualUrl" class="btn btn-default" title="Help"><i class="fa fa-info"></i></a>
+        </li>
+    }
+</ul>
+}
+
+@section pagejs {
+    <script src="~/Angular/app/jsonService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/Client/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script type="text/javascript">
+
+        jQuery('.search-filter').keypress(function(e){
+            if (e.keyCode == 13) {
+                var scope = angular.element(jQuery('body')).scope();
+                scope.event.reload();
+            }
+        });
+
+        clientService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/client/';
+        clientService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+        clientService.searchFilter.pageSize = @System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"];
+        var cookieId = '@HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString()';
+
+        var modelApp = angular.module('tilsoftApp', ['ngCookies', 'avs-directives']);
+        modelApp.controller('tilsoftController', ['$scope', '$cookieStore', function ($scope, $cookieStore) {
+            $scope.data = [];
+
+            $scope.buyingClient = null;
+            $scope.saler = null;
+            $scope.agents = null;
+            $scope.countries = null;
+            $scope.deliveryTerms = null;
+            $scope.paymentTerms = null;
+            $scope.clientRelationshipTypes = null;
+            $scope.currentSeason='@Frontend.Helper.Common.GetCurrentSeason()';
+
+            $scope.pageIndex = 1;
+            $scope.totalPage = 0;
+            $scope.totalRows = 0;
+
+            $scope.filters = {
+                ClientUD : '',
+                ClientNM : '',
+                StreetAddress1 : '',
+                Telephone : '',
+                Email : '',
+                ClientCityNM : '',
+                ClientCountryNM : '',
+                SaleID : '',
+                Sale2ID : '',
+                SaleVNID : '',
+                SaleVN2ID : '',
+                AgentID : '',
+                PaymentTermID : '',
+                DeliveryTermID : '',
+                IsActive: 'true',
+                IsBuyClient: '',
+                IsBuyingOrangePie:'',
+                BuyingOrganization:'',
+                RelationshipTypeID : '',
+                SaleMerAssistID: ''
+            };
+
+            $cookieStore.put(cookieId, $scope.filters);
+            var cookieValue = $cookieStore.get(cookieId);
+            if (cookieValue) {
+                $scope.filters = cookieValue;
+            }
+
+            $scope.gridHandler = {
+                loadMore: function () {
+                    if ($scope.pageIndex < $scope.totalPage) {
+                        $scope.pageIndex++;
+                        clientService.searchFilter.pageIndex = $scope.pageIndex;
+                        $scope.search(true);
+                    }
+                },
+                sort: function (sortedBy, sortedDirection) {
+                    $scope.data = [];
+                    clientService.searchFilter.sortedDirection = sortedDirection;
+                    $scope.pageIndex = 1;
+                    clientService.searchFilter.pageIndex = scope.pageIndex;
+                    clientService.searchFilter.sortedBy = sortedBy;
+                    $scope.search(true);
+                },
+                isTriggered: false
+            };
+
+            $scope.event = {
+                search: function(){
+                    $scope.data = [];
+                    $scope.pageIndex = 1;
+                    clientService.searchFilter.pageIndex = $scope.pageIndex;
+                    $scope.search();
+                },
+                printCIS: function(id){
+                    clientService.getCIS(
+                        id,
+                        function (data) {
+                            window.open('@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]' + data.data);
+                        },
+                        function (error) {
+                            jsHelper.showMessage('warning', error);
+                        }
+                    );
+                },
+                exportExcel : function ($event) {
+                    $event.preventDefault();
+                    clientService.exportExcelClient(
+                        {
+                            filters: $scope.filters,
+                            sortedBy: 'piConfirmedSaleAmountThisYear',
+                            sortedDirection: 'DESC',
+                            pageSize: 20,
+                            pageIndex: 1
+                        },
+                        function (data) {
+                            jsHelper.processMessage(data.message);
+                            if (data.message.type !=2)
+                            {
+                                window.open('@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]' + data.data);
+                            }
+                        },
+                        function (error) {
+                            jsHelper.showMessage('warning', error);
+                        }
+                    );
+                },
+                init: function() {
+                    clientService.getFilterSearch(
+                        function (data) {
+                            //console.log(data.data);
+                            $scope.buyingClient = [];
+                            $scope.buyingClient.push({yesNoValue: '', yesNoText: ''});
+                            Array.prototype.push.apply($scope.buyingClient, data.data.buyingClient);
+
+                            $scope.countries = data.data.countries;
+                            $scope.agents = data.data.agents;
+                            $scope.saler = data.data.salers;
+                            $scope.deliveryTerms = data.data.deliveryTerms;
+                            $scope.paymentTerms = data.data.paymentTerms;
+                            $scope.clientRelationshipTypes = data.data.clientRelationshipTypes;
+                            $scope.$apply();
+                            $scope.search();
+                        },
+                        function (error) {
+                            jsHelper.showMessage("warning", error);
+                        });
+                },
+                reload: function() {
+                    $scope.data = [];
+                    $scope.pageIndex = 1;
+                    clientService.searchFilter.pageIndex = $scope.pageIndex;
+                    $scope.search();
+                },
+                activate: function(item){
+                    clientService.setActiveStatus(
+                        item.clientID,
+                        1,
+                        function (data) {
+                            $scope.event.reload();
+                        },
+                        function (error) {
+                            jsHelper.showMessage("warning", error);
+                        }
+                    );
+                },
+                deactivate: function(item){
+                    clientService.setActiveStatus(
+                        item.clientID,
+                        0,
+                        function (data) {
+                            $scope.event.reload();
+                        },
+                        function (error) {
+                            jsHelper.showMessage("warning", error);
+                        }
+                    );
+                }
+            }
+            //
+            // private function defined
+            //
+            $scope.search = function (isLoadMore) {
+                $cookieStore.put(cookieId, $scope.filters);
+                //$scope.gridHandler.isTriggered = false;
+                clientService.searchFilter.filters = $scope.filters;
+
+                clientService.search(
+                    function (data) {
+                        Array.prototype.push.apply($scope.data, data.data.data);
+                        
+                        //pesmission on gross margin
+                        $scope.hasPermissionOnGrossMargin = data.data.hasPermissionOnGrossMargin;
+
+                        //exRate
+                        $scope.exRate = data.data.exRate;
+
+                        //grand total
+                        $scope.piConfirmedContThisYear_Total = data.data.piConfirmedContThisYear_Total;
+                        $scope.piConfirmedSaleAmountThisYear_Total = data.data.piConfirmedSaleAmountThisYear_Total;
+                        $scope.piConfirmedDelta9AmountThisYear_Total = data.data.piConfirmedDelta9AmountThisYear_Total;
+                        $scope.piConfirmedDelta9PercentThisYear_Total = data.data.piConfirmedDelta9PercentThisYear_Total;
+
+                        //sub total
+                        $scope.piConfirmedContThisYear_SubTotal = data.data.piConfirmedContThisYear_SubTotal;
+                        $scope.piConfirmedSaleAmountThisYear_SubTotal = data.data.piConfirmedSaleAmountThisYear_SubTotal;
+                        $scope.piConfirmedDelta9AmountThisYear_SubTotal = data.data.piConfirmedDelta9AmountThisYear_SubTotal;
+                        $scope.piConfirmedDelta9PercentThisYear_SubTotal = data.data.piConfirmedDelta9PercentThisYear_SubTotal;
+
+                        //get total row
+                        $scope.totalRows = data.totalRows;
+
+                        //cal total page
+                        $scope.totalPage = Math.ceil(data.totalRows / clientService.searchFilter.pageSize);
+                        $scope.$apply();                        
+                        jQuery('#content').show();
+
+                        $scope.gridHandler.refresh();
+                        if (!isLoadMore) {
+                            $scope.gridHandler.goTop();
+                        }
+                        $scope.gridHandler.isTriggered = true;
+                    },
+                    function (error) {
+                        $scope.data = null;
+                        $scope.pageIndex = 1;
+                        $scope.totalPage = 0;
+                        $scope.totalRows = 0;
+                        $scope.$apply();
+                    }
+                );
+            }
+
+            $scope.delete = function (id,$event) {
+                $event.preventDefault();
+                if (confirm('Are you sure ?')) {
+                    clientService.delete(id,
+                        function (data) {
+                            jsHelper.processMessage(data.message);
+
+                            if(data.message.type == 0) {
+                                var j = -1;
+                                for (var i = 0; i < $scope.data.length; i++) {
+                                    if ($scope.data[i].clientID == data.data) {
+                                        j = i;
+                                        break;
+                                    }
+                                }
+
+                                if (j >= 0) {
+                                    $scope.models.splice(j, 1);
+                                }
+
+                                $scope.$apply();
+                            }
+                        },
+                        function (error) {
+                            jsHelper.showMessage('warning', error);
+                        }
+                    );
+                }
+            }
+
+            $scope.event.init();
+        }]);
+
+    </script>
+}

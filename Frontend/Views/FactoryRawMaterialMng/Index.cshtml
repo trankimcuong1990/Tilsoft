@@ -1,0 +1,225 @@
+﻿@{
+    ViewBag.Title = "Search Sub Supplier Material";
+    ViewBag.ModuleCode = "FactoryRawMaterialMng";
+    ViewBag.Icon = "fa-search";
+
+    string CurrentSeason = Library.OMSHelper.Helper.GetCurrentSeason();
+    string NextSeason = Library.OMSHelper.Helper.GetNextSeason(CurrentSeason);
+
+    string Season = "";
+    //if (DateTime.Now.Month == 8 || DateTime.Now.Month == 9)
+    //{
+    //    Season = NextSeason;
+    //    //Season = currentSeason;
+    //}
+    //else
+    //{
+    //    Season = CurrentSeason;
+    //}
+
+    Season = CurrentSeason;
+
+    string PrevSeason = Library.OMSHelper.Helper.GetPrevSeason(Season);
+
+    string userManualUrl = string.Empty;
+    if (System.IO.File.Exists(Server.MapPath("~/UserManual/" + ViewBag.ModuleCode + ".pdf")))
+    {
+        userManualUrl = "/UserManual/" + ViewBag.ModuleCode + ".pdf";
+    }
+
+}
+<style>
+    .select2-arrow {
+        width: 15px !important;
+    }
+
+    .search-text {
+        height: 29px !important;
+        padding: 8px !important;
+        border: 1px solid #ddd !important;
+    }
+</style>
+<div class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-1" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Search Result</h2>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div avs-scroll grid-handler="gridHandler" class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header" style="width: 1770px;">
+                                <div style="width: 100px;"><b>Found </b><b style="color:#a90329;">{{totalRows}} </b></div>
+                                <div style="width: 100px;"><i class="fa fa-file-image-o"></i> Logo</div>
+                                <div style="width: 120px;" class="sorting" data-colname="factoryUD"> Code</div>
+                                <div style="width: 150px;" class="sorting" data-colname="factoryName"> Short Name</div>
+                                <div style="width: 250px;" class="sorting" data-colname="factoryOfficialName"> Official Name</div>
+                                <div style="width: 120px;" class="sorting" data-colname="currentTurnover"> @Season Turnover</div>
+                                <div style="width: 120px;" class="sorting" data-colname="previousTurnover"> @PrevSeason Turnover</div>
+                                <div style="width: 250px;"><i class="fa fa-user"></i> Contact</div>
+                                <div style="width: 120px;"><i class="fa fa-list"></i> Key Material</div>
+                                <div style="width: 120px;" class="sorting" data-colname="locationNM"><i class="fa fa-map-marker"></i> Location</div>
+                                <div class="sorting" style="width: 90px" data-colname="isPotential">Potential</div>
+                                <div style="width: 170px" class="sorting" data-colname="updatorName">Updated By</div>
+                                <div></div>
+                            </div>
+                            <div class="tilsoft-table-filter" style="width: 1770px;">
+                                <div style="width: 100px;">
+                                    <a href="javascript:void(0)" class="btn btn-{{isDefaultFilter?'default':'primary'}} btn-xs" title="Apply Filter" ng-click="event.reload()"><i class="fa fa-filter"></i></a>
+                                    <a href="javascript:void(0)" class="btn btn-default btn-xs" title="Clear Filter" ng-click="event.clearFilter()"><i class="fa fa-ban"></i></a>
+                                </div>
+                                <div style="width: 100px;"></div>
+                                <div style="width: 120px;"><input class="search-filter search-text" type="text" ng-model="filters.FactoryRawMaterialUD" /></div>
+                                <div style="width: 150px;"><input class="search-filter search-text" type="text" ng-model="filters.FactoryRawMaterialOfficialNM" /></div>
+                                <div style="width: 250px;"><input class="search-filter search-text" type="text" ng-model="filters.FactoryRawMaterialShortNM" /></div>
+                                <div style="width: 120px;"></div>
+                                <div style="width: 120px;"></div>
+                                <div style="width: 250px;"><input class="search-filter search-text" type="text" ng-model="filters.ContactPerson" /></div>
+                                <div style="width: 120px;">
+                                    <select class="form-control search-filter" style="width: 100%" ng-model="filters.KeyRawMaterialID" ng-options="keyRawMaterial.keyRawMaterialID as keyRawMaterial.keyRawMaterialNM for keyRawMaterial in keyRawMaterials">
+                                        <option value=""></option>
+                                    </select>
+                                    <i></i>
+                                </div>
+                                <div style="width: 120px;">
+                                    <select class="form-control search-filter" style="width: 100%" ng-model="filters.LocationID" ng-options="location.locationID as location.locationNM for location in locations">
+                                        <option value=""></option>
+                                    </select>
+                                </div>
+                                <div style="width: 90px">
+                                    <label class="select">
+                                        <select class="form-control search-filter" ng-model="filters.IsPotential">
+                                            <option value=""></option>
+                                            <option value="true">YES</option>
+                                            <option value="false">NO</option>
+                                        </select>
+                                    </label>
+                                </div>
+                                <div style="width: 170px"><input class="search-filter search-text" type="text" ng-model="filters.UpdatedBy" /></div>
+                                <div></div>
+                            </div>
+                            <div class="tilsoft-table-body" style="width: 1770px; margin-top: 95px;height:450px;">
+                                <table>
+                                    <tr style="background:#eff;">
+                                        <td colspan="4"></td>
+                                        <td style="font-weight:bold;text-align:right">Total</td>
+                                        <td style="width: 120px;text-align:right;"><b style="color:#a90329;">$ {{method.getTotalCurrentTurnover(data) | currency:'':2}}</b></td>
+                                        <td style="width: 120px;text-align:right;"><b style="color:#a90329;">$ {{method.getTotalPreviousTurnover(data) | currency:'':2}}</b></td>
+                                        <td colspan="6"></td>
+                                    </tr>
+                                    <tr ng-repeat="item in data">
+                                        <td style="text-align: center; width: 100px;line-height:25px;">
+                                            <a class="btn btn-default btn-xs font-11" target="_blank" href="@Url.Action("Overview", "FactoryRawMaterialMng")/{{item.factoryRawMaterialID}}" title="Overview" style="width: 80px;"><i class="fa fa-eye"></i>&nbsp;Overview</a><br />
+                                            @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current) != "disabled")
+                                            {
+                                                <a class="btn btn-primary btn-xs font-11" target="_blank" href="@Url.Action("Edit", "FactoryRawMaterialMng")/{{item.factoryRawMaterialID}}" title="Edit" style="width: 80px;"><i class="fa fa-pencil"></i>&nbsp;Edit</a><br />
+                                            }
+                                        </td>
+                                        <td style="width: 100px;">
+                                            <a href="{{item.logoThumbnailLocation}}" data-featherlight="image">
+                                                <img style="width: 95%;" ng-src="{{item.logoFileLocation}}" />
+                                            </a>
+                                        </td>
+                                        <td style="width: 120px;">{{item.factoryRawMaterialUD}}</td>
+                                        <td style="width: 150px;">{{item.factoryRawMaterialShortNM}}</td>
+                                        <td style="width: 250px;">
+                                            {{item.factoryRawMaterialOfficialNM}}
+                                            <div ng-if="item.phone">
+                                                <i class="fa fa-phone"></i> {{item.phone}}
+                                            </div>
+                                            <div ng-if="item.webAddress">
+                                                <i class="fa fa-globe"></i> <a href="//{{item.webAddress}}" target="_blank">{{item.webAddress}}</a>
+                                            </div>
+                                        </td>
+                                        <td style="width: 120px;text-align:right;">$ {{item.currentTurnover | currency:'':2}}</td>
+                                        <td style="width: 120px;text-align:right;">$ {{item.previousTurnover | currency:'':2}}</td>
+                                        <td style="width: 250px;">
+                                            <div class="box" ng-if="item.contactPerson">
+                                                <strong class="fa fa-user"> {{item.contactPerson}}</strong><br />
+                                                <i class="fa fa-phone"> {{item.phone}}</i>
+                                            </div>
+                                            <!--
+                                            <h6>AVT Responsible Persons</h6>
+                                            <div class="box" ng-if="item.factoryRawMaterialPricingPersons">
+                                                <i class="fa fa-user"></i>
+                                                <strong>Pricing</strong>:
+                                                <ul>
+                                                    <li ng-repeat="emp in item.factoryRawMaterialPricingPersons">
+                                                        <a ng-if="emp.employeeID" href="@Url.Action("EmpDetail", "EmployeeMng", new { id = UrlParameter.Optional })/{{emp.employeeID}}" da dat data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                            {{emp.employeeNM}}
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                            <div class="box" ng-if="item.factoryRawMaterialQualityPersons">
+                                                <i class="fa fa-user"></i>
+                                                <strong>Quanlity</strong>:
+                                                <ul>
+                                                    <li ng-repeat="emp in item.factoryRawMaterialQualityPersons">
+                                                        <a ng-if="emp.employeeID" href="@Url.Action("EmpDetail", "EmployeeMng", new { id = UrlParameter.Optional })/{{emp.employeeID}}" da dat data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                            {{emp.employeeNM}}
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                            -->
+                                        </td>
+                                        <td style="width: 120px;"></td>
+                                        <td style="width: 120px;">{{item.locationNM}}</td>
+                                        <td style="text-align: center; width: 90px; vertical-align: middle"><label ng-class="item.isPotential == true ? 'fa fa-check' : 'label'"></label></td>
+                                        <td style="width: 170px;">
+                                            <i class="fa fa-user"></i><a ng-if="item.updatedBy" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.updatedBy}}" dat data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                {{item.updatorName}}
+                                            </a>
+                                        </td>
+                                        <td></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction {
+<ul id="sparks">
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default" title="Search" ng-click="event.reload()"><i class="fa fa-search"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default" title="Refresh" ng-click="event.reload()"><i class="fa fa-refresh"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="@Url.Action("Edit", "FactoryRawMaterialMng")/0" target="_blank" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="New"><i class="fa fa-file-o"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0)" class="btn btn-default" title="Export Excel" style="color: #0c68f1" ng-click="exportExcel()"><i class="fa fa-file-excel-o"></i></a>
+    </li>
+    @if (!string.IsNullOrEmpty(userManualUrl))
+    {
+        <li class="sparks-info">
+            <a target="_blank" href="@userManualUrl" class="btn btn-default" title="Help"><i class="fa fa-info"></i></a>
+        </li>
+    }
+</ul>
+}
+
+@section pagejs {
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/factoryrawmaterialmng/',
+            token: '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]',
+            pageSize: 50,
+            cookieId: '@HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString()',
+            serviceReport: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]'
+        }
+    </script>
+    <script src="~/Angular/app/factoryRawMaterialMng/index.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/jsonService2.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/factoryRawMaterialMng/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}

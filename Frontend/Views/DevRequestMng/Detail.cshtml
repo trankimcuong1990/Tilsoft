@@ -1,0 +1,187 @@
+﻿@{
+    ViewBag.Title = "Dev Request Detail";
+    ViewBag.Icon = "fa-list-ul";
+    ViewBag.Module = "Dev Request";
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="well padding-10">
+            <h3 class="margin-top-0">
+                {{data.title}}
+                <br/>
+                <small class="font-xs">
+                    <i>
+                        Requested by: 
+                        <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{data.requesterID}}" data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                            {{data.requesterName}} ({{data.internalCompanyNM}})
+                        </a>
+                    </i>
+                </small>
+            </h3>
+
+            <div class="row">
+                <div class="col-sm-8">
+                    <h4><i class="fa fa-comment-o"></i> <strong>Task Description</strong></h4>
+                    <p ng-bind-html="dataService.formatRemark(data.description)"></p>
+                </div>
+                <div class="col-sm-4">
+                    <ul class="info-list">
+                        <li><i class="fa fa-cubes"></i> <strong>Project</strong>: {{data.devRequestProjectNM}}</li>
+                        <li><i class="fa fa-tags"></i> <strong>Type</strong>: {{data.devRequestTypeNM}}</li>
+                        <li><i class="fa fa-exclamation-circle"></i> <strong>Priority</strong>: <span class="priority-box priority-{{data.priority}}" style="line-height: 12px;">{{data.devRequestPriorityNM}}</span></li>
+                        <li><i class="fa fa-info-circle"></i> <strong>Status</strong>: <span class="status-box request-status-{{data.devRequestStatusID}}">{{data.devRequestStatusNM}}</span></li>
+                        <li><i class="fa fa-calendar"></i> <strong>Start Date</strong>: {{data.startDate}}</li>
+                        <li><i class="fa fa-calendar"></i> <strong>Est End Date</strong>: {{data.estEndDate}}</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-6">
+                    <table class="table table-bordered table-striped" style="margin-top: 5px;">
+                        <thead>
+                            <tr>
+                                <th style="width: 100%;"><i class="fa fa-chain"></i> Attached File(s)</th>
+                            </tr>
+                        </thead>
+                        <tbody ng-if="data.devRequestFiles.length == 0">
+                            <tr>
+                                <td class="text-align-center">Empty</td>
+                            </tr>
+                        </tbody>
+                        <tbody ng-if="data.devRequestFiles.length > 0">
+                            <tr ng-repeat="item in data.devRequestFiles">
+                                <td><a href="{{item.fileLocation}}" target="_blank">{{item.friendlyName}}</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-sm-6">
+                    <table class="table table-bordered table-striped" style="margin-top: 5px;">
+                        <thead>
+                            <tr>
+                                <th><i class="fa fa-user"></i> Assigned Person(s)</th>
+                                <th>Est Hour Spend</th>
+                                <th>Act Hour Spend</th>
+                            </tr>
+                        </thead>
+                        <tbody ng-if="data.devRequestAssignments.length == 0">
+                            <tr>
+                                <td class="text-align-center" colspan="3">Not yet assigned</td>
+                            </tr>
+                        </tbody>
+                        <tbody ng-if="data.devRequestAssignments.length > 0">
+                            <tr ng-repeat="item in data.devRequestAssignments">
+                                <td style="{{item.isPersonInCharge?'font-weight: bold;':''}}">
+                                    <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.assignedTo}}" data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                        {{item.assignedPersonName}}
+                                    </a>
+                                    &nbsp;
+                                    <a href="javascript:void(0)" class="btn btn-danger btn-xs" ng-click="unAssignService.openForm(item)">Un-assign</a>
+                                </td>
+                                <td style="text-align: right;">{{item.estWorkingHour}}</td>
+                                <td style="text-align: right;">{{item.actualWorkingHour}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <a href="javascript:void(0)" class="btn btn-default" ng-click="commentService.openComment()"><i class="fa fa-comments-o"></i> Comment</a>
+            <a href="javascript:void(0)" class="btn btn-success" ng-click="statusService.openForm()"><i class="fa fa-info-circle"></i> Change Status</a>
+            <a href="javascript:void(0)" class="btn btn-warning" ng-click="priorityService.openForm()"><i class="fa fa-exclamation"></i> Change Priority</a>
+            <a href="javascript:void(0)" class="btn btn-primary" ng-click="assignService.openForm()"><i class="fa fa-group"></i> Assign</a>
+            <a href="javascript:void(0)" class="btn bg-color-pinkDark txt-color-white" ng-click="esthourspendService.openForm()" ng-if="data.devRequestAssignments.length > 0"><i class="fa fa-clock-o"></i> Set Working Hour</a>
+        </div>        
+    </div>
+</div>
+
+<form class="row" name="editForm" id="main-form">
+    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="well well-sm">
+            <div class="smart-timeline">
+                <ul class="smart-timeline-list">
+                    <li ng-repeat="item in data.devRequestHistories | orderBy: '-devRequestHistoryID'">
+                        <div class="smart-timeline-icon {{$parent.method.getClass(item.devRequestHistoryActionID)}}">
+                            <i class="fa {{$parent.method.getIcon(item.devRequestHistoryActionID)}}"></i>
+                        </div>
+                        <div class="smart-timeline-time">
+                            <small>{{item.updatedDate}}</small>
+                            <br />
+                            <small>
+                                <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.updatedBy}}" data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                    {{item.actionUpdatorName}}
+                                </a>
+                            </small>
+                        </div>
+                        <div class="smart-timeline-content">
+                            <p>
+                                <strong>{{item.actionDescription}}</strong>
+                            </p>
+                            <p ng-bind-html="$parent.dataService.formatRemark(item.comment)"></p>
+                            <div class="well well-sm display-inline" ng-if="item.devRequestCommentAttachedFiles.length > 0">
+                                <p>Attachment</p>
+                                <ul>
+                                    <li ng-repeat="file in item.devRequestCommentAttachedFiles"><a href="{{file.fileLocation}}">{{file.friendlyName}}</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</form>
+
+<!-- COMMENT -->
+@Html.Partial("~/Views/DevRequestMng/Detail/Comment.cshtml")
+
+<!-- PRIORITY -->
+@Html.Partial("~/Views/DevRequestMng/Detail/Priority.cshtml")
+
+<!-- STATUS -->
+@Html.Partial("~/Views/DevRequestMng/Detail/Status.cshtml")
+
+<!-- ASSIGN -->
+@Html.Partial("~/Views/DevRequestMng/Detail/Assign.cshtml")
+
+<!-- UNASSIGN -->
+@Html.Partial("~/Views/DevRequestMng/Detail/UnAssign.cshtml")
+
+<!-- EST HOUR SPEND -->
+@Html.Partial("~/Views/DevRequestMng/Detail/HourSpend.cshtml")
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "DevRequestMng")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script type="text/javascript">
+        var context = {
+            id: @ViewBag.ID,
+            errMsg: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED',
+            backUrl: '@Url.Action("Index", "DevRequestMng")',
+            refreshUrl: '@Url.Action("Detail", "DevRequestMng", new { id = UrlParameter.Optional })/',
+
+            backendReportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]',
+            serviceUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/devrequestmng/',
+            token: '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]',
+            supportServiceUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/support/',
+        };
+    </script>
+    <script src="~/Angular/app/devRequestMng/detail.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/jsonService2.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/devRequestMng/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/devRequestMng/detail/commentService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/devRequestMng/detail/priorityService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/devRequestMng/detail/statusService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/devRequestMng/detail/assignService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/devRequestMng/detail/unAssignService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/devRequestMng/detail/esthourspendService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}
+

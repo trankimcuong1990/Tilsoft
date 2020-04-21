@@ -1,0 +1,69 @@
+﻿@{
+    ViewBag.Title = "Report Client";
+    ViewBag.Module = "Report Client";
+}
+
+<div class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-search-filter" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Clients Report</h2>
+            </header>
+
+            <div>
+                <div class="jarviswidget-editbox"></div>
+
+                <div class="widget-body">
+                    <fieldset>
+                        <div class="form-group">
+                            <button ng-click="event.ok($event)">OK</button>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction {
+}
+
+@section pagejs {
+    <script src="~/Angular/app/reportClient/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script type="text/javascript">
+        reportClientService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/report_client/';
+        reportClientService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+        var reportClientApp = angular.module('tilsoftApp', []);
+        reportClientApp.controller('tilsoftController', ['$scope', function ($scope) {
+            $scope.supportModel = null;
+        
+            $scope.event = {
+                ok: function ($event) {
+                    $event.preventDefault();
+             
+                    reportClientService.getReport(
+                    
+                     
+                        function (data) {
+                            window.location = '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]' + data.data + '.xlsm';
+                            
+                        },
+                        function (error) {
+                            jsHelper.showMessage('warning', error);
+                        }
+                    );
+                }
+            }
+
+                 $scope.prepareForm = function () {
+                         
+                      jQuery('#content').show();
+             
+         }
+                       
+            $scope.prepareForm();
+        }]);
+    </script>
+}

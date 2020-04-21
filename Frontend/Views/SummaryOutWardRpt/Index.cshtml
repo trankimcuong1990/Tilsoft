@@ -1,0 +1,150 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var supportServiceRoot = (System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"]);
+    ViewBag.Icon = "fa-bar-chart-o";
+    ViewBag.Title = "Summaries OutWard";
+    ViewBag.Module = "Summaries OutWard";
+}
+
+<div class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-search-filter" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Filters</h2>
+            </header>
+
+            <div>
+                <div class="widget-body no-padding">
+                    <div class="smart-form">
+                        <fieldset>
+                            <section class="col col-sm-1">
+                                <label class="label">Month</label>
+                                <select class="select2" id="monthID" ng-model="selection.monthValue" ng-options="item.monthID as item.monthValue for item in supportMonth">
+                                    <option value=""></option>
+                                </select>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label class="label">Year</label>
+                                <select class="select2" id="yearID" ng-model="selection.yearValue" ng-options="item.yearID as item.yearValue for item in supportYear">
+                                    <option value=""></option>
+                                </select>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label class="label">Status</label>
+                                <select class="form-control" style="margin-left:5px" ng-model="selection.workOrderStatusNM" ng-options="status.workOrderStatusID as status.workOrderStatusNM for status in listStatus">
+                                    <option value=""></option>
+                                </select>
+                            </section>
+                        </fieldset>
+                        <footer>
+                            <a href="javascript:void(0)" class="btn btn-primary" style="float: none;" ng-click="event.search()"><i class="fa fa-code"></i> HTML Version</a>
+                            <a href="javascript:void(0)" class="btn btn-primary" ng-click="event.generateExcel()" style="float: none;"><i class="fa fa-file-excel-o"></i> Excel Version</a>
+                        </footer>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="margin-top: 5px;">
+        <div class="jarviswidget jarviswidget-color-darken" id="." data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Results HTML</h2>
+            </header>
+            <div>
+                <div class="jarviswidget-editbox"></div>
+                <div class="widget-body">
+                    <div class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-body" style="width: 100%; overflow-y: hidden; margin-top: 0px; max-height:none">
+                                <table style="border: 1px solid black">
+                                    <thead>
+                                        <tr>
+                                            <th rowspan="2" style="width:100px; background-color: #adc7e7; border: 1px solid black"><strong>Work Order</strong></th>
+                                            <th rowspan="2" style="width:200px; background-color: #adc7e7; border: 1px solid black"><strong>Code</strong></th>
+                                            <th rowspan="2" style="width:500px; background-color: #adc7e7; border: 1px solid black"><strong>Name</strong></th>
+                                            <th rowspan="2" style="width:70px; background-color: #adc7e7; border: 1px solid black"><strong>Unit</strong></th>
+                                            <th rowspan="2" style="width:100px; background-color: #adc7e7; border: 1px solid black"><strong>Unit Price</strong></th>
+                                            <th colspan="2" style="width:200px; background-color: #adc7e7; border: 1px solid black"><strong>Bom</strong></th>
+                                            <th colspan="2" style="width:200px; height:40px; background-color: #adc7e7; border: 1px solid black"><strong>Actual Production</strong></th>
+                                            <th colspan="2" style="width:200px; background-color: #adc7e7; border: 1px solid black"><strong>Diffirence</strong></th>
+                                        </tr>
+                                        <tr>
+                                            <th style="width:100px; height:50px; background-color: #adc7e7; border: 1px solid black"><strong>Quantity</strong></th>
+                                            <th style="width:100px; background-color: #adc7e7; border: 1px solid black"><strong>Total Amount</strong></th>
+                                            <th style="width:100px; background-color: #adc7e7; border: 1px solid black"><strong>Quantity</strong></th>
+                                            <th style="width:100px; background-color: #adc7e7; border: 1px solid black"><strong>Total Amount</strong></th>
+                                            <th style="width:100px; background-color: #adc7e7; border: 1px solid black"><strong>Quantity</strong></th>
+                                            <th style="width:100px; background-color: #adc7e7; border: 1px solid black"><strong>Total Amount</strong></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody ng-repeat="mItem in workOrder">
+                                        <tr ng-style="{'background': (mItem.parentBOMID == null) ? 'RGB(0, 176, 240)' : 'none'}">
+                                            <td>{{mItem.workOrderUD}}</td>
+                                            <td colspan="3" style="text-align: right"><strong>Total Amount:</strong></td>
+                                            <td style="text-align: right"></td>
+                                            <td style="text-align: center"></td>
+                                            <td style="text-align: right"><strong>{{method.getTotalAmountBOM(mItem) | number : 2}}</strong></td>
+                                            <td style="text-align: center"></td>
+                                            <td style="text-align: right"><strong>{{method.getTotalAmountActual(mItem) | number : 2}}</strong></td>
+                                            <td style="text-align: center"></td>
+                                            <td style="text-align: right"><strong>{{method.getTotalAmountDiffirence(mItem) | number : 2}}</strong></td>
+                                        </tr>
+                                        <tr ng-repeat="sItem in workOrderDetail | filter: {'workOrderID': mItem.workOrderID}">
+                                            <td></td>
+                                            <td>{{sItem.productionItemUD}}</td>
+                                            <td>{{sItem.productionItemNM}}</td>
+                                            <td style="text-align: center">{{sItem.unit}}</td>
+                                            <td style="text-align: right">
+                                                <label ng-if="sItem.productionItemTypeID != 1">{{sItem.price | number : 2}}</label>
+                                                <label ng-if="sItem.productionItemTypeID == 1">{{sItem.unitPrice | number : 2}}</label>
+                                            </td>
+                                            <td style="text-align: center">{{sItem.bomQnt}}</td>
+                                            <td style="text-align: right">{{sItem.totalAmountBOM | number : 2}}</td>
+                                            <td style="text-align: right">
+                                                <label ng-if="sItem.productionItemTypeID != 1">{{sItem.actualQnt }}</label>
+                                                <label ng-if="sItem.productionItemTypeID == 1">{{sItem.qtyByUnit }}</label>
+                                            </td>
+                                            <td style="text-align: right">
+                                                <label ng-if="sItem.productionItemTypeID != 1">{{sItem.totalAmountActual | number : 2}}</label>
+                                                <label ng-if="sItem.productionItemTypeID == 1">{{sItem.totalValue | number : 2}}</label>                                               
+                                            </td>
+                                            <td style="text-align: center">                                              
+                                                <label ng-if="sItem.productionItemTypeID != 1"> {{sItem.diffirenceQnt}}</label>
+                                                <label ng-if="sItem.productionItemTypeID == 1">{{sItem.diffirenceQntOfComponent}}</label>
+                                            </td>
+                                            <td style="text-align: right">
+                                                <label ng-if="sItem.productionItemTypeID != 1">{{sItem.totalAmountDiffirence | number : 2}}</label>
+                                                <label ng-if="sItem.productionItemTypeID == 1">{{sItem.totalDiffirenceOfComponent | number : 2}}</label>                                                
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section pagejs {
+    <script type="text/javascript">
+
+        var context = {
+            token: '@token',
+            serviceUrl: '@(serviceRoot)/api/summaryoutwardrpt/',
+            supportServiceUrl: '@(supportServiceRoot)/api/support/',
+            reportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]',
+            backendReportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]'
+        }
+    </script>
+    <script type="text/javascript" src="~/Views/SummaryOutWardRpt/index.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Views/SummaryOutWardRpt/service.js?v=@guid"></script>
+}

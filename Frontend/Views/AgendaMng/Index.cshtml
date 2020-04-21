@@ -1,0 +1,54 @@
+﻿@{
+    ViewBag.Title = "Sales Agenda";
+    ViewBag.Module = "Sales Agenda";
+    ViewBag.Icon = "fa-calendar";
+
+    Frontend.APIDTO.APIUserInformation userInfo = (Frontend.APIDTO.APIUserInformation)Session[Frontend.Customize.Common.ProjectDefinition.USER_INFO_SESSION];
+    string clientViewUrl = Url.Action("Overview", "Client", new { id = UrlParameter.Optional });
+    if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current) == "disabled")
+    {
+        clientViewUrl = string.Empty;
+    }
+
+    string userManualUrl = string.Empty;
+    if (System.IO.File.Exists(Server.MapPath("~/UserManual/" + ViewBag.ModuleCode + ".pdf")))
+    {
+        userManualUrl = "/UserManual/" + ViewBag.ModuleCode + ".pdf";
+    }
+}
+
+<div class="row" ng-view></div>
+
+
+
+@section FormAction {
+<ul id="sparks">
+    @if (!string.IsNullOrEmpty(userManualUrl))
+    {
+        <li class="sparks-info">
+            <a target="_blank" href="@userManualUrl" class="btn btn-default" title="Help"><i class="fa fa-info"></i></a>
+        </li>
+    }
+</ul>
+}
+
+@section pagejs {
+    <script type="text/javascript">
+        var context = {
+            serviceUrl : '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/agendamng/',
+            token : '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]',
+            cookieId: '@HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString()',
+            userName: '@userInfo.Data.FullName',
+            userID: @userInfo.Data.UserId,
+            profileViewUrl: '@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/',
+            clientViewUrl: '@clientViewUrl',
+        }
+    </script>
+    <script src="~/Views/AgendaMng/index.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/AgendaMng/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/AgendaMng/view/calendar.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/AgendaMng/view/eventEdit.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/AgendaMng/view/eventView.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/AgendaMng/view/eventVisit.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/jsonService2.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}

@@ -1,0 +1,137 @@
+﻿@{
+    string currentSeason = Library.Helper.GetCurrentSeason();
+    string nextSeason = Library.Helper.GetNextSeason(currentSeason);
+    string prevSeason = Library.Helper.GetPreviousSeason(currentSeason);
+
+    if (ViewData["season"] != null)
+    {
+        currentSeason = ViewData["season"].ToString();
+    }
+
+    //if (DateTime.Now.Month == 8)
+    //{
+    //    currentSeason = nextSeason;
+    //    nextSeason = Library.Helper.GetNextSeason(currentSeason);
+    //    prevSeason = Library.Helper.GetPreviousSeason(currentSeason);
+    //}
+}
+<div ng-controller="SaleByAccManagerPreSeasonController">
+    <h1><i class="fa fa-minus-square-o" ng-click="event.toggPanel($event,'pnlSaleByAccManagerPreSeason')"></i> SALE BY ACC MANAGER - @currentSeason</h1>
+    <div class="row" id="pnlSaleByAccManagerPreSeason">
+        <div class="col-xs-12 rpt-content">
+
+            <div id="chartDDCSaleProformaPreSeason"></div>
+
+            <div class="tilsoft-table">
+                <div class="tilsoft-table-body" style="margin-top:0px">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width:10px">#<br />{{ddcProformaBySales.length}}</th>
+                                <th>Sales {{param.currentSeason}}</th>
+                                <th style="width:90px">EXPECTED<br />(EXP) {{param.a}}</th>
+                                <th style="width:50px">%<br />OF<br />EXP</th>
+                                <th style="width:90px">Proforma<br />Invoice<br />(PF)</th>
+                                <th style="width:50px">%<br />of<br />PF</th>
+                                <th style="width:90px">Proforma<br />Invoice<br />confirmed<br />(PFC)</th>
+                                <th style="width:50px">%<br />of<br />PFC</th>
+                                <th style="width:70px">LC Cost</th>
+                                <th style="width:70px">Interest</th>
+                                <th style="width:90px">Commercial<br />Invoice<br />(CI)</th>
+                                <th style="width:50px">%<br />of<br />CI</th>
+                                <th style="width:90px">P/I CONF &Delta;7</th>
+                                <th style="width:50px">% IN 100% OF &Delta;7</th>
+                                <th style="width:60px">P/I CONF &Delta;7%</th>
+                                <th style="width:90px">FOB<br />CI</th>
+                                <th style="width:80px">Ware<br />house<br />CI</th>
+                                <th style="width:70px">Other<br />CI</th>
+                                <th style="width:80px">Credit<br />Note<br />CI</th>
+                            </tr>
+                            <tr>
+                                <th></th>
+                                <th>A</th>
+                                <th>B</th>
+                                <th>C</th>
+                                <th>D</th>
+                                <th>E</th>
+                                <th>F</th>
+                                <th>G</th>
+                                <th>H</th>
+                                <th>I</th>
+                                <th>J=O+P+Q+R</th>
+                                <th>K</th>
+                                <th>L</th>
+                                <th>M</th>
+                                <th>N</th>
+                                <th>O</th>
+                                <th>P</th>
+                                <th>Q</th>
+                                <th>R</th>
+                            </tr>
+                            <tr style="font-weight: bold;">
+                                <td colspan="2">TOTAL</td>
+                                <td style="text-align: right;">{{ddcProformaBySales | sumFunc:'expectedAmountInEUR' | currency:'&euro;':0}}</td>
+                                <td style="text-align: right;">100%</td>
+                                <td style="text-align: right;">{{ddcProformaBySales | sumFunc:'piAmountInEUR' | currency:'&euro;':0}}</td>
+                                <td style="text-align: right;">100%</td>
+                                <td style="text-align: right;">{{ddcProformaBySales | sumFunc:'piConfirmedAmountInEUR' | currency:'&euro;':0}}</td>
+                                <td style="text-align: right;">100%</td>
+                                <td style="text-align: right;">{{ddcProformaBySales | sumFunc:'lcCostAmountInEUR' | currency:'&euro;':0}}</td>
+                                <td style="text-align: right;">{{ddcProformaBySales | sumFunc:'interestAmountInEUR' | currency:'&euro;':0}}</td>
+                                <td style="text-align: right;">{{ddcProformaBySales | sumFunc:'ciAmountInEUR' | currency:'&euro;':0}}</td>
+                                <td style="text-align: right;">100%</td>
+                                <td style="text-align: right;">{{ddcProformaBySales | sumFunc:'deltaAfterAllInEUR' | currency:'&euro;':0}}</td>
+                                <td style="text-align: right;">100%</td>
+                                <td style="text-align: right;">{{(ddcProformaBySales | sumFunc:'deltaAfterAllInEUR') / (ddcProformaBySales | sumFunc:'purchasingAmountInEUR') * 100 | currency:'':1}} %</td>
+                                <td style="text-align: right;">{{ddcProformaBySales | sumFunc:'ciFobAmountInEUR' | currency:'&euro;':0}}</td>
+                                <td style="text-align: right;">{{ddcProformaBySales | sumFunc:'ciWarehouseAmountInEUR' | currency:'&euro;':0}}</td>
+                                <td style="text-align: right;">{{ddcProformaBySales | sumFunc:'ciOtherAmountInEUR' | currency:'&euro;':0}}</td>
+                                <td style="text-align: right;">{{ddcProformaBySales | sumFunc:'ciCreditNoteAmountInEUR' | currency:'&euro;':0}}</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="item in ddcProformaBySales">
+                                <td style="text-align: center;">{{$index + 1}}</td>
+                                <td style="text-align: left;">{{item.saleUD}}-{{item.saleNM}}</td>
+                                <td style="text-align: right;">{{item.expectedAmountInEUR | currency:'&euro;':0}}</td>
+                                <td style="text-align: right;">{{item.expectedAmountInEUR / (ddcProformaBySales | sumFunc:'expectedAmountInEUR') * 100 | number : 0}} %</td>
+                                <td style="text-align: right;">{{item.piAmountInEUR | currency:'&euro;':0}}</td>
+                                <td style="text-align: right;">{{item.piAmountInEUR / (ddcProformaBySales | sumFunc:'piAmountInEUR') * 100 | number : 0}} %</td>
+                                <td style="text-align: right;">{{item.piConfirmedAmountInEUR | currency:'&euro;':0}}</td>
+                                <td style="text-align: right;">{{item.piConfirmedAmountInEUR / (ddcProformaBySales | sumFunc:'piConfirmedAmountInEUR') * 100 | number : 0}} %</td>
+                                <td style="text-align: right;">{{item.lcCostAmountInEUR | currency:'&euro;':0}}</td>
+                                <td style="text-align: right;">{{item.interestAmountInEUR | currency:'&euro;':0}}</td>
+                                <td style="text-align: right;">{{item.ciAmountInEUR | currency:'&euro;':0}}</td>
+                                <td style="text-align: right;">{{item.ciAmountInEUR / (ddcProformaBySales | sumFunc:'ciAmountInEUR') * 100 | number : 0}} %</td>
+                                <td style="text-align: right;">{{item.deltaAfterAllInEUR | currency:'&euro;':0}}</td>
+                                <td style="text-align: right;">{{item.deltaAfterAllInEUR / (ddcProformaBySales | sumFunc : 'deltaAfterAllInEUR') * 100 | number : 0}} %</td>
+                                <td style="text-align: right;">{{item.deltaAfterAllPercent | currency :'' : 1}} %</td>
+                                <td style="text-align: right;">{{item.ciFobAmountInEUR | currency:'&euro;':0}}</td>
+                                <td style="text-align: right;">{{item.ciWarehouseAmountInEUR | currency:'&euro;':0}}</td>
+                                <td style="text-align: right;">{{item.ciOtherAmountInEUR | currency:'&euro;':0}}</td>
+                                <td style="text-align: right;">{{item.ciCreditNoteAmountInEUR | currency:'&euro;':0}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+        <div class="col-xs-12 rpt-loading">
+            <i class="fa fa-spin fa-refresh"></i> Loading, please wait ...
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var saleByAccManagerPreSeasonContext = {
+        serviceUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/misalemanagement/',
+        token: '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]',
+        currentSeason: '@currentSeason',
+        param: {
+            currentSeason: '@currentSeason',
+            nextSeason: '@nextSeason',
+            prevSeason: '@prevSeason'
+        }
+    }
+</script>

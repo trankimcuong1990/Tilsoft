@@ -1,0 +1,116 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    var pageSize = System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"];
+    var cookieID = HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString();
+
+    ViewBag.Title = "Search Delivery Note To Be Destroyed";
+    ViewBag.Module = "Delivery Note To Be Destroyed";
+}
+<form class="row" id="main-form">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-search-result" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Search Result</h2>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div avs-scroll grid-handler="gridHandler" class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table">
+                            <div style="width:1140px" class="tilsoft-table-header">
+                                <div style="width:80px">Found(s)<br /><strong style="color:maroon">{{totalRows}}</strong></div>
+                                <div style="width:130px">Delivery Note<br />Nr.</div>
+                                <div style="width:150px">Delivery Note<br />Date</div>
+                                <div style="width:450px">Description</div>
+                                <div>More<br />Information</div>
+                            </div>
+                            <div style="width:1140px" class="tilsoft-table-filter">
+                                <div style="width:80px; text-align:center">
+                                    <a href="javascript:void(0)" class="btn btn-{{isDefaultFilter ? 'default' : 'primary'}} btn-xs" title="Apply Filter" ng-click="event.refresh()">
+                                        <i class="fa fa-filter"></i>
+                                    </a>
+                                    <a href="javascript:void(0)" class="btn btn-default btn-xs" title="Clear Filter" ng-click="event.clear()">
+                                        <i class="fa fa-ban"></i>
+                                    </a>
+                                </div>
+                                <div style="width:130px">
+                                    <input type="text" class="form-control search-filter" style="width:100%" ng-model="filters.deliveryNoteUD" />
+                                </div>
+                                <div style="width:150px; padding:0px">
+                                    <div class="input-group" style="border:none">
+                                        <input type="text" class="form-control search-filter" style="width:100%" avs-calendar />
+                                        <span class="input-group-addon">
+                                            <i class="fa fa-calendar"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div style="width:450px"></div>
+                                <div></div>
+                            </div>
+                            <div style="width:1140px" class="tilsoft-table-body">
+                                <table>
+                                    <tbody>
+                                        <tr ng-repeat="item in data">
+                                            <td style="width:79px; text-align:center">
+                                                <a href="@Url.Action("Edit", "DeliveryNoteToBeDestroyedMng")/{{item.deliveryNoteID}}" class="btn btn-default btn-primary font-11 btn-xs @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" style="width: 60px" target="_blank">
+                                                    <i class="fa fa-pencil-square-o"></i> Edit
+                                                </a>
+                                                <a href="#" class="btn btn-default btn-danger font-11 btn-xs @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current))" style="width: 60px; margin-top: 3px" ng-click="event.remove(item)">
+                                                    <i class="fa fa-times"></i> Delete
+                                                </a>
+                                            </td>
+                                            <td style="width:130px; text-align: center">{{item.deliveryNoteUD}}</td>
+                                            <td style="width:150px; text-align: center">{{item.deliveryNoteDate}}</td>
+                                            <td style="width:450px">{{item.description}}</td>
+                                            <td>
+                                                <div ng-show="item.updatedBy != null">
+                                                    Updated by:
+                                                    <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.updatedBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                        <i class="fa fa-user"></i> {{item.updatorName}}
+                                                    </a>
+                                                    on {{item.updatedDate}}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+@section FormAction {
+<ul id="sparks">
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default" title="Search" ng-click="event.refresh()"><i class="fa fa-search"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default" title="Refresh" ng-click="event.refresh()"><i class="fa fa-refresh"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="@Url.Action("Edit", "DeliveryNoteToBeDestroyedMng", new { id = UrlParameter.Optional })/0" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="Create new Delivery Note to be Destroyed" target="_blank"><i class="fa fa-file-o"></i></a>
+    </li>
+</ul>
+}
+@section pagepopup2{
+}
+
+@section pagejs {
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(serviceRoot)/api/deliveryNoteToBeDestroyedMng/',
+            token: '@token',
+            pageSize: '@pageSize',
+            cookieID: '@cookieID'
+        }
+    </script>
+    <script type="text/javascript" src="~/Angular/app/deliveryNoteToBeDestroyedMng/index.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/deliveryNoteToBeDestroyedMng/service.js?v=@guid"></script>
+}

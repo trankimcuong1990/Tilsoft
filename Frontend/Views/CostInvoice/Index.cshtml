@@ -1,0 +1,298 @@
+﻿@{
+    ViewBag.Title = "Search Sea Freight / Trucking Invoice";
+    ViewBag.Module = "Sea Freigh / Tracking Invoice";
+}
+
+<div class="row">
+
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-0" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-search"></i> </span>
+                <h2>Search Filters</h2>
+            </header>
+
+            <div>
+                <div class="jarviswidget-editbox"></div>
+                <div class="widget-body">
+                    <fieldset>
+                        <div class="row">
+                            <div class="col-sm-2">
+                                <label>Invoice No</label>
+                                <input class="form-control search-filter" type="text" id="txtinvoiceno" ng-model="filters.InvoiceNo">
+                            </div>
+                            <div class="col-sm-2">
+                                <label>Client Code</label>
+                                <input class="form-control search-filter" type="text" id="txtclientcode" ng-model="filters.ClientUD">
+                            </div>
+                            <div class="col-sm-2">
+                                <label>Client Name</label>
+                                <input class="form-control search-filter" type="text" id="txtclientnm" ng-model="filters.ClientNM">
+                            </div>
+                            <div class="col-sm-2">
+                                <label>BL No</label>
+                                <input class="form-control search-filter" type="text" id="txtblno" ng-model="filters.BLNo">
+                            </div>
+                        </div>
+                        
+                    </fieldset>
+                </div>
+            </div>
+        </div>
+    </article>
+
+
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-1" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Search Result</h2>
+            </header>
+
+            <div>
+                <div class="jarviswidget-editbox"></div>
+
+                <div class="widget-body">
+                    <div class="table-responsive" id="mainresultTable">
+                        <table class="table table-bordered table-hover custom-table dataTable">
+                            <thead>
+                                <tr>
+                                    <th style="width: 100px;"></th>
+                                    <th style="width: 70px;" class=" sorting_desc" data-colname="InvoiceNo">INVOICE NO</th>
+                                    <th style="width: 70px;" class=" sorting_desc" data-colname="Amount">TOTAL AMOUNT</th>
+                                    <th style="width: 50px;" class="sorting" data-colname="Currency">CURRENCY</th>
+                                    <th style="width: 100px;" class="sorting" data-colname="RefNo">REF NO</th>
+                                    <th style="width: 70px;" class="sorting" data-colname="InvoiceDate">INVOICE DATE</th>
+                                    <th style="width: 100px;" class="sorting" data-colname="BLNo">BL NO</th>
+                                    <th style="width: 60px;" class="sorting" data-colname="ClientUD">CLIENT CODE</th>
+                                    <th style="width: 250px;" class="sorting" data-colname="ClientNM">CLIENT NAME</th>
+                                    
+                                    <th style="width: 150px;" class="sorting" data-colname="Conditions">CONDITIONS</th>
+                                    <th style="width: 100px;" class="sorting" data-colname="Payment Term">PAYMENT TERM</th>
+                                    <th style="width: 100px;" class="sorting" data-colname="DeliveryTerm">DELIVERY TERM</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="item in costInvoice">
+                                    <td style="text-align: center">
+
+                                        @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current) == "disabled")
+                                        {
+                                            <a href="@Url.Action("Edit", "CostInvoice")/{{item.costInvoiceID}}" class="btn btn-primary btn-xs font-11"><i class="fa fa-folder-open"></i> View</a>
+                                        }
+                                        else
+                                        {
+                                            <a href="@Url.Action("Edit", "CostInvoice")/{{item.costInvoiceID}}" title="Edit" class="btn btn-primary btn-xs font-11"><i class="fa fa-pencil"></i> Edit</a>
+                                        }
+
+                                        @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current) != "disabled")
+                                        {
+                                            <a href="javascript:void(0)" ng-click="delete(item.costInvoiceID)" title="Delete" class="btn btn-danger btn-xs font-11"><i class=" fa fa-times"></i>Del</a>
+                                        }
+
+
+                                    </td>
+                                    <td>{{item.invoiceNo}}</td>
+                                    <td style="text-align:right">{{item.amount | number : 2}}</td>
+                                    <td>{{item.currency}}</td>
+                                    <td>{{item.invoiceRefNo}}</td>
+                                    <td>{{item.invoiceDateFormated}}</td>
+                                    <td>{{item.blNo}}</td>
+                                    <td>{{item.clientUD}}</td>
+                                    <td>{{item.clientNM}}</td>
+                                    
+                                    <td>{{item.condition}}</td>
+                                    <td>{{item.paymentTermNM}}</td>
+                                    <td>{{item.deliveryTypeNM}}</td>
+
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Search" ng-click="search()"><i class=" fa fa-search"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Refresh" ng-click="search()"><i class="fa fa-refresh"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="@Url.Action("Edit", "CostInvoice")/0" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="New"><i class="fa fa-file-o"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default disabled" title="Print"><i class="fa fa-print"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script src="~/Angular/app/costinvoice/service.js"></script>
+    <script type="text/javascript">
+
+        jQuery('.search-filter').keypress(function(e){
+            if (e.keyCode == 13) {
+                var scope = angular.element(jQuery('body')).scope();
+                scope.search();
+            }
+        });
+
+
+        //// config data table
+        jQuery('#mainresultTable').furnindoTable();
+        //// end config data table
+
+        costInvoiceInvoiceService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/costInvoice/';
+        costInvoiceInvoiceService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+        costInvoiceInvoiceService.searchFilter.pageSize = @System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"];
+
+        var modelApp = angular.module('tilsoftApp', []);
+        modelApp.controller('tilsoftController', ['$scope', function ($scope) {
+            $scope.costInvoice = null;
+            $scope.pageIndex = 1;
+            $scope.totalPage = 0;
+            $scope.filters = {
+                InvoiceNo : '',
+                ClientUD : '',
+                ClientNM : '',
+                BLNo : '',
+            };
+
+            //
+            // private function defined
+            //
+            $scope.search = function () {
+                costInvoiceInvoiceService.searchFilter.filters = $scope.filters;
+                costInvoiceInvoiceService.search(
+                    function (data) {
+                        $scope.costInvoice = data.data;
+                        $scope.totalPage = Math.ceil(data.totalRows / costInvoiceInvoiceService.searchFilter.pageSize);
+                        $scope.$apply();
+
+                        if(data.totalRows < costInvoiceInvoiceService.searchFilter.pageSize) {
+                            jQuery('#mainresultTable').find('ul').hide();
+                        }
+                        else {
+                            jQuery('#mainresultTable').find('ul').show();
+                        }
+
+                        jQuery('#content').show();
+
+                    },
+                    function (error) {
+                        $scope.costInvoice = null;
+                        $scope.pageIndex = 1;
+                        $scope.totalPage = 0;
+                        $scope.$apply();
+                    }
+                );
+            }
+
+            // function define
+            $scope.delete = function (id) {
+                if (confirm('Are you sure ?')) {
+                    costInvoiceInvoiceService.delete(id,
+                        function (data) {
+                            jsHelper.processMessage(data.message);
+
+                            if(data.message.type == 0) {
+                                var j = -1;
+                                for (var i = 0; i < $scope.costInvoice.length; i++) {
+                                    if ($scope.costInvoice[i].costInvoiceID == data.data) {
+                                        j = i;
+                                        break;
+                                    }
+                                }
+
+                                if (j >= 0) {
+                                    $scope.costInvoice.splice(j, 1);
+                                }
+
+                                $scope.$apply();
+                            }
+                        },
+                        function (error) {
+                            jsHelper.showMessage('warning', error);
+                        }
+                    );
+                }
+            }
+
+            //
+            // SORTING & PAGING
+            //
+            $scope.goToFirst = function ($event) {
+                $event.preventDefault($event);
+                $scope.pageIndex = 1;
+                costInvoiceInvoiceService.searchFilter.pageIndex = $scope.pageIndex;
+                $scope.search();
+            }
+
+            $scope.goToPrev = function ($event) {
+                $event.preventDefault();
+                if ($scope.pageIndex > 1) {
+                    $scope.pageIndex--;
+                    costInvoiceInvoiceService.searchFilter.pageIndex = $scope.pageIndex;
+                    $scope.search();
+                }
+            }
+
+            $scope.goToNext = function ($event) {
+                $event.preventDefault();
+                if ($scope.pageIndex < $scope.totalPage) {
+                    $scope.pageIndex++;
+                    costInvoiceInvoiceService.searchFilter.pageIndex = $scope.pageIndex;
+                    $scope.search();
+                }
+            }
+
+            $scope.goToLast = function ($event) {
+                $event.preventDefault();
+                $scope.pageIndex = $scope.totalPage;
+                costInvoiceInvoiceService.searchFilter.pageIndex = $scope.pageIndex;
+                $scope.search();
+            }
+
+            $scope.goToPage = function ($event) {
+                $event.preventDefault();
+                if (jQuery('#mainresultTable_pageIndex').val() > 0 && jQuery('#mainresultTable_pageIndex').val() <= $scope.totalPage) {
+                    $scope.pageIndex = jQuery('#mainresultTable_pageIndex').val();
+                    costInvoiceInvoiceService.searchFilter.pageIndex = $scope.pageIndex;
+                    $scope.search();
+                }
+                else {
+                    alert('Invalid page index!');
+                    jQuery('#mainresultTable_pageIndex').val($scope.pageIndex);
+                }
+            }
+
+            $scope.sort = function ($event) {
+                $event.preventDefault();
+
+                $scope.pageIndex = 1;
+                costInvoiceInvoiceService.searchFilter.pageIndex = $scope.pageIndex;
+                costInvoiceInvoiceService.searchFilter.sortedBy = jQuery($event.target).data('colname');
+
+                if (jQuery($event.target).hasClass('sorting_asc')) {
+                    costInvoiceInvoiceService.searchFilter.sortedDirection = 'asc';
+                }
+                else if (jQuery($event.target).hasClass('sorting_desc') || jQuery($event.target).hasClass('sorting')) {
+                    costInvoiceInvoiceService.searchFilter.sortedDirection = 'desc';
+                }
+
+                $scope.search();
+            }
+
+            //
+            // INIT
+            //
+            $scope.search();
+        }]);
+    </script>
+}

@@ -1,0 +1,984 @@
+﻿@{
+    if (ViewBag.ID == 0)
+    {
+        ViewBag.Title = "Create New Production Item";
+    }
+    else
+    {
+        ViewBag.Title = "Edit Production Item";
+    }
+
+    ViewBag.Module = "ProductionItem";
+    Frontend.APIDTO.APIUserInformation userInfo = (Frontend.APIDTO.APIUserInformation)Session[Frontend.Customize.Common.ProjectDefinition.USER_INFO_SESSION];
+    int userGroupID1 = userInfo.Data.UserGroupID;
+    string isDisabled = (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Approve, HttpContext.Current));
+}
+<style>
+    .css-inline a {
+        display: inline;
+    }
+
+    .smart-form .inline-group .checkbox {
+        width: 30% !important;
+    }
+
+    .smart-form .input-group input {
+        padding: 0px 7px !important;
+    }
+
+    .inline-cus {
+        display: inline-block !important;
+    }
+
+    .tilsoft-table .tilsoft-table-header div, .tilsoft-table .tilsoft-table-filter div, .tilsoft-table .tilsoft-table-totalrow div, .tilsoft-table .tilsoft-table-subtotalrow div {
+        height: 29px;
+    }
+</style>
+<form class="row" name="editForm" id="main-form">
+    <article>
+        <div class="jarviswidget" id="wid-id-product-information" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <ul class="nav nav-tabs pull-left in">
+                    <li class="active">
+                        <a data-toggle="tab" href="#tabGeneral"> <i class="fa fa-list"></i> <span> Main Information</span> </a>
+                    </li>
+                </ul>
+            </header>
+            <div class="tab-content">
+                <div class="col-col-12 tab-pane active" id="tabGeneral">
+                    <div id="general-section" class="well-sm" style="background: #fff;">
+                        <div class="smart-form m-bottom-15">
+                            <div class="note" style="float:right;">
+                                <strong>Last updated By</strong>
+                                <i class="fa fa-user" ng-show="data.updatedBy != null"> </i>
+                                <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{data.updatedBy}}" data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600" ng-show="data.updatedBy != null && data.updatorName != null">
+                                    {{data.updatorName}}
+                                </a>
+                                on
+                                {{data.updatedDate}}
+                            </div>
+                            <h1>General Information</h1>
+                            <br />
+                            <hr>
+                            <fieldset>
+                                <div class="row">
+                                    <div class="col col-2" style="position:relative;">
+                                        <div>
+                                            <label class="label">Product Image</label>
+                                            <div class="input-group css-inline" style="width: 100%;">
+                                                @Html.Partial("~/Views/Shared/_Controls/_ImageBox.cshtml", new Frontend.Models.ImageBoxViewModel() { URLBinding = "data.fileLocation", JSOnChangeHandler = "event.changeLogo", JSONRemoveHandler = "event.removeLogo" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!--List type-->
+                                    <div class="col col-4 m-bottom-15">
+                                        <label class="label">
+                                            <span>Type</span>
+                                            <em ng-show="editForm.productionItemID.$error.required" class="note note-error">(Required)</em>
+                                        </label>
+                                        @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Reset, HttpContext.Current) != "disabled")
+                                        {
+                                            <label class="select" ng-class="{'state-error': editForm.productionItemID.$error.required}">
+                                                <select ng-change="event.changeRequired(data.productionItemTypeID)" ng-model="data.productionItemTypeID" ng-options="productionItemType.productionItemTypeID as productionItemType.productionItemTypeNM for productionItemType in productionItemTypes" required name="productionItemID">
+                                                    <option value=""></option>
+                                                </select>
+                                                <i></i>
+                                            </label>
+                                        }
+                                        else
+                                        {
+                                            <label class="select" ng-show="data.productionItemID ==null || data.productionItemID  == 0" ng-class="{'state-error': editForm.productionItemID.$error.required}">
+                                                <select ng-change="event.changeRequired(data.productionItemTypeID)" ng-model="data.productionItemTypeID" ng-options="productionItemType.productionItemTypeID as productionItemType.productionItemTypeNM for productionItemType in productionItemTypes" required name="productionItemID">
+                                                    <option value=""></option>
+                                                </select>
+                                                <i></i>
+                                            </label>
+                                            <label class="input" ng-show="data.productionItemID > 0">
+                                                <span class="form-control">{{data.productionItemTypeNM}}</span>
+                                            </label>
+                                        }
+                                    </div>
+
+                                    <div class="col col-6 m-bottom-15">
+                                        <label class="label">
+                                            <span style="display:inline-block"> Code &nbsp; <input type="checkbox" ng-model="autoGenerate" value="true"> &nbsp;Auto Generated</span>
+                                            <span ng-if="!editForm.productionItemUD.$valid" style="color:red">Please enter 8 characters</span>
+                                        </label>
+                                        <label class="input" ng-class="{'state-error': editForm.productionItemUD.$error.required}">
+                                            <input name="productionItemUD" type="text" id="productionItemUD" ng-model="data.productionItemUD" ng-if="autoGenerate == false && data.productionItemID == null" required placeholder="At least 8 characters" ng-minlength="8" />
+                                            <input name="productionItemUD" type="text" id="productionItemUD" ng-model="data.productionItemUD" autocomplete="off" readonly ng-if="autoGenerate == true && data.productionItemID == null " />
+                                            <input name="productionItemUD" type="text" id="productionItemUD" ng-model="data.productionItemUD" autocomplete="off" readonly ng-if="autoGenerate == true && data.productionItemID != null " />
+                                            <input name="productionItemUD" type="text" id="productionItemUD" ng-model="data.productionItemUD" autocomplete="off" readonly ng-if="autoGenerate == false && data.productionItemID != null" />
+                                        </label>
+                                    </div>
+
+                                    <div class="col col-4 m-bottom-15">
+                                        <label class="label">
+                                            <span>Name</span>
+                                            <em ng-show="editForm.productionItemNM.$error.required" class="note note-error">(Required)</em>
+                                        </label>
+                                        <label class="input" ng-class="{'state-error': editForm.productionItemNM.$error.required}">
+                                            <input name="productionItemNM" type="text" id="productionItemNM" ng-model="data.productionItemNM" required autocomplete="off" />
+                                        </label>
+                                    </div>
+
+                                    <div class="col col-4 m-bottom-15">
+                                        <label class="label">
+                                            <span>Vietnamese Name</span>
+                                        </label>
+                                        <label class="input">
+                                            <input name="productionItemVNNM" type="text" id="productionItemVNNM" ng-model="data.productionItemVNNM" autocomplete="off" />
+                                        </label>
+                                    </div>
+
+                                    <!-- Disable input data-->
+                                    <div class="col col-2 m-bottom-15" ng-if="data.productionItemUD != null && autoGenerate == true ">
+                                        <label class="label">
+                                            Country
+                                        </label>
+                                        <label class="select">
+                                            <select ng-model="data.countryID" ng-options="country.countryID as country.countryCode for country in countries" disabled>
+                                                <option value=""></option>
+                                            </select>
+                                        </label>
+                                    </div>
+
+                                    <div class="col col-2 m-bottom-15" ng-if="data.productionItemUD != null && autoGenerate == true ">
+                                        <label class="label">
+                                            Material Group
+                                        </label>
+                                        <label class="select btn @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Reset, HttpContext.Current))">
+                                            <select ng-model="data.productionItemGroupID" ng-options="productionItemGroup.productionItemGroupID as productionItemGroup.productionItemGroupNM for productionItemGroup in productionItemGroups">
+                                                <option value=""></option>
+                                            </select>
+                                            <i></i>
+                                        </label>
+                                    </div>
+
+
+                                    <div class="col col-2 m-bottom-15" ng-if="data.productionItemUD != null && autoGenerate == true ">
+                                        <label class="label">
+                                            Material Type
+                                        </label>
+                                        <label class="select btn @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Reset, HttpContext.Current))">
+                                            <select ng-model="data.productionItemMaterialTypeID" ng-options="productionItemMaterialType.productionItemTypeID as productionItemMaterialType.productionItemTypeNM for productionItemMaterialType in productionItemMaterialTypes">
+                                                <option value=""></option>
+                                            </select>
+                                            <i></i>
+                                        </label>
+                                    </div>
+
+                                    <!-- Disable input data-->
+                                    <div class="col col-2 m-bottom-15" ng-if="data.productionItemID != null && autoGenerate == false ">
+                                        <label class="label">
+                                            Country
+                                        </label>
+                                        <label class="select">
+                                            <select ng-model="data.countryID" ng-options="country.countryID as country.countryCode for country in countries" disabled>
+                                                <option value=""></option>
+                                            </select>
+                                        </label>
+                                    </div>
+
+                                    <div class="col col-2 m-bottom-15" ng-if="data.productionItemID != null && autoGenerate == false ">
+                                        <label class="label">
+                                            Material Group
+                                        </label>
+                                        <label class="select btn @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Reset, HttpContext.Current))">
+                                            <select ng-model="data.productionItemGroupID" ng-options="productionItemGroup.productionItemGroupID as productionItemGroup.productionItemGroupNM for productionItemGroup in productionItemGroups">
+                                                <option value=""></option>
+                                            </select>
+                                            <i></i>
+                                        </label>
+                                    </div>
+
+
+                                    <div class="col col-2 m-bottom-15" ng-if="data.productionItemID != null && autoGenerate == false ">
+                                        <label class="label">
+                                            Material Type
+                                        </label>
+                                        <label class="select btn @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Reset, HttpContext.Current))">
+                                            <select ng-model="data.productionItemMaterialTypeID" ng-options="productionItemMaterialType.productionItemTypeID as productionItemMaterialType.productionItemTypeNM for productionItemMaterialType in productionItemMaterialTypes">
+                                                <option value=""></option>
+                                            </select>
+                                            <i></i>
+                                        </label>
+                                    </div>
+
+
+                                    <!-- Enable input data-->
+                                    <div class="col col-2 m-bottom-15" ng-if="data.productionItemUD == null && autoGenerate == true">
+                                        <label class="label">
+                                            Country
+                                            <em ng-show="editForm.countryID.$error.required" class="note note-error error-cus">(Required)</em>
+                                        </label>
+                                        <label class="select select-cus" ng-class="{'state-error': editForm.countryID.$error.required}">
+                                            <select name="countryID" class="remove-required" id="countryID" ng-model="data.countryID" ng-options="country.countryID as country.countryCode for country in countries" required>
+                                                <option value=""></option>
+                                            </select>
+                                            <i></i>
+                                        </label>
+                                    </div>
+
+                                    <div class="col col-2 m-bottom-15" ng-if="data.productionItemUD == null && autoGenerate == true">
+                                        <label class="label">
+                                            Material Group
+                                            <em ng-show="editForm.productionItemGroupID.$error.required" class="note note-error error-cus">(Required)</em>
+                                        </label>
+                                        <label class="select select-cus" ng-class="{'state-error': editForm.productionItemGroupID.$error.required}">
+                                            <select name="productionItemGroupID" class="remove-required" ng-model="data.productionItemGroupID" ng-options="productionItemGroup.productionItemGroupID as productionItemGroup.productionItemGroupNM for productionItemGroup in productionItemGroups" required>
+                                                <option value=""></option>
+                                            </select>
+                                            <i></i>
+                                        </label>
+                                    </div>
+
+
+                                    <div class="col col-2 m-bottom-15" ng-if="data.productionItemUD == null && autoGenerate == true">
+                                        <label class="label">
+                                            Material Type
+                                            <em ng-show="editForm.productionItemTypeID.$error.required" class="note note-error error-cus">(Required)</em>
+                                        </label>
+                                        <label class="select select-cus" ng-class="{'state-error': editForm.productionItemTypeID.$error.required}">
+                                            <select name="productionItemTypeID" class="remove-required" ng-model="data.productionItemMaterialTypeID" ng-options="productionItemMaterialType.productionItemTypeID as productionItemMaterialType.productionItemTypeNM for productionItemMaterialType in productionItemMaterialTypes" required>
+                                                <option value=""></option>
+                                            </select>
+                                            <i></i>
+                                        </label>
+                                    </div>
+
+
+                                    <!-- Enable input data with not Required-->
+                                    <div class="col col-2 m-bottom-15" ng-if="autoGenerate == false && data.productionItemID == null ">
+                                        <label class="label">
+                                            Country
+                                        </label>
+                                        <label class="select">
+                                            <select name="countryID" id="countryID" ng-model="data.countryID" ng-options="country.countryID as country.countryCode for country in countries">
+                                                <option value=""></option>
+                                            </select>
+                                            <i></i>
+                                        </label>
+                                    </div>
+
+                                    <div class="col col-2 m-bottom-15" ng-if="autoGenerate == false && data.productionItemID == null">
+                                        <label class="label">
+                                            Material Group
+                                        </label>
+                                        <label class="select">
+                                            <select name="productionItemGroupID" ng-model="data.productionItemGroupID" ng-options="productionItemGroup.productionItemGroupID as productionItemGroup.productionItemGroupNM for productionItemGroup in productionItemGroups">
+                                                <option value=""></option>
+                                            </select>
+                                            <i></i>
+                                        </label>
+                                    </div>
+
+                                    <div class="col col-2 m-bottom-15" ng-if="autoGenerate == false && data.productionItemID == null">
+                                        <label class="label">
+                                            Material Type
+                                        </label>
+                                        <label class="select">
+                                            <select name="productionItemTypeID" ng-model="data.productionItemMaterialTypeID" ng-options="productionItemMaterialType.productionItemTypeID as productionItemMaterialType.productionItemTypeNM for productionItemMaterialType in productionItemMaterialTypes">
+                                                <option value=""></option>
+                                            </select>
+                                            <i></i>
+                                        </label>
+                                    </div>
+
+                                    <!--
+                                        <div class="col col-2 m-bottom-15" ng-if="data.productionItemUD == null">
+                                            <label class="label">
+                                                Material Spec
+                                                <em ng-show="editForm.productionItemSpecID.$error.required" class="note note-error">(Required)</em>
+                                            </label>
+                                            <label class="select" ng-class="{'state-error': editForm.productionItemSpecID.$error.required}">
+                                                <select name="productionItemSpecID" ng-model="data.productionItemSpecID" ng-options="productionItemSpec.productionItemSpecID as productionItemSpec.productionItemSpecNM for productionItemSpec in productionItemSpecs" required>
+                                                    <option value=""></option>
+                                                </select>
+                                                <i></i>
+                                            </label>
+                                        </div>
+                                    -->
+                                    <!-- End -->
+                                    <!--
+                                    <div class="col col-4 m-bottom-15">
+                                        <label class="label">
+                                            <span>Prefer Vender</span>
+                                        </label>
+                                        <label class="input">
+                                            <input name="preferVender" type="text" id="preferVender" ng-model="data.preferVender" autocomplete="off" />
+                                        </label>
+                                    </div>
+                                    -->
+
+
+                                    <div class="col col-2 m-bottom-15" ng-if="data.productionItemID == null">
+                                        <label class="label">
+                                            UoM
+                                            <em ng-show="editForm.unitID.$error.required" class="note note-error error-cus">(Required)</em>
+                                        </label>
+                                        <label class="select select-cus" ng-class="{'state-error': editForm.unitID.$error.required}">
+                                            <select ng-model="data.unitID" class="remove-required" ng-options="unit.unitID as unit.unitNM for unit in units" required name="unitID">
+                                                <option value=""></option>
+                                            </select>
+                                            <i></i>
+                                        </label>
+                                    </div>
+                                    <div class="col col-2 m-bottom-15" ng-if="data.productionItemID != null">
+                                        <label class="label">
+                                            UoM
+                                            <em ng-show="editForm.unitID.$error.required" class="note note-error">(Required)</em>
+                                        </label>
+                                        <label class="select btn @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Reset, HttpContext.Current))" ng-class="{'state-error': editForm.unitID.$error.required}">
+                                            <select ng-model="data.unitID" ng-options="unit.unitID as unit.unitNM for unit in units" required name="unitID">
+                                                <option value=""></option>
+                                            </select>
+                                            <i></i>
+                                        </label>
+                                    </div>
+
+                                    <div class="col col-2 m-bottom-15">
+                                        <label class="label">
+                                            <span>Packing UoM</span>
+                                        </label>
+                                        <label class="select">
+                                            <select ng-model="data.packingUnit" ng-options="unit.unitID as unit.unitNM for unit in units">
+                                                <option value=""></option>
+                                            </select>
+                                            <i></i>
+                                        </label>
+                                    </div>
+
+                                    <div class="col col-2 m-bottom-15">
+                                        <label class="label">
+                                            <span>Quantity Per Packing UoM</span>
+                                        </label>
+                                        <label class="input">
+                                            <input type="number" name="quantityPerPacking" id="quantityPerPacking" ng-model="data.quantityPerPacking" min="1" max="10000">
+                                        </label>
+                                    </div>
+
+                                </div>
+                                <div class="row">
+
+                                    <div class="col col-2 m-bottom-15">
+                                        <label class="label">&nbsp;</label>
+                                        <label class="checkbox">
+                                        </label>
+                                    </div>
+
+                                    @*add column outsourcingCost type Hau*@
+                                    <div class="col col-2 m-bottom-15">
+                                        <label class="label">
+                                            <span>Outsourcing Type</span>
+                                            <em ng-show="editForm.outsourcingCostTypeID.$error.required" class="note note-error">(Required)</em>
+                                        </label>
+                                        <label class="select" ng-class="{'state-error': editForm.outsourcingCostTypeID.$error.required}">
+                                            <select ng-disabled="data.productionItemGroupID == null || data.productionItemGroupID == ''"
+                                                    ng-model="data.outsourcingCostTypeID"
+                                                    ng-options="out.outsourcingCostTypeID as out.outsourcingCostTypeNM for out in outSourcingCostTypeDTOs | filter : {'productionItemGroupID': data.productionItemGroupID}" ng-required="data.productionItemGroupID === 14" name="outsourcingCostTypeID">
+                                                <option value=""></option>
+                                            </select>
+                                            <i></i>
+                                        </label>
+                                    </div>
+
+                                    <div class="col col-2 m-bottom-15">
+                                        <label class="label">&nbsp;</label>
+                                        <label class="checkbox">
+                                            <input type="checkbox" ng-model="data.status">
+                                            <i></i> Activated
+                                        </label>
+                                    </div>
+
+                                    <div class="col col-2 m-bottom-15">
+                                        <label class="label">&nbsp;</label>
+                                        <label class="checkbox">
+                                            <input type="checkbox" ng-model="data.isAutoAdd">
+                                            <i></i> Auto add to the cost list of BOM
+                                        </label>
+                                    </div>
+
+                                    <div class="col col-2 m-bottom-15">
+                                        <label class="label">&nbsp;</label>
+                                        <label class="checkbox">
+                                            <input type="checkbox" ng-model="data.isAVTGroup">
+                                            <i></i> AVT Group
+                                        </label>
+                                    </div>
+
+                                    <div class="col col-2 m-bottom-15" ng-if="data.isAVTGroup">
+                                        <label class="label">
+                                            <span>BreakDown Category</span>
+                                        </label>
+                                        <label class="select">
+                                            <select ng-model="data.breakdownCategoryID" ng-options="x.breakdownCategoryID as x.breakdownCategoryNM for x in breakDownCategorys">
+                                                <option value=""></option>
+                                            </select>
+                                            <i></i>
+                                        </label>
+                                    </div>
+
+                                </div>
+                            </fieldset>
+                        </div>
+
+                        <!--Inventory data-->
+                        <div class="well-sm col-sm-12 smart-form m-bottom-15">
+                            <fieldset>
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <h1 class="m-bottom-15">Inventory Data</h1>
+                                        <hr style="margin-top: 5px;margin-bottom: 5px;">
+                                        <div class="col col-3 m-bottom-15">
+                                            <label class="label">
+                                                <span>Inventory UoM</span>
+                                                <em ng-show="editForm.inventoryUnit.$error.required" class="note note-error">(Required)</em>
+                                            </label>
+                                            <label class="select" ng-class="{'state-error': editForm.inventoryUnit.$error.required}">
+                                                <select ng-model="data.inventoryUnit" ng-options="unit.unitID as unit.unitNM for unit in units">
+                                                    <option value=""></option>
+                                                </select>
+                                                <i></i>
+                                            </label>
+                                        </div>
+
+                                        <div class="col col-3 m-bottom-15">
+                                            <label class="label">Valuation Method</label>
+                                            <label class="select">
+                                                <select ng-model="data.valuationMethod" ng-options="valuationMethod.methodID as valuationMethod.methodNM for valuationMethod in valuationMethods">
+                                                    <option value=""></option>
+                                                </select>
+                                                <i></i>
+                                            </label>
+                                        </div>
+
+                                        <div class="col col-3 m-bottom-15">
+                                            <label class="label">
+                                                <span>Required (purchasing UoM)</span>
+                                            </label>
+                                            <label class="input">
+                                                <input type="number" name="requiredPurchasing" id="requiredPurchasing" ng-model="data.requiredPurchasing" min="1" max="10000">
+                                            </label>
+                                        </div>
+
+                                        <div class="col col-3 m-bottom-15" style="visibility:hidden">
+                                            <label class="label">
+                                                <span>Space</span>
+                                            </label>
+                                            <label class="input">
+                                                <input type="text" disabled>
+                                            </label>
+                                        </div>
+
+                                        <div class="col col-3 m-bottom-15">
+                                            <label class="label">
+                                                <span>Minimum</span>
+                                            </label>
+                                            <label class="input">
+                                                <input type="number" name="minimum" id="minimum" ng-model="data.minimum" min="1" max="10000">
+                                            </label>
+                                        </div>
+
+                                        <div class="col col-3 m-bottom-15">
+                                            <label class="label">
+                                                <span>Average</span>
+                                            </label>
+                                            <label class="input">
+                                                <input type="number" step=".01" name="average" id="average" ng-model="data.average" min="1" max="10000">
+                                            </label>
+                                        </div>
+
+                                        <div class="col col-3 m-bottom-15">
+                                            <label class="label">
+                                                <span>Maximum</span>
+                                            </label>
+                                            <label class="input">
+                                                <input type="number" name="maximum" id="maximum" ng-model="data.maximum" min="1" max="10000">
+                                            </label>
+                                        </div>
+
+                                        <div class="col col-3 m-bottom-15" ng-show="data.valuationMethod == 2">
+                                            <label class="label">
+                                                <span>Item Price</span>
+                                            </label>
+                                            <label class="input">
+                                                <input name="itemCost" type="text" class="form-control" avs-number ng-data-source="data.itemCost" ng-decimal="2" style="text-align:right" currency-symbol="" />
+                                            </label>
+                                        </div>
+
+                                        <div class="col col-3 m-bottom-15" ng-show="data.valuationMethod == 2">
+                                            <label class="label">
+                                                <span>Based on</span>
+                                            </label>
+                                            <label class="select">
+                                                <select ng-model="data.basedOn" ng-options="basedOn.basedOnID as basedOn.basedOnNM for basedOn in basedOns">
+                                                    <option value=""></option>
+                                                </select>
+                                                <i></i>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
+
+                        <!--Planning data-->
+                        <div class="well-sm col-sm-12 smart-form m-bottom-15">
+                            <fieldset>
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <h1 class="m-bottom-15">Planning Data</h1>
+                                        <hr style="margin-top: 5px;margin-bottom: 5px;">
+                                        <div class="col col-3 m-bottom-15">
+                                            <label class="label">
+                                                <span>MRP</span>
+                                            </label>
+                                            <select class="form-control" ng-model="data.mrp" ng-options="mrp.mrpID as mrp.mrpNM for mrp in mrps">
+                                                <option value=""></option>
+                                            </select>
+                                            <i></i>
+                                        </div>
+
+                                        <div class="col col-3 m-bottom-15">
+                                            <label class="label">
+                                                <span>Procurement method</span>
+                                            </label>
+                                            <select class="form-control" ng-model="data.procurementMethod" ng-options="procurementMethod.methodID as procurementMethod.methodNM for procurementMethod in procurementMethods">
+                                                <option value=""></option>
+                                            </select>
+                                            <i></i>
+                                        </div>
+
+                                        <div class="col col-3 m-bottom-15">
+                                            <label class="label">
+                                                <span>Lead time (days)</span>
+                                            </label>
+                                            <label class="input">
+                                                <input type="number" name="leadTime" id="leadTime" ng-model="data.leadTime" min="1" max="10000">
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
+
+                        <hr />
+                        <!-- Warehouse data -->
+                        <div class="well-sm col-sm-12 smart-form m-bottom-15">
+                            <h1>Warehouse Data</h1>
+                            <br />
+                            <hr>
+                            <fieldset style="padding: 0px;">
+                                <a class="btn btn-primary btn-xs font-11" href="javascript:void(0);" ng-click="event.addWarehouse($event)" style="margin-bottom: 10px;"><i class="fa fa-plus"></i> Add new </a>
+                                <div class="tilsoft-table-wrapper">
+                                    <div class="tilsoft-table">
+                                        <div class="tilsoft-table-body" style="width: 100%; overflow-y: hidden; height: auto; min-height: 100px; margin-top: 0px;">
+                                            <table>
+                                                <tr>
+                                                    <th style="width: 50px;">&nbsp;</th>
+                                                    <th style="width: 55px;">Default</th>
+                                                    <th style="width: 135px;">Branch</th>
+                                                    <th style="width: 150px;">Code</th>
+                                                    <th style="width: 200px;">Name</th>
+                                                    <th style="width: 100px;">Instock</th>
+                                                    <th style="width: 300px;">Description</th>
+                                                    <th style="width: 100px;">Committed</th>
+                                                    <th style="width: 100px;">Ordered</th>
+                                                    <th>Available</th>
+                                                </tr>
+                                                <tr ng-repeat="item in data.productionItemWarehouses">
+                                                    <td style="text-align: center;">
+                                                        <a href="javascript:void(0);" title="Remove" class="btn btn-danger btn-xs font-11" ng-click="event.removeWarehouse($event, item.productionItemWarehouseID)">Remove  </a>
+                                                    </td>
+                                                    <td style="text-align: center;"><input type="checkbox" ng-model="item.isDefault" @*ng-click="method.checkDefault($event,item)"*@ /></td>
+                                                    <td style="width:100px" ng-class="{'state-error': editForm.branchID.$error.required}">
+
+                                                        <label class="select" ng-class="{'state-error': editForm.unitID.$error.required}">
+                                                            <select class="form-control" name="branchID" ng-model="item.branchID" ng-options="branch.branchID as branch.branchUD for branch in branches" required>
+                                                                <option value=""></option>
+                                                            </select>
+                                                            <i></i>
+                                                            <em ng-show="editForm.branchID.$error.required && !item.branchID" class="note note-error">(Required)</em>
+                                                        </label>
+                                                    </td>
+                                                    <td style="width: 100px;"><input type="text" class="form-control" style="width: 95%;" ng-model="item.factoryWarehouseUD" readonly /></td>
+                                                    <td style="width: 200px;" ng-class="{'state-error': editForm.factoryWarehouseID.$error.required}">
+                                                        <select class="form-control" name="factoryWarehouseID" id="factoryWarehouseID" ng-model="item.factoryWarehouseID" ng-options="factoryWarehouse.factoryWarehouseID as factoryWarehouse.factoryWarehouseNM for factoryWarehouse in factoryWarehouses | filter : { branchID : item.branchID ? item.branchID : -1} : true" required>
+                                                            <option value=""></option>
+                                                        </select>
+                                                    </td>
+                                                    <td style="width: 100px;"><input type="text" class="form-control" style="width: 95%; text-align: right;" ng-model="item.inStock" /></td>
+                                                    <td style="width: 300px;"><input type="text" class="form-control" style="width: 95%; text-align: right;" ng-model="item.description" /></td>
+                                                    <td style="width: 100px;text-align:center"><input type="text" class="form-control" style="width: 95%; text-align: right;" ng-model="item.committed" /></td>
+                                                    <td style="width: 100px; text-align: center;"><input type="text" class="form-control" style="width: 95%; text-align: right;" ng-model="item.ordered" /></td>
+                                                    <td><input type="text" class="form-control" style="width: 95%; text-align: right;" ng-model="item.available" /></td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
+
+                        <hr />
+                        <!-- Vender data -->
+                        <div class="well-sm col-sm-12 smart-form m-bottom-15">
+                            <h1>Vendor Data</h1>
+                            <br />
+                            <hr>
+                            <fieldset style="padding: 0px;">
+                                <a class="btn btn-primary btn-xs font-11" href="javascript:void(0);" ng-click="event.addVender($event)" style="margin-bottom: 10px;"><i class="fa fa-plus"></i> Add new </a>
+                                <div class="tilsoft-table-wrapper">
+                                    <div class="tilsoft-table">
+                                        <div class="tilsoft-table-body" style="width: 100%; overflow-y: hidden; height: auto; min-height: 100px; margin-top: 0px;">
+                                            <table>
+                                                <tr>
+                                                    <th style="width: 60px;">&nbsp;</th>
+                                                    <th style="width: 100px;">Default</th>
+                                                    <th style="width: 100px;">Code</th>
+                                                    <th style="width: 400px;">Name</th>
+                                                    <th>Remark</th>
+                                                </tr>
+                                                <tr ng-repeat="item in data.productionItemVenders">
+                                                    <td style="text-align: center;">
+                                                        <a href="javascript:void(0);" title="Remove" class="btn btn-danger btn-xs font-11" ng-click="event.removeVender($event, item.productionItemVenderID)">Remove</a>
+                                                    </td>
+                                                    <td style="text-align: center;"><input type="checkbox" ng-model="item.isDefault" /></td>
+                                                    <td style="width: 100px;"><input type="text" class="form-control" style="width: 95%; text-align: right;" ng-model="item.factoryRawMaterialUD" readonly /></td>
+                                                    <td style="width: 400px;">
+                                                        <select class="form-control" ng-model="item.factoryRawMaterialID" ng-options="factoryRawMaterialSupplier.factoryRawMaterialID as factoryRawMaterialSupplier.factoryRawMaterialShortNM for factoryRawMaterialSupplier in factoryRawMaterialSuppliers">
+                                                            <option value=""></option>
+                                                        </select>
+                                                    </td>
+                                                    <td><input type="text" class="form-control" style="width: 95%; text-align: right;" ng-model="item.remark" /></td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
+
+
+                        <!--SubUnit-->
+                        <div class="well-sm col-sm-12 smart-form m-bottom-15">
+                            <h1>1 SUB UNIT = HSQD MAIN UNIT</h1>
+                            <br />
+                            <hr>
+                            <fieldset style="padding: 0px;">
+                                <a class="btn btn-primary btn-xs font-11" href="javascript:void(0);" ng-click="event.addSubUnit($event)" style="margin-bottom: 10px;"><i class="fa fa-plus"></i> Add new </a>
+                                <div class="tilsoft-table-wrapper">
+                                    <div class="tilsoft-table">
+                                        <div class="tilsoft-table-body" style="width: 100%; overflow-y: hidden; height: auto; min-height: 100px; margin-top: 0px;">
+                                            <table>
+                                                <tr>
+                                                    <th style="width: 80px;">&nbsp;</th>
+                                                    <th style="width: 200px;">Unit</th>
+                                                    <th style="width: 150px;">HSQD</th>
+                                                    <th style="width: 150px;">Valid From</th>
+                                                    <th style="width: 170px;">Tracking</th>
+                                                    <th>Remark</th>
+                                                </tr>
+                                                <tr ng-repeat="item in data.productionItemSubUnitDTOs">
+                                                    <td style="text-align: center; vertical-align:middle">
+                                                        <a href="javascript:void(0);" title="Remove" class="btn btn-danger btn-xs font-11" ng-click="event.removeSubUnit($event, item.productionItemUnitID)" ng-if="item.productionItemUnitID < 0">Remove</a>
+                                                        <a href="javascript:void(0);" title="History" class="btn btn-info btn-xs font-11" ng-click="event.openHistoryUnit(item.productionItemUnitHistorys)" ng-if="item.productionItemUnitID > 0">History</a>
+                                                    </td>
+                                                    <td>
+                                                        <label class="select" ng-class="{'state-error': editForm.unitID.$error.required}">
+                                                            <select class="form-control" name="unitID" ng-model="item.unitID" ng-options="unit.unitID as unit.unitNM for unit in units" ng-disabled="data.productionItemID != null && item.productionItemUnitID > 0 && data.userGroupID != 1" required>
+                                                                <option value=""></option>
+                                                            </select>
+                                                            <i></i>
+                                                            <em ng-show="editForm.unitID.$error.required && !item.unitID" class="note note-error">(Required)</em>
+                                                        </label>
+                                                    </td>
+                                                    <td>
+                                                        <label class="input" ng-class="{'state-error': editForm.conversionFactor.$error.required}">
+                                                            <input type="text" avs-number-2 ng-decimal="4" name="conversionFactor" class="form-control" style="width: 100%; text-align: right;" ng-model="item.conversionFactor" ng-disabled=" item.productionItemUnitID > 0 && @isDisabled == null" required />
+                                                        </label>
+                                                        <em ng-show="editForm.conversionFactor.$error.required && !item.conversionFactor" class="note note-error">(Required)</em>
+                                                    </td>
+                                                    <td>
+                                                        <label class="input">
+                                                            <input type="text" name="validFrom" avs-calendar class="form-control" style="width: 100%;" ng-data-source="item.validFrom" ng-disabled=" item.productionItemUnitID > 0 && @isDisabled == null" />
+                                                            <i class="icon-append fa fa-calendar"></i>
+                                                        </label>
+                                                    </td>
+                                                    <td style="vertical-align:middle">
+                                                        <span><i class="fa fa-user" aria-hidden="true"></i> {{item.creator}}</span>
+                                                        <br />
+                                                        <span><i class="fa fa-clock-o" aria-hidden="true"></i> {{item.updatedDate}}</span>   
+                                                    </td>
+                                                    <td><input type="text" class="form-control" style="width: 100%; text-align: left;" ng-model="item.remark" /></td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
+
+                        <!--Over View-->
+                        <div class="well-sm col-sm-12 smart-form m-bottom-15">
+                            <h1>Over View</h1>
+                            <br />
+                            <hr>
+                            <fieldset style="padding: 0px;">
+                                <div class="col col-lg-4 m-bottom-15">
+                                    <label class="label">Status</label>
+                                    <label class="select">
+                                        <select ng-model="data.overViewStatus" ng-options="xxx.overViewStatus as xxx.name for xxx in status">
+                                            <option value=""></option>
+                                        </select>
+                                        <i></i>
+                                    </label>
+                                </div>
+                                <div class="col col-lg-4 m-bottom-15">
+                                    <label class="label">Asset Class</label>
+                                    <label class="select">
+                                        <select ng-model="data.depreciationType" ng-options="xxx.depreciationType as xxx.name for xxx in depreciationTypes">
+                                            <option value=""></option>
+                                        </select>
+                                        <i></i>
+                                    </label>
+                                </div>
+                                <div class="col col-lg-4 m-bottom-15">
+                                    <label class="label">Account Determination</label>
+                                    <label class="input">
+                                        <input type="text" class="form-control" ng-model="data.accountDetermination" />
+                                    </label>
+                                </div>
+                                <div class="col col-lg-4 m-bottom-15">
+                                    <label class="label">Depreciation Type</label>
+                                    <label class="select">
+                                        <select ng-model="data.assetClass" ng-options="xxx.assetClass as xxx.name for xxx in assetClases">
+                                            <option value=""></option>
+                                        </select>
+                                        <i></i>
+                                    </label>
+                                </div>
+                            </fieldset>
+                        </div>
+
+                        <!--Depreciation Parameters-->
+                        <div class="well-sm col-lg-12 m-bottom-15 smart-form">
+                            <h1>Depreciation Parameters</h1>
+                            <br />
+                            <hr />
+                            <fieldset style="padding: 0px;">
+                                <div class="col col-lg-4 m-bottom-15">
+                                    <label class="label">Userful Life (Month):</label>
+                                    <label class="input">
+                                        <input type="text" ng-model="data.userfulLife" style="text-align:right" />
+                                    </label>
+                                </div>
+
+                                <div class="col col-lg-4 m-bottom-15">
+                                    <label class="label">Start Date: </label>
+                                    <label class="input">
+                                        <input type="text" class="datepicker" data-dateformat="dd/mm/yy" ng-model="data.startDate" /><i class="icon-append fa fa-calendar"></i>
+                                    </label>
+                                </div>
+                                <div class="col col-lg-4 m-bottom-15">
+                                    <label class="label">End Date:</label>
+                                    <label class="input">
+                                        <span class="form-control" ng-model="data.endDate">{{method.getEndDay(data.startDate,data.userfulLife)}}</span>
+                                    </label>
+                                </div>
+                            </fieldset>
+                        </div>
+
+                        <!--Depreciation-->
+                        <div class="well-sm col-lg-12 smart-form m-bottom-15">
+                            <h1>Depreciation</h1>
+                            <br />
+                            <hr />
+                            <fieldset style="padding: 0px;">
+                                <div class="row">
+                                    <div class="col col-lg-4 m-bottom-15">
+                                        <label class="label">Initiate value</label>
+                                        <label class="input">
+                                            <input type="text" avs-number ng-data-source="data.initiateValue" ng-decimal="0" style="text-align:right" />
+                                        </label>
+                                    </div>
+                                    <div class="col col-lg-4 m-bottom-15">
+                                        <label class="label">Accumulated depreciation</label>
+                                        <label class="input">
+                                            <input type="text" avs-number ng-data-source="data.accumulatedDepreciation" style="text-align:right" ng-decimal="0" />
+                                        </label>
+                                    </div>
+                                    <div class="col col-lg-4 m-bottom-15">
+                                        <label class="label">Depreciation/ month</label>
+                                        <label class="input">
+                                            <span class="form-control" ng-model="data.depreciationPerMonth"><b style="color:#0f68ff"> {{method.getDepreciationPerMonth(data) | currency:'':0}}</b></span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col col-lg-4 m-bottom-15">
+                                        <label class="label">Increased adjustment value</label>
+                                        <label class="input">
+                                            <input type="text" avs-number ng-data-source="data.increasedAdjustmentValue" ng-decimal="0" style="text-align:right" />
+                                        </label>
+                                    </div>
+                                    <div class="col col-lg-4 m-bottom-15">
+                                        <label class="label">Decreased adjustment value</label>
+                                        <label class="input">
+                                            <input type="text" avs-number ng-data-source="data.decreasedAdjustmentValue" style="text-align:right" ng-decimal="0" />
+                                        </label>
+                                    </div>
+                                    <div class="col col-lg-4 m-bottom-15">
+                                        <label class="label">Net value</label>
+                                        <label class="input">
+                                            <span class="form-control" ng-model="data.netValue"><b style="color:#0f68ff"> {{method.getNetValue(data) | currency:'':0}}</b></span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
+
+                        <div class="well-sm col-lg-12 smart-form m-bottom-15">
+                            <div class="row">
+                                <label class="label" style="margin-left:14px">
+                                    <h1 style="display:inline">Depreciation Table</h1>
+                                    <a class="btn btn-primary" style="display:inline-block; margin-top:-8px; width:200px; text-align:center; margin-left:50px" ng-click="event.addDay(data.startDate, data.userfulLife)"> <i class="fa fa-list"></i> Get Depreciation Table</a>
+                                </label>
+                            </div>
+                            <br />
+                            <hr />
+                            <label class="input">
+                                <input type="text" id="kl" class="form-control" onkeyup="event.searchTable()" placeholder="Search for Year" title="Type in a Year" style="margin-bottom:10px; margin-top:10px; padding-left:10px;">
+                            </label>
+                            <fieldset style="padding: 0px;">
+                                <div class="widget-body">
+                                    <div id="searchResult" class="tilsoft-table-wrapper">
+                                        <div class="tilsoft-table">
+                                            <div class="tilsoft-table-header" style="width:100%;">
+                                                <div style="width:151px; font-size:10px;text-align:center">Depreciation Month</div>
+                                                <div style="width:250px;font-size:10px;text-align:center">Depreciation Value</div>
+                                                <div style="width:250px; font-size:10px;text-align:center">Total Depreciated Value</div>
+                                                <div style="font-size:10px;text-align:center"> Net value</div>
+                                            </div>
+                                            <div class="tilsoft-table-body" style="width:100%; overflow-y:auto; height:auto; min-height:100px; margin-top:0px">
+                                                <table id="nl">
+                                                    <tbody>
+                                                        <tr>
+                                                            <td style="width:150px; font-size:10px;text-align:center">Depreciation Month</td>
+                                                            <td style="width:250px; font-size:10px;text-align:center">Depreciation Value</td>
+                                                            <td style="width:250px; font-size:10px;text-align:center">Total Depreciated Value</td>
+                                                            <td style="font-size:10px;text-align:center">Net value</td>
+                                                        </tr>
+                                                        <tr ng-repeat="item in dataBTKH">
+                                                            <td style="text-align:center; width:150px">{{item.dateAdded}}</td>
+                                                            <td style="text-align:center; width:250px">{{item.depreciationValue | currency:'':0}}</td>
+                                                            <td style="text-align:center; width:250px">{{item.totalDepreciationValue | currency:'':0}}</td>
+                                                            <td style="text-align:center">{{item.netValue | currency:'':0}}</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+<!---->
+<div id="unitHistory" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title" id="myModalLabel">History</h4>
+            </div>
+            <div class="modal-body no-padding">
+                <div class="smart-form">
+                    <fieldset ng-if="currentHistory.length > 0">
+                        <div class="tilsoft-table-wrapper">
+                            <div class="tilsoft-table">
+                                <div class="tilsoft-table-body" style="width: 100%; overflow-y: hidden; height: auto; min-height: 100px; margin-top: 0px;">
+                                    <table>
+                                        <tr>
+                                            <th style="width: 100px;">Valid From</th>
+                                            <th style="width: 100px;">HSQD</th>
+                                            <th style="width: 150px;">Updated by</th>
+                                            <th style="width: 150px;">Updated Date</th>
+                                            <th></th>
+                                        </tr>
+                                        <tr ng-repeat="item in currentHistory">
+                                            <td>
+                                                {{item.validFromHistory}}
+                                            </td>
+                                            <td style="text-align:right">
+                                                {{item.hsqdHistory | number:4}}
+                                            </td>
+                                            <td>
+                                                {{item.creator}}
+                                            </td>
+                                            <td>
+                                                {{item.updateDate}}
+                                            </td>
+                                            <td></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <fieldset ng-if="currentHistory.length <= 0">
+                        <div class="content">
+                            <h2>No history found</h2>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" ng-click="event.closeHistoryUnit()">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "ProductionItem")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="event.update($event)"><i class="fa fa-save"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="#" class="btn btn-default" title="Export to excel" ng-click="event.exportExcel()" style="color: #31B404"><i class="fa fa-file-excel-o"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script type="text/javascript">
+    var context = {
+            id: @ViewBag.ID,
+            serviceUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/productionItem/',
+            token: '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]',
+            backUrl: '@Url.Action("Index", "ProductionItem")',
+            refreshUrl: '@Url.Action("Edit", "ProductionItem", new { id = UrlParameter.Optional })/',
+            backendReportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]',
+            userGroupID: @userGroupID1
+        }
+    </script>
+    <script src="~/Angular/app/productionItem/edit.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/jsonService2.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/productionItem/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/support/service.js?c=@System.Guid.NewGuid().ToString().Replace("-","")"></script>
+}

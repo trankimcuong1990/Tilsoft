@@ -1,0 +1,488 @@
+﻿@{
+    if (ViewBag.ID == 0)
+    {
+        ViewBag.Title = "Create New Client Payment";
+    }
+    else
+    {
+        ViewBag.Title = "Edit Client Payment";
+    }
+
+    int clientId = 0;
+    int methodId = 0;
+    string currency = "";
+    if (Request.Params["clientId"] != null)
+    {
+        clientId = Convert.ToInt32(Request.Params["clientId"]);
+    }
+    if (Request.Params["m"] != null)
+    {
+        methodId = Convert.ToInt32(Request.Params["m"].ToString());
+    }
+    if (Request.Params["c"] != null)
+    {
+        currency = Request.Params["c"].ToString();
+    }
+}
+
+<form class="row" name="editForm" id="main-form">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-0" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>General Information</h2>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div class="smart-form">
+                        <fieldset>
+                            <div class="row">
+                                <section class="col col-3">
+                                    <label class="label">Payment No</label>
+                                    <label class="input">
+                                        <span class="form-control">{{data.clientPaymentUD}}</span>
+                                    </label>
+                                </section>
+                                <section class="col col-3">
+                                    <label class="label">Ballance Ref</label>
+                                    <label class="input">
+                                        <span class="form-control">{{data.clientPaymentBallanceUD}}</span>
+                                    </label>
+                                </section>
+                                <section class="col col-2">
+                                    <label class="label">Method</label>
+                                    <label class="input">
+                                        <span class="form-control">{{data.clientPaymentMethodNM}}</span>
+                                    </label>
+                                </section>
+                                <section class="col col-1">
+                                    <label class="label">Currency</label>
+                                    <label class="input">
+                                        <span class="form-control">{{data.currency}}</span>
+                                    </label>
+                                </section>
+                                <section class="col col-3">
+                                    <label class="label">Status</label>
+                                    <label class="input" ng-if="!data.isConfirmed">
+                                        <span class="form-control">PENDING</span>
+                                    </label>
+                                    <label class="input" ng-if="data.isConfirmed">
+                                        <span class="form-control">CONFIRMED</span>
+                                    </label>
+                                </section>                                                                
+                            </div>
+                            <div class="row">
+                                <section class="col col-2">
+                                    <label class="label">Client Code</label>
+                                    <label class="input">
+                                        <span class="form-control">{{data.clientUD}}</span>
+                                    </label>
+                                </section>
+                                <section class="col col-4">
+                                    <label class="label">Client Name</label>
+                                    <label class="input">
+                                        <span class="form-control">{{data.clientNM}}</span>
+                                    </label>
+                                </section>
+                                <section class="col col-3">
+                                    <label class="label">USD Balance</label>
+                                    <label class="input">
+                                        <span class="form-control" style="text-align: right;">${{data.totalBallanceUSDAmount | currency:'':2}}</span>
+                                    </label>
+                                </section>
+                                <section class="col col-3">
+                                    <label class="label">EUR Balance</label>
+                                    <label class="input">
+                                        <span class="form-control" style="text-align: right;">&euro;{{data.totalBallanceEURAmount | currency:'':2}}</span>
+                                    </label>
+                                </section>
+                            </div>
+                            <div class="row">                                
+                                <section class="col col-3">
+                                    <label class="label">LC No</label>
+                                    <label class="input">
+                                        <input type="text" ng-model="data.lcNo" />
+                                    </label>
+                                </section>                             
+                                <section class="col col-3">
+                                    <label class="label">Transaction No</label>
+                                    <label class="input">
+                                        <input type="text" ng-model="data.transactionNo" />
+                                    </label>
+                                </section>                                
+                                <section class="col col-3">
+                                    <label class="label">Payment Date <span class="note-error" ng-show="editForm.paymentDate.$error.required"> - Required</span></label>
+                                    <label class="input">
+                                        <i class="icon-append fa fa-calendar"></i>
+                                        <input name="paymentDate" type="text" data-dateformat="dd/mm/yy" class="datepicker" ng-model="data.paymentDate" required />
+                                    </label>
+                                </section>
+                                <section class="col col-3">
+                                    <label class="label">Amount</label>
+                                    <label class="input">
+                                        <input name="amount" type="text" ng-model="data.amount" furnindo-currency style="text-align: right;" />
+                                    </label>
+                                </section>                                
+                                
+                            </div>
+                            <section>
+                                <label class="label">Remark</label>
+                                <label class="textarea">
+                                    <textarea rows="5" ng-model="data.remark"></textarea>
+                                </label>
+                            </section>
+                            <section ng-if="data.updatorName">
+                                <div class="note">
+                                    <strong>Updated by</strong> {{data.updatorName}} on {{data.updatedDate}}
+                                </div>
+                            </section>
+                            <section ng-if="data.confirmerName">
+                                <div class="note">
+                                    <strong>Approved by</strong> {{data.confirmerName}} on {{data.confirmedDate}}
+                                </div>
+                            </section>
+                        </fieldset>
+                        <footer style="background: #eeefee;">
+                            <a href="javascript:void(0)" class="btn btn-default" style="float: none;" ng-click="event.addPI()" ng-disabled="data.isConfirmed">Add P/I</a>
+                            <a href="javascript:void(0)" class="btn btn-default" style="float: none;" ng-click="event.addInvoice()" ng-disabled="data.isConfirmed">Add Invoice</a>
+                            <a href="javascript:void(0)" class="btn btn-default" style="float: none;" ng-click="event.addOther()" ng-disabled="data.isConfirmed">Add Other</a>
+                        </footer>
+                        <fieldset style="padding-top: 0px;">
+                            <div class="row">                                 
+                                <div class="tilsoft-table-wrapper" id="grdImages">
+                                    <div class="tilsoft-table">
+                                        <div style="width: 100%; overflow: auto; min-height: 100px; margin-top: 0px;" class="tilsoft-table-body">                                           
+                                            <table>
+                                                <tbody>
+                                                    <tr>
+                                                        <th style="width: 120px; font-weight: bold;">&nbsp;</th>
+                                                        <th style="width: 100px; font-weight: bold;">P/I</th>
+                                                        <th style="width: 100px; font-weight: bold;">Invoice</th>
+                                                        <th style="width: 100px; font-weight: bold;">To be paid</th>
+                                                        <th style="width: 100px; font-weight: bold;">Paid Amount</th>
+                                                        <th style="width: 100px; font-weight: bold;">Paid Date</th>
+                                                        <th style="width: 100px; font-weight: bold;">Amount</th>
+                                                        <th style="width: 100px; font-weight: bold;">Deducted Amount</th>
+                                                        <th style="font-weight: bold;">Remark</th>
+                                                    </tr>
+                                                    <tr>
+                                                        <th style="font-weight: bold; text-align: right;" colspan="6">TOTAL</th>
+                                                        <th style="font-weight: bold; text-align: right;"><span ng-if="data.currency == 'EUR'">&euro;</span><span ng-if="data.currency == 'USD'">$</span>{{method.getTotal() | currency:'':2}}</th>
+                                                        <th style="text-align: left;" colspan="2"></th>
+                                                    </tr>
+                                                    <tr ng-repeat="item in data.clientPaymentDetails">
+                                                        <td style="text-align: center;">
+                                                            <a class="btn btn-primary btn-xs font-11" href="javascript:void(0)" title="Edit" ng-click="event.editDetail(item)" ng-disabled="data.isConfirmed"><i class="fa fa-folder-open"></i> Edit</a>
+                                                            <a class="btn btn-danger btn-xs font-11" href="javascript:void(0)" title="Edit" ng-click="event.deleteDetail(item)" ng-disabled="data.isConfirmed"><i class="fa fa-times"></i> Delete</a>
+                                                        </td>
+                                                        <td style="text-align: center;">{{item.proformaInvoiceNo}}</td>
+                                                        <td style="text-align: center;">{{item.invoiceNo}}</td>
+                                                        <td style="text-align: right;"><span ng-if="data.currency == 'EUR'">&euro;</span><span ng-if="data.currency == 'USD'">$</span>{{item.toBePaidAmount | currency:'':2}}</td>
+                                                        <td style="text-align: right;"><span ng-if="data.currency == 'EUR'">&euro;</span><span ng-if="data.currency == 'USD'">$</span>{{item.paidAmount | currency:'':2}}</td>
+                                                        <td style="text-align: center;">{{item.paidDate}}</td>                                                        
+                                                        <td style="text-align: right;"><span ng-if="data.currency == 'EUR'">&euro;</span><span ng-if="data.currency == 'USD'">$</span>{{item.amount | currency:'':2}}</td>
+                                                        <td style="text-align: right;"><span ng-if="data.currency == 'EUR'">&euro;</span><span ng-if="data.currency == 'USD'">$</span>{{item.deductedAmount | currency:'':2}}</td>
+                                                        <td>{{item.remark}}</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+<form name="piForm" id="piForm" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title" id="myModalLabel">Add P/I</h4>
+            </div>
+            <div class="modal-body no-padding">
+                <div class="smart-form">
+                    <fieldset>
+                        <div class="row">
+                            <section class="col col-3">
+                                <label class="label">P/I <span class="note-error" ng-show="piForm.saleorder.$error.required"> - Required</span></label>
+                                <label class="select" ng-if="!currentDetail.isDone">
+                                    <select name="saleorder" ui-select2 ng-model="currentDetail.saleOrderID" style="width:100%" class="select2" required ng-change="event.orderChange()">
+                                        <option value="">--NULL--</option>
+                                        <option ng-repeat="order in orders" value="{{order.saleOrderID}}">{{order.proformaInvoiceNo}} ({{order.invoiceDate}})</option>
+                                    </select>
+                                </label>
+                                <label class="input" ng-if="currentDetail.isDone">
+                                    <span class="form-control">{{currentDetail.proformaInvoiceNo}}</span>
+                                </label>
+                            </section>
+                            <section class="col col-3">
+                                <label class="label">Order date</label>
+                                <label class="input">
+                                    <span class="form-control">{{currentDetail.saleOrderDate}}</span>
+                                </label>
+                            </section>
+                            <section class="col col-3">
+                                <label class="label">To be paid</label>
+                                <label class="input">
+                                    <span class="form-control" style="text-align: right;">{{currentDetail.toBePaidAmount | currency:'':2}}</span>
+                                </label>
+                            </section>
+                            <section class="col col-3">
+                                <label class="label">Paid amount</label>
+                                <label class="input">
+                                    <span class="form-control" style="text-align: right;">{{currentDetail.paidAmount | currency:'':2}}</span>
+                                </label>
+                            </section>                            
+                        </div>
+                        <div class="row">
+                            <section class="col col-6">
+                                <label class="label">Paid Date</label>
+                                <label class="input">
+                                    <i class="icon-append fa fa-calendar"></i>
+                                    <input name="paymentDate" type="text" data-dateformat="dd/mm/yy" class="datepicker" ng-model="currentDetail.paidDate" />
+                                </label>
+                            </section>
+                            <section class="col col-6">
+                                <label class="label">Amount <span class="note-error" ng-show="piForm.amount.$error.required"> - Required</span></label>
+                                <label class="input">
+                                    <input name="amount" type="text" style="text-align: right;" ng-model="currentDetail.amount" furnindo-currency required />
+                                </label>
+                            </section>
+                        </div>
+                        <section>
+                            <label class="label">Remark</label>
+                            <label class="textarea">
+                                <textarea ng-model="currentDetail.remark" rows="4"></textarea>
+                            </label>
+                        </section>
+                    </fieldset>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" ng-click="event.updatePI()">
+                    Update
+                </button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</form>
+
+<form name="invoiceForm" id="invoiceForm" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title" id="myModalLabel">Add Invoice</h4>
+            </div>
+            <div class="modal-body no-padding">
+                <div class="smart-form">
+                    <fieldset>
+                        <div class="row">
+                            <section class="col col-4">
+                                <label class="label">Invoice ({{data.currency}}) <span class="note-error" ng-show="invoiceForm.invoice.$error.required"> - Required</span></label>
+                                <label class="select" ng-if="!currentDetail.isDone">
+                                    <select name="invoice" ui-select2 ng-model="currentDetail.eCommercialInvoiceID" style="width:100%" class="select2" required ng-change="event.invoiceChange()">
+                                        <option value="">--NULL--</option>
+                                        <option ng-repeat="invoice in invoices" value="{{invoice.eCommercialInvoiceID}}">{{invoice.invoiceNo}}: {{invoice.totalAmount | currency:'':2}} ({{invoice.invoiceDate}})</option>
+                                    </select>
+                                </label>
+                                <label class="input" ng-if="currentDetail.isDone">
+                                    <span class="form-control">{{currentDetail.invoiceNo}}</span>
+                                </label>
+                            </section>
+                            <section class="col col-2">
+                                <label class="label">Invoice date</label>
+                                <label class="input">
+                                    <span class="form-control">{{currentDetail.invoiceDate}}</span>
+                                </label>
+                            </section>
+                            <section class="col col-3">
+                                <label class="label">To be paid</label>
+                                <label class="input">
+                                    <span class="form-control" style="text-align: right;">{{currentDetail.toBePaidAmount | currency:'':2}}</span>
+                                </label>
+                            </section>
+                            <section class="col col-3">
+                                <label class="label">Paid amount</label>
+                                <label class="input">
+                                    <span class="form-control" style="text-align: right;">{{currentDetail.paidAmount | currency:'':2}}</span>
+                                </label>
+                            </section>                            
+                        </div>
+                        <div class="row">
+                            <section class="col col-4">
+                                <label class="label">Paid Date</label>
+                                <label class="input">
+                                    <i class="icon-append fa fa-calendar"></i>
+                                    <input name="paymentDate" type="text" data-dateformat="dd/mm/yy" class="datepicker" ng-model="currentDetail.paidDate" />
+                                </label>
+                            </section>
+                            <section class="col col-4">
+                                <label class="label">Deducted Amount</label>
+                                <label class="input">
+                                    <span class="form-control" style="text-align: right;">{{currentDetail.deductedAmount | currency:'':2}}</span>
+                                </label>
+                            </section>
+                            <section class="col col-4">
+                                <label class="label">Amount to be applied <span class="note-error" ng-show="invoiceForm.amount.$error.required"> - Required</span></label>
+                                <label class="input">
+                                    <input name="amount" type="text" ng-model="currentDetail.amount" furnindo-currency required style="text-align: right;" />
+                                </label>
+                            </section>                            
+                        </div>
+                        <section>
+                            <label class="label">Remark</label>
+                            <label class="textarea">
+                                <textarea ng-model="currentDetail.remark" rows="4"></textarea>
+                            </label>
+                        </section>
+                        <section>
+                            <div class="tilsoft-table-wrapper" id="grdImages">
+                                <div class="tilsoft-table">
+                                    <div style="width: 100%; overflow: auto; min-height: 100px; height: auto; margin-top: 0px;" class="tilsoft-table-body">
+                                        <table>
+                                            <tbody>
+                                                <tr>
+                                                    <th style="font-weight: bold;">P/I</th>
+                                                    <th style="font-weight: bold;">Date</th>
+                                                    <th style="font-weight: bold;">To be paid</th>
+                                                    <th style="font-weight: bold;">Paid Amount</th>
+                                                    <th style="font-weight: bold;">Already Deducted Amount</th>
+                                                    <th style="width: 150px; font-weight: bold;">Deducted Amount</th>
+                                                </tr>
+                                                <tr ng-repeat="item in currentDetail.clientPaymentDeductions">
+                                                    <td style="text-align: center;">{{item.proformaInvoiceNo}}</td>
+                                                    <td style="text-align: center;">{{item.invoiceDate}}</td>
+                                                    <td style="text-align: right;"><span ng-if="data.currency == 'EUR'">&euro;</span><span ng-if="data.currency == 'USD'">$</span>{{item.toBePaidAmount | currency:'':2}}</td>
+                                                    <td style="text-align: right;"><span ng-if="data.currency == 'EUR'">&euro;</span><span ng-if="data.currency == 'USD'">$</span>{{item.paidAmount | currency:'':2}}</td>
+                                                    <td style="text-align: right;"><span ng-if="data.currency == 'EUR'">&euro;</span><span ng-if="data.currency == 'USD'">$</span>{{item.deductedAmount | currency:'':2}}</td>
+                                                    <td style="text-align: right;"><input ng-model="item.amount" type="text" style="width: 100%; text-align: right;" furnindo-currency ng-change="event.onDeductedAmountChange()" /></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </fieldset>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" ng-click="event.updateInvoice()">
+                    Update
+                </button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</form>
+
+<form name="otherForm" id="otherForm" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title" id="myModalLabel">Add Other Charge</h4>
+            </div>
+            <div class="modal-body no-padding">
+                <div class="smart-form">
+                    <fieldset>
+                        <div class="row">
+                            <section class="col col-4">
+                                <label class="label">Paid Date</label>
+                                <label class="input">
+                                    <i class="icon-append fa fa-calendar"></i>
+                                    <input name="paymentDate" type="text" data-dateformat="dd/mm/yy" class="datepicker" ng-model="currentDetail.paidDate" />
+                                </label>
+                            </section>
+                            <section class="col col-4">
+                                <label class="label">Amount <span class="note-error" ng-show="invoiceForm.amount.$error.required"> - Required</span></label>
+                                <label class="input">
+                                    <input name="amount" type="text" ng-model="currentDetail.amount" furnindo-currency required style="text-align: right;" />
+                                </label>
+                            </section>
+                        </div>
+                        <section>
+                            <label class="label">Remark</label>
+                            <label class="textarea">
+                                <textarea ng-model="currentDetail.remark" rows="4"></textarea>
+                            </label>
+                        </section>
+                    </fieldset>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" ng-click="event.updateOther()">
+                    Update
+                </button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "ClientPaymentMng")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="event.update()" ng-disabled="data.isConfirmed"><i class="fa fa-save"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current))" title="Delete" ng-click="event.delete()" style="color: #ff0000;" ng-disabled="data.isConfirmed"><i class="fa fa-times"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default disabled" title="Print"><i class="fa fa-print"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Approve, HttpContext.Current))" title="Approve" ng-click="event.approve()" ng-disabled="data.isConfirmed"><i class="fa fa-thumbs-o-up"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default disabled" title="Reset Approval status"><i class="fa fa-thumbs-o-down"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script src="~/Angular/app/jsonService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script type="text/javascript">
+        jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/clientpayment/';
+        jsonService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+        jsonService.supportServiceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/support/';
+        var context = {
+            id: @ViewBag.ID,
+            clientId: @clientId,
+            methodId: @methodId,
+            currency: '@currency',
+            errMsg: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED',
+            backUrl: '@Url.Action("Index", "ClientPaymentMng")',
+            refreshUrl: '@Url.Action("Edit", "ClientPaymentMng", new { id = UrlParameter.Optional })/',
+            editTitle: '@ViewBag.Title'
+        }
+    </script>
+    <script src="~/Angular/app/clientPaymentMng/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/clientPaymentMng/edit.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}
+

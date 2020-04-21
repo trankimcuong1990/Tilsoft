@@ -1,0 +1,883 @@
+﻿@{
+    if (ViewBag.ID == 0)
+    {
+        ViewBag.Title = "Create Material Receipt";
+    }
+    else
+    {
+        ViewBag.Title = "Edit Material Receipt";
+    }
+
+    ViewBag.Module = "Factory Material Receipt";
+}
+
+<form class="row" name="editForm" id="main-form">
+
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+
+        <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>{{ui.title}}</h2>
+            </header>
+            <div>
+                <div class="widget-body">
+
+                    @*select type of search product from to export : search from free stock or search from other order*@
+                    <div class="smart-form" ng-if="ui.currentForm=='search-product-from'">
+                        <div class="row">
+                            <section class="col col-lg-12">
+                                <label class="label">Search product from</label>
+                                <div class="inline-group">
+                                    <label class="radio" ng-repeat="item in baseOnTypes">
+                                        <input type="radio" name="radio-inline3" ng-model="searchProductFrom.baseOnTypeID" ng-value="item.baseOnTypeID">
+                                        <i></i>{{item.baseOnTypeName}}
+                                    </label>
+                                </div>
+                            </section>
+                        </div>
+
+                        <div class="row">
+                            <section class="col col-lg-12">
+                                <a href="#" class="btn btn-primary btn-xs" title="Select" ng-click="searchProductFrom.event.gotoNextStep($event)"><i class="fa fa-check"></i> Next</a>
+                            </section>
+                        </div>
+                    </div>
+
+                    @*search free material*@
+                    <div class="smart-form" ng-if="ui.currentForm=='search-free-material'">
+                        <div class="row">
+                            <section class="col col-lg-6">
+                                <label>Material</label>
+                                <input type="text" class="form-control" ng-model="quickSearchMaterial.filters.filters.searchQuery" />
+                            </section>
+                        </div>
+                        <div class="row">
+                            <section class="col col-lg-12">
+                                <a href="#" class="btn btn-primary btn-xs" title="Search" ng-click="quickSearchMaterial.event.search($event)"><i class="fa fa-search"></i> Search</a>
+                                <a href="#" class="btn btn-success btn-xs" title="Select" ng-click="quickSearchMaterial.event.itemSelected($event)"><i class="fa fa-check"></i> Select</a>
+                                <a href="#" class="btn btn-warning btn-xs" title="Back" ng-click="quickSearchMaterial.event.close($event)"><i class="fa fa-arrow-left"></i> Back</a>
+                            </section>
+                        </div>
+                        <div class="row">
+                            <section class="col col-lg-12">
+                                <div id="quickSearchResultGrid_Material" class="tilsoft-table-wrapper">
+                                    <div class="tilsoft-table">
+                                        <div class="tilsoft-table-header" style="width: 700px;">
+                                            <div style="width: 60px; text-align: center"></div>
+                                            <div style="width: 150px" class="sorting">Material Code</div>
+                                            <div style="width: 400px" class="sorting">Material Name</div>
+                                            <div style="width: 100px" class="sorting">Material Type</div>
+                                            <div style="width: 100px" class="sorting">Material Color</div>
+                                            <div style="width: 70px" class="sorting">Unit</div>
+                                            <div class="sorting"> </div>
+                                        </div>
+
+                                        <div class="tilsoft-table-body" style="width: 700px;">
+                                            <table>
+                                                <tr ng-repeat="item in quickSearchMaterial.data">
+                                                    <td style="width: 60px; text-align: center; vertical-align:middle">
+                                                        <label class="checkbox" style="margin-left:15px; margin-bottom:20px">
+                                                            <input type="checkbox" ng-model="item.isSelected">
+                                                            <i></i>
+                                                        </label>
+                                                    </td>
+                                                    <td style="width: 150px; vertical-align:middle">{{item.factoryMaterialUD}}</td>
+                                                    <td style="width: 400px; vertical-align:middle">{{item.factoryMaterialNM}}</td>
+                                                    <td style="width: 100px; vertical-align:middle">{{item.factoryMaterialTypeNM}}</td>
+                                                    <td style="width: 100px; vertical-align:middle">{{item.factoryMaterialColorNM}}</td>
+                                                    <td style="width: 70px; vertical-align:middle">{{item.unitNM}}</td>
+                                                    <td style="text-align: center; vertical-align: middle;">
+                                                        <div ng-repeat="item_image in item.factoryMaterialImages" class="float-img-list">
+                                                            <a href="{{item_image.fileLocation}}" data-featherlight="image">
+                                                                <img ng-src="{{item_image.thumbnailLocation}}" width="50" height="50" />
+                                                            </a>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+
+                    @*search material to import by order*@
+                    <div class="smart-form" ng-if="ui.currentForm=='search-material-to-import-by-order'">
+                        <div class="row">
+                            <section class="col col-lg-2">
+                                <label>Material Code</label>
+                                <input type="text" class="form-control" ng-model="searchToImportByOrder.filters.filters.factoryMaterialUD" />
+                            </section>
+
+                            <section class="col col-lg-2">
+                                <label>ArticleCode</label>
+                                <input type="text" class="form-control" ng-model="searchToImportByOrder.filters.filters.articleCode" />
+                            </section>
+
+                            <section class="col col-lg-1">
+                                <label>Client</label>
+                                <input type="text" class="form-control" ng-model="searchToImportByOrder.filters.filters.clientUD" />
+                            </section>
+
+                            <section class="col col-lg-1">
+                                <label>Order</label>
+                                <input type="text" class="form-control" ng-model="searchToImportByOrder.filters.filters.proformaInvoiceNo" />
+                            </section>
+
+                            <section class="col col-lg-3">
+                                <label>Material Name</label>
+                                <input type="text" class="form-control" ng-model="searchToImportByOrder.filters.filters.factoryMaterialNM" />
+                            </section>
+
+                            <section class="col col-lg-3">
+                                <label>Description</label>
+                                <input type="text" class="form-control" ng-model="searchToImportByOrder.filters.filters.description" />
+                            </section>
+                        </div>
+
+                        <div class="row">
+                            <section class="col col-lg-12">
+                                <a href="#" class="btn btn-primary btn-xs" title="Search" ng-click="searchToImportByOrder.event.search($event)"><i class="fa fa-search"></i> Search</a>
+                                <a href="#" class="btn btn-success btn-xs" title="Select" ng-click="searchToImportByOrder.event.itemSelected($event)"><i class="fa fa-check"></i> Select</a>
+                                <a href="#" class="btn btn-warning btn-xs" title="Back" ng-click="searchToImportByOrder.event.close($event)"><i class="fa fa-arrow-left"></i> Back</a>
+                            </section>
+                        </div>
+
+                        <div class="row">
+                            <section class="col col-lg-12">
+                                <div id="grdNeedToImportByOrder" class="tilsoft-table-wrapper">
+                                    <div class="tilsoft-table">
+                                        <div class="tilsoft-table-header" style="width: 1500px;">
+                                            <div style="width: 60px; text-align: center"></div>
+                                            <div style="width:260px" class="sorting" data-colname="factoryMaterialUD">Material</div>
+                                            <div style="width:60px" class="sorting" data-colname="unitNM">Unit</div>
+                                            <div style="width:200px" class="sorting" data-colname="factoryFinishedProductUD">Component</div>
+                                            <div style="width:90px" class="sorting" data-colname="factoryUD">Factory</div>
+                                            <div style="width:80px" class="sorting" data-colname="lds">LDS</div>
+                                            <div style="width:70px" class="sorting" data-colname="proformaInvoiceNo">Order No</div>
+                                            <div style="width:60px" class="sorting" data-colname="clientUD">Client</div>
+                                            <div class="sorting" data-colname="articleCode">Product</div>
+                                        </div>
+                                        <div class="tilsoft-table-body" style="width: 1500px;">
+                                            <table>
+                                                <tr ng-repeat="item in searchToImportByOrder.data">
+                                                    <td style="width: 60px; text-align: center; vertical-align:middle">
+                                                        <label class="checkbox" style="margin-left:15px; margin-bottom:20px">
+                                                            <input type="checkbox" ng-model="item.isSelected">
+                                                            <i></i>
+                                                        </label>
+                                                    </td>
+                                                    <td style="width:260px"><span style="font-weight:bold">{{item.factoryMaterialUD}}</span><br />{{item.factoryMaterialNM}}</td>
+                                                    <td style="width:60px; text-align:center">{{item.unitNM}}</td>
+                                                    <td style="text-align:left;width:200px"><span style="font-weight:bold;">{{item.factoryFinishedProductUD}}</span><br />{{item.factoryFinishedProductNM}}</td>
+                                                    <td style="width:90px" >{{item.factoryUD}}</td>
+                                                    <td style="width:80px" >{{item.lds}}</td>
+                                                    <td style="width:70px" >{{item.proformaInvoiceNo}}</td>
+                                                    <td style="width:60px" >{{item.clientUD}}</td>
+                                                    <td style="text-align:left"><span style="font-weight:bold">{{item.articleCode}}</span><br />{{item.description}}</td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+
+                        </div>
+                    </div>
+
+                    @*search material from free stock to export*@
+                    <div class="smart-form" ng-if="ui.currentForm=='search-material-to-export-from-free-stock'">
+                        <div class="row">
+                            <section class="col col-lg-2">
+                                <label>Material Code</label>
+                                <input type="text" class="form-control" ng-model="searchStockFreeForm.filters.filters.factoryMaterialUD" />
+                            </section>
+                            <section class="col col-lg-8">
+                                <label>Material Name</label>
+                                <input type="text" class="form-control" ng-model="searchStockFreeForm.filters.filters.factoryMaterialNM" />
+                            </section>
+                            <section class="col col-lg-2">
+                                <label>Area</label>
+                                <select name="factoryAreaID_" class="form-control" ng-model="searchStockFreeForm.filters.filters.factoryAreaID" ng-options="item.factoryAreaID as item.factoryAreaNM for item in factoryAreas">
+                                    <option value=""></option>
+                                </select>
+                            </section>
+                        </div>
+                        <div class="row">
+                            <section class="col col-lg-12">
+                                <a href="#" class="btn btn-primary btn-xs" title="Search" ng-click="searchStockFreeForm.event.search($event)"><i class="fa fa-search"></i> Search</a>
+                                <a href="#" class="btn btn-success btn-xs" title="Select" ng-click="searchStockFreeForm.event.itemSelected($event)"><i class="fa fa-check"></i> Select</a>
+                                <a href="#" class="btn btn-warning btn-xs" title="Back" ng-click="searchStockFreeForm.event.close($event)"><i class="fa fa-arrow-left"></i> Back</a>
+                            </section>
+                        </div>
+                        <div class="row">
+                            <section class="col col-lg-12">
+                                <div id="quickSearchResultGrid_Material" class="tilsoft-table-wrapper">
+                                    <div class="tilsoft-table">
+                                        <div class="tilsoft-table-header" style="width: 1000px;">
+                                            <div style="width: 60px; text-align: center"></div>
+                                            <div style="width: 170px" class="sorting">Material Code</div>
+                                            <div style="width: 500px" class="sorting">Material Name</div>
+                                            <div style="width: 80px" class="sorting">Area</div>
+                                            <div style="width: 70px" class="sorting">Stock Qnt</div>
+                                            <div style="width: 70px" class="sorting">Unit</div>
+                                            <div class="sorting"></div>
+                                        </div>
+
+                                        <div class="tilsoft-table-body" style="width: 1000px;">
+                                            <table>
+                                                <tr ng-repeat="item in searchStockFreeForm.data">
+                                                    <td style="width: 60px; text-align: center; vertical-align:middle">
+                                                        <label class="checkbox" style="margin-left:15px; margin-bottom:20px">
+                                                            <input type="checkbox" ng-model="item.isSelected">
+                                                            <i></i>
+                                                        </label>
+                                                    </td>
+                                                    <td style="width: 170px; vertical-align:middle">{{item.factoryMaterialUD}}</td>
+                                                    <td style="width: 500px; vertical-align:middle">{{item.factoryMaterialNM}}</td>
+                                                    <td style="width: 80px; vertical-align:middle">{{item.factoryAreaNM}}</td>
+                                                    <td style="width: 70px; vertical-align:middle;text-align:right">{{item.totalStockQnt}}</td>
+                                                    <td style="width: 70px; vertical-align:middle; text-align:center">{{item.unitNM}}</td>
+                                                    <td style="text-align: center; vertical-align: middle;">
+                                                        <div ng-repeat="item_image in item.factoryMaterialImages" class="float-img-list">
+                                                            <a href="{{item_image.fileLocation}}" data-featherlight="image">
+                                                                <img ng-src="{{item_image.thumbnailLocation}}" width="50" height="50" />
+                                                            </a>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+
+                    @*search material to export by order*@
+                    <div class="smart-form" ng-if="ui.currentForm=='search-stock-remain'">
+                        <div class="row">
+                            <section class="col col-lg-2">
+                                <label>Material Code</label>
+                                <input type="text" class="form-control" ng-model="quickSearchStockRemain.filters.filters.factoryMaterialUD" />
+                            </section>
+
+                            <section class="col col-lg-2">
+                                <label>ArticleCode</label>
+                                <input type="text" class="form-control" ng-model="quickSearchStockRemain.filters.filters.articleCode" />
+                            </section>
+
+                            <section class="col col-lg-1">
+                                <label>Client</label>
+                                <input type="text" class="form-control" ng-model="quickSearchStockRemain.filters.filters.clientUD" />
+                            </section>
+
+                            <section class="col col-lg-1">
+                                <label>Order</label>
+                                <input type="text" class="form-control" ng-model="quickSearchStockRemain.filters.filters.proformaInvoiceNo" />
+                            </section>
+
+                            <section class="col col-lg-3">
+                                <label>Material Name</label>
+                                <input type="text" class="form-control" ng-model="quickSearchStockRemain.filters.filters.factoryMaterialNM" />
+                            </section>
+
+                            <section class="col col-lg-3">
+                                <label>Description</label>
+                                <input type="text" class="form-control" ng-model="quickSearchStockRemain.filters.filters.description" />
+                            </section>
+                        </div>
+
+                        <div class="row">
+                            <section class="col col-lg-12">
+                                <a href="#" class="btn btn-primary btn-xs" title="Search" ng-click="quickSearchStockRemain.event.search($event)" ><i class="fa fa-search"></i> Search</a>
+                                <a href="#" class="btn btn-success btn-xs" title="Select" ng-click="quickSearchStockRemain.event.itemSelected($event)" ><i class="fa fa-check"></i> Select</a>
+                                <a href="#" class="btn btn-warning btn-xs" title="Back" ng-click="quickSearchStockRemain.event.close($event)"><i class="fa fa-arrow-left"></i> Back</a>
+                            </section>
+                        </div>
+                        
+                        <div class="row">
+                            <section class="col col-lg-12">
+                                <div id="grdStockRemain" class="tilsoft-table-wrapper">
+                                    <div class="tilsoft-table">
+                                        <div class="tilsoft-table-header" style="width: 1500px;">
+                                            <div style="width: 60px; text-align: center"></div>
+                                            <div style="width:260px" class="sorting" data-colname="factoryMaterialUD">Material</div>
+                                            <div style="width:100px" class="sorting" data-colname="factoryAreaNM">Area</div>
+                                            <div style="width:70px" class="sorting" data-colname="totalStockQnt">Stock Qnt</div>
+                                            <div style="width:200px" class="sorting" data-colname="factoryFinishedProductUD">Component</div>
+                                            <div style="width:90px" class="sorting" data-colname="factoryUD">Factory</div>
+                                            <div style="width:80px" class="sorting" data-colname="lds">LDS</div>
+                                            <div style="width:70px" class="sorting" data-colname="proformaInvoiceNo">Order No</div>
+                                            <div style="width:60px" class="sorting" data-colname="clientUD">Client</div>
+                                            <div class="sorting" data-colname="articleCode">Product</div>
+                                        </div>
+                                        <div class="tilsoft-table-body" style="width: 1500px;">
+                                            <table>
+                                                <tr ng-repeat="item in quickSearchStockRemain.data">
+                                                    <td style="width: 60px; text-align: center; vertical-align:middle">
+                                                        <label class="checkbox" style="margin-left:15px; margin-bottom:20px">
+                                                            <input type="checkbox" ng-model="item.isSelected">
+                                                            <i></i>
+                                                        </label>
+                                                    </td>
+                                                    <td style="width:260px"><span style="font-weight:bold">{{item.factoryMaterialUD}}</span><br />{{item.factoryMaterialNM}}</td>
+                                                    <td style="width:100px" class="sorting">{{item.factoryAreaNM}}</td>
+                                                    <td style="width:70px" class="sorting">{{item.totalStockQnt}}</td>
+                                                    <td style="text-align:left;width:200px"><span style="font-weight:bold;">{{item.factoryFinishedProductUD}}</span><br />{{item.factoryFinishedProductNM}}</td>
+                                                    <td style="width:90px" class="sorting">{{item.factoryUD}}</td>
+                                                    <td style="width:80px" class="sorting">{{item.lds}}</td>
+                                                    <td style="width:70px" class="sorting">{{item.proformaInvoiceNo}}</td>
+                                                    <td style="width:60px" class="sorting">{{item.clientUD}}</td>
+                                                    <td style="text-align:left"><span style="font-weight:bold">{{item.articleCode}}</span><br />{{item.description}}</td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+
+                        </div>
+                    </div>
+
+                    @*import receipt*@
+                    <div class="smart-form" ng-show="ui.currentForm=='import-receipt'">
+                        
+                        @*master receipt*@
+                        <div class="row">
+                            <section class="col col-lg-2">
+                                <label>Receipt No</label>
+                                <input class="form-control" type="text" ng-model="data.receiptNo" />
+                            </section>
+                           
+                            <section class="col col-lg-2">
+                                <label>Season</label>
+                                <select name="season" class="form-control" ng-model="data.season" ng-options="season.seasonValue as season.seasonText for season in seasons" required>
+                                    <option value=""></option>
+                                </select>
+                                <span class="help-block" ng-show="editForm.season.$error.required"><i class="fa fa-warning"></i>Season is required.</span>
+                            </section>
+
+                            <section class="col col-lg-2">
+                                <label>Receipt Date</label>
+                                <label class="input">
+                                    <input type="text" class="datepicker" ng-model="data.receiptDate" data-dateformat="dd/mm/yy" />
+                                    <i class="icon-append fa fa-calendar"></i>
+                                </label>
+                            </section>
+
+                            <section class="col col-lg-4">
+                                <label>Reason Import</label>
+                                <input type="text" ng-model="data.reason" class="form-control" />
+                            </section>
+
+
+                            <section class="col col-lg-2">
+                                <label>Type</label>
+                                <span class="form-control">{{method.getReceiptTypeName(data.receiptTypeID)}}</span>
+                            </section>
+
+
+                           
+                        </div>
+                        <div class="row">
+                            <section class="col col-lg-3">
+                                <label>Delivery Name</label>
+                                <input type="text" ng-model="data.deliverName" class="form-control" />
+                            </section>
+                            <section class="col col-lg-5">
+                                <label>Delivery Address</label>
+                                <input type="text" ng-model="data.deliverAddress" class="form-control" />
+                            </section>
+                            
+                            <section class="col col-2">
+                                <label>Created By</label>
+                                <span class="form-control">
+                                    <a ng-show="(data.createdBy!=null && data.creatorName2!=null)" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{data.createdBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                        <i class="fa fa-user"></i> {{data.creatorName2}}
+                                    </a>
+                                    <span ng-show="(data.createdBy!=null && data.creatorName2==null && data.creatorName!=null)">{{data.creatorName}}</span>
+                                </span>
+                            </section>
+                            <section class="col col-2">
+                                <label>Created Date</label>
+                                <span class="form-control">{{data.createdDate}}</span>
+                            </section>
+                            
+                            
+                            
+                        </div>
+
+                        <div class="row">
+                            <section class="col col-lg-3">
+                                <label>Stock Name</label>
+                                <input type="text" ng-model="data.stockName" class="form-control" />
+                            </section>
+                            <section class="col col-lg-5">
+                                <label>Stock Address</label>
+                                <input type="text" ng-model="data.stockAddress" class="form-control" />
+                            </section>
+
+                            <section class="col col-lg-2">
+                                <label>Updated By</label>
+                                <span class="form-control">
+                                    <a ng-show="(data.updatedBy!=null && data.updatorName2!=null)" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{data.updatedBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                        <i class="fa fa-user"></i> {{data.updatorName2}}
+                                    </a>
+                                    <span ng-show="(data.updatedBy!=null && data.updatorName2==null && data.updatorName!=null)">{{data.updatorName}}</span>
+                                </span>
+                            </section>
+                            <section class="col col-lg-2">
+                                <label>Updated Date</label>
+                                <span class="form-control">{{data.updatedDate}}</span>
+                            </section>
+                            
+                        </div>
+
+                        @*button search material*@
+                        <div class="row">
+                            <section class="col col-lg-12" ng-if="data.baseOnTypeID==1">
+                                <a href="#" class="btn btn-success btn-xs" title="Add" ng-click="quickSearchMaterial.event.openScreen($event)"><i class="fa fa-plus"></i> Add material to input</a>
+                            </section>
+                            <section class="col col-lg-12" ng-if="data.baseOnTypeID==2">
+                                <a href="#" class="btn btn-success btn-xs" title="Add" ng-click="searchToImportByOrder.event.openScreen($event)"><i class="fa fa-plus"></i> Add material to input by order</a>
+                            </section>
+                        </div>
+
+                        @*detail receipt*@
+                        <div class="row">
+                            <section class="col col-lg-12" ng-if="data.baseOnTypeID==1">
+                                <div id="grdReceiptDetail" class="tilsoft-table-wrapper">
+                                    <div class="tilsoft-table">
+
+                                        <div class="tilsoft-table-header" style="width: 1600px;">
+                                            <div style="width:50px"></div>
+                                            <div style="width:180px" class="sorting" data-colname="factoryMaterialUD">Material Code</div>
+                                            <div style="width:400px" class="sorting" data-colname="factoryMaterialNM">Material Name</div>
+                                            <div style="width:50px" class="sorting" data-colname="unitNM">Unit</div>
+                                            <div style="width:100px" class="sorting" data-colname="factoryAreaID">Area</div>
+                                            <div style="width:70px" class="sorting" data-colname="unitPrice">Price</div>
+                                            <div style="width:60px" class="sorting" data-colname="quantity">Qnt</div>
+                                            <div style="width:60px" class="sorting" data-colname="quantity">Stock Qnt</div>
+                                            <div class="sorting" data-colname="quantity">Remark</div>
+                                        </div>
+
+                                        <div class="tilsoft-table-body" style="width: 1600px;">
+                                            <table>
+                                                <tbody ng-repeat="item in data.factoryMaterialReceiptDetails">
+                                                    <tr>
+                                                        <td style="text-align:center; vertical-align:middle; width:49px">
+                                                            <a ng-click="event.removeMaterial($event,$index)" class="btn btn-danger btn-xs font-11 {{data.receiptTypeID==1 && item.factoryMaterialReceiptDetailID>0?'disabled':''}}" href="javascript:void(0);"><i class=" fa fa-times"></i>Del</a>
+                                                        </td>
+                                                        <td style="width:180px;vertical-align:middle">{{item.factoryMaterialUD}}</td>
+                                                        <td style="width:400px;vertical-align:middle">{{item.factoryMaterialNM}}</td>
+                                                        <td style="width:50px;text-align:center;vertical-align:middle">{{item.unitNM}}</td>
+                                                        <td style="width:100px">
+                                                            <select name="factoryAreaID" class="form-control" ng-model="item.factoryAreaID" ng-options="item.factoryAreaID as item.factoryAreaNM for item in factoryAreas">
+                                                                <option value=""></option>
+                                                            </select>
+                                                        </td>
+                                                        <td style="width:70px"><input type="text" ng-model="item.unitPrice" style="width: 100%;text-align:right" /></td>
+                                                        <td style="width:60px"><input type="text" ng-model="item.quantity" style="width: 100%;text-align:right" /></td>
+                                                        <td style="width:60px;text-align:center;vertical-align:middle">{{item.totalStockQnt}}</td>
+                                                        <td style="text-align:left"><input type="text" ng-model="item.remark"/></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                        
+                            <section class="col col-lg-12" ng-if="data.baseOnTypeID==2">
+                                <div id="grdReceiptDetail" class="tilsoft-table-wrapper">
+                                    <div class="tilsoft-table">
+
+                                        <div class="tilsoft-table-header" style="width: 1600px;">
+                                            <div style="width:50px"></div>
+                                            <div style="width:200px" class="sorting" data-colname="factoryMaterialUD">Material Name</div>
+                                            <div style="width:50px" class="sorting" data-colname="unitNM">Unit</div>
+                                            <div style="width:100px" class="sorting" data-colname="factoryAreaID">Area</div>
+                                            <div style="width:70px" class="sorting" data-colname="unitPrice">Price</div>
+                                            <div style="width:60px" class="sorting" data-colname="quantity">Qnt</div>
+                                            <div style="width:60px" class="sorting" data-colname="quantity">Stock Qnt</div>
+                                            <div style="width:70px" class="sorting" data-colname="normValue">Order Norm</div>
+                                            <div style="width:200px" class="sorting" data-colname="factoryFinishedProductUD">Component</div>
+                                            <div style="width:90px" class="sorting" data-colname="factoryUD">Factory</div>
+                                            <div style="width:80px" class="sorting" data-colname="lds">LDS</div>
+                                            <div style="width:70px" class="sorting" data-colname="proformaInvoiceNo">Order No</div>
+                                            <div style="width:60px" class="sorting" data-colname="clientUD">Client</div>
+                                            <div style="width:70px" class="sorting" data-colname="orderQnt">Order Qnt</div>
+                                            <div class="sorting" data-colname="articleCode">Description</div>
+                                        </div>
+
+                                        <div class="tilsoft-table-body" style="width: 1600px;">
+                                            <table>
+                                                <tbody ng-repeat="item in data.factoryMaterialReceiptDetails">
+                                                    <tr>
+                                                        <td style="text-align:center; vertical-align:middle; width:49px">
+                                                            <a ng-click="event.removeMaterial($event,$index)" class="btn btn-danger btn-xs font-11 {{data.receiptTypeID==1 && item.factoryMaterialReceiptDetailID>0?'disabled':''}}" href="javascript:void(0);"><i class=" fa fa-times"></i>Del</a>
+                                                        </td>
+                                                        <td style="width:200px"><span style="font-weight:bold">{{item.factoryMaterialUD}}</span><br />{{item.factoryMaterialNM}}</td>
+                                                        <td style="width:50px;text-align:center;">{{item.unitNM}}</td>
+                                                        <td style="width:100px">
+                                                            <select name="factoryAreaID" class="form-control" ng-model="item.factoryAreaID" ng-options="item.factoryAreaID as item.factoryAreaNM for item in factoryAreas">
+                                                                <option value=""></option>
+                                                            </select>
+                                                        </td>
+                                                        <td style="width:70px"><input type="text" ng-model="item.unitPrice" style="width: 100%;text-align:right" /></td>
+                                                        <td style="width:60px"><input type="text" ng-model="item.quantity" style="width: 100%;text-align:right" /></td>
+                                                        <td style="width:60px; text-align:center;">{{item.totalStockQnt}}</td>
+                                                        <td style="width:70px; text-align:center;">{{item.normValue * item.orderQnt}}</td>
+                                                        <td style="text-align:left;width:200px"><span style="font-weight:bold;">{{item.factoryFinishedProductUD}}</span><br />{{item.factoryFinishedProductNM}}</td>
+                                                        <td style="width:90px">{{item.factoryUD}}</td>
+                                                        <td style="width:80px">{{item.lds}}</td>
+                                                        <td style="width:70px">{{item.proformaInvoiceNo}}</td>
+                                                        <td style="width:60px">{{item.clientUD}}</td>
+                                                        <td style="width:70px; text-align:center">{{item.orderQnt}}</td>
+                                                        <td style="text-align:left"><span style="font-weight:bold">{{item.articleCode}}</span><br />{{item.description}}</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+
+                    @*export receipt*@
+                    <div class="smart-form" ng-show="ui.currentForm=='export-receipt'">
+                        
+                        @*master receipt export*@
+                        <div class="row">
+                            <section class="col col-lg-2">
+                                <label>Receipt No</label>
+                                <input class="form-control" type="text" ng-model="data.receiptNo" />
+                            </section>
+
+                            <section class="col col-lg-1">
+                                <label>Season</label>
+                                <select name="season" class="form-control" ng-model="data.season" ng-options="season.seasonValue as season.seasonText for season in seasons" required>
+                                    <option value=""></option>
+                                </select>
+                                <span class="help-block" ng-show="editForm.season.$error.required"><i class="fa fa-warning"></i>Season is required.</span>
+                            </section>
+                            
+                            <section class="col col-lg-2">
+                                <label>Receipt Date</label>
+                                <label class="input">
+                                    <input type="text" class="datepicker" ng-model="data.receiptDate" data-dateformat="dd/mm/yy" />
+                                    <i class="icon-append fa fa-calendar"></i>
+                                </label>
+                            </section>
+
+                            <section class="col col-lg-4">
+                                <label>Reason Import</label>
+                                <input type="text" ng-model="data.reason" class="form-control" />
+                            </section>
+                            
+                            <section class="col col-lg-1">
+                                <label>Type</label>
+                                <span class="form-control">{{method.getReceiptTypeName(data.receiptTypeID)}}</span>
+                            </section>
+
+                            <section class="col col-lg-2">
+                                <label>Export to team</label>
+                                <span class="form-control">{{method.getFactoryTeamName(data.factoryTeamID)}}</span>
+                            </section>
+
+                            
+                        </div>
+                        
+                        <div class="row">
+                            <section class="col col-lg-3">
+                                <label>Receiver Name</label>
+                                <input type="text" ng-model="data.receiverName" class="form-control" />
+                            </section>
+                            <section class="col col-lg-5">
+                                <label>Receiver Address</label>
+                                <input type="text" ng-model="data.receiverAddress" class="form-control" />
+                            </section>
+
+                            <section class="col col-lg-4">
+                                <label>Step</label>
+                                <span class="form-control">{{data.factoryStepNM}}</span>
+                            </section>
+
+                          
+
+                            @*<section class="col col-2">
+                                <label>Updated By</label>
+                                <span class="form-control">{{data.updatorName}}</span>
+                            </section>
+                            <section class="col col-2">
+                                <label>Updated Date</label>
+                                <span class="form-control">{{data.updatedDate}}</span>
+                            </section>*@
+                        </div>
+
+                        <div class="row">
+                            <section class="col col-lg-3">
+                                <label>Stock Name</label>
+                                <input type="text" ng-model="data.stockName" class="form-control" />
+                            </section>
+                            <section class="col col-lg-5">
+                                <label>Stock Address</label>
+                                <input type="text" ng-model="data.stockAddress" class="form-control" />
+                            </section>
+                            
+                            <section class="col col-lg-4">
+                                <label>Procedure</label>
+                                <span class="form-control">{{data.factoryGoodsProcedureNM}}</span>
+                            </section>
+                            
+                            
+                        </div>
+
+                        @*button search material to export*@
+                        <div class="row">
+                            <section class="col col-lg-12" ng-if="data.baseOnTypeID==1">
+                                <a href="#" class="btn btn-success btn-xs" title="Add" ng-click="searchStockFreeForm.event.openScreen($event)"><i class="fa fa-plus"></i> Add material to output</a>
+                            </section>
+                            <section class="col col-lg-12" ng-if="data.baseOnTypeID==2">
+                                <a href="#" class="btn btn-success btn-xs" title="Add" ng-click="quickSearchStockRemain.event.openScreen($event,null)"><i class="fa fa-plus"></i> Add material to output</a>
+                            </section>
+                        </div>
+
+                        @*detail of receipt export*@
+                        <div class="row">
+                            <section class="col col-lg-12" ng-if="data.baseOnTypeID==1">
+                                <div id="grdReceiptDetail" class="tilsoft-table-wrapper">
+                                    <div class="tilsoft-table">
+                                        <div class="tilsoft-table-header" style="width: 1600px;">
+                                            <div style="width:50px"></div>
+                                            <div style="width:180px" class="sorting" data-colname="factoryMaterialUD">Material Code</div>
+                                            <div style="width:400px" class="sorting" data-colname="factoryMaterialNM">Material Name</div>
+                                            <div style="width:50px" class="sorting" data-colname="unitNM">Unit</div>
+                                            <div style="width:100px" class="sorting" data-colname="factoryAreaID">Area</div>
+                                            <div style="width:70px" class="sorting" data-colname="totalStockQnt">Stock Qnt</div>
+                                            <div style="width:70px" class="sorting" data-colname="unitPrice">Price</div>
+                                            <div style="width:60px" class="sorting" data-colname="quantity">Qnt</div>
+                                            <div class="sorting" data-colname="quantity">Remark</div>
+                                        </div>
+
+                                        <div class="tilsoft-table-body" style="width: 1600px;">
+                                            <table>
+                                                <tbody ng-repeat="item in data.factoryMaterialReceiptDetails">
+                                                    <tr>
+                                                        <td style="text-align:center; vertical-align:middle; width:49px">
+                                                            <a ng-click="event.removeMaterial($event,$index)" class="btn btn-danger btn-xs font-11 {{data.receiptTypeID==1 && item.factoryMaterialReceiptDetailID>0?'disabled':''}}" href="javascript:void(0);"><i class=" fa fa-times"></i>Del</a>
+                                                        </td>
+                                                        <td style="width:180px;vertical-align:middle">{{item.factoryMaterialUD}}</td>
+                                                        <td style="width:400px;vertical-align:middle">{{item.factoryMaterialNM}}</td>
+                                                        <td style="width:50px;text-align:center;vertical-align:middle">{{item.unitNM}}</td>
+                                                        <td style="width:100px;vertical-align:middle">{{item.factoryAreaNM}}</td>
+                                                        <td style="width:70px;vertical-align:middle;text-align:center">{{item.totalStockQnt}}</td>
+                                                        <td style="width:70px"><input type="text" ng-model="item.unitPrice" style="width: 100%;text-align:right" /></td>
+                                                        <td style="width:60px"><input type="text" ng-model="item.quantity" style="width: 100%;text-align:right" /></td>
+                                                        <td style="text-align:left"><input type="text" ng-model="item.remark" /></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+
+                            <section class="col col-lg-12" ng-if="data.baseOnTypeID==2">
+                                <div id="grdReceiptDetail" class="tilsoft-table-wrapper">
+                                    <div class="tilsoft-table">
+
+                                        <div class="tilsoft-table-header" style="width: 1600px;">
+                                            <div style="width:50px"></div>
+                                            <div style="width:200px" class="sorting" data-colname="factoryMaterialUD">Material Name</div>
+                                            <div style="width:50px" class="sorting" data-colname="unitNM">Unit</div>
+                                            <div style="width:100px" class="sorting" data-colname="factoryAreaID">Area</div>
+                                            <div style="width:70px" class="sorting" data-colname="unitPrice">Price</div>
+                                            <div style="width:60px" class="sorting" data-colname="quantity">Qnt</div>
+                                            <div style="width:70px" class="sorting" data-colname="totalStockQnt">Stock Qnt</div>
+                                            <div style="width:70px" class="sorting" data-colname="normValue">Order Norm</div>
+                                            <div style="width:200px" class="sorting" data-colname="factoryFinishedProductUD">Component</div>
+                                            <div style="width:90px" class="sorting" data-colname="factoryUD">Factory</div>
+                                            <div style="width:80px" class="sorting" data-colname="lds">LDS</div>
+                                            <div style="width:70px" class="sorting" data-colname="proformaInvoiceNo">Order No</div>
+                                            <div style="width:60px" class="sorting" data-colname="clientUD">Client</div>
+                                            <div style="width:70px" class="sorting" data-colname="orderQnt">Order Qnt</div>
+                                            <div class="sorting" data-colname="articleCode">Description</div>
+                                        </div>
+
+                                        <div class="tilsoft-table-body" style="width: 1600px;">
+                                            <table>
+                                                <tbody ng-repeat="item in data.factoryMaterialReceiptDetails">
+                                                    <tr>
+                                                        <td style="text-align:center; vertical-align:middle; width:49px">
+                                                            <a ng-click="event.removeMaterial($event,$index)" class="btn btn-danger btn-xs font-11 {{data.receiptTypeID==1 && item.factoryMaterialReceiptDetailID>0?'disabled':''}}" href="javascript:void(0);"><i class=" fa fa-times"></i> Del</a>
+                                                            <a ng-click="searchProductFrom.event.openScreen($event,item)" class="btn btn-success btn-xs font-11" href="javascript:void(0);" style="margin-top:3px"><i class=" fa fa-plus"></i>Add</a>
+                                                        </td>
+                                                        <td style="width:200px"><span style="font-weight:bold">{{item.factoryMaterialUD}}</span><br />{{item.factoryMaterialNM}}</td>
+                                                        <td style="width:50px;text-align:center">{{item.unitNM}}</td>
+                                                        <td style="width:100px">
+                                                            <select name="factoryAreaID" class="form-control" ng-model="item.factoryAreaID" ng-options="item.factoryAreaID as item.factoryAreaNM for item in factoryAreas" ng-if="data.receiptTypeID==1">
+                                                                <option value=""></option>
+                                                            </select>
+                                                            <span ng-if="data.receiptTypeID==2">{{item.factoryAreaNM}}</span>
+                                                        </td>                                                        
+                                                        <td style="width:70px"><input type="text" ng-model="item.unitPrice" style="width: 100%;text-align:right" /></td>
+                                                        <td style="width:60px"><input type="text" ng-model="item.quantity" style="width: 100%;text-align:right" /></td>
+                                                        <td style="width:70px; text-align:center">{{item.totalStockQnt}}</td>
+                                                        <td style="width:70px; text-align:center">{{item.normValue * item.orderQnt}}</td>
+                                                        <td style="text-align:left;width:200px"><span style="font-weight:bold;">{{item.factoryFinishedProductUD}}</span><br />{{item.factoryFinishedProductNM}}</td>
+                                                        <td style="width:90px">{{item.factoryUD}}</td>
+                                                        <td style="width:80px">{{item.lds}}</td>
+                                                        <td style="width:70px">{{item.proformaInvoiceNo}}</td>
+                                                        <td style="width:60px">{{item.clientUD}}</td>
+                                                        <td style="width:70px; text-align:center">{{item.orderQnt}}</td>
+                                                        <td style="text-align:left"><span style="font-weight:bold">{{item.articleCode}}</span><br />{{item.description}}</td>
+                                                    </tr>
+                                                    <tr ng-repeat="sItem in item.factoryMaterialReceiptDetails | filter : {isFreeStock : 'true'}">
+                                                        <td colspan="5"></td>
+                                                        <td style="width:60px"><input type="text" ng-model="sItem.quantity" style="width: 100%;text-align:right" /></td>
+                                                        <td style="width:70px; text-align:center;vertical-align:middle">{{sItem.totalStockQnt}}</td>
+                                                        <td colspan="8"><input type="text" ng-model="sItem.remark" placeholder="remark"/></td>
+                                                    </tr>
+                                                    <tr ng-repeat="sItem in item.factoryMaterialReceiptDetails | filter : {isFreeStock : 'false'}">
+                                                        <td colspan="5"></td>
+                                                        <td style="width:60px"><input type="text" ng-model="sItem.quantity" style="width: 100%;text-align:right" /></td>
+                                                        <td style="width:70px; text-align:center">{{sItem.totalStockQnt}}</td>
+                                                        <td style="width:70px; text-align:center">{{sItem.normValue * sItem.orderQnt}}</td>
+                                                        <td style="text-align:left;width:200px"><span style="font-weight:bold;">{{sItem.factoryFinishedProductUD}}</span><br />{{sItem.factoryFinishedProductNM}}</td>
+                                                        <td style="width:90px">{{sItem.factoryUD}}</td>
+                                                        <td style="width:80px">{{sItem.lds}}</td>
+                                                        <td style="width:70px">{{sItem.proformaInvoiceNo}}</td>
+                                                        <td style="width:60px">{{sItem.clientUD}}</td>
+                                                        <td style="width:70px; text-align:center">{{sItem.orderQnt}}</td>
+                                                        <td style="text-align:left"><span style="font-weight:bold">{{sItem.articleCode}}</span><br />{{sItem.description}}</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+                    
+                    </div>
+                
+                </div>
+            </div>
+        </div>
+    </article>
+
+</form>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "FactoryMaterialReceipt")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="#" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="event.update($event)"><i class="fa fa-save"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="#" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="Delete" style="color: #ff0000;" ng-click="event.delete($event)"><i class="fa fa-times"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="#" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Print, HttpContext.Current))" title="Print" ng-click="event.getReceiptPrintout()"><i class="fa fa-print"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagepopup2{
+    <div id="receiptTypeForm" style="display:none">
+        <p></p>
+        <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+            <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+                <header></header>
+                <div>
+                    <div class="widget-body no-padding">
+                        <form class="smart-form">
+                            <fieldset>
+                                <section class="col col-lg-3">
+                                    <div class="inline-group">
+                                        <label class="radio" ng-repeat="item in receiptTypes">
+                                            <input type="radio" name="radio-inline1" ng-model="$parent.data.receiptTypeID" ng-value="item.receiptTypeID">
+                                            <i></i>{{item.receiptTypeName}}
+                                        </label>
+                                    </div>
+                                </section>
+                            </fieldset>
+
+                            <fieldset>
+                                <section class="col col-lg-6">
+                                    <label class="label"> Base on</label>
+                                    <div class="inline-group">
+                                        <label class="radio" ng-repeat="item in baseOnTypes">
+                                            <input type="radio" name="radio-inline2" ng-model="$parent.data.baseOnTypeID" ng-value="item.baseOnTypeID">
+                                            <i></i>{{data.receiptTypeID==1?'Input':''}}{{data.receiptTypeID==2?'Output':''}} {{item.baseOnTypeName}}
+                                        </label>
+                                    </div>
+                                </section>
+                            </fieldset>
+
+                            <fieldset ng-show="data.receiptTypeID==2">
+                                <section class="col col-lg-3">
+                                    <label>Export to team</label>
+                                    <select name="factoryTeamID" class="form-control" ng-model="selectedTeamItem" ng-options="item as item.factoryTeamNM for item in factoryTeams">
+                                        <option value=""></option>
+                                    </select>
+                                </section>
+
+                                <section class="col col-lg-3">
+                                    <label>At Step</label>
+                                    <select name="stepID" class="form-control" ng-model="selectedStepItem" ng-options="item as item.factoryStepNM for item in selectedTeamItem.factoryTeamSteps">
+                                        <option value=""></option>
+                                    </select>
+                                </section>
+
+                                <section class="col col-lg-3">
+                                    <label>In Procedure</label>
+                                    <select name="goodsProcedure" class="form-control" ng-model="selectdGoodsProcedureItem" ng-options="item as item.factoryGoodsProcedureNM for item in selectedStepItem.factoryGoodsProcedureDetails">
+                                        <option value=""></option>
+                                    </select>
+                                </section>
+                            </fieldset>
+
+
+                            <footer style="">
+                                <a href="javascript:void(0);" class="btn btn-primary" ng-click="event.onNextButtonClick()">Next</a>
+                            </footer>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </article>
+    </div>
+}
+
+@section pagejs {
+    <script src="~/Angular/app/jsonService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/support/service.js?c=@System.Guid.NewGuid().ToString().Replace("-","")"></script>
+    <script type="text/javascript">
+    jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/factoryMaterialReceipt/';
+    jsonService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+    supportService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/support/';
+    supportService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+    var context = {
+            id: '@ViewBag.ID',
+            backUrl: '@Url.Action("Index", "FactoryMaterialReceipt")',
+            refreshUrl: '@Url.Action("Edit", "FactoryMaterialReceipt", new { id = UrlParameter.Optional })/',
+            errMsg: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED',
+            reportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]'
+        }
+    </script>
+    <script src="~/Angular/app/factoryMaterialReceipt/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/factoryMaterialReceipt/edit.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}
+

@@ -1,0 +1,192 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var supportServiceRoot = (System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"]);
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+
+    ViewBag.Title = (ViewBag.ID == 0) ? "Create Delivery Note Default" : "Edit Delivery Note Default";
+    ViewBag.SubTitle = (ViewBag.ID == 0) ? "Create" : "Edit";
+    ViewBag.Module = " Delivery Note Default ";
+}
+
+<form name="editForm" class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>@(ViewBag.ID == 0 ? "Create Delivery Note Default" : "Edit Delivery Note Default")</h2>
+            </header>
+            <div>
+                <div class="jarviswidget-editbox"></div>
+                <div class="widget-body">
+                    <div class="smart-form">
+                        <div class="row">
+                            <section class="col col-sm-2">
+                                <label class="label">Delivery Note Nr.</label>
+                                <label class="input">
+                                    <input type="text" class="form-control" style="font-family:Arial" maxlength="50" readonly ng-model="data.deliveryNoteUD" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label class="label">Delivery Note Date</label>
+                                <label class="input-group">
+                                    <input type="text" class="form-control" style="font-family:Arial" avs-calendar ng-data-source="data.deliveryNoteDate" />
+                                    <span class="input-group-addon">
+                                        <i class="fa fa-calendar"></i>
+                                    </span>
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label class="label">Related Document Nr.</label>
+                                <label class="input">
+                                    <input type="text" class="form-control" style="font-family:Arial" maxlength="50" ng-model="data.relatedDocumentNo" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-6">
+                                <label class="label">Description</label>
+                                <label class="input">
+                                    <input type="text" class="form-control" style="font-family: Arial" maxlength="500" ng-model="data.description" />
+                                </label>
+                            </section>
+                        </div>
+                        <div class="row">
+                            <section class="col col-sm-2">
+                                <label class="label" style="text-align: right">Receiver:</label>
+                            </section>
+                            <section class="col col-sm-5">
+                                <label class="input-group">
+                                    <input type="text" class="form-control" style="font-family:Arial" placeholder="Please input one Client..." avs-remote-auto-complete ng-request-param="ngRequestClient" ng-init-param="ngInitClient" ng-model="ngInitClient" ng-item-value="ngItemClient" ng-item-selected="ngSelectedClient" data-method="POST" data-format-function="formatData" ng-readonly="ngInitFactory != null && ngInitFactory != ''" />
+                                    <span class="input-group-addon">
+                                        <i class="fa fa-search"></i>
+                                    </span>
+                                </label>
+                            </section>
+                            <section class="col col-sm-5">
+                                <label class="input-group">
+                                    <input type="text" class="form-control" style="font-family:Arial" placeholder="Please input one Factory..." avs-remote-auto-complete ng-request-param="ngRequestFactory" ng-init-param="ngInitFactory" ng-model="ngInitFactory" ng-item-value="ngItemFactory" ng-item-selected="ngSelectedFactory" data-method="POST" data-format-function="formatData" ng-readonly="ngInitClient != null && ngInitClient != ''" />
+                                    <span class="input-group-addon">
+                                        <i class="fa fa-search"></i>
+                                    </span>
+                                </label>
+                            </section>
+                        </div>
+                        <div class="row">
+                            <section class="col col-sm-2">
+                                <label class="label" style="text-align: right">Search Product:</label>
+                            </section>
+                            <section class="col col-sm-10">
+                                <label class="input-group">
+                                    <input id="scanQRCode" type="text" class="form-control" style="font-family:Arial" autocomplete="off" ng-model="searchString" ng-change="event.scan($event)" />
+                                    <span class="input-group-addon">
+                                        <i class="fa fa-search"></i>
+                                    </span>
+                                </label>
+                            </section>
+                        </div>
+                        <div class="row" style="margin-top:0px">
+                            <section class="col col-sm-12">
+                                <div avs-scroll grid-handler="gridHandler" class="tilsoft-table-wrapper">
+                                    <div class="tilsoft-table">
+                                        <div class="tilsoft-table-header" style="width:1000px">
+                                            <div style="width:70px">
+                                                Found(s)
+                                                <span style="color: maroon"><strong>{{totalRowsScan}}</strong></span>
+                                            </div>
+                                            <div style="width:110px">Code</div>
+                                            <div style="width:300px">Name</div>
+                                            <div style="width:100px">Type</div>
+                                            <div style="width:85px">Quantity</div>
+                                            <div style="width:100px">QNT BarCode</div>
+                                            <div style="width:120px">From<br />Warehouse</div>
+                                            <div style="width:90px">PALLET</div>
+                                            <div>Remark</div>
+                                        </div>
+                                        <div class="tilsoft-table-body" style="width:1000px">
+                                            <table>
+                                                <tbody>
+                                                    <tr>
+                                                        <td colspan="4" style="text-align:right;vertical-align:central;">Total:</td>
+                                                        <td style="text-align:right; width: 85px; background-color:yellow">{{event.getTotalQuantity()}}</td>
+                                                        <td colspan="3" width="56px"></td>
+                                                    </tr>
+                                                    <tr ng-repeat="item in data.deliveryNoteDetailDTOs">
+                                                        <td style="width:70px; text-align:center">
+                                                            <a href="javascript:void(0)" class="btn btn-default btn-danger btn-xs" ng-click="event.remove($event, item)">
+                                                                <i class="fa fa-times"></i> Del
+                                                            </a>
+                                                        </td>
+                                                        <td style="width:110px; text-align: center">{{item.productionItemUD}}</td>
+                                                        <td style="width:300px;">{{item.productionItemNM}}</td>
+                                                        <td style="width:100px; text-align:center">{{item.productionItemTypeNM}}</td>
+                                                        <td style="width:85px; text-align:center">
+                                                            <input type="text" class="form-control" avs-number style="text-align:right" ng-data-source="item.qty" ng-keypress="event.getTotalQuantity()" />
+                                                        </td>
+                                                        <td style="width:100px; text-align:center">
+                                                            <input type="text" class="form-control" style="text-align:right" avs-number ng-data-source="item.qntBarCode" value="1" />
+                                                        </td>
+                                                        <td style="width: 120px">
+                                                            <select class="form-control" ng-model="item.fromFactoryWarehouseID" ng-options="item.factoryWarehouseID as item.factoryWarehouseNM for item in supportFactoryWarehouses">
+                                                                <option value=""></option>
+                                                            </select>
+                                                        </td>
+                                                        <td style="width:90px">
+                                                            <select class="form-control" ng-model="item.factoryWarehousePalletID" ng-options="item.factoryWarehousePalletID as item.factoryWarehousePalletNM for item in factoryWarehousePallets | filter: {factoryWarehouseID: item.fromFactoryWarehouseID}">
+                                                                <option value=""></option>
+                                                            </select>
+                                                        </td>
+                                                        <td>
+                                                            <input type="text" class="form-control" ng-model="item.description" />
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+@section FormAction{
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "DeliveryNoteDefaultMng")" class="btn btn-default" title="Back">
+                <i class="fa fa-arrow-left"></i>
+            </a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current))" title="Delete" ng-click="event.del(data.deliveryNoteID)">
+                <i class="fa fa-times"></i>
+            </a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="event.update()">
+                <i class="fa fa-floppy-o"></i>
+            </a>
+        </li>
+    </ul>
+}
+
+@section pagejs{
+    <script type="text/javascript">
+        var context = {
+            id: @ViewBag.ID,
+            backUrl: '@Url.Action("Index", "DeliveryNoteDefaultMng")',
+            refreshUrl: '@Url.Action("Edit", "DeliveryNoteDefaultMng", new { id = UrlParameter.Optional })/',
+            serviceUrl: '@(serviceRoot)/api/deliveryNoteDefaultMng/',
+            supportServiceUrl: '@(supportServiceRoot)/api/support/',
+            token: '@token',
+            msgValid: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED'
+        };
+    </script>
+    <script type="text/javascript" src="~/Views/DeliveryNoteDefaultMng/edit.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Views/DeliveryNoteDefaultMng/service.js?=@guid"></script>
+}

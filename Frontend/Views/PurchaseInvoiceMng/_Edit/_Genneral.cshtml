@@ -1,0 +1,636 @@
+﻿<article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+    <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+        <header>
+            <span class="widget-icon">
+                <i class="fa fa-database"></i>
+            </span>
+            <h2>General</h2>
+        </header>
+        <div>
+            <div class="jarviswidget-editbox"></div>
+            <div class="widget-body">
+                <div class="smart-form">
+                    <div class="row">
+
+                        <section class="col col-sm-2">
+                            <label>Type</label>
+                            <label class="input" ng-if="!data.purchaseInvoiceID>0">
+                                <select class="form-control" ng-model="data.purchaseInvoiceTypeID" ng-options="item.purchaseInvoiceTypeID as item.purchaseInvoiceTypeNM for item in supportData.purchaseInvoiceTypeDTOs" ng-change="event.resetDetail()">
+                                    <option value=""></option>
+                                </select>
+                            </label>
+                            <span class="form-control" ng-if="data.purchaseInvoiceID>0">{{data.purchaseInvoiceTypeNM}}</span>
+                        </section>
+
+                        <section class="col col-sm-2">
+                            <label>Status</label>
+                            <label class="input">
+                                <select disabled class="form-control"
+                                        ng-model="data.purchaseInvoiceStatusID"
+                                        ng-change="purchaseInvoiceStatus.setPurchaseInvoiceStatus()"
+                                        ng-options="item.purchaseInvoiceStatusID as item.purchaseInvoiceStatusNM for item in supportData.purchaseInvoiceStatusDTOs">
+                                    <option value=""></option>
+                                </select>
+                            </label>
+                        </section>
+                        <section class="col col-sm-8">
+                            <label>Tracking Info</label>
+                            <span class="form-control">
+                                Created by
+                                <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{data.createdBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="700">
+                                    {{data.creatorName}}
+                                </a> at {{data.createdDate}},
+
+                                Updated by
+                                <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{data.updatedBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="700">
+                                    {{data.updatorName}}
+                                </a> at {{data.updatedDate}},
+
+                                <span ng-if="data.isConfirmed===true||data.isConfirmed===false">
+                                    {{data.isConfirmed===true?'Confirmed by':''}}
+                                    {{data.isConfirmed===false?'Un-Confirmed by':''}}
+                                    <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{data.updatedBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="700">
+                                        {{data.confirmerName}}
+                                    </a> at {{data.confirmedDate}}
+                                </span>
+
+                            </span>
+                        </section>
+                    </div>
+                    <div class="row">
+                        <section class="col col-sm-2">
+                            <label>Doc Code</label>
+                            <label class="input">
+                                <input class="form-control" type="text" ng-model="data.purchaseInvoiceUD" readonly />
+                            </label>
+                        </section>
+
+                        <section class="col col-sm-2">
+                            <label>Invoice Date</label>
+                            <label class="input-group" ng-if="data.purchaseInvoiceStatusID == 1">
+                                <input type="text" class="form-control" avs-calendar ng-data-source="data.purchaseInvoiceDate" />
+                                <span class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </span>
+                            </label>
+                            <input class="form-control" readonly ng-model="data.purchaseInvoiceDate" ng-if="data.purchaseInvoiceStatusID != 1" />
+                        </section>
+
+                        <section class="col col-sm-2">
+                            <label>Posting Date</label>
+                            <label class="input-group" ng-if="!data.purchaseInvoiceID>0">
+                                <input type="text" class="form-control" avs-calendar ng-data-source="data.postingDate" />
+                                <span class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </span>
+                            </label>
+                            <input class="form-control" readonly ng-model="data.postingDate" ng-if="data.purchaseInvoiceID>0" />
+                        </section>
+
+                        <section class="col col-sm-1">
+                            <label>Currency <em class="note note-error" ng-show="(data.currency == null || data.currency == '')">(Required)</em></label>
+                            <label class="input" ng-if="data.purchaseInvoiceStatusID == 1">
+                                <select class="form-control" ng-model="data.currency" ng-options="item.sname as item.name for item in supportData.spCurrency" required>
+                                    <option value=""></option>
+                                </select>
+                            </label>
+                            <label class="input" ng-if="data.purchaseInvoiceStatusID != 1">
+                                <span class="form-control">{{data.currency}}</span>
+                            </label>
+                        </section>
+
+                        <section class="col col-sm-2">
+                            <label>
+                                Payment Term
+                                <em class="note note-error" ng-show="(data.factoryRawMaterialID == null || data.factoryRawMaterialID == '')">(Required Supplier)</em>
+                                <em class="note note-error" ng-show="(data.factoryRawMaterialID > 0) && (data.supplierPaymentTerm == null || data.supplierPaymentTerm == '')">(Required)</em>
+                            </label>
+                            <label class="input" ng-show="data.purchaseInvoiceStatusID == 1">
+                                <select class="form-control" ng-model="data.supplierPaymentTerm"
+                                        ng-options="item.supplierPaymentTermID as item.supplierPaymentTermNM for item in supportData.paymentTerms">
+                                    <option value=""></option>
+                                </select>
+                            </label>
+                            <label class="input" ng-show="data.purchaseInvoiceStatusID != 1">
+                                <select class="form-control" ng-model="data.supplierPaymentTerm"
+                                        disabled
+                                        ng-options="item.supplierPaymentTermID as item.supplierPaymentTermNM for item in supportData.paymentTerms">
+                                    <option value=""></option>
+                                </select>
+                            </label>
+                        </section>
+
+                        <section class="col col-sm-3">
+                            <label>Attached File</label>
+                            <label class="input">
+                                <span class="form-control">
+                                    {{data.friendlyName}}
+                                    <div style="position: absolute; right: 5px; top: 5px;">
+                                        <a ng-disabled="!data.fileLocation || data.friendlyName==null" href="javascript:void(0);" class="btn btn-primary btn-xs" style="font-size: 11px;" ng-click="event.downloadFile()">Download</a>
+                                        <a href="javascript:void(0);" class="btn btn-primary btn-xs" style="font-size: 11px;" ng-click="event.changeFile()">Change</a>
+                                        <a ng-disabled="!data.fileLocation || data.friendlyName==null" href="javascript:void(0);" class="btn btn-danger btn-xs" style="font-size: 11px;" ng-click="event.removeFile()">Remove</a>
+                                    </div>
+                                </span>
+                            </label>
+                        </section>
+
+
+                    </div>
+                    <div class="row">
+                        <section class="col col-sm-4">
+                            <label>
+                                Supplier
+                                <em class="note note-error" ng-show="(data.factoryRawMaterialID == null || data.factoryRawMaterialID == '')">(Required)</em>
+                            </label>
+                            <label class="label" ng-if="!data.purchaseInvoiceID>0 && !supportData.checkHasPO">
+                                <select avs-select ng-model="data.factoryRawMaterialID"
+                                        ng-change="event.changeSupplier(data.factoryRawMaterialID)"
+                                        ng-options="factoryRawMaterial.factoryRawMaterialID as factoryRawMaterial.factoryRawMaterialOfficialNM for factoryRawMaterial in supportData.factoryRawMaterialDTOs">
+                                    <option value=""></option>
+                                </select>
+                                <i></i>
+                            </label>
+                            <span class="form-control" ng-if="data.purchaseInvoiceID>0 || supportData.checkHasPO">{{data.factoryRawMaterialOfficialNM}}</span>
+                        </section>
+                        <section class="col col-sm-2">
+                            <label>
+                                Invoice No
+                                <em class="note note-error" ng-show="(data.invoiceNo == null  || data.invoiceNo == '')">(Required)</em>
+                            </label>
+                            <label class="input">
+                                <input class="form-control" type="text" ng-model="data.invoiceNo" ng-readonly="data.purchaseInvoiceStatusID != 1" />
+                            </label>
+                        </section>
+                        <section class="col col-sm-6">
+                            <label>Remark</label>
+                            <label class="input">
+                                <textarea class="form-control" style="background:none" ng-model="data.remark" rows="4" ng-readonly="data.purchaseInvoiceStatusID != 1"></textarea>
+                                @*<input class="form-control" type="text" ng-model="data.remark" ng-readonly="data.purchaseInvoiceStatusID != 1" />*@
+                            </label>
+                        </section>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    @*Item from PO*@
+    <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false" ng-if="data.purchaseInvoiceTypeID == 1">
+        <header>
+            <ul class="nav nav-tabs pull-left in">
+                <li class="active">
+                    <a data-toggle="tab" href="javascript:void(0)"> <i class="fa fa-database"></i> <span class="hidden-mobile hidden-tablet">Details</span> </a>
+                </li>
+            </ul>
+        </header>
+        <div>
+            <div class="jarviswidget-editbox"></div>
+            <div class="widget-body">
+                <div class="tab-content" id="tab-content-detail">
+                    <a class="btn btn-primary btn-xs m-bottom-15" href="#/purchase-order" ng-show="(data.purchaseInvoiceStatusID == null || data.purchaseInvoiceStatusID == 1) && data.factoryRawMaterialID"><i class="fa fa-plus"></i> Add Item From PO</a>
+                    <a class="btn btn-primary btn-xs m-bottom-15" ng-click="addItemCost()" ng-show="data.purchaseInvoiceStatusID == null || data.purchaseInvoiceStatusID == 1"> <i class="fa fa-plus"></i> Add Cost</a>
+
+                    <div class="tab-pane active" id="tabComponent">
+                        <div class="smart-form">
+                            <div class="row">
+                                <section class="col col-lg-12">
+                                    <div avs-scrollable-table class="tilsoft-table-wrapper">
+                                        <div class="tilsoft-table">
+                                            <div class="tilsoft-table-header" style="width:1460px">
+                                                <div style="width:60px" ng-show="data.purchaseInvoiceStatusID == 1"></div>
+                                                <div style="width:140px">Purchase Order</div>
+                                                <div style="width:150px">Item Code</div>
+                                                <div style="width:250px">Item Name</div>
+                                                <div style="width:80px">Unit</div>
+                                                <div style="width:100px;">PO Qnt</div>
+                                                <div style="width:100px;">Received Qnt</div>
+                                                <div style="width:100px;">Quantity</div>
+                                                <div style="width:100px;">PO Price</div>
+                                                <div style="width:100px;">Price</div>
+                                                <div style="width:150px;">Amount</div>
+                                                <div>Remark</div>
+                                            </div>
+                                            <div class="tilsoft-table-body" style="width:1460px;">
+                                                <table>
+                                                    <tbody ng-repeat="item in data.purchaseInvoiceDetailDTOs">
+                                                        <tr ng-if="item.type == 0">
+                                                            <td style="width:59px;vertical-align:middle" ng-show="data.purchaseInvoiceStatusID == 1">
+                                                                <a class="btn btn-danger btn-xs" ng-click="deleteFromProductionItem(item)"><i class="fa fa-times"></i> Del</a>
+                                                            </td>
+                                                            <td style="width: 140px;vertical-align:middle">
+                                                                {{item.purchaseOrderUD}}
+                                                            </td>
+                                                            <td style="width:150px;vertical-align:middle">
+                                                                <input type="text" class="input-xs text-left" avs-remote-auto-complete
+                                                                       ng-request-param="productionBox.request"
+                                                                       data-method="POST"
+                                                                       ng-init-param="item.productionItemUD"
+                                                                       ng-init-param2="1"
+                                                                       ng-model="item.productionItemUD"
+                                                                       ng-item-value="productionBox.data"
+                                                                       ng-item-selected="productionBox.selectedItem(productionBox.data,item)"
+                                                                       data-format-function="formatProductionItem"
+                                                                       ng-readonly="data.purchaseInvoiceStatusID != 1"
+                                                                       ng-if="item.productionItemTypeID == 7" />
+                                                                <span ng-if="item.productionItemTypeID != 7">{{item.productionItemUD}}</span>
+                                                            </td>
+                                                            <td style="width:250px;vertical-align:middle">
+                                                                {{item.productionItemNM}}
+                                                            </td>
+                                                            <td style="width:80px; text-align:center;vertical-align:middle">
+                                                                {{item.unitNM}}
+                                                            </td>
+
+                                                            <td style="width:100px;vertical-align:middle; text-align: right">
+                                                                {{item.orderQnt | number : 6}}
+
+                                                            </td>
+                                                            <td style="width:100px;text-align:right;vertical-align:middle">{{item.totalReceivedQnt | number : 2}}</td>
+                                                            <td style="width:100px;text-align:right">
+                                                                @*<input type="text" class="form-control input-xs text-right"
+                                                                    ng-readonly="item.productionItemTypeID == 7 || data.purchaseInvoiceStatusID != 1"
+                                                                    avs-number
+                                                                    ng-data-source="item.quantity"
+                                                                    ng-decimal="2" />*@
+                                                                <input type="text" class="form-control input-xs text-right"
+                                                                       avs-number
+                                                                       ng-data-source="item.quantity"
+                                                                       ng-readonly="data.purchaseInvoiceStatusID != 1"
+                                                                       ng-decimal="2" 
+                                                                       ng-on-change="event.vatAmount()"/>
+                                                            </td>
+                                                            <td style="width:100px;text-align:right;vertical-align:middle">{{item.poPrice | number : 0}}</td>
+                                                            <td style="width:100px;text-align:right">
+                                                                <input type="text" class="form-control input-xs text-right"
+                                                                       avs-number
+                                                                       ng-data-source="item.unitPrice"
+                                                                       ng-readonly="data.purchaseInvoiceStatusID != 1"
+                                                                       ng-decimal="2" 
+                                                                       ng-on-change="event.vatAmount()"/>
+                                                            </td>
+                                                            <td ng-if="item.type == 0" style="width:150px;text-align:right;vertical-align:middle">{{item.quantity * item.unitPrice | number : 0}}</td>
+                                                            <td ng-if="item.type == 1" style="width:150px;text-align:right;vertical-align:middle">{{0-(item.quantity * item.unitPrice) | number : 0}}</td>
+                                                            <td>
+                                                                <input type="text" class="form-control input-xs"
+                                                                       ng-model="item.remark"
+                                                                       ng-readonly="data.purchaseInvoiceStatusID != 1" />
+                                                            </td>
+                                                        </tr>
+                                                        <tr ng-if="item.type == 1" style="background-color: lightgray">
+                                                            <td style="width:59px;vertical-align:middle" ng-show="data.purchaseInvoiceStatusID == 1">
+                                                                <a class="btn btn-danger btn-xs" ng-click="deleteFromProductionItem(item)"><i class="fa fa-times"></i> Del</a>
+                                                            </td>
+                                                            <td style="width: 140px;vertical-align:middle">
+                                                                {{item.purchaseOrderUD}}
+                                                            </td>
+                                                            <td style="width:150px;vertical-align:middle">
+                                                                <input type="text" class="input-xs text-left" avs-remote-auto-complete
+                                                                       ng-request-param="productionBox.request"
+                                                                       data-method="POST"
+                                                                       ng-init-param="item.productionItemUD"
+                                                                       ng-init-param2="1"
+                                                                       ng-model="item.productionItemUD"
+                                                                       ng-item-value="productionBox.data"
+                                                                       ng-item-selected="productionBox.selectedItem(productionBox.data,item)"
+                                                                       data-format-function="formatProductionItem"
+                                                                       ng-readonly="data.purchaseInvoiceStatusID != 1"
+                                                                       ng-if="item.productionItemTypeID == 7" />
+                                                                <span ng-if="item.productionItemTypeID != 7">{{item.productionItemUD}}</span>
+                                                            </td>
+                                                            <td style="width:250px;vertical-align:middle">
+                                                                {{item.productionItemNM}}
+                                                            </td>
+                                                            <td style="width:80px; text-align:center;vertical-align:middle">
+                                                                {{item.unitNM}}
+                                                            </td>
+
+                                                            <td style="width:100px;vertical-align:middle; text-align: right">
+                                                                {{item.orderQnt | number : 6}}
+
+                                                            </td>
+                                                            <td style="width:100px;text-align:right;vertical-align:middle">{{item.totalReceivedQnt | number : 2}}</td>
+                                                            <td style="width:100px;text-align:right">
+                                                                @*<input type="text" class="form-control input-xs text-right"
+                                                                    ng-readonly="item.productionItemTypeID == 7 || data.purchaseInvoiceStatusID != 1"
+                                                                    avs-number
+                                                                    ng-data-source="item.quantity"
+                                                                    ng-decimal="2" />*@
+                                                                <input type="text" class="form-control input-xs text-right"
+                                                                       readonly
+                                                                       avs-number
+                                                                       ng-data-source="item.quantity"
+                                                                       ng-decimal="2" 
+                                                                       ng-on-change="event.vatAmount()"/>
+                                                            </td>
+                                                            <td style="width:100px;text-align:right;vertical-align:middle">{{item.poPrice | number : 0}}</td>
+                                                            <td style="width:100px;text-align:right">
+                                                                <input type="text" class="form-control input-xs text-right"
+                                                                       avs-number
+                                                                       ng-data-source="item.unitPrice"
+                                                                       ng-readonly="data.purchaseInvoiceStatusID != 1"
+                                                                       ng-decimal="2" 
+                                                                       ng-on-change="event.vatAmount()"/>
+                                                            </td>
+                                                            <td ng-if="item.type == 0" style="width:150px;text-align:right;vertical-align:middle">{{item.quantity * item.unitPrice | number : 0}}</td>
+                                                            <td ng-if="item.type == 1" style="width:150px;text-align:right;vertical-align:middle">{{0-(item.quantity * item.unitPrice) | number : 0}}</td>
+                                                            <td>
+                                                                <input type="text" class="form-control input-xs"
+                                                                       ng-model="item.remark"
+                                                                       ng-readonly="data.purchaseInvoiceStatusID != 1" />
+                                                            </td>
+                                                        </tr>
+                                                        <tr ng-if="item.type != 1 && item.type != 0">
+                                                            <td style="width:59px;vertical-align:middle" ng-show="data.purchaseInvoiceStatusID == 1">
+                                                                <a class="btn btn-danger btn-xs" ng-click="deleteFromProductionItem(item)"><i class="fa fa-times"></i> Del</a>
+                                                            </td>
+                                                            <td style="width: 140px;vertical-align:middle">
+                                                                {{item.purchaseOrderUD}}
+                                                            </td>
+                                                            <td style="width:150px;vertical-align:middle">
+                                                                <input type="text" class="input-xs text-left" avs-remote-auto-complete
+                                                                       ng-request-param="productionBox.request"
+                                                                       data-method="POST"
+                                                                       ng-init-param="item.productionItemUD"
+                                                                       ng-init-param2="1"
+                                                                       ng-model="item.productionItemUD"
+                                                                       ng-item-value="productionBox.data"
+                                                                       ng-item-selected="productionBox.selectedItem(productionBox.data,item)"
+                                                                       data-format-function="formatProductionItem"
+                                                                       ng-readonly="data.purchaseInvoiceStatusID != 1"
+                                                                       ng-if="item.productionItemTypeID == 7" />
+                                                                <span ng-if="item.productionItemTypeID != 7">{{item.productionItemUD}}</span>
+                                                            </td>
+                                                            <td style="width:250px;vertical-align:middle">
+                                                                {{item.productionItemNM}}
+                                                            </td>
+                                                            <td style="width:80px; text-align:center;vertical-align:middle">
+                                                                {{item.unitNM}}
+                                                            </td>
+
+                                                            <td style="width:100px;vertical-align:middle; text-align: right">
+                                                                {{item.orderQnt | number : 6}}
+
+                                                            </td>
+                                                            <td style="width:100px;text-align:right;vertical-align:middle">{{item.poReceivedQnt | number : 2}}</td>
+                                                            <td style="width:100px;text-align:right">
+                                                                @*<input type="text" class="form-control input-xs text-right"
+                                                                    ng-readonly="item.productionItemTypeID == 7 || data.purchaseInvoiceStatusID != 1"
+                                                                    avs-number
+                                                                    ng-data-source="item.quantity"
+                                                                    ng-decimal="2" />*@
+                                                                <input type="text" class="form-control input-xs text-right"
+                                                                       readonly
+                                                                       avs-number
+                                                                       ng-data-source="item.quantity"
+                                                                       ng-decimal="2" 
+                                                                       ng-on-change="event.vatAmount()"/>
+                                                            </td>
+                                                            <td style="width:100px;text-align:right;vertical-align:middle">{{item.poPrice | number : 0}}</td>
+                                                            <td style="width:100px;text-align:right">
+                                                                <input type="text" class="form-control input-xs text-right"
+                                                                       avs-number
+                                                                       ng-data-source="item.unitPrice"
+                                                                       ng-readonly="data.purchaseInvoiceStatusID != 1"
+                                                                       ng-decimal="2" 
+                                                                       ng-on-change="event.vatAmount()"/>
+                                                            </td>
+                                                            <td style="width:150px;text-align:right;vertical-align:middle">{{item.quantity * item.unitPrice | number : 0}}</td>
+                                                            <td>
+                                                                <input type="text" class="form-control input-xs"
+                                                                       ng-model="item.remark"
+                                                                       ng-readonly="data.purchaseInvoiceStatusID != 1" />
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="row totalborder" style="margin-left:10px">
+                <div class="col-xs-12 col-sm-8 col-md-8 col-lg-8 m-bottom-15"></div>
+                <div class="col-xs-6 col-sm-2 col-md-2 col-lg-2 m-bottom-8 text-left" style="width: 150px">
+                    <label style="height:13px">Item Amount:</label>
+                </div>
+                <label style="height:13px;width: 150px" class="col-xs-12 col-sm-1 col-md-1 col-lg-1 m-bottom-15 text-right">
+                    {{event.itemAmount() | number : 0}}
+                </label>
+            </div>
+            <div class="row" style="margin-left:10px">
+                <div class="col-xs-12 col-sm-8 col-md-8 col-lg-8 m-bottom-15"></div>
+                <div class="col-xs-12 col-sm-2 col-md-2 col-lg-2 m-bottom-15 text-left" style="width: 150px">
+                    <label style="height:13px">Cost Amount:</label>
+                </div>
+                <label style="height:13px;width: 150px" class="col-xs-12 col-sm-1 col-md-1 col-lg-1 m-bottom-15 text-right">
+                    {{event.costAmount() | number : 0}}
+                </label>
+            </div>
+            <div class="row" style="margin-left:10px">
+                <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 m-bottom-15"></div>
+                <div class="col-xs-12 col-sm-2 col-md-2 col-lg-2 m-bottom-15">
+                    <label style="height: 13px;">VAT Percent: </label>
+                    <label style="height:13px" class="text-right select">
+                        <select ng-model="data.vat" ng-options="item.id as item.name for item in supportData.spcheckPercentVAT" ng-change="event.vatAmount()" ng-disabled="data.purchaseInvoiceStatusID != 1">
+                            <option value=""></option>
+                        </select>
+                        <i></i>
+                    </label>
+                </div>
+                <div class="col-xs-12 col-sm-2 col-md-2 col-lg-2 m-bottom-15 text-left" style="width: 150px">
+                    <label style="height:13px">VAT Amount:</label>
+                </div>
+                <label style="height:13px" class="col-xs-12 col-sm-1 col-md-1 col-lg-1 m-bottom-15 text-right">
+                    <input type="text" class="form-control input-xs text-right"
+                           style="width: 130px"
+                           avs-number
+                           ng-data-source="data.vatAmount" ng-on-change="event.totalAmount()"/>
+                </label>
+            </div>
+            @*<div class="row">
+                    <div class="col-xs-12 col-sm-9 col-md-9 col-lg-9 m-bottom-15"></div>
+                    <div class="col-xs-12 col-sm-2 col-md-2 col-lg-2 m-bottom-15" style="border-bottom:2px solid #ccc"></div>
+                </div>*@
+            <div class="row" style="margin-left:10px">
+                <div class="col-xs-12 col-sm-8 col-md-8 col-lg-8 m-bottom-15"></div>
+                <div class="col-xs-12 col-sm-2 col-md-2 col-lg-2 m-bottom-15 text-left" style="width: 150px">
+                    <label style="height:13px;width: 130px">
+                        <b>Total Amount:</b>
+                    </label>
+                </div>
+                <label style="height:13px" class="col-xs-12 col-sm-1 col-md-1 col-lg-1 m-bottom-15 text-right">
+                    <input type="text" class="form-control input-xs text-right"
+                           style="width: 130px"
+                           avs-number
+                           ng-data-source="data.totalAmount"/>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    @*Item from ProductionItem*@
+    <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false" ng-if="data.purchaseInvoiceTypeID == 2">
+        <header>
+            <ul class="nav nav-tabs pull-left in">
+                <li class="active">
+                    <a data-toggle="tab" href="javascript:void(0)"> <i class="fa fa-database"></i> <span class="hidden-mobile hidden-tablet">Details</span> </a>
+                </li>
+            </ul>
+        </header>
+        <div>
+            <div class="jarviswidget-editbox"></div>
+            <div class="widget-body">
+                <div class="tab-content" id="tab-content-detail">
+                    <a class="btn btn-primary btn-xs m-bottom-15" ng-click="addItem()" ng-show="data.purchaseInvoiceStatusID == null || data.purchaseInvoiceStatusID == 1"> <i class="fa fa-plus"></i> Add Blank Item </a>
+
+                    <div class="tab-pane active" id="tabComponent">
+                        <div class="smart-form">
+                            <div class="row">
+                                <section class="col col-lg-12">
+                                    <div avs-scrollable-table class="tilsoft-table-wrapper" ng-load-next-page="bomTable.loadNextPage()" ng-sort-data="bomTable.sortData">
+                                        <div class="tilsoft-table">
+                                            <div class="tilsoft-table-header" style="width:1000px">
+                                                <div style="width:60px" ng-show="data.purchaseInvoiceStatusID == 1"></div>
+                                                <div style="width:150px">Item Code</div>
+                                                <div style="width:250px">Item Name</div>
+                                                <div style="width:80px">Unit</div>
+                                                <div style="width:150px;">Warehouse</div>
+                                                <div style="width:100px;">Quantity</div>
+                                                <div style="width:130px;">Price</div>
+                                                <div style="width:150px;">Amount</div>
+                                                <div>Remark</div>
+                                            </div>
+                                            <div class="tilsoft-table-body" style="width:1000px;">
+                                                <table>
+                                                    <tbody ng-repeat="item in data.purchaseInvoiceDetailDTOs">
+                                                        <tr>
+                                                            <td style="width:59px;vertical-align:middle" ng-show="data.purchaseInvoiceStatusID == 1">
+                                                                <a class="btn btn-danger btn-xs" ng-click="deleteFromProductionItem(item)"><i class="fa fa-times"></i> Del</a>
+                                                            </td>
+                                                            <td style="width:150px;vertical-align:top">
+                                                                <input type="text" class="input-xs text-left" avs-remote-auto-complete
+                                                                       ng-request-param="productionBox.request"
+                                                                       data-method="POST"
+                                                                       ng-init-param="item.productionItemUD"
+                                                                       ng-init-param2="0"
+                                                                       ng-model="item.productionItemUD"
+                                                                       ng-item-value="productionBox.data"
+                                                                       ng-item-selected="productionBox.selectedItem(productionBox.data,item)"
+                                                                       data-format-function="formatProductionItem"
+                                                                       ng-readonly="data.purchaseInvoiceStatusID != 1" />
+                                                            </td>
+                                                            <td style="width:250px;vertical-align:middle">
+                                                                {{item.productionItemNM}}
+                                                            </td>
+                                                            <td style="width:80px; text-align:center;vertical-align:middle">
+                                                                {{item.unitNM}}
+                                                            </td>
+
+                                                            <td style="width:150px; text-align:right;vertical-align:middle">
+                                                                <select class="input-xs"
+                                                                        ng-model="item.factoryWarehouseID"
+                                                                        ng-disabled="data.purchaseInvoiceStatusID != 1"
+                                                                        ng-options="gItem.factoryWarehouseID as gItem.factoryWarehouseNM for gItem in supportData.factoryWarehouseDTOs | orderBy: 'factoryWarehouseNM'"></select>
+                                                            </td>
+
+                                                            <td style="width:100px;vertical-align:middle">
+                                                                <input type="text" class="form-control input-xs text-right"
+                                                                       ng-readonly="item.productionItemTypeID == 7 || data.purchaseInvoiceStatusID != 1"
+                                                                       avs-number
+                                                                       ng-data-source="item.quantity"
+                                                                       ng-decimal="2"
+                                                                       ng-on-change="event.vatAmount()"/>
+                                                            </td>
+
+                                                            <td style="width:130px;vertical-align:middle">
+                                                                <input type="text" class="form-control input-xs text-right"
+                                                                       avs-number
+                                                                       ng-data-source="item.unitPrice"
+                                                                       ng-readonly="data.purchaseInvoiceStatusID != 1"
+                                                                       ng-decimal="0" 
+                                                                       ng-on-change="event.vatAmount()"/>
+                                                            </td>
+                                                            <td style="width:150px;text-align:right;vertical-align:middle">{{item.quantity * item.unitPrice | number : 0}}</td>
+                                                            <td>
+                                                                <input type="text" class="form-control input-xs"
+                                                                       ng-model="item.remark"
+                                                                       ng-readonly="data.purchaseInvoiceStatusID != 1" />
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="row totalborder" style="margin-left:10px">
+                <div class="col-xs-12 col-sm-8 col-md-8 col-lg-8 m-bottom-15"></div>
+                <div class="col-xs-6 col-sm-2 col-md-2 col-lg-2 m-bottom-8 text-left" style="width: 150px">
+                    <label style="height:13px">Item Amount:</label>
+                </div>
+                <label style="height:13px;width: 150px" class="col-xs-12 col-sm-1 col-md-1 col-lg-1 m-bottom-15 text-right">
+                    {{event.itemAmount() | number : 0}}
+                </label>
+            </div>
+            <div class="row" style="margin-left:10px">
+                <div class="col-xs-12 col-sm-8 col-md-8 col-lg-8 m-bottom-15"></div>
+                <div class="col-xs-12 col-sm-2 col-md-2 col-lg-2 m-bottom-15 text-left" style="width: 150px">
+                    <label style="height:13px">Cost Amount:</label>
+                </div>
+                <label style="height:13px;width: 150px" class="col-xs-12 col-sm-1 col-md-1 col-lg-1 m-bottom-15 text-right">
+                    {{event.costAmount() | number : 0}}
+                </label>
+            </div>
+            <div class="row" style="margin-left:10px">
+                <div class="col-xs-12 col-sm-8 col-md-8 col-lg-8 m-bottom-15">
+                    <label style="margin-left: 800px; height: 13px">VAT Percent: </label>
+                    <label style="height:13px;" class="text-right select">
+                        <select ng-model="data.vat" ng-options="item.id as item.name for item in supportData.spcheckPercentVAT" ng-change="event.vatAmount()" ng-disabled="data.purchaseInvoiceStatusID != 1">
+                            <option value=""></option>
+                        </select>
+                        <i></i>
+                    </label>
+                </div>
+                <div class="col-xs-12 col-sm-2 col-md-2 col-lg-2 m-bottom-15 text-left" style="width: 150px">
+                    <label style="height:13px">VAT Amount:</label>
+                </div>
+                <label style="height:13px" class="col-xs-12 col-sm-1 col-md-1 col-lg-1 m-bottom-15 text-right">
+                    <input type="text" class="form-control input-xs text-right"
+                           style="width: 130px"
+                           avs-number
+                           ng-data-source="data.vatAmount" ng-on-change="event.totalAmount()"/>
+                </label>
+            </div>
+            @*<div class="row">
+                    <div class="col-xs-12 col-sm-9 col-md-9 col-lg-9 m-bottom-15"></div>
+                    <div class="col-xs-12 col-sm-2 col-md-2 col-lg-2 m-bottom-15" style="border-bottom:2px solid #ccc"></div>
+                </div>*@
+            <div class="row" style="margin-left:10px">
+                <div class="col-xs-12 col-sm-8 col-md-8 col-lg-8 m-bottom-15"></div>
+                <div class="col-xs-12 col-sm-2 col-md-2 col-lg-2 m-bottom-15 text-left" style="width: 150px">
+                    <label style="height:13px">
+                        <b>Total Amount:</b>
+                    </label>
+                </div>
+                <label style="height:13px" class="col-xs-12 col-sm-1 col-md-1 col-lg-1 m-bottom-15 text-right">
+                    <input type="text" class="form-control input-xs text-right"
+                           style="width: 130px"
+                           avs-number
+                           ng-data-source="data.totalAmount"/>
+                </label>
+            </div>
+        </div>
+    </div>
+</article>

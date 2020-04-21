@@ -1,0 +1,246 @@
+﻿@{
+    ViewBag.Title = "Select client to create invoice";
+    ViewBag.Module = "Eurofar Commercial Invoice";
+}
+
+<div class="row">
+
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+
+        
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-0" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-search"></i> </span>
+                <h2>Search Filters</h2>
+            </header>
+
+            <div>
+                <div class="jarviswidget-editbox"></div>
+                <div class="widget-body">
+                    <div class="row">
+                        <div class="col-sm-2">
+                            <label>Client Code</label>
+                            <input class="form-control search-filter" type="text" id="ClientUD" ng-model="filters.ClientUD">
+                        </div>
+
+                        <div class="col-sm-2">
+                            <label>Client Name</label>
+                            <input class="form-control search-filter" type="text" id="ClientNM" ng-model="filters.ClientNM">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-search-result" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Client search result</h2>
+            </header>
+            <div>
+                <div class="jarviswidget-editbox"></div>
+                <div class="widget-body">
+                    <div id="searchTableContent" class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header" style="width: 1100px;">
+                                <div style="width: 60px;"></div>
+                                <div style="width: 80px;" class="sorting" data-colname="clientUD">Client Code</div>
+                                <div class="sorting" data-colname="streetAddress1">Client Name</div>
+                            </div>
+                            <div class="tilsoft-table-body" style="width: 1100px; ">
+                                <table>
+                                    <tr ng-repeat="item in data">
+                                        <td style="text-align: center; width: 60px;">
+                                            <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "ECommercialInvoice")/0?invoiceTypeID=@ViewBag.InvoiceTypeID&internalCompanyID=@ViewBag.InternalCompanyID&clientID={{item.clientID}}" title="Select client to create invoice">Select</a>
+                                        </td>
+                                        <td style="width: 80px;">{{item.clientUD}}</td>
+                                        <td>{{item.clientNM}}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+    </article>
+</div>
+
+
+@section pagepopup
+{
+}
+
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Search" ng-click="event.search()"><i class=" fa fa-search"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Refresh" ng-click="event.search()"><i class="fa fa-refresh"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script src="~/Views/ECommercialInvoice/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script type="text/javascript">
+
+        jQuery('.search-filter').keypress(function (e) {
+        
+            if (e.keyCode == 13) {
+                var scope = angular.element(jQuery('body')).scope();
+                scope.event.search();
+            }
+        });
+
+        var searchGrid = jQuery('#searchTableContent').scrollableTable(
+            function(currentPage){
+                var scope = angular.element(jQuery('body')).scope();
+                scope.$apply(function(){
+                    scope.pageIndex = currentPage;
+                    eCommercialInvoiceService.searchFilter.pageIndex = scope.pageIndex;
+                    scope.method.search();
+                });
+            },
+            function(sortedBy, sortedDirection){
+                var scope = angular.element(jQuery('body')).scope();
+                scope.$apply(function(){
+                    eCommercialInvoiceService.searchFilter.sortedDirection = sortedDirection;
+                    scope.pageIndex = 1;
+                    eCommercialInvoiceService.searchFilter.pageIndex = scope.pageIndex;
+                    eCommercialInvoiceService.searchFilter.sortedBy = sortedBy;
+                    scope.method.search();
+                });
+            }
+        );
+
+
+        eCommercialInvoiceService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/ECommercialInvoice/';
+        eCommercialInvoiceService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+        eCommercialInvoiceService.searchFilter.pageSize = @System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"];
+
+        var modelApp = angular.module('tilsoftApp', []);
+        modelApp.controller('tilsoftController', ['$scope', function ($scope) {
+            $scope.data = null;
+
+            $scope.pageIndex = 1;
+            $scope.totalPage = 0;
+            $scope.filters = {
+                ClientUD : '',
+                ClientNM : '',
+            };
+
+            $scope.event = {
+                
+                search: function () {
+                    eCommercialInvoiceService.searchFilter.filters = $scope.filters;
+                    eCommercialInvoiceService.searchFilter.sortedBy = 'clientUD';
+                    $scope.method.search();
+                }
+            }
+
+            $scope.method = {
+               
+                search: function () {
+                
+                    if ('@ViewBag.InvoiceTypeID' == 1) //FOB INVOICE
+                    {
+                        $scope.method.search_initFobInvoice();
+                    }
+                    else if ('@ViewBag.InvoiceTypeID' == 2) //WAREHOUSE INVOICE
+                    {
+                        $scope.method.search_initWarehouseInvoice();
+                    }
+                    else if ('@ViewBag.InvoiceTypeID' == 3) //OTHER INVOICE
+                    {
+                        $scope.method.search_client();
+                    }
+                    else if ('@ViewBag.InvoiceTypeID' == 5) //CONTAINER TRANSPORT INVOICE
+                    {
+                        $scope.method.search_client();
+                    }
+                },
+              
+                search_initFobInvoice : function () {
+                    eCommercialInvoiceService.search_initFobInvoice(
+                        function (data) {
+                            $scope.data = data.data;
+                            $scope.totalPage = Math.ceil(data.totalRows / eCommercialInvoiceService.searchFilter.pageSize);
+                            $scope.$apply();
+
+                            if(data.totalRows < eCommercialInvoiceService.searchFilter.pageSize) {
+                                jQuery('#searchTableContent').find('ul').hide();
+                            }
+                            else {
+                                jQuery('#searchTableContent').find('ul').show();
+                            }
+
+                            jQuery('#content').show();
+                            searchGrid.updateLayout();
+                        },
+                        function (error) {
+                            $scope.data = null;
+                            $scope.$apply();
+                        }
+                    );
+                },
+
+                search_initWarehouseInvoice : function () {
+                    eCommercialInvoiceService.search_initWarehouseInfo(
+                        function (data) {
+                            $scope.data = data.data;
+                            $scope.totalPage = Math.ceil(data.totalRows / eCommercialInvoiceService.searchFilter.pageSize);
+                            $scope.$apply();
+
+                            if(data.totalRows < eCommercialInvoiceService.searchFilter.pageSize) {
+                                jQuery('#searchTableContent').find('ul').hide();
+                            }
+                            else {
+                                jQuery('#searchTableContent').find('ul').show();
+                            }
+
+                            jQuery('#content').show();
+                            searchGrid.updateLayout();
+                        },
+                        function (error) {
+                            $scope.data = null;
+                            $scope.$apply();
+                        }
+                    );
+                },
+
+                search_client: function () {
+                    eCommercialInvoiceService.search_client(
+                        function (data) {
+                            $scope.data = data.data;
+                            $scope.totalPage = Math.ceil(data.totalRows / eCommercialInvoiceService.searchFilter.pageSize);
+                            $scope.$apply();
+
+                            if(data.totalRows < eCommercialInvoiceService.searchFilter.pageSize) {
+                                jQuery('#searchTableContent').find('ul').hide();
+                            }
+                            else {
+                                jQuery('#searchTableContent').find('ul').show();
+                            }
+
+                            jQuery('#content').show();
+                            searchGrid.updateLayout();
+                        },
+                        function (error) {
+                            $scope.data = null;
+                            $scope.$apply();
+                        }
+                    );
+                },
+            }
+
+            $scope.event.search();
+        }]);
+    </script>
+}

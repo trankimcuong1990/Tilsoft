@@ -1,0 +1,19 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Module.ProductOverviewRpt.DTO.PriceComparison
+{
+    public class PriceOfferHistoryDTO
+    {
+        public int QuotationOfferDetailID { get; set; }
+        public int? FactoryOrderDetailID { get; set; }
+        public string QuotationOfferDirectionNM { get; set; }
+        public decimal? Price { get; set; }
+        public string UpdatorName { get; set; }
+        public int UpdatedBy { get; set; }
+        public string UpdatedDate { get; set; }
+    }
+}

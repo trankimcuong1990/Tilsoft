@@ -1,0 +1,450 @@
+﻿@{
+    ViewBag.Title = "Forwarder Invoice";
+    ViewBag.Module = "Forwarder Invoice";
+
+    //get param 
+    string isCopy = "false";
+    string bookingID = "0";
+    if (Request.Params["isCopy"] != null)
+    {
+        isCopy = Request.Params["isCopy"];
+    }
+    if (Request.Params["bookingID"] != null)
+    {
+        bookingID = Request.Params["bookingID"];
+    }
+}
+<style>
+    .tilsoft-table .select2-container {
+        width: 93% !important;
+        display:inline-block;
+    }    
+</style>
+<form class="row" name="editForm">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <ul class="nav nav-tabs pull-left in">
+                    <li class="active">
+                        <a data-toggle="tab" href="#tabGeneral"> <i class="fa fa-database"></i> <span class="hidden-mobile hidden-tablet">General</span></a>
+                    </li>
+                    <li>
+                        <a data-toggle="tab" href="#tabShippedInfo"> <i class="fa fa-database"></i> <span class="hidden-mobile hidden-tablet">Shipping Info</span></a>
+                    </li>
+                    <li>
+                        <a data-toggle="tab" href="#tabTracking"> <i class="fa fa-database"></i> <span class="hidden-mobile hidden-tablet">Tracking</span></a>
+                    </li>
+                </ul>
+            </header>
+            <div>
+                <div class="jarviswidget-editbox"></div>
+                <div class="widget-body">
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="tabGeneral">
+                            <div class="smart-form">
+                                <div class="row">
+                                    <section class="col col-lg-2">
+                                        <label>Invoice No</label>
+                                        <input type="text" name="invoiceNo" ng-model="data.invoiceNo" class="form-control" required />
+                                        <span class="help-block" ng-show="editForm.invoiceNo.$error.required"><i class="fa fa-warning"></i>Invoice No is required.</span>
+                                    </section>
+
+                                    <section class="col col-lg-2">
+                                        <label>Invoice Date</label>
+                                        <label class="input">
+                                            <input name="invoiceDate" type="text" class="datepicker" ng-model="data.invoiceDate" data-dateformat="dd/mm/yy" required />
+                                            <i class="icon-append fa fa-calendar"></i>
+                                        </label>
+                                        <span class="help-block" ng-show="editForm.invoiceDate.$error.required"><i class="fa fa-warning"></i>Invoice date is required.</span>
+                                    </section>
+
+                                    <section class="col col-lg-1">
+                                        <label>Currency</label>
+                                        <select ng-model="data.currency" name="currency" ng-options="currencyItem.currencyID as currencyItem.currencyNM for currencyItem in currencies" class="form-control" required ng-change="event.selectedCurrency(data.currency)">
+                                            <option></option>
+                                        </select>
+                                        <span class="help-block" ng-show="editForm.currency.$error.required"><i class="fa fa-warning"></i>Currency is required.</span>
+                                    </section>
+
+                                    <section class="col col-lg-2">
+                                        <label>Eurofar Ref No</label>
+                                        <input type="text" id="refNo" ng-model="data.refNo" class="form-control" />
+                                    </section>
+
+                                    <section class="col col-lg-1">
+                                        <label>Status</label>
+                                        <span class="form-control">{{data.invoiceStatusText}}</span>
+                                    </section>
+
+                                    <section class="col col-lg-2">
+                                        <label>Status By</label>
+                                        <span class="form-control">{{data.statustorName}}</span>
+                                    </section>
+
+                                    <section class="col col-lg-2">
+                                        <label>Status Date</label>
+                                        <span class="form-control">{{data.statusUpdatedDate}}</span>
+                                    </section>
+                                </div>
+                                <div class="row">
+                                    <section class="col col-lg-2">
+                                        <label>Remark</label>
+                                        <input type="text" id="remark" ng-model="data.remark" class="form-control" />
+                                    </section>
+                                    <section class="col col-lg-2">
+                                        <label>BL No</label>
+                                        <span class="form-control">{{data.blNo}}</span>
+                                    </section>
+                                    <section class="col col-lg-6">
+                                        <label>Forwarder</label>
+                                        <span class="form-control">{{data.forwarderNM}}</span>
+                                    </section>
+                                    <section class="col col-lg-2">
+                                        <label>Total Invoice</label>
+                                        <span class="form-control" style="text-align:right">{{method.getTotalInvoice() | number : 2}}</span>
+                                    </section>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="tabShippedInfo">
+                            <div class="smart-form">
+                                <div class="row">
+                                    <section class="col col-lg-2">
+                                        <label>Client Code</label>
+                                        <span class="form-control">{{data.clientUD}}</span>
+                                    </section>
+                                    <section class="col col-lg-10">
+                                        <label>Client Name</label>
+                                        <span class="form-control">{{data.clientNM}}</span>
+                                    </section>
+                                </div>
+                                <div class="row">
+                                    <section class="col col-lg-2">
+                                        <label>POL</label>
+                                        <span class="form-control">{{data.poLname}}</span>
+                                    </section>
+                                    <section class="col col-lg-2">
+                                        <label>POD</label>
+                                        <span class="form-control">{{data.podName}}</span>
+                                    </section>
+                                    <section class="col col-lg-8">
+                                        <label>Forwarder</label>
+                                        <span class="form-control">{{data.forwarderNM}}</span>
+                                    </section>
+                                </div>
+                                <div class="row">
+                                    <section class="col col-lg-4">
+                                        <div class="tilsoft-table">
+                                            <div class="tilsoft-table-body" style="margin-top:0px;height:auto">
+                                                <table>
+                                                    <tr>
+                                                        <th>Container No</th>
+                                                        <th style="width:100px">Container Type</th>
+                                                        <th style="width:80px">ETD</th>
+                                                    </tr>
+                                                    <tr ng-repeat="item in loadingPlanDTOs">
+                                                        <td>{{item.containerNo}}</td>
+                                                        <td style="text-align:center">{{item.containerTypeNM}}</td>
+                                                        <td style="text-align:center">{{data.etd}}</td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </section>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="tabTracking">
+                            <div class="smart-form">
+                                <div class="row">
+                                    <section class="col col-lg-12">
+                                        <span class="box">
+                                            <i class="fa fa-user"></i>
+                                            <strong>Updated By</strong>:
+                                            <a ng-if="data.updatedBy" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{data.updatedBy}}" dat data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                {{data.updatorName}}
+                                            </a>
+                                        </span>
+                                        <span class="box"><i class="fa fa-calendar"></i> <strong>Updated Date</strong>: {{data.updatedDate}}</span>
+                                    </section>
+                                </div>
+                                <div class="row">
+                                    <section class="col col-lg-12">
+                                        <span class="box">
+                                            <i class="fa fa-user"></i>
+                                            <strong>Created By</strong>:
+                                            <a ng-if="data.createdBy" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{data.createdBy}}" dat data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                {{data.creatorName}}
+                                            </a>
+                                        </span>
+                                        <span class="box"><i class="fa fa-calendar"></i> <strong>Updated Date</strong>: {{data.createdDate}}</span>
+                                    </section>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <ul class="nav nav-tabs pull-left in">
+                    <li class="active">
+                        <a data-toggle="tab" href="#tabCostDetail"> <i class="fa fa-database"></i> <span class="hidden-mobile hidden-tablet">Cost Items</span> </a>
+                    </li>
+                </ul>
+            </header>
+            <div>
+                <div class="jarviswidget-editbox"></div>
+                <div class="widget-body">
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="tabCostDetail">
+                            <div class="row"> 
+                                <div class="col col-lg-12 m-bottom-15" >
+                                    <a ng-click="event.addCostItem($event)" class="btn btn-success btn-xs font-11" href="javascript:void(0);"><i class=" fa fa-plus"></i> Add Cost Item</a>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col col-lg-12">
+                                    <div id="grdCost" class="tilsoft-table-wrapper">
+                                        <div class="tilsoft-table">
+                                            <div class="tilsoft-table-header" style="width: 1000px;">
+                                                <div style="width:100px"></div>
+                                                <div style="width:400px" class="sorting" data-colname="transportCostItemID">Cost Item</div>
+                                                <div style="width:70px" class="sorting" data-colname="currency">Curr ency</div>
+                                                <div style="width:100px" class="sorting" data-colname="offerPrice">Offer Price</div>
+                                                @*<div style="width:100px" class="sorting" data-colname="alreadyInvoiced">Already Invoiced</div>*@
+                                                <div style="width:100px" class="sorting" data-colname="subTotalAmount">Invoice</div>
+                                                <div style="width:100px" class="sorting" data-colname="totalAmount">Total</div>
+                                                <div class="sorting" data-colname="remark">Remark</div>
+                                            </div>
+                                            <div class="tilsoft-table-body" style="width: 1000px;">
+                                                <table>
+                                                    <tbody ng-repeat="item in data.transportInvoiceDetailDTOs">
+                                                        <tr>
+                                                            <td style="text-align:center; vertical-align:middle; width:99px">
+                                                                <a ng-click="event.removeCostDetail($event,$index)" class="btn btn-danger btn-xs font-11" href="javascript:void(0);"><i class=" fa fa-times"></i>Del</a>
+                                                                <a ng-click="event.addCont($event,item)" class="btn btn-success btn-xs font-11" href="javascript:void(0);"><i class=" fa fa-plus"></i>Add</a>
+                                                            </td>
+                                                            <td style="width:400px;vertical-align:middle">
+                                                                <select ng-model="item.transportCostItemID" id="costitem{{item.transportInvoiceDetailID}}"  ng-options="costItem.transportCostItemID as costItem.transportCostItemNM for costItem in $parent.transportCostItemDTOs | filter : { currency: data.currency}" ng-focus="event.addNewCostDetailLine($event, $index,item)" ng-click="event.addNewCostDetailLine($event,$index,item)" ng-change="event.transportCostItemChange(item)">
+                                                                    <option></option>
+                                                                </select>
+                                                                <a class="btn btn-primary btn-xs" ng-click="transportCostItemForm.event.load(0,item)">...</a>
+                                                            </td>
+                                                            <td style="width:70px;text-align:right;vertical-align:middle">
+                                                                <span class="form-control">{{item.currency}}</span>
+                                                            </td>
+                                                            <td style="width:100px;text-align:center;vertical-align:middle">
+                                                                <span ng-if="item.transportCostChargeTypeID==1" class="form-control">{{item.offerPrice  | number : 2}}</span>
+                                                                <span ng-if="item.transportCostChargeTypeID==2" class="form-control">{{method.getTotalOfferPrice(item)  | number : 2}}</span>
+                                                            </td>
+                                                            @*<td style="width:100px;text-align:right;vertical-align:middle">
+                                                                <span class="form-control">{{item.alreadyInvoiced  | number : 2}}</span>
+                                                            </td>*@
+                                                            <td style="width:100px">
+                                                                <input type="text" ng-model="item.subTotalAmount" class="form-control" style="text-align:right" ng-focus="event.addNewCostDetailLine($event, $index,item)" ng-click="event.addNewCostDetailLine($event,$index,item)" furnindo-currency ng-disabled="item.transportCostChargeTypeID==2"/>
+                                                            </td>
+                                                            <td style="width:100px;text-align:right">
+                                                               <span class="form-control">{{method.getTotalAmountOfCostItem(item) | number : 2}}</span>
+                                                            </td>
+                                                            <td style="text-align:left">
+                                                                <input type="text" ng-model="item.remark" ng-focus="event.addNewCostDetailLine($event, $index,item)" ng-click="event.addNewCostDetailLine($event,$index,item)" />
+                                                            </td>
+                                                        </tr>
+
+                                                        <tr ng-show="item.transportInvoiceContainerDetailDTOs.length>0">
+                                                            <td></td>
+                                                            <td colspan="6">
+                                                                <div class="tilsoft-table">
+                                                                    <table>
+                                                                        <tr ng-repeat="cItem in item.transportInvoiceContainerDetailDTOs">
+                                                                            <td style="text-align:center; vertical-align:middle;width:30px">
+                                                                                <a ng-click="event.removeCont($event,$index,item)" class="btn btn-danger btn-xs font-11" href="javascript:void(0);"><i class=" fa fa-times"></i></a>                                                                                
+                                                                            </td>
+                                                                            <td style="width:432px">
+                                                                                <select ng-model="cItem.loadingPlanID" id="loadingplan{{cItem.transportInvoiceContainerDetailID}}" ng-options="loadingItem.loadingPlanID as loadingItem.containerNo for loadingItem in $parent.loadingPlanDTOs">
+                                                                                    <option></option>
+                                                                                </select>
+                                                                            </td>
+                                                                            <td style="width:100px;text-align:right"><span class="form-control">{{cItem.offerPrice | number : 2}}</span></td>
+                                                                            @*<td style="width:100px;text-align:right"><span class="form-control">{{cItem.alreadyInvoiced | number : 2}}</span></td>*@
+                                                                            <td style="width:100px">
+                                                                                <input class="form-control"  style="text-align:right" furnindo-currency ng-model="cItem.amount" ng-change="event.changeAmountOfCont(item)"/>
+                                                                            </td>
+                                                                            <td style="width:100px;text-align:right"><span class="form-control">{{method.getTotalAmountOfCont(cItem) | number : 2}}</span></td>
+                                                                            <td></td>
+                                                                        </tr>
+                                                                    </table>
+                                                                </div>
+                                                                
+                                                            </td>
+                                                        </tr>
+
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </article>
+
+
+    <div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="frmTransportCostItemInfo" class="modal fade" style="display: none;">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button aria-hidden="true" data-dismiss="modal" class="close" type="button">
+                        ×
+                    </button>
+                    <h4 id="myModalLabel" class="modal-title">{{transportCostItemForm.transportCostItemID==0?'Create New Transport Cost Item':'Transport Cost Item Infomation'}}</h4>
+                </div>
+                <div class="modal-body smart-form">
+                    <fieldset>
+                        <div class="row" ng-show="transportCostItemForm.data!=null">
+                            <div class="row">
+                                <section class="col col-lg-4">
+                                    <label>Cost Name</label>
+                                    <input type="text" ng-model="transportCostItemForm.data.transportCostItemNM" class="form-control" />
+                                </section>
+                                <section class="col col-lg-2">
+                                    <label>Cost Type</label>
+                                    <select id="transportCostTypeID" name="transportCostTypeID" class="form-control" ng-model="transportCostItemForm.data.transportCostTypeID" ng-options="item.transportCostTypeID as item.transportCostTypeNM for item in transportCostTypes">
+                                        <option value=""></option>
+                                    </select>
+                                </section>
+                                <section class="col col-lg-2">
+                                    <label>Charge Type</label>
+                                    <select id="transportCostChargeTypeID" name="TransportCostChargeTypeID" class="form-control" ng-model="transportCostItemForm.data.transportCostChargeTypeID" ng-options="item.transportCostChargeTypeID as item.transportCostChargeTypeNM for item in transportCostChargeTypes">
+                                        <option value=""></option>
+                                    </select>
+                                </section>
+                                <section class="col col-lg-2">
+                                    <label>Currency</label>
+                                    <select id="currency1" name="currency1" class="form-control" ng-model="transportCostItemForm.data.currency" ng-options="item.currencyID as item.currencyNM for item in currencies">
+                                        <option value=""></option>
+                                    </select>
+                                </section>
+                                <section class="col col-2">
+                                    <label class="label">&nbsp;</label>
+                                    <label class="checkbox">
+                                        <input type="checkbox" ng-model="transportCostItemForm.data.isDefault">
+                                        <i></i>Default
+                                    </label>
+                                </section>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="row">
+                                <section class="col col-lg-12">
+                                    <a class="btn btn-primary btn-xs" ng-click="transportCostItemForm.event.newCostItem()"><i class="fa fa-file-o"></i> New</a>
+                                    <a class="btn btn-success btn-xs" ng-click="transportCostItemForm.event.updateTransportCostItem()"><i class="fa fa-save"></i> Save</a>
+                                </section>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="tilsoft-table">
+                                <div class="tilsoft-table-body" style="margin-top:0px; height:280px">
+                                    <table>
+                                        <tr>
+                                            <th style="width:80px"></th>
+                                            <th>Cost Name</th>
+                                            <th style="width:130px">Cost Type</th>
+                                            <th style="width:160px">Charge Type</th>
+                                            <th style="width:100px">Currency</th>
+                                            <th style="width:50px">Default</th>
+                                        </tr>
+                                        <tr ng-repeat="item in transportCostItemDTOs">
+                                            <td>
+                                                <a class="btn btn-primary btn-xs" ng-click="transportCostItemForm.event.selectItem(item)">Select</a>
+                                                <a class="btn btn-danger btn-xs" ng-click="transportCostItemForm.event.deleteCostItem(item.transportCostItemID)">Del</a>
+                                            </td>
+                                            <td style="text-align:left">{{item.transportCostItemNM}}</td>
+                                            <td style="text-align:left">{{item.transportCostTypeNM}}</td>
+                                            <td style="text-align:left">{{item.transportCostChargeTypeNM}}</td>
+                                            <td style="text-align:center">{{item.currency}}</td>
+                                            <td style="text-align:center"><input type="checkbox" ng-model="item.isDefault" disabled /></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+                <div class="modal-footer">
+                    <button data-dismiss="modal" class="btn btn-default" type="button" ng-click="transportCostItemForm.event.cancel()">
+                        Cancel
+                    </button>
+                    <button class="btn btn-primary" type="button" ng-click="transportCostItemForm.event.ok()">
+                        OK
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+</form>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "TransportInvoice")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="#" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="event.update()" ng-disabled="data.invoiceStatusID==3"><i class="fa fa-save"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="#" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="Delete" style="color: #ff0000;" ng-click="event.delete($event)" ng-disabled="data.invoiceStatusID==3"><i class="fa fa-times"></i></a>
+        </li>
+
+        <li class="sparks-info">
+            <a href="#" class="btn btn-default" title="Set invoice as verify" style="color: #071bf7;" ng-click="event.setInvoiceStatus(2)" ng-disabled="data.invoiceStatusID==3 || data.invoiceStatusID==2"><i class="fa fa-check"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="#" class="btn btn-default" title="Set invoice as paid" style="color: #0df227;" ng-click="event.setInvoiceStatus(3)" ng-disabled="data.invoiceStatusID==3"><i class="fa fa-dollar"></i></a>
+        </li>
+    </ul>
+}
+@section pagejs {
+    <script src="~/Angular/app/jsonService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/support/service.js?c=@System.Guid.NewGuid().ToString().Replace("-","")"></script>
+
+    <script src="~/Angular/app/transportInvoice/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/transportInvoice/edit.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+
+    <script type="text/javascript">
+        jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/transportInvoice/';
+        jsonService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+        supportService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/support/';
+        supportService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+        var context = {
+            id: '@ViewBag.ID',
+            backUrl: '@Url.Action("Index", "transportInvoice")',
+            refreshUrl: '@Url.Action("Edit", "transportInvoice", new { id = UrlParameter.Optional })/',
+            errMsg: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED',
+            reportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]',
+
+            token: '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]',
+            isCopy: '@isCopy',
+            bookingID: '@bookingID',
+            transportOfferAPIServiceUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/transportOffer/'
+        }
+    </script>
+}
+

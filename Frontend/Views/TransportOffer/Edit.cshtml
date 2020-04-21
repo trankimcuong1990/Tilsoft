@@ -1,0 +1,455 @@
+﻿@{
+    ViewBag.Title = "Forwarder Offer";
+    ViewBag.Module = "Forwarder Offer";
+
+    //get param 
+    string IsCopy = "false";
+    if (Request.Params["isCopy"] != null)
+    {
+        IsCopy = Request.Params["isCopy"];
+    }
+}
+<style>
+    .tilsoft-table .select2-container {
+        width: 89% !important;
+        display:inline-block;
+    }    
+</style>
+
+<form class="row" name="editForm">
+
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>General</h2>
+            </header>
+            <div>
+                <div class="widget-body">
+                    <div class="smart-form">
+                        <div class="row">
+                           
+                            <section class="col col-lg-8">
+                                <label>Forwarder</label>
+                                <select id="forwarderID" name="forwarderID" ng-model="data.forwarderID" ng-options="item.forwarderID as item.forwarderNM for item in forwarders" required>
+                                    <option value=""></option>
+                                </select>
+                                <span class="help-block" ng-show="editForm.forwarderID.$error.required"><i class="fa fa-warning"></i>Forwarder is required.</span>
+                            </section>
+
+                            <section class="col col-lg-2">
+                                <label>Valid From</label>
+                                <label class="input">
+                                    <input name="validFrom" type="text" class="datepicker" ng-model="data.validFrom" data-dateformat="dd/mm/yy" required />
+                                    <i class="icon-append fa fa-calendar"></i>
+                                </label>
+                                <span class="help-block" ng-show="editForm.validFrom.$error.required"><i class="fa fa-warning"></i>Valid from date is required.</span>
+                            </section>
+
+                            <section class="col col-lg-2">
+                                <label>Valid To</label>
+                                <label class="input">
+                                    <input name="validTo" type="text" class="datepicker" ng-model="data.validTo" data-dateformat="dd/mm/yy" required />
+                                    <i class="icon-append fa fa-calendar"></i>
+                                </label>
+                                <span class="help-block" ng-show="editForm.validTo.$error.required"><i class="fa fa-warning"></i>Valid to date is required.</span>
+                            </section>
+
+                            
+                        </div>
+                        <div class="row">
+                            <section class="col col-4">
+                                <label>Description</label>
+                                <input name="description" type="text" class="form-control" ng-model="data.description" />
+                            </section>
+                            <section class="col col-4">
+                                <label class="label">
+                                    Transport File
+                                </label>
+                                <label class="input">
+                                    <span class="form-control">
+                                        {{data.friendlyName}}
+                                        <div style="position: absolute; right: 5px; top: 5px;">
+                                            <a ng-disabled="!data.fileLocation" href="javascript:void(0);" class="btn btn-primary btn-xs" style="font-size: 11px;" ng-click="event.downloadFile()">Download</a>
+                                            <a href="javascript:void(0);" class="btn btn-primary btn-xs" style="font-size: 11px;" ng-click="event.changeFile()">Change</a>
+                                            <a ng-disabled="!data.fileLocation" href="javascript:void(0);" class="btn btn-danger btn-xs" style="font-size: 11px;" ng-click="event.removeFile()">Remove</a>
+                                        </div>
+                                    </span>
+                                </label>
+                            </section>  
+                            <section class="col col-2">
+                                <label>Updated By</label>
+                                <span class="form-control">{{data.updatorName}}</span>
+                            </section>
+
+                            <section class="col col-2">
+                                <label>Updated Date</label>
+                                <span class="form-control">{{data.updatedDate}}</span>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <ul class="nav nav-tabs pull-left in">
+                    <li class="active">
+                        <a data-toggle="tab" href="#tabCostDetail"> <i class="fa fa-database"></i> <span class="hidden-mobile hidden-tablet">Cost</span> </a>
+                    </li>
+                    <li>
+                        <a data-toggle="tab" href="#tabConditionDetail"> <i class="fa fa-database"></i> <span class="hidden-mobile hidden-tablet">Condtion</span> </a>
+                    </li>
+                </ul>
+            </header>
+            <div>
+                <div class="jarviswidget-editbox"></div>
+                <div class="widget-body">
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="tabCostDetail">
+                            <div class="row">
+                                <div class="col col-lg-12">
+                                    <div id="grdCost" class="tilsoft-table-wrapper">
+                                        <div class="tilsoft-table">
+                                            <div class="tilsoft-table-header" style="width: 1200px;">
+                                                <div style="width:50px"></div>
+                                                <div style="width:350px" class="sorting" data-colname="transportCostItemID">Cost Item</div>
+                                                <div style="width:110px" class="sorting" data-colname="currency">Currency</div>
+                                                <div style="width:80px" class="sorting" data-colname="cost20DC">20DC</div>
+                                                <div style="width:80px" class="sorting" data-colname="cost40DC">40DC</div>
+                                                <div style="width:80px" class="sorting" data-colname="cost40HC">40HC</div>
+                                                <div style="width:150px" class="sorting" data-colname="polID">POL</div>
+                                                <div style="width:150px" class="sorting" data-colname="podID">POD</div>
+                                                <div class="sorting" data-colname="remark">Remark</div>
+                                            </div>
+                                            <div class="tilsoft-table-body" style="width: 1200px;">
+                                                <table>
+                                                    <tbody ng-repeat="item in data.transportOfferCostDetailDTOs">
+                                                        <tr>
+                                                            <td style="text-align:center; vertical-align:middle; width:49px">
+                                                                <a ng-click="event.removeCostDetail($event,$index)" class="btn btn-danger btn-xs font-11" href="javascript:void(0);"><i class=" fa fa-times"></i>Del</a>
+                                                            </td>
+                                                            <td style="width:350px;vertical-align:middle">
+                                                                <select ng-model="item.transportCostItemID" id="costitem{{item.transportOfferCostDetailID}}"  ng-options="costItem.transportCostItemID as costItem.transportCostItemNM for costItem in $parent.transportCostItemDTOs" ng-focus="event.addNewCostDetailLine($event, $index,item)" ng-click="event.addNewCostDetailLine($event,$index,item)" ng-change="event.transportCostItemChange(item)">
+                                                                    <option></option>
+                                                                </select>
+                                                                @*<a class="btn btn-success btn-xs {{item.transportCostItemID>0?'':'disabled'}}" ng-click="transportCostItemForm.event.load(item.transportCostItemID,item)"><i class="fa fa-pencil"></i></a>
+                                                                <a class="btn btn-primary btn-xs" ng-click="transportCostItemForm.event.load(0,item)"><i class="fa fa-plus"></i></a>*@
+                                                                <a class="btn btn-primary btn-xs" ng-click="transportCostItemForm.event.load(item.transportCostItemID,item)">...</a>
+                                                            </td>
+                                                            <td style="width:110px;text-align:center;vertical-align:middle">
+                                                                <select ng-model="item.currency" id="currency{{item.transportOfferCostDetailID}}"  ng-focus="event.addNewCostDetailLine($event, $index,item)" ng-click="event.addNewCostDetailLine($event,$index,item)" ng-options="currencyItem.currencyID as currencyItem.currencyNM for currencyItem in $parent.currencies">
+                                                                    <option></option>
+                                                                </select>
+                                                            </td>
+                                                            <td style="width:80px">
+                                                                <input type="text" avs-number ng-data-source="item.cost20DC" ng-decimal="2"  class="form-control" style="text-align:right" ng-focus="event.addNewCostDetailLine($event, $index,item)" ng-click="event.addNewCostDetailLine($event,$index,item)"/>
+                                                            </td>
+                                                            <td style="width:80px">
+                                                                <input type="text" avs-number ng-data-source="item.cost40DC" ng-decimal="2"  class="form-control" style="text-align:right" ng-focus="event.addNewCostDetailLine($event, $index,item)" ng-click="event.addNewCostDetailLine($event,$index,item)"/>
+                                                            </td>
+                                                            <td style="width:80px">
+                                                                <input type="text" avs-number ng-data-source="item.cost40HC" ng-decimal="2"  class="form-control" style="text-align:right" ng-focus="event.addNewCostDetailLine($event, $index,item)" ng-click="event.addNewCostDetailLine($event,$index,item)"/>
+                                                            </td>
+                                                            <td style="width:150px">
+                                                                <select ng-model="item.polid"  id="pol{{item.transportOfferCostDetailID}}"  ng-options="polItem.polid as polItem.poLname for polItem in $parent.poLs" ng-focus="event.addNewCostDetailLine($event, $index,item)" ng-click="event.addNewCostDetailLine($event,$index,item)">
+                                                                    <option></option>
+                                                                </select>
+                                                            </td>
+                                                            <td style="width:150px">
+                                                                <select ng-model="item.podid" id="pod{{item.transportOfferCostDetailID}}" ng-options="podItem.podid as podItem.podName for podItem in $parent.poDs" ng-focus="event.addNewCostDetailLine($event, $index,item)" ng-click="event.addNewCostDetailLine($event,$index,item)">
+                                                                    <option></option>
+                                                                </select>
+                                                            </td>
+                                                            <td style="text-align:left">
+                                                                <input type="text" ng-model="item.remark" ng-focus="event.addNewCostDetailLine($event, $index,item)" ng-click="event.addNewCostDetailLine($event,$index,item)" />
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>                                
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="tabConditionDetail">
+                            <div class="row">
+                                <div class="col col-lg-12">
+                                    <div id="grdCondition" class="tilsoft-table-wrapper">
+                                        <div class="tilsoft-table">
+                                            <div class="tilsoft-table-header" style="width: 1050px;">
+                                                <div style="width:50px"></div>
+                                                <div style="width:400px" class="sorting" data-colname="transportConditionItemID">Condition Item</div>
+                                                <div style="width:100px" class="sorting" data-colname="condition20DC">20DC</div>
+                                                <div style="width:100px" class="sorting" data-colname="condition40DC">40DC</div>
+                                                <div style="width:100px" class="sorting" data-colname="condition40HC">40HC</div>
+                                                @*<div style="width:200px" class="sorting" data-colname="polID">POL</div>*@
+                                                <div style="width:200px" class="sorting" data-colname="podID">POD</div>
+                                                <div class="sorting" data-colname="remark">Remark</div>
+                                            </div>
+                                            <div class="tilsoft-table-body" style="width: 1050px;">
+                                                <table>
+                                                    <tbody ng-repeat="item in data.transportOfferConditionDetailDTOs">
+                                                        <tr>
+                                                            <td style="text-align:center; vertical-align:middle; width:49px">
+                                                                <a ng-click="event.removeConditionDetail($event,$index)" class="btn btn-danger btn-xs font-11" href="javascript:void(0);"><i class=" fa fa-times"></i>Del</a>
+                                                            </td>
+                                                            <td style="width:400px;vertical-align:middle">
+                                                                <select ng-model="item.transportConditionItemID" id="conditionitem{{item.transportOfferConditionDetailID}}" ng-options="conditionItem.transportConditionItemID as conditionItem.transportConditionItemNM for conditionItem in $parent.transportConditionItemDTOs" ng-focus="event.addNewConditionDetailLine($event, $index,item)" ng-click="event.addNewConditionDetailLine($event,$index,item)">
+                                                                    <option></option>
+                                                                </select>
+                                                                @*<a class="btn btn-success btn-xs {{item.transportConditionItemID>0?'':'disabled'}}" ng-click="transportConditionItemForm.event.load(item.transportConditionItemID,item)"><i class="fa fa-pencil"></i></a>
+                                                                <a class="btn btn-primary btn-xs" ng-click="transportConditionItemForm.event.load(0,item)"><i class="fa fa-plus"></i></a>*@
+                                                                <a class="btn btn-primary btn-xs" ng-click="transportConditionItemForm.event.load(item.transportConditionItemID,item)">...</a>
+                                                            </td>
+                                                            <td style="width:100px">
+                                                                <input type="text" ng-model="item.condition20DC" class="form-control" style="text-align:right" ng-focus="event.addNewConditionDetailLine($event, $index,item)" ng-click="event.addNewConditionDetailLine($event,$index,item)" />
+                                                            </td>
+                                                            <td style="width:100px">
+                                                                <input type="text" ng-model="item.condition40DC" class="form-control" style="text-align:right" ng-focus="event.addNewConditionDetailLine($event, $index,item)" ng-click="event.addNewConditionDetailLine($event,$index,item)" />
+                                                            </td>
+                                                            <td style="width:100px">
+                                                                <input type="text" ng-model="item.condition40HC" class="form-control" style="text-align:right" ng-focus="event.addNewConditionDetailLine($event, $index,item)" ng-click="event.addNewConditionDetailLine($event,$index,item)" />
+                                                            </td>
+
+                                                            @*<td style="width:200px">
+                                                                <select ng-model="item.polid" id="polcondition{{item.transportOfferConditionDetailID}}" ng-options="polItem.polid as polItem.poLname for polItem in $parent.poLs" ng-focus="event.addNewConditionDetailLine($event, $index,item)" ng-click="event.addNewConditionDetailLine($event,$index,item)">
+                                                                    <option></option>
+                                                                </select>
+                                                            </td>*@
+
+                                                            <td style="width:200px">
+                                                                <select ng-model="item.podid" id="podcondition{{item.transportOfferConditionDetailID}}" ng-options="podItem.podid as podItem.podName for podItem in $parent.poDs" ng-focus="event.addNewConditionDetailLine($event, $index,item)" ng-click="event.addNewConditionDetailLine($event,$index,item)">
+                                                                    <option></option>
+                                                                </select>
+                                                            </td>
+
+                                                            <td style="text-align:left">
+                                                                <input type="text" ng-model="item.remark" ng-focus="event.addNewConditionDetailLine($event, $index,item)" ng-click="event.addNewConditionDetailLine($event,$index,item)" />
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+
+    <div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="frmTransportCostItemInfo" class="modal fade" style="display: none;">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button aria-hidden="true" data-dismiss="modal" class="close" type="button">
+                        ×
+                    </button>
+                    <h4 id="myModalLabel" class="modal-title">{{transportCostItemForm.transportCostItemID==0?'Create New Transport Cost Item':'Transport Cost Item Infomation'}}</h4>
+                </div>
+                <div class="modal-body smart-form">
+                    <fieldset>
+                        <div class="row" ng-show="transportCostItemForm.data!=null">
+                            <div class="row">
+                                <section class="col col-lg-4">
+                                    <label>Cost Name</label>
+                                    <input type="text" ng-model="transportCostItemForm.data.transportCostItemNM" class="form-control" />
+                                </section>
+                                <section class="col col-lg-2">
+                                    <label>Cost Type</label>
+                                    <select id="transportCostTypeID" name="transportCostTypeID" class="form-control" ng-model="transportCostItemForm.data.transportCostTypeID" ng-options="item.transportCostTypeID as item.transportCostTypeNM for item in transportCostTypes">
+                                        <option value=""></option>
+                                    </select>
+                                </section>
+                                <section class="col col-lg-2">
+                                    <label>Charge Type</label>
+                                    <select id="transportCostChargeTypeID" name="TransportCostChargeTypeID" class="form-control" ng-model="transportCostItemForm.data.transportCostChargeTypeID" ng-options="item.transportCostChargeTypeID as item.transportCostChargeTypeNM for item in transportCostChargeTypes">
+                                        <option value=""></option>
+                                    </select>
+                                </section>
+                                <section class="col col-lg-2">
+                                    <label>Currency</label>
+                                    <select id="currency1" name="currency1" class="form-control" ng-model="transportCostItemForm.data.currency" ng-options="item.currencyID as item.currencyNM for item in currencies">
+                                        <option value=""></option>
+                                    </select>
+                                </section>
+                                <section class="col col-2">
+                                    <label class="label">&nbsp;</label>
+                                    <label class="checkbox">
+                                        <input type="checkbox" ng-model="transportCostItemForm.data.isDefault">
+                                        <i></i>Default
+                                    </label>
+                                </section>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="row">
+                                <section class="col col-lg-12">
+                                    <a class="btn btn-primary btn-xs" ng-click="transportCostItemForm.event.newCostItem()"><i class="fa fa-file-o"></i> New</a>
+                                    <a class="btn btn-success btn-xs" ng-click="transportCostItemForm.event.updateTransportCostItem()"><i class="fa fa-save"></i> Save</a>
+                                </section>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="tilsoft-table">
+                                <div class="tilsoft-table-body" style="margin-top:0px; height:280px">
+                                    <table>
+                                        <tr>
+                                            <th style="width:80px"></th>
+                                            <th>Cost Name</th>
+                                            <th style="width:130px">Cost Type</th>
+                                            <th style="width:160px">Charge Type</th>
+                                            <th style="width:100px">Currency</th>
+                                            <th style="width:50px">Default</th>
+                                        </tr>
+                                        <tr ng-repeat="item in transportCostItemDTOs">
+                                            <td>
+                                                <a class="btn btn-primary btn-xs" ng-click="transportCostItemForm.event.selectItem(item)">Select</a>
+                                                <a class="btn btn-danger btn-xs" ng-click="transportCostItemForm.event.deleteCostItem(item.transportCostItemID)">Del</a>
+                                            </td>
+                                            <td style="text-align:left">{{item.transportCostItemNM}}</td>
+                                            <td style="text-align:left">{{item.transportCostTypeNM}}</td>
+                                            <td style="text-align:left">{{item.transportCostChargeTypeNM}}</td>
+                                            <td style="text-align:center">{{item.currency}}</td>
+                                            <td style="text-align:center"><input type="checkbox" ng-model="item.isDefault" disabled/></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+                <div class="modal-footer">
+                    <button data-dismiss="modal" class="btn btn-default" type="button" ng-click="transportCostItemForm.event.cancel()">
+                        Cancel
+                    </button>
+                    <button class="btn btn-primary" type="button" ng-click="transportCostItemForm.event.ok()">
+                        OK
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="frmTransportConditionItemInfo" class="modal fade" style="display: none;">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button aria-hidden="true" data-dismiss="modal" class="close" type="button">
+                        ×
+                    </button>
+                    <h4 id="myModalLabel" class="modal-title">{{transportConditionItemForm.transportConditionItemID==0?'Create New Transport Condition Item':'Transport Condition Item Infomation'}}</h4>
+                </div>
+                <div class="modal-body smart-form">
+                    <fieldset>
+                        <div class="row" ng-show="transportConditionItemForm.data!=null">
+                            <div class="row">
+                                <section class="col col-lg-10">
+                                    <label>Condition Name</label>
+                                    <input type="text" ng-model="transportConditionItemForm.data.transportConditionItemNM" class="form-control" />
+                                </section>
+                                <section class="col col-2">
+                                    <label class="label">&nbsp;</label>
+                                    <label class="checkbox">
+                                        <input type="checkbox" ng-model="transportConditionItemForm.data.isDefault">
+                                        <i></i>Default
+                                    </label>
+                                </section>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="row">
+                                <section class="col col-lg-12">
+                                    <a class="btn btn-primary btn-xs" ng-click="transportConditionItemForm.event.newConditionItem()"><i class="fa fa-file-o"></i> New</a>
+                                    <a class="btn btn-success btn-xs" ng-click="transportConditionItemForm.event.updateTransportConditionItem()"><i class="fa fa-save"></i> Save</a>
+                                </section>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="tilsoft-table">
+                                <div class="tilsoft-table-body" style="margin-top:0px; height:280px">
+                                    <table>
+                                        <tr>
+                                            <th style="width:80px"></th>
+                                            <th>Condition Name</th>
+                                            <th style="width:50px">Default</th>
+                                        </tr>
+                                        <tr ng-repeat="item in transportConditionItemDTOs">
+                                            <td>
+                                                <a class="btn btn-primary btn-xs" ng-click="transportConditionItemForm.event.selectItem(item)">Select</a>
+                                                <a class="btn btn-danger btn-xs" ng-click="transportConditionItemForm.event.deleteConditionItem(item.transportConditionItemID)">Del</a>
+                                            </td>
+                                            <td style="text-align:left">{{item.transportConditionItemNM}}</td>
+                                            <td style="text-align:center"><input type="checkbox" ng-model="item.isDefault" disabled /></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                    </fieldset>
+                </div>
+                <div class="modal-footer">
+                    <button data-dismiss="modal" class="btn btn-default" type="button" ng-click="transportConditionItemForm.event.cancel()">
+                        Cancel
+                    </button>
+                    <button class="btn btn-primary" type="button" ng-click="transportConditionItemForm.event.ok()">
+                        OK
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</form>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "TransportOffer")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="#" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="event.update()"><i class="fa fa-save"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="#" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="Delete" style="color: #ff0000;" ng-click="event.delete($event)"><i class="fa fa-times"></i></a>
+        </li>
+    </ul>
+}
+@section pagejs {
+    <script src="~/Angular/app/jsonService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/support/service.js?c=@System.Guid.NewGuid().ToString().Replace("-","")"></script>
+
+    <script src="~/Angular/app/transportOffer/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/transportOffer/edit.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+
+    <script type="text/javascript">
+        jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/transportOffer/';
+        jsonService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+        supportService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/support/';
+        supportService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+        var context = {
+            id: '@ViewBag.ID',
+            backUrl: '@Url.Action("Index", "TransportOffer")',
+            refreshUrl: '@Url.Action("Edit", "TransportOffer", new { id = UrlParameter.Optional })/',
+            errMsg: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED',
+            reportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]',
+
+            token: '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]',
+            isCopy : '@IsCopy'
+        }
+    </script>
+}
+

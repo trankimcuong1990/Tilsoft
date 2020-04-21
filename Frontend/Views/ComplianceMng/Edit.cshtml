@@ -1,0 +1,274 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+
+    ViewBag.Title = (ViewBag.ID == 0) ? "Create Compliance" : "Edit Compliance";
+    ViewBag.SubTitle = (ViewBag.ID == 0) ? "Create" : "Edit";
+    ViewBag.Module = "Compliance";
+
+    string userManualUrl = string.Empty;
+    if (System.IO.File.Exists(Server.MapPath("~/UserManual/" + ViewBag.ModuleCode + ".pdf")))
+    {
+        userManualUrl = "/UserManual/" + ViewBag.ModuleCode + ".pdf";
+    }
+}
+
+<form name="editForm" class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+
+        <div class="jarviswidget jarviswidget-color-darken" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>@ViewBag.SubTitle General</h2>
+            </header>
+            <div>
+                <div class="jarviswidget-editbox"></div>
+                <div class="widget-body">
+                    <div class="row">
+                        <div class="col-sm-2  m-bottom-15">
+                            <label>Process No.</label>
+                            <span class="form-control">
+                                {{data.complianceProcessDTO.complianceProcessUD}}
+                            </span>
+                        </div>
+                        <div class="col-sm-2  m-bottom-15">
+                            <label><i class="fa fa-calendar"></i> Expired Date </label>
+                            <label class="input">
+                                <input id="expiredDate" class="form-control" style="font-family: Arial; font-size: 12px" ng-on-change="event.autoDate(data.complianceProcessDTO.expiredDate)" avs-calendar ng-data-source="data.complianceProcessDTO.expiredDate" />
+                            </label>
+                        </div>
+                        <div class="col-sm-2  m-bottom-15">
+                            <label><i class="fa fa-calendar"></i> Renew Date </label>
+                            <label class="input">
+                                <input id="renewDate" class="form-control" style="font-family: Arial; font-size: 12px" avs-calendar ng-data-source="data.complianceProcessDTO.renewDate" />
+                            </label>
+                        </div>
+                        <div class="col-sm-2  m-bottom-15">
+                            <label><i class="fa fa-calendar"></i> Fictive Date </label>
+                            <label class="input">
+                                <input id="fictiveDate" class="form-control" style="font-family: Arial; font-size: 12px" avs-calendar ng-data-source="data.complianceProcessDTO.fictiveDate" />
+                            </label>
+                        </div>
+                        <div class="col-sm-2  m-bottom-15">
+                            <label>
+                                Certificate Type
+                                <em class="note note-error" ng-show="!data.complianceProcessDTO.complianceCertificateTypeID"> (Required)</em>
+                            </label>
+                            <select class="form-control" ng-model="data.complianceProcessDTO.complianceCertificateTypeID" ng-options="item.complianceCertificateTypeID as item.complianceCertificateTypeNM for item in data.complianceCertificateTypeDTOs">
+                                <option value=""></option>
+                            </select>
+                        </div>
+                        <div class="col-sm-2  m-bottom-15">
+                            <label>Certificate Number</label>
+                            <input class="form-control" type="text" ng-model="data.complianceProcessDTO.certificateNumber">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-2  m-bottom-15">
+                            <label>Status</label>
+                            <select class="form-control" ng-model="data.complianceProcessDTO.auditStatusID" ng-options="item.auditStatusID as item.auditStatusNM for item in data.auditStatusDTOs">
+                                <option value=""></option>
+                            </select>
+                        </div>
+                        <div class="col-sm-2  m-bottom-15">
+                            <label>
+                                Rating
+                            </label>
+                            <input class="form-control" type="text" ng-model="data.complianceProcessDTO.rating">
+                        </div>
+                        <div class="col-sm-2">
+                            <label>Client Code</label>
+                            <select ui-select2 ng-model="data.complianceProcessDTO.clientID" class="select2">
+                                <option value=""></option>
+                                <option ng-repeat="item in data.clientDTOs | orderBy: 'clientUD'" value="{{item.clientID}}">{{item.clientUD}}</option>
+                            </select>
+                        </div>
+                        <div class="col-sm-2">
+                            <label>Factory</label>
+                            <select ui-select2 ng-model="data.complianceProcessDTO.factoryID" class="select2">
+                                <option value=""></option>
+                                <option ng-repeat="item in data.factoryDTOs | orderBy: 'factoryUD'" value="{{item.factoryID}}">{{item.factoryUD}}</option>
+                            </select>
+                        </div>
+                        <div class="col-sm-2  m-bottom-15">
+                            <label>Updated By</label>
+                            <span class="form-control">                            
+                                <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{data.complianceProcessDTO.userID}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                    <i class="fa fa-user"></i> {{data.complianceProcessDTO.employeeNM}}
+                                </a>
+                            </span>
+                        </div>
+                        <div class="col-sm-2  m-bottom-15">
+                            <label>Updated Date</label>
+                            <span class="form-control">
+                                {{data.complianceProcessDTO.updatedDate}}
+                            </span>
+                        </div>                       
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6  m-bottom-15">
+                            <label>Remark</label>
+                            <input class="form-control" type="text" ng-model="data.complianceProcessDTO.remark">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+
+            <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+                <header>
+                    <ul class="nav nav-tabs pull-left in">
+                        <li class="active">
+                            <a data-toggle="tab" ng-click="selectedTab('tabAttachedFile')" href="javascript:void(0)"> <i class="fa fa-database"></i> <span class="hidden-mobile hidden-tablet">Attached File</span> </a>
+                        </li>
+                        <li>
+                            <a data-toggle="tab" ng-click="selectedTab('tabPIC')" href="javascript:void(0)"> <i class="fa fa-database"></i> <span class="hidden-mobile hidden-tablet">PIC</span> </a>
+                        </li>
+                    </ul>
+                </header>
+                <div>
+                    <div class="jarviswidget-editbox"></div>
+                    <div class="widget-body">
+                        <div class="tab-content" id="tab-content-detail">                           
+                            <div class="tab-pane active" id="tabAttachedFile">
+                                <div class="widget-body no-padding">
+                                    <section class="col col-lg-12">
+                                        <a class="btn btn-primary btn-xs font-11" href="javascript:void(0);" ng-click="addAttachedFile($event)" style="margin-bottom: 10px;"><i class="fa fa-plus"></i> Add new </a>
+                                        <div class="tilsoft-table-wrapper">
+                                            <div class="tilsoft-table">
+                                                <div class="tilsoft-table-body" style="width: 100%; overflow-y: auto; height: auto; min-height: 100px; margin-top: 0px;">
+                                                    <table>
+                                                        <tbody>
+                                                            <tr>
+                                                                <th style="width: 50px;">&nbsp;</th>
+                                                                <th style="width: 55px;">Certificate</th>
+                                                                <th style="width: 120px;">File</th>
+                                                                <th></th>
+                                                            </tr>
+                                                            <tr ng-repeat="item in data.complianceProcessDTO.complianceAttachedFileDTOs">
+                                                                <td style="text-align: center;">
+                                                                    <a href="javascript:void(0);" title="Remove" class="btn btn-danger btn-xs font-11" ng-click="removeAttachedFile($event, item.complianceAttachedFileID)">Remove  </a>
+                                                                </td>
+                                                                <td style="text-align: center;"><input type="checkbox" ng-model="item.isCertificate" ng-click="method.checkCertificate($event,item)" /></td>
+                                                                <td style="text-align: center;" class="action">
+                                                                    @Html.Partial("~/Views/Shared/_Controls/_FileUploadBox2.cshtml", new Frontend.Models.FileUploadViewModel2() { ControlID = "item.complianceAttachedFileID", TypeID = 1, URLBinding = "item.fileUDUrl", FileName = "item.fileUDFriendlyName", JSOnChangeHandler = "changeFileUD", JSONRemoveHandler = "removeFileUD" })
+                                                                </td>
+                                                                <td></td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+                                </div>
+                            </div>
+                            <div class="tab-pane " id="tabPIC">
+                                <div class="widget-body no-padding">
+                                    <section class="col col-lg-12">
+                                        <a class="btn btn-primary btn-xs font-11" href="javascript:void(0);" ng-click="addPIC($event)" style="margin-bottom: 10px;"><i class="fa fa-plus"></i> Add new </a>
+                                        <div class="tilsoft-table-wrapper">
+                                            <div class="tilsoft-table">
+                                                <div class="tilsoft-table-body" style="width: 100%; overflow-y: hidden; height: auto; min-height: 100px; margin-top: 0px;">
+                                                    <table>
+                                                        <tr>
+                                                            <th style="width: 50px;">&nbsp;</th>
+                                                            <th style="width: 120px;">Employee</th>
+                                                            <th style="width: 120px;">PreparationTimeFrom</th>
+                                                            <th style="width: 120px;">PreparationTimeTo</th>
+                                                            <th style="width: 120px;">File</th>
+                                                            <th style="width: 360px;">Remark</th>
+                                                            <th></th>
+                                                        </tr>
+                                                        <tr ng-repeat="item in data.complianceProcessDTO.compliancePICDTOs">
+                                                            <td style="text-align: center;">
+                                                                <a href="javascript:void(0);" title="Remove" class="btn btn-danger btn-xs font-11" ng-click="removePIC($event, item.compliancePICID)">Remove  </a>
+                                                            </td>
+                                                            <td style="width: 300px;">
+                                                                <select ui-select2 ng-model="item.employeeID" class="select2">
+                                                                    <option value=""></option>
+                                                                    <option ng-repeat="employee in data.employeeDTOs | orderBy: 'employeeNM'" value="{{employee.employeeID}}">{{employee.employeeNM}}</option>
+                                                                </select>
+                                                            </td>
+                                                            <td>
+                                                                <label class="input">
+                                                                    <input class="form-control" style="font-family: Arial; font-size: 12px" avs-calendar ng-data-source="item.preparationTimeFrom" />
+                                                                </label>
+                                                            </td>
+                                                            <td>
+                                                                <label class="input">
+                                                                    <input class="form-control" style="font-family: Arial; font-size: 12px" avs-calendar ng-data-source="item.preparationTimeTo" />
+                                                                </label>
+                                                            </td>
+                                                            <td style="text-align: center;" class="action">
+                                                                @Html.Partial("~/Views/Shared/_Controls/_FileUploadBox2.cshtml", new Frontend.Models.FileUploadViewModel2() { ControlID = "item.compliancePICID", TypeID = 2, URLBinding = "item.fileUDUrl", FileName = "item.fileUDFriendlyName", JSOnChangeHandler = "changeFileUD", JSONRemoveHandler = "removeFileUD" })
+
+                                                            </td>
+                                                            <td>
+                                                                <input class="form-control" type="text" ng-model="item.remark">
+                                                            </td>
+
+                                                            <td></td>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </article>
+
+</form>
+
+@section FormAction{
+<ul id="sparks">
+    <li class="sparks-info">
+        <a href="@Url.Action("Index", "ComplianceMng")" class="btn btn-default" title="Back">
+            <i class="fa fa-arrow-left"></i>
+        </a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0)" class="btn btn-default" ng-if="item.total==0 || item.total==null" title="Delete" ng-class="{'disabled': data.complianceCertificateTypeID == 0}" ng-click="event.deletedata(data.complianceCertificateType)">
+            <i class="fa fa-times"></i>
+        </a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0)" class="btn btn-default" title="Save" ng-click="update($event)">
+            <i class="fa fa-floppy-o"></i>
+        </a>
+    </li>
+    @if (!string.IsNullOrEmpty(userManualUrl))
+    {
+        <li class="sparks-info">
+            <a target="_blank" href="@userManualUrl" class="btn btn-default" title="Help"><i class="fa fa-info"></i></a>
+        </li>
+    }
+</ul>
+}
+
+@section pagejs{
+    <script type="text/javascript">
+        var context = {
+            id: @ViewBag.ID,
+            backUrl: '@Url.Action("Index", "ComplianceMng")',
+            refreshUrl: '@Url.Action("Edit", "ComplianceMng", new { id = UrlParameter.Optional })/',
+            serviceUrl: '@(serviceRoot)/api/compliance/',
+            token: '@token'        
+        };
+    </script>
+    <script type="text/javascript" src="~/Views/ComplianceMng/edit.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Views/ComplianceMng/service.js?v=@guid"></script>
+}
+

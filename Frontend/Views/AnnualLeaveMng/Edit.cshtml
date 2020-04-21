@@ -1,0 +1,225 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+
+    ViewBag.Title = (ViewBag.ID == 0) ? "Create Leave Request" : "Edit Leave Request";
+    ViewBag.SubTitle = (ViewBag.ID == 0) ? "Create" : "Edit";
+    ViewBag.Module = "Annual Leave";
+}
+
+<form name="editForm" class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>@ViewBag.SubTitle General</h2>
+            </header>
+            <div>
+                <div class="jarviswidget-editbox"></div>
+                <div class="widget-body">
+                    <div class="smart-form">
+                        <div class="row">
+                            <section class="col col-lg-2">
+                                <label class="label">
+                                    <b>Request by</b>
+                                </label>
+                                <label class="input">
+                                    <select disabled class="form-control" ng-model="data.statusUpdatedEmployeeIDBy" ng-options="employeeDTO.employeeID as employeeDTO.employeeNM for employeeDTO in employeeDTOs">
+                                        <option value=""></option>
+                                    </select>
+                                </label>
+                            </section>
+                            <section class="col col-lg-2">
+                                <label class="label">
+                                    <b>Request for</b>
+                                </label>
+                                <label class="select" >
+                                    <select ui-select2 ng-model="data.employeeID" class="select2" ng-disabled="data.annualLeaveTrackingID">
+                                        <option value=""></option>
+                                        <option ng-repeat="employeeDTO in employeeDTOs | orderBy: 'employeeNM'" value="{{employeeDTO.employeeID}}">{{employeeDTO.employeeNM}}</option>
+                                    </select>
+                                </label>
+                            </section>
+                            <section class="col col-lg-2">
+                                <label class="label">
+                                    <b>Status</b>
+                                </label>
+                                <label class="input">
+                                    <select disabled class="form-control" ng-model="data.statusID" ng-options="annualLeaveStatusDTO.annualLeaveStatusID as annualLeaveStatusDTO.annualLeaveStatusNM for annualLeaveStatusDTO in annualLeaveStatusDTOs">
+                                        <option value=""></option>
+                                    </select>
+                                </label>
+                            </section>
+                            <section class="col col-lg-2">
+                                <label class="label">
+                                    <b>Affected Year</b>
+                                </label>
+                                <label class="input">
+                                    <input type="text" class="form-control" style="text-align: right;background:#fff4a6" ng-model="data.affectedYear" disabled/>
+                                </label>
+                            </section>
+                            <section class="col col-lg-2">
+                                <label class="label">
+                                    <b>Requested time off</b>
+                                </label>
+                                <label class="input">
+                                    <input type="text" class="form-control" style="text-align: right;background:#fff4a6" avs-number ng-data-source="data.requestedTimeOff" ng-decimal="1" disabled />
+                                </label>
+                            </section>
+                            <section class="col col-lg-2">
+                                <label class="label">
+                                    <b>Available time</b>
+                                </label>
+                                <label class="input">
+                                    <input type="text" class="form-control" style="text-align: right;background:#fff4a6" ng-data-source="availableTime" avs-number ng-decimal="1" disabled />
+                                </label>
+                            </section>
+                        </div>                       
+                        <div class="row">
+                            <section class="col col-lg-6">
+                                <label class="label">
+                                    <b>Leave reason</b>
+                                </label>
+                                <label class="textarea">
+                                    <textarea rows="6" ng-model="data.remark"></textarea>
+                                </label>                               
+                            </section>
+
+                            <section class="col col-lg-6">
+                                <label class="label">
+                                    <b>Comment</b>
+                                </label>                          
+                                <label class="textarea">
+                                    <textarea rows="6" ng-model="data.managerRemark"></textarea>
+                                </label>
+                            </section>
+                        </div>
+
+                         <div class="row">
+                                <section class="col col-lg-12">
+                                    <a class="btn btn-primary btn-xs font-11" href="javascript:void(0);" ng-click="event.addWarehouse($event)" style="margin-bottom: 10px;"><i class="fa fa-plus"></i> Add new </a>
+                                    <div class="tilsoft-table-wrapper">
+                                        <div class="tilsoft-table">
+                                            <div class="tilsoft-table-body" style="width: 100%; overflow-y: hidden; height: auto; min-height: 100px; margin-top: 0px;">
+                                                <table>
+                                                    <tr>
+                                                        <th style="width: 50px;">&nbsp;</th>
+                                                        <th style="width: 150px;">Leave type</th>
+                                                        <th style="width: 250px;">Leave from date</th>
+                                                        <th style="width: 150px;">Leave from time</th>
+                                                        <th style="width: 250px;">Leave to date</th>
+                                                        <th style="width: 150px;">Leave to time</th>
+                                                        <th style="width: 100px;">Days off</th>
+                                                        <th></th>
+                                                    </tr>
+                                                    <tr ng-repeat="item in data.annualLeaveTrackingDetailDTOs">
+                                                        <td style="text-align: center;width: 50px;">
+                                                            <a href="javascript:void(0);" title="Remove" class="btn btn-danger btn-xs font-11" ng-click="event.removeWarehouse($event, item.annualLeaveTrackingDetailID)">Remove  </a>
+                                                        </td>
+                                                        <td style="width: 150px;">
+                                                            <label class="input">
+                                                                <select class="form-control" ng-model="item.leaveTypeID" ng-options="annualLeaveTypeDTO.annualLeaveTypeID as annualLeaveTypeDTO.annualLeaveTypeNM for annualLeaveTypeDTO in annualLeaveTypeDTOs">
+                                                                    <option value=""></option>
+                                                                </select>
+                                                            </label>
+                                                        </td>
+                                                        <td style="width: 250px;" ng-class="{'state-error': editForm.fromDate.$error.required}">
+                                                            <label class="input">
+                                                                <i class="icon-append fa fa-calendar"></i>
+                                                                <input class="form-control" style="font-family: Arial; font-size: 12px" avs-calendar ng-on-change="event.calRequestedTimeOff()" ng-data-source="item.fromDate" />
+                                                            </label>
+                                                        </td>
+                                                        <td style="width: 150px;" ng-class="{'state-error': editForm.fromTime.$error.required}">
+                                                            <label class="select">
+                                                                <select class="form-control" ng-model="item.fromTime" ng-options="time as time for time in fromTimeRange" ng-change="event.calRequestedTimeOff()" required style="font-family: Arial">
+                                                                    <option value=""></option>
+                                                                </select>
+                                                                <i></i>
+                                                            </label>
+                                                        </td>
+                                                        <td style="width: 250px;" ng-class="{'state-error': editForm.toDate.$error.required}">
+                                                            <label class="input">
+                                                                <i class="icon-append fa fa-calendar"></i>
+                                                                <input class="form-control" style="font-family: Arial; font-size: 12px" avs-calendar ng-on-change="event.calRequestedTimeOff()" ng-data-source="item.toDate" />
+                                                            </label>
+                                                        </td>
+                                                        <td style="width: 150px;" ng-class="{'state-error': editForm.toTime.$error.required}">
+                                                            <label class="select">
+                                                                <select class="form-control" ng-model="item.toTime" ng-options="time as time for time in toTimeRange" ng-change="event.calRequestedTimeOff()" required style="font-family: Arial">
+                                                                    <option value=""></option>
+                                                                </select>
+                                                                <i></i>
+                                                            </label>
+                                                        </td>
+                                                        <td style="width: 100px;">
+                                                            <label class="input">
+                                                                <input type="text" class="form-control" style="text-align: right" avs-number ng-data-source="item.numberOfDays" ng-decimal="1" disabled />
+                                                            </label>
+                                                        </td>
+                                                        <td></td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+                            </div>
+                        </div>
+                    </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+@section FormAction{
+<ul id="sparks">
+    <li class="sparks-info">
+        <a href="@Url.Action("Index", "AnnualLeaveMng")" class="btn btn-default">
+            <i class="fa fa-arrow-left"></i>
+        </a>
+    </li>
+    @*<li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default" ng-click="event.deleteAnnualLeave()">
+                <i class="fa fa-times"></i>
+            </a>
+        </li>*@
+    <li class="sparks-info" ng-hide="(data.statusID != 1)">
+        <a href="javascript:void(0)" class="btn btn-default" ng-click="event.saveAnnualLeave()">
+            <i class="fa fa-floppy-o"></i>
+        </a>
+    </li>
+    <li class="sparks-info" ng-hide="(data.statusID != 1) || (data.reportToID != data.employeeLoginID)">
+        <a href="javascript:void(0)" class="btn btn-default" ng-click="event.approve()" title="Approve" style="color: darkblue" >
+            <i class="fa fa-check"></i>
+        </a>
+    </li>   
+    <li class="sparks-info" ng-hide="(data.statusID != 1) || (data.reportToID != data.employeeLoginID)">
+        <a href="javascript:void(0)" class="btn btn-default" ng-click="event.reject()" title="Reject" style="color: red">
+            <i class="fa fa-mail-reply"></i>
+        </a>
+    </li>
+    <li class="sparks-info" ng-show="data.statusID == 1 && data.employeeLoginID == data.statusUpdatedEmployeeIDBy">
+        <a href="javascript:void(0)" class="btn btn-default" ng-click="event.cancel()" title="Cancel">
+            <i class="fa fa-times"></i>
+        </a>
+    </li>
+</ul>
+}
+
+@section pagejs{
+    <script type="text/javascript">
+        var context = {
+            id: @ViewBag.ID,
+            backUrl: '@Url.Action("Index", "AnnualLeaveMng")',
+            refreshUrl: '@Url.Action("Edit", "AnnualLeaveMng", new { id = UrlParameter.Optional })/',
+            serviceUrl: '@(serviceRoot)/api/annualLeaveMng/',
+            token: '@token'
+        };
+    </script>
+    <script type="text/javascript" src="~/Views/AnnualLeaveMng/edit.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Views/AnnualLeaveMng/service.js?v=@guid"></script>
+}

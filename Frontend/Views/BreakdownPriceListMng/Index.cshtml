@@ -1,0 +1,128 @@
+﻿@{
+    ViewBag.Title = "Breakdown Price List";
+    ViewBag.Module = "Breakdown Price List";
+}
+
+<form class="row" id="main-form">
+    <div ng-show="currentScreen==screen._MAIN">
+        <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+            <div class="jarviswidget" id="wid-id-search-result" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+                <header>
+                    <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                    <h2>Search Result</h2>
+                </header>
+                <div class="smart-form">
+                    <div class="widget-body no-padding">
+                        <div avs-scroll grid-handler="gridHandler" class="tilsoft-table-wrapper">
+                            <div class="tilsoft-table">
+                                <div class="tilsoft-table-header" style="width: 1100px;">
+                                    <div style="width:70px"></div>
+                                    <div style="width: 120px;" class="sorting" data-colname="workCenterNM">Code</div>
+                                    <div style="width: 340px;" class="sorting" data-colname="productArticleCode">VN Name</div>
+                                    <div style="width: 120px;" class="sorting" data-colname="productDescription">EN Name</div>
+                                    <div style="width: 70px;" class="sorting" data-colname="productDescription">Unit</div>
+                                    <div style="width: 100px;" class="sorting" data-colname="productDescription">AVF Price VND</div>
+                                    <div style="width: 100px;" class="sorting" data-colname="productDescription">AVT Price VND</div>
+                                    <div style="width: 90px;"  data-colname="productDescription">AVF IN USD</div>
+                                    <div  data-colname="productDescription">AVT IN USD</div>
+                                    
+                                </div>
+
+                                <div class="tilsoft-table-filter" style="width: 1100px;">
+                                    <div style="width:70px"></div>
+                                    <div style="width: 120px; text-align: center; vertical-align: middle"><input type="text" ng-model="filters.productionItemUD" class="search-filter" /></div>
+                                    <div style="width: 340px; text-align: center; vertical-align: middle"><input type="text" ng-model="filters.productionItemNM" class="search-filter" /></div>
+                                    <div style="width: 120px; text-align: center; vertical-align: middle"><input type="text" ng-model="filters.productionItemNMEN" class="search-filter" /></div>
+                                    <div style="width: 70px"></div>
+                                    <div style="width: 100px"></div>
+                                    <div style="width: 100px"></div>
+                                    <div style="width: 90px"></div>
+                                    <div style="width: 100%"></div>
+                                    
+                                </div>
+
+                                <div class="tilsoft-table-body" style="width: 1100px; margin-top: 95px;">
+                                    <table>
+                                        <tbody ng-repeat="item in data">
+                                            <tr>
+                                                <td style="text-align:center; width:69px">
+                                                    <a href="{{item.fileLocation}}" data-featherlight="image">
+                                                        <img ng-src="{{item.thumbnailLocation}}" width="50" height="50" />
+                                                    </a>
+                                                </td>
+                                                <td style="text-align: left; width: 120px; vertical-align:middle">{{item.productionItemUD}}</td>
+                                                <td style="text-align: left; width: 340px; vertical-align:middle">{{item.productionItemNM}}</td>
+                                                <td style="text-align: left; width: 120px; vertical-align:middle">{{item.productionItemNMEN}}</td>
+                                                <td style="text-align: left; width: 70px; vertical-align:middle">{{item.unitNM}}</td>
+                                                <td style="text-align: right; width: 100px; vertical-align:middle">
+                                                    <div ng-show="companyID!=1">
+                                                        {{item.avfPrice | number : 2}}
+                                                    </div>
+                                                    <div ng-show="companyID==1">
+                                                        <input type="text" ng-model="item.avfPrice" style="text-align:right" ng-change="event.changePrice(item)" />
+                                                    </div>
+                                                </td>
+                                                <td style="text-align: right; width: 100px; vertical-align:middle">
+                                                    <div ng-show="companyID!=3">
+                                                        {{item.avtPrice | number : 2}}
+                                                    </div>
+                                                    <div ng-show="companyID==3">
+                                                        <input type="text" ng-model="item.avtPrice" style="text-align:right" ng-change="event.changePrice(item)" />
+                                                    </div>
+                                                </td>
+                                                <td style="text-align: right; width: 90px; vertical-align:middle">
+                                                    {{item.avfPrice/exchangeRate | number : 2}} $
+                                                </td>
+                                                <td style="text-align: right; vertical-align:middle">
+                                                    {{item.avtPrice/exchangeRate | number : 2}} $
+                                                </td>
+                                                
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <span>Found: {{totalRows}} record(s)</span>
+                    </div>
+                </div>
+            </div>
+        </article>
+    </div>
+
+    <div ng-show="currentScreen==screen._SELECTED_ITEM">
+        @Html.Partial("~/Views/BreakdownPriceListMng/SelectedItem.cshtml")
+    </div>
+</form>
+
+@section FormAction {
+<ul id="sparks">
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default" title="Search" ng-click="event.reload()"><i class="fa fa-search"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default" title="Refresh" ng-click="event.reload()"><i class="fa fa-refresh"></i></a>
+    </li>
+    <li class="sparks-info">        
+        <a href="javascript:void(0);" class="btn btn-primary" title="Show item need update price" ng-click="event.showSelectedItem()"><i class="fa fa-list"></i></a>
+    </li>
+</ul>
+}
+@section pagepopup2{
+}
+
+@section pagejs {
+    <script src="~/Views/BreakdownPriceListMng/Index.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/breakdown-price-list/',
+            token: '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]',
+            pageSize: @System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"],
+            cookieId: '@HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString()',
+            backendReportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]',
+            title:'Breakdown price list'
+        }
+    </script>
+    <script src="~/Angular/app/jsonService2.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/BreakdownPriceListMng/Service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}

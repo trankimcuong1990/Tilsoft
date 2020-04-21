@@ -1,0 +1,511 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var supportServiceRoot = (System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"]);
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+
+    var modelID = ViewBag.ModelID;
+    var sampleProductID = ViewBag.SampleProductID;
+    var id = ViewBag.ID;
+
+    var subTitle = (id == 0) ? "Create " : "Edit ";
+    subTitle = subTitle + ((modelID != null) ? "Product Break Down With Model" : "Product Break Down With Sample Product");
+
+    ViewBag.Title = (id == 0) ? "Create Product Break Down" : "Edit Product Break Down";
+    ViewBag.SubTitle = subTitle;
+    ViewBag.Module = "Product Break Down";
+    ViewBag.Icon = "fa-database";
+}
+
+<style>
+    sup {
+        vertical-align: super;
+        font-size: smaller;
+    }
+
+    .ui-autocomplete {
+        max-height: 300px;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .modal-dialog {
+        top: 100px !important
+    }
+</style>
+
+<div class="row" name="editForm" style="margin-top: {{openSubForm == true ? 3 : 0}}px">
+    <article class="col col-sm-12">
+        <div class="jarviswidget" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>General Product Break Down</h2>
+            </header>
+            <div class="no-padding" ng-if="!openSubForm">
+                <div class="widget-body" style="padding-bottom: 0px">
+                    <div class="smart-form">
+                        <fieldset>
+                            <section class="col col-sm-1">
+                                <label>Model</label>
+                                <label class="input">
+                                    <input class="form-control" style="height: 30px; font-family: Arial" type="text" avs-remote-auto-complete ng-request-param="requestModel" ng-init-param="data.modelUD" ng-model="data.modelUD" ng-item-value="model" ng-item-selected="event.selectModel(model)" data-method="POST" data-format-function="formatData" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-5" style="padding-left: 0px">
+                                <label>&nbsp;</label>
+                                <label class="input">
+                                    <input class="form-control" style="height: 30px; font-family: Arial" type="text" readonly ng-model="data.modelNM" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label>Product</label>
+                                <label class="input">
+                                    <input class="form-control" style="height: 30px; font-family: Arial" type="text" avs-remote-auto-complete ng-request-param="requestSampleProduct" ng-init-param="data.sampleProductUD" ng-model="data.sampleProductUD" ng-item-value="sampleProduct" ng-item-selected="event.selectSampleProduct(sampleProduct)" data-method="POST" data-format-function="formatData" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-4" style="padding-left: 0px">
+                                <label>&nbsp;</label>
+                                <label class="input">
+                                    <input class="form-control" style="height: 30px; font-family: Arial" type="text" readonly ng-model="data.articleDescription" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label>Item Size</label>
+                                <label class="input">
+                                    <input class="form-control" style="height: 30px; font-family: Arial" type="text" ng-model="data.itemSize" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label>Carton Size</label>
+                                <label class="input">
+                                    <input class="form-control" style="height: 30px; font-family: Arial" type="text" ng-model="data.cartonSize" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label>Frame Desceiption</label>
+                                <label class="input">
+                                    <input class="form-control" style="height: 30px; font-family: Arial" type="text" ng-model="data.frameDescription" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label>Cushion Desceiption</label>
+                                <label class="input">
+                                    <input class="form-control" style="height: 30px; font-family: Arial" type="text" ng-model="data.cushionDescription" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-4">
+                                <label>Remark</label>
+                                <label class="input">
+                                    <input class="form-control" style="height: 30px; font-family: Arial" type="text" ng-model="data.remark" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label>Total Amount(USD)</label>
+                                <label class="input">
+                                    <input class="form-control" style="height: 30px; font-family: Arial; text-align: right" type="text" readonly avs-currency ng-data-source="event.getTotalAmountProductBreakDown()" ng-decimal="2" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label>Season Spec(%)</label>
+                                <label class="input">
+                                    <input class="form-control" style="height: 30px; font-family: Arial; text-align: right" type="text" avs-number ng-data-source="data.seasonSpec" ng-decimal="2" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label>Final Amount(USD)</label>
+                                <label class="input">
+                                    <input class="form-control" style="height: 30px; font-family: Arial; text-align: right" type="text" readonly avs-currency ng-data-source="event.getPriceAmountProductBreakDown()" ng-decimal="2" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label>Client</label>
+                                <label class="input">
+                                    <input style="height: 30px; font-family: Arial" class="form-control" avs-remote-auto-complete ng-request-param="requestClient" ng-init-param="data.clientUD" ng-model="data.clientUD" ng-item-value="client" ng-item-selected="event.selectClient(client)" data-method="POST" data-format-function="formatClient" />
+                                </label>
+                            </section>
+                        </fieldset>
+                    </div>
+                    <div class="smart-form">
+                        <fieldset>
+                            <section class="col" style="margin-bottom: 0px">
+                                <a href="#" class="btn btn-sm btn-primary m-bottom-15" title="Add product break down category" ng-click="event.addProductBreakDownCategoryAmount()">
+                                    <i class="fa fa-plus"></i> Add amount category
+                                </a>
+                                <a href="#" class="btn btn-sm btn-success m-bottom-15" title="Add all product break down default category with amount" ng-click="event.fillProductBreakDownCategoryAmount()">
+                                    <i class="fa fa-sort-amount-desc"></i> Auto-fill amount category
+                                </a>
+                            </section>
+                        </fieldset>
+                    </div>
+                    <div avs-scrollable-table class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header" style="width: 1415px">
+                                <div style="width: 60px">TOTAL<br /><b style="color: #0026ff">{{data.productBreakDownCategoryAmount.length | number}}</b></div>
+                                <div style="width: 55px">#</div>
+                                <div style="width: 200px">Name</div>
+                                <div style="width: 80px">Type</div>
+                                <div style="width: 120px">Qnt</div>
+                                <div style="width: 120px">Price<br />(USD)</div>
+                                <div style="width: 120px">Amount<br />(USD)</div>
+                                <div style="width: 300px">Remark</div>
+                                <div style="width: 350px">Image</div>
+                                <div style="border-bottom: none"></div>
+                            </div>
+                            <div class="tilsoft-table-totalrow" style="width: {{data.productBreakDownCategoryAmount.length > 0 ? 1656 : 1673}}px; margin-top: 50px">
+                                <div style="width: 395px">Total Of Amount</div>
+                                <div style="width: 120px">{{event.getSubTotalQuantityForGroupAmount() | number : 4}}</div>
+                                <div style="width: 120px">$ {{event.getSubTotalUnitPriceForGroupAmount() | number : 2}}</div>
+                                <div style="width: 120px">$ {{event.getSubTotalAmountForGroupAmount() | number : 2}}</div>
+                                <div style="width: 650px"></div>
+                                <div style="border-bottom: none"></div>
+                            </div>
+                            <div class="tilsoft-table-body" style="width: 1415px; margin-top: 80px">
+                                <table>
+                                    <tbody>
+                                        <tr ng-repeat="itemAmount in data.productBreakDownCategoryAmount | orderBy : 'displayOrder'">
+                                            <td style="text-align: center; width: 60px">
+                                                <a href="#" class="btn btn-danger btn-xs font-11" title="Remove product break down category with amount" ng-click="event.removeProductBreakDownCategoryAmount(itemAmount)">
+                                                    <i class="fa fa-times"></i> Del
+                                                </a>
+                                            </td>
+                                            <td style="text-align: center; width: 55px">
+                                                <input type="text" class="form-control" style="height: 30px; text-align: center" avs-number ng-data-source="itemAmount.displayOrder" />
+                                            </td>
+                                            <td style="text-align: center; width: 200px">
+                                                <div class="input-group">
+                                                    <input type="text" class="form-control" style="height: 30px" ng-model="itemAmount.productBreakDownCategoryNM" />
+                                                    <a href="javascript:void(0)" class="btn btn-default input-group-addon" ng-click="event.getProductBreakDownDetail(itemAmount)">
+                                                        <i class="fa fa-list"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                            <td style="text-align: center; width: 80px">{{itemAmount.productBreakDownCalculationTypeNM}}</td>
+                                            <td style="text-align: center; width: 120px">
+                                                <input type="text" class="form-control" style="height: 30px; text-align: right" avs-number ng-data-source="itemAmount.quantity" ng-decimal="4" ng-on-change="event.getAmountForGroupAmount(itemAmount)" />
+                                            </td>
+                                            <td style="text-align: center; width: 120px">
+                                                <input type="text" class="form-control" style="height: 30px; text-align: right" avs-currency ng-data-source="itemAmount.unitPrice" ng-decimal="2" ng-on-change="event.getAmountForGroupAmount(itemAmount)" />
+                                            </td>
+                                            <td style="text-align: right; width: 120px">
+                                                <label ng-if="itemAmount.amount != null && itemAmount.amount != ''">$ {{itemAmount.amount | number : 2}}</label>
+                                            </td>
+                                            <td style="text-align: center; width: 300px">
+                                                <input type="text" class="form-control" style="height: 30px" ng-model="itemAmount.remark" />
+                                            </td>
+                                            <td style="width: 350px">
+                                                <a href="javascript:void(0)" class="btn btn-primary btn-xs font-11" style="margin-bottom: 5px" ng-click="event.addImage(itemAmount)">
+                                                    <i class="fa fa-plus"></i> Add images
+                                                </a>
+                                                <section class="col col-sm-12 no-padding" ng-if="itemAmount.productBreakDownCategoryImage.length > 0">
+                                                    <div ng-repeat="image in itemAmount.productBreakDownCategoryImage">
+                                                        <div class="input-group" style="margin-bottom: {{itemAmount.productBreakDownCategoryImage.indexOf(image) == (itemAmount.productBreakDownCategoryImage.length - 1) ? 0 : 5}}px">
+                                                            <input type="text" class="form-control" style="height: 30px" readonly ng-model="image.friendlyName" />
+                                                            <a href="javascript:void(0)" class="btn btn-default btn-sm input-group-addon" ng-click="event.downloadImage(image)">
+                                                                <i class="fa fa-download"></i>
+                                                            </a>
+                                                            <a href="javascript:void(0)" class="btn btn-default btn-sm input-group-addon" ng-click="event.changeImage(image)">
+                                                                <i class="fa fa-pencil"></i>
+                                                            </a>
+                                                            <a href="javascript:void(0)" class="btn btn-default btn-sm input-group-addon" ng-click="event.removeImage(image, amount.productBreakDownCategoryImage)">
+                                                                <i class="fa fa-times"></i>
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </section>
+                                            </td>
+                                            <td style="border-bottom: none"></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="smart-form">
+                        <fieldset>
+                            <section class="col" style="margin-bottom: 0px">
+                                <a href="#" class="btn btn-sm btn-primary m-bottom-15" title="Add product break down category" ng-click="event.addProductBreakDownCategoryPercent()">
+                                    <i class="fa fa-plus"></i> Add percent category
+                                </a>
+                                <a href="#" class="btn btn-sm btn-success m-bottom-15" title="Add all product break down default category with percent" ng-click="event.fillProductBreakDownCategoryPercent()">
+                                    <i class="fa fa-sort-amount-desc"></i> Auto-fill percent category
+                                </a>
+                            </section>
+                        </fieldset>
+                    </div>
+                    <div avs-scrollable-table class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header" style="width: 1415px">
+                                <div style="width: 60px">TOTAL<br /><b style="color: #0026ff">{{data.productBreakDownCategoryPercent.length | number}}</b></div>
+                                <div style="width: 55px">#</div>
+                                <div style="width: 200px">Name</div>
+                                <div style="width: 80px">Type</div>
+                                <div style="width: 120px">Qnt</div>
+                                <div style="width: 120px">Price<br />(USD)</div>
+                                <div style="width: 120px">Amount<br />(USD)</div>
+                                <div style="width: 300px">Remark</div>
+                                <div style="width: 350px">Image</div>
+                                <div style="border-bottom: none"></div>
+                            </div>
+                            <div class="tilsoft-table-totalrow" style="width: {{data.productBreakDownCategoryPercent.length > 0 ? 1656 : 1673}}px; margin-top: 50px">
+                                <div style="width: 395px">Total Of Percent</div>
+                                <div style="width: 120px">{{event.getSubTotalQuantityForGroupPercent() | number : 4}}</div>
+                                <div style="width: 120px"></div>
+                                <div style="width: 120px">$ {{event.getSubTotalAmountForGroupPercent() | number : 2}}</div>
+                                <div style="width: 650px"></div>
+                                <div style="border-bottom: none"></div>
+                            </div>
+                            <div class="tilsoft-table-body" style="width: 1415px; margin-top: 80px">
+                                <table>
+                                    <tbody>
+                                        <tr ng-repeat="itemPercent in data.productBreakDownCategoryPercent | orderBy : 'displayOrder'">
+                                            <td style="text-align: center; width: 60px">
+                                                <a href="#" class="btn btn-danger btn-xs font-11" title="Remove product break down category with amount" ng-click="event.removeProductBreakDownCategoryPercent(itemPercent)">
+                                                    <i class="fa fa-times"></i> Del
+                                                </a>
+                                            </td>
+                                            <td style="text-align: center; width: 55px">
+                                                <input type="text" class="form-control" style="height: 30px; text-align: center" avs-number ng-data-source="itemPercent.displayOrder" />
+                                            </td>
+                                            <td style="text-align: center; width: 200px">
+                                                <div class="input-group">
+                                                    <input type="text" class="form-control" style="height: 30px" ng-model="itemPercent.productBreakDownCategoryNM" />
+                                                    <a href="javascript:void(0)" class="btn btn-default input-group-addon" ng-click="event.getProductBreakDownDetail(itemPercent)">
+                                                        <i class="fa fa-list"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                            <td style="text-align: center; width: 80px">{{itemPercent.productBreakDownCalculationTypeNM}}</td>
+                                            <td style="text-align: center; width: 120px">
+                                                <input type="text" class="form-control" style="height: 30px; text-align: right" avs-number ng-data-source="itemPercent.quantity" ng-decimal="4" ng-on-change="event.getAmountForGroupAmount(itemPercent)" />
+                                            </td>
+                                            <td style="text-align: right; width: 120px">
+                                                <label ng-if="itemPercent.unitPrice != null && itemPercent.unitPrice != ''">$ {{itemPercent.unitPrice | number : 2}}</label>
+                                            </td>
+                                            <td style="text-align: right; width: 120px">
+                                                <label ng-if="itemPercent.amount != null && itemPercent.amount != ''">$ {{itemPercent.amount | number : 2}}</label>
+                                            </td>
+                                            <td style="text-align: center; width: 300px">
+                                                <input type="text" class="form-control" style="height: 30px" ng-model="itemPercent.remark" />
+                                            </td>
+                                            <td style="width: 350px">
+                                                <a href="javascript:void(0)" class="btn btn-primary btn-xs font-11" style="margin-bottom: 5px" ng-click="event.addImage(itemPercent)">
+                                                    <i class="fa fa-plus"></i> Add images
+                                                </a>
+                                                <section class="col col-sm-12 no-padding" ng-if="itemPercent.productBreakDownCategoryImage.length > 0">
+                                                    <div ng-repeat="image in itemPercent.productBreakDownCategoryImage">
+                                                        <div class="input-group" style="margin-bottom: {{itemPercent.productBreakDownCategoryImage.indexOf(image) == (itemPercent.productBreakDownCategoryImage.length - 1) ? 0 : 5}}px">
+                                                            <input type="text" class="form-control" style="height: 30px" readonly ng-model="image.friendlyName" />
+                                                            <a href="javascript:void(0)" class="btn btn-default btn-sm input-group-addon" ng-click="event.downloadImage(image)">
+                                                                <i class="fa fa-download"></i>
+                                                            </a>
+                                                            <a href="javascript:void(0)" class="btn btn-default btn-sm input-group-addon" ng-click="event.changeImage(image)">
+                                                                <i class="fa fa-pencil"></i>
+                                                            </a>
+                                                            <a href="javascript:void(0)" class="btn btn-default btn-sm input-group-addon" ng-click="event.removeImage(image, itemPercent.productBreakDownCategoryImage)">
+                                                                <i class="fa fa-times"></i>
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </section>
+                                            </td>
+                                            <td style="border-bottom: none"></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="no-padding" ng-if="openSubForm">
+                <div class="widget-body" style="padding-bottom: 0px">
+                    <div class="smart-form">
+                        <fieldset>
+                            <section class="col col-sm-6" style="text-align: left">
+                                <a href="javascript:void(0)" class="btn btn-default btn-sm btn-primary" style="height: 30px" ng-click="event.addProductBreakDownCategoryType()">
+                                    <i class="fa fa-plus"></i> Add product break down category type
+                                </a>
+                            </section>
+                            <section class="col col-sm-6" style="text-align: right">
+                                <a href="javascript:void(0)" class="btn btn-default btn-sm btn-success" style="height: 30px" ng-click="event.downloadProductBreakDownDetailTemplate()">
+                                    <i class="fa fa-download"></i> Download template data configuration
+                                </a>
+                                <a href="javascript:void(0)" class="btn btn-default btn-sm btn-warning" style="height: 30px" ng-click="event.uploadProductBreakDownDetailTemplate(dataDetail)">
+                                    <i class="fa fa-upload"></i> Upload template data configuration
+                                </a>
+                                <a href="javascript:void(0)" class="btn btn-default btn-sm btn-danger" style="height: 30px" ng-click="event.closeProductBreakDownDetail(dataDetail)">
+                                    <i class="fa fa-times"></i> Close configuration data
+                                </a>
+                            </section>
+                        </fieldset>
+                    </div>
+                    <div avs-scrollable-table class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header" style="width: 1915px">
+                                <div style="width: 70px">Total<br /><b style="color: #0026ff">{{dataDetail.productBreakDownCategoryType.length | number}}</b></div>
+                                <div style="width: 55px">#</div>
+                                <div style="width: 200px">Name</div>
+                                <div style="width: 80px">Unit</div>
+                                <div style="width: 120px">Qnt</div>
+                                <div style="width: 120px">Price<br />(USD)</div>
+                                <div style="width: 120px">Amount<br />(USD)</div>
+                                <div style="width: 120px">Dimension<br />L</div>
+                                <div style="width: 120px">Dimension<br />W</div>
+                                <div style="width: 120px">Dimension<br />H</div>
+                                <div style="width: 120px">Profile</div>
+                                <div style="width: 120px">Weight</div>
+                                <div style="width: 120px">Volumne</div>
+                                <div style="width: 120px">Acreage</div>
+                                <div style="width: 300px">Remark</div>
+                                <div style="border-bottom: none"></div>
+                            </div>
+                            <div class="tilsoft-table-body" style="width: 1915px; margin-top: 50px">
+                                <table>
+                                    <tbody ng-repeat="categoryType in dataDetail.productBreakDownCategoryType">
+                                        <tr>
+                                            <th style="text-align: center; width: 70px">
+                                                <a href="#" class="btn btn-primary btn-xs font-11" title="Add product breakdown category type detail" ng-if="data.isConfirmed == null || !data.isConfirmed" ng-click="event.addProductBreakDownDetail(categoryType)">
+                                                    <i class="fa fa-plus"></i>
+                                                </a>
+                                                <a href="#" class="btn btn-danger btn-xs font-11" title="Remove product breakdown category type" ng-if="data.isConfirmed == null || !data.isConfirmed" ng-click="event.removeProductBreakDownCategoryType(categoryType)">
+                                                    <i class="fa fa-times"></i>
+                                                </a>
+                                            </th>
+                                            <th colspan="3" style="width: 345px">
+                                                <input type="text" class="form-control" style="height: 30px" ng-model="categoryType.productBreakDownCategoryTypeNM" ng-if="data.isConfirmed == null || !data.isConfirmed" />
+                                                <span ng-if="data.isConfirmed">{{categoryType.productBreakDownCategoryTypeNM}}</span>
+                                            </th>
+                                            <th style="width: 120px"></th>
+                                            <th style="width: 120px"></th>
+                                            <th style="width: 120px"></th>
+                                            <th style="width: 120px"></th>
+                                            <th style="width: 120px"></th>
+                                            <th style="width: 120px"></th>
+                                            <th style="width: 120px"></th>
+                                            <th style="width: 120px"></th>
+                                            <th style="width: 120px"></th>
+                                            <th style="width: 120px"></th>
+                                            <th style="width: 300px"></th>
+                                            <th style="border-bottom: 0px"></th>
+                                        </tr>
+                                        <tr style="background: #eff7f7">
+                                            <th colspan="4" style="text-align: right; color: #666; background: #eff7f7; width: 404px"><b>TOTAL OF {{categoryType.productBreakDownCategoryTypeNM}}</b></th>
+                                            <th style="text-align: right; background: #eff7f7">{{method.getTotalQuantityDetail(categoryType) | number:4}}</th>
+                                            <th style="text-align: right; background: #eff7f7">$ {{method.getTotalPriceDetail(categoryType) | number:2}}</th>
+                                            <th style="text-align: right; background: #eff7f7">$ {{method.getTotalAmountDetail(categoryType) | number:2}}</th>
+                                            <th style="text-align: right; background: #eff7f7"></th>
+                                            <th style="text-align: right; background: #eff7f7"></th>
+                                            <th style="text-align: right; background: #eff7f7"></th>
+                                            <th style="background: #eff7f7"></th>
+                                            <th style="text-align: right; background: #eff7f7">{{method.getTotalWeightDetail(categoryType) | number:2}}</th>
+                                            <th style="text-align: right; background: #eff7f7">{{method.getTotalVolumneDetail(categoryType) | number:5}}</th>
+                                            <th style="text-align: right; background: #eff7f7">{{method.getTotalAcreageDetail(categoryType) | number:2}}</th>
+                                            <th style="background: #eff7f7"></th>
+                                            <th style="background: #eff7f7; border-bottom: none"></th>
+                                        </tr>
+                                        <tr ng-repeat="detailData in categoryType.productBreakDownDetail | orderBy: 'displayOrder'">
+                                            <td style="width: 69px; text-align: center">
+                                                <a href="#" class="btn btn-danger btn-xs font-11" title="Remove product breakdown category type detail" ng-if="data.isConfirmed == null || !data.isConfirmed" ng-click="event.removeProductBreakDownDetail(categoryType, detailData)">
+                                                    <i class="fa fa-times"></i> Del
+                                                </a>
+                                            </td>
+                                            <td style="width: 55px">
+                                                <input type="text" class="form-control" style="height: 30px; text-align: center" avs-number ng-if="data.isConfirmed == null || !data.isConfirmed" ng-data-source="detailData.displayOrder" />
+                                            </td>
+                                            <td>
+                                                <input type="text" class="form-control" style="height: 30px" ng-if="data.isConfirmed == null || !data.isConfirmed" ng-model="detailData.productBreakDownDetailNM" />
+                                            </td>
+                                            <td style="width: 80px">
+                                                <input type="text" class="form-control" style="height: 30px; text-align: center" ng-if="data.isConfirmed == null || !data.isConfirmed" ng-model="detailData.unit" />
+                                            </td>
+                                            <td>
+                                                <input type="text" class="form-control" style="height: 30px; text-align: right" avs-number ng-data-source="detailData.quantity" ng-decimal="4" ng-if="data.isConfirmed == null || !data.isConfirmed" ng-on-change="event.getAmount(detailData, categoryType)" />
+                                            </td>
+                                            <td>
+                                                <input type="text" class="form-control" style="height: 30px; text-align: right" avs-currency ng-data-source="detailData.unitPrice" ng-decimal="2" ng-if="data.isConfirmed == null || !data.isConfirmed" ng-on-change="event.getAmount(detailData, categoryType)" />
+                                            </td>
+                                            <td style="text-align: right">
+                                                <label ng-if="detailData.amount != null && detailData.amount != ''">$ {{detailData.amount | number : 2}}</label>
+                                            </td>
+                                            <td>
+                                                <input type="text" class="form-control" style="height: 30px; text-align: right" avs-number ng-data-source="detailData.dimensionL" ng-decimal="2" ng-if="data.isConfirmed == null || !data.isConfirmed" />
+                                            </td>
+                                            <td>
+                                                <input type="text" class="form-control" style="height: 30px; text-align: right" avs-number ng-data-source="detailData.dimensionW" ng-decimal="2" ng-if="data.isConfirmed == null || !data.isConfirmed" />
+                                            </td>
+                                            <td>
+                                                <input type="text" class="form-control" style="height: 30px; text-align: right" avs-number ng-data-source="detailData.dimensionH" ng-decimal="2" ng-if="data.isConfirmed == null || !data.isConfirmed" />
+                                            </td>
+                                            <td>
+                                                <input type="text" class="form-control" style="height: 30px" ng-if="data.isConfirmed == null || !data.isConfirmed" ng-model="detailData.profile" />
+                                            </td>
+                                            <td>
+                                                <input type="text" class="form-control" style="height: 30px; text-align: right" avs-number ng-data-source="detailData.weight" ng-decimal="2" ng-if="data.isConfirmed == null || !data.isConfirmed" />
+                                            </td>
+                                            <td>
+                                                <input type="text" class="form-control" style="height: 30px; text-align: right" avs-number ng-data-source="detailData.volume" ng-decimal="5" ng-if="data.isConfirmed == null || !data.isConfirmed" />
+                                            </td>
+                                            <td>
+                                                <input type="text" class="form-control" style="height: 30px; text-align: right" avs-number ng-data-source="detailData.acreage" ng-decimal="2" ng-if="data.isConfirmed == null || !data.isConfirmed" />
+                                            </td>
+                                            <td>
+                                                <input type="text" class="form-control" style="height: 30px" ng-if="data.isConfirmed == null || !data.isConfirmed" ng-model="detailData.remark" />
+                                            </td>
+                                            <td style="border-bottom: none"></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction{
+<ul id="sparks">
+    <li class="sparks-info" ng-if="!openSubForm">
+        <a href="@Url.Action("Index", "ProductBreakDownMng")" class="btn btn-default btn-sm" title="Back">
+            <i class="fa fa-arrow-left"></i>
+        </a>
+    </li>
+    <li class="sparks-info" ng-if="(data.isConfirmed == null || data.isConfirmed == 0) && !openSubForm">
+        <a href="javascript:void(0)" class="btn btn-default btn-sm" ng-click="event.updated($event)">
+            <i class="fa fa-floppy-o"></i>
+        </a>
+    </li>
+    <li class="sparks-info" ng-if="(data.isConfirmed == null || data.isConfirmed == 0) && !openSubForm">
+        <a href="javascript:void(0)" class="btn btn-default btn-sm" title="Delete" ng-class="{'disabled': data.productBreakDownID == 0}" ng-click="event.deleted(data.productBreakDownID)">
+            <i class="fa fa-times"></i>
+        </a>
+    </li>
+    <li class="sparks-info" ng-if="(data.isConfirmed == null || data.isConfirmed == 0) && !openSubForm">
+        <a href="javascript:void(0)" class="btn btn-default btn-sm" ng-class="{'disabled': data.productBreakDownID == 0}" ng-click="event.approve()">
+            <i class="fa fa-check"></i>
+        </a>
+    </li>
+</ul>
+}
+
+@section pagejs{
+    <script type="text/javascript">
+        var context = {
+            id: '@id',
+            modelID: '@modelID',
+            sampleProductID: '@sampleProductID',
+            token: '@token',
+            backUrl: '@Url.Action("Index", "ProductBreakDownMng")',
+            refreshUrl: '@Url.Action("Edit", "ProductBreakDownMng", new { id = UrlParameter.Optional })/',
+            serviceUrl: '@(serviceRoot)/api/productBreakDown/',
+            servicePath: '@(serviceRoot)/Reports/',
+            supportServiceUrl: '@(serviceRoot)/api/support/',
+        }
+    </script>
+    <script type="text/javascript" src="~/Views/ProductBreakDownMng/edit.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Views/ProductBreakDownMng/service.js?v=@guid"></script>
+}

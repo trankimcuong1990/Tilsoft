@@ -1,0 +1,150 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+
+    ViewBag.Title = (ViewBag.ID == 0) ? "Create OP Sequence" : "Edit OP Sequence";
+    ViewBag.SubTitle = (ViewBag.ID == 0) ? "Create" : "Edit";
+    ViewBag.Module = "OP Sequence";
+}
+
+<form name="editForm" class="row">
+    <!-- General -->
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>@ViewBag.SubTitle General</h2>
+            </header>
+            <div>
+                <div class="jarviswidget-editbox"></div>
+                <div class="widget-body">
+                    <div class="smart-form">
+                        <div class="row">
+                            <section class="col col-lg-6">
+                                <label class="label">
+                                    <strong>OP Sequence</strong>
+                                    <em class="note note-error" ng-show="editForm.opSequenceNM.$error.required"> (Required)</em>
+                                </label>
+                                <label class="input" ng-class="{'state-error': editForm.opSequenceNM.$error.required}">
+                                    <input class="form-control" name="opSequenceNM" maxlength="255" ng-model="data.opSequenceNM" required>
+                                </label>
+                            </section>
+                            <section class="col col-lg-2">
+                                <label class="label">
+                                    <strong>Company Name</strong>
+                                </label>
+                                <label class="input">
+                                    <span class="form-control">
+                                        <i class="fa fa-building" ng-show="data.companyNM != null"></i> {{data.companyNM}}
+                                    </span>
+                                </label>
+                            </section>
+                            <section class="col col-lg-2">
+                                <label class="label">
+                                    <strong>Updated By</strong>
+                                </label>
+                                <label class="input">
+                                    <span class="form-control">
+                                        <i class="fa fa-user" ng-show="data.profileNM != null || data.employeeNM != null"></i>
+                                        <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{data.updatedBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600" ng-show="data.updatedBy != null && data.employeeNM != null">
+                                            {{data.employeeNM}}
+                                        </a>
+                                        <span ng-show="data.updatedBy != null && data.employeeNM == null && data.profileNM != null">{{data.profileNM}}</span>
+                                    </span>
+                                </label>
+                            </section>
+                            <section class="col col-lg-2">
+                                <label class="label">
+                                    <strong>Updated Date</strong>
+                                </label>
+                                <label class="input">
+                                    <span class="form-control">
+                                        <i class="fa fa-calendar" ng-show="data.updatedDate != null"></i> {{data.updatedDate}}
+                                    </span>
+                                </label>
+                            </section>
+                        </div>
+
+                        <div class="row">
+                            <section class="col col-lg-12">
+                                <a href="javascript:void(0)" class="btn btn-default btn-primary btn-xs" ng-click="event.added($event)" style="margin-bottom:4px">
+                                    <i class="fa fa-plus"></i> Add Detail
+                                </a>
+                                <div class="tilsoft-table">
+                                    <div class="tilsoft-table-body" style="margin-top:0px">
+                                        <table>
+                                            <tbody>
+                                                <tr>
+                                                    <th style="width: 50px!important; text-align: center; vertical-align: middle"></th>
+                                                    <th style="width: 70px!important; text-align: center; vertical-align: middle">Index</th>
+                                                    <th style="text-align: center; vertical-align: middle">WorkCenter</th>
+                                                    <th style="width:100px">Exception At Confirm Frame Status</th>
+                                                </tr>
+                                                <tr ng-repeat="item in data.opSequenceDetails">
+                                                    <td style="text-align: center; vertical-align: middle">
+                                                        <a href="javascript:void(0)" class="btn btn-default btn-danger btn-xs" ng-click="event.removed($event, $index)">
+                                                            <i class="fa fa-times"></i>Del
+                                                        </a>
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" class="form-control" style="text-align: right" min="0" ng-model="item.sequenceIndexNumber">
+                                                    </td>
+                                                    <td>
+                                                        <select class="form-control" ng-model="item.workCenterID" ng-options="workCenter.workCenterID as workCenter.workCenterUD for workCenter in workCenters">
+                                                            <option value=""></option>
+                                                        </select>
+                                                    </td>
+                                                    <td style="text-align:center">
+                                                        <input type="checkbox" ng-model="item.isExceptionAtConfirmFrameStatus">
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+@section FormAction{
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "OPSequence")" class="btn btn-default">
+                <i class="fa fa-arrow-left"></i>
+            </a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default" ng-class="{'disabled': data.opSequenceID == 0}" ng-click="event.deleted(data.opSequenceID)">
+                <i class="fa fa-times"></i>
+            </a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default" ng-click="event.updated($event)">
+                <i class="fa fa-floppy-o"></i>
+            </a>
+        </li>
+    </ul>
+}
+
+@section pagejs{
+    <script type="text/javascript">
+        var context = {
+            id: @ViewBag.ID,
+            backUrl: '@Url.Action("Index", "OPSequence")',
+            refreshUrl: '@Url.Action("Edit", "OPSequence", new { id = UrlParameter.Optional })/',
+            serviceUrl: '@(serviceRoot)/api/opsequence/',
+            token: '@token'
+        };
+    </script>
+    <script type="text/javascript" src="~/Angular/app/opSequence/edit.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/opSequence/service.js?v=@guid"></script>
+}

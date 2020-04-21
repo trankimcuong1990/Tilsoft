@@ -1,0 +1,120 @@
+﻿@{
+    ViewBag.Title = "Create new booking";
+    ViewBag.Module = "Booking";
+    ViewBag.CurrentSeason = Frontend.Helper.Common.GetCurrentSeason();
+}
+
+<form class="row" name="editForm">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <h2>Select below options to create new booking</h2>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div class="smart-form">
+                        <fieldset>                          
+                            <div class="row">
+                                <section class="col col-6">
+                                    <label class="label">Season</label>
+                                    <label class="select">
+                                        <select ng-model="data.season" ng-options="season.seasonValue as season.seasonText for season in seasons">
+                                            <option value=""></option>
+                                        </select>
+                                        <i></i>
+                                    </label>
+                                </section>
+                            </div>
+
+                            <div class="row">
+                                <section class="col col-6">
+                                    <label class="label">Client</label>
+                                    <label class="select">
+                                        <select ng-model="data.clientID" ng-options="client.clientID as client.clientUD for client in clients | orderBy : 'clientUD'">
+                                            <option value=""></option>
+                                        </select>
+                                        <i></i>
+                                    </label>
+                                </section>
+                            </div>
+
+                            <div class="row">
+                                <section class="col col-6">
+                                    <label class="label">Supplier</label>
+                                    <label class="select">
+                                        <select ng-model="data.supplierID" ng-options="supplier.supplierID as supplier.supplierNM for supplier in suppliers | orderBy : 'supplierNM'">
+                                            <option value=""></option>
+                                        </select>
+                                        <i></i>
+                                    </label>
+                                </section>
+                            </div>
+                        </fieldset>
+                        <footer>
+                            <button class="btn btn-primary" type="button" ng-click="event.goNext($event)">
+                                Next
+                            </button>
+                        </footer>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+@section pagejs {
+    <script src="~/Angular/app/jsonService.js"></script>
+    <script src="~/Angular/app/booking/service.js"></script>
+    <script type="text/javascript">
+        jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/booking/';
+        jsonService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+        var tilsoftApp = angular.module('tilsoftApp', []);
+        tilsoftApp.controller('tilsoftController', ['$scope', function ($scope) {
+            $scope.data = {
+                clientID: '',
+                supplierID: '',
+                season: '@ViewBag.CurrentSeason'
+            };
+            $scope.seasons = null;
+            $scope.clients = null;
+            $scope.suppliers = null;
+
+            $scope.event = {
+                load: function () {
+                    jsonService.getinitdata(
+                        function (data) {
+                            $scope.seasons = data.data.seasons;
+                            $scope.clients = data.data.clients;
+                            $scope.suppliers = data.data.suppliers;
+                            $scope.$apply();
+
+                            jQuery('#content').show();
+                        },
+                        function (error) {
+                            jsHelper.showMessage('warning', error);
+
+                            $scope.seasons = null;
+                            $scope.clients = null;
+                            $scope.suppliers = null;
+                            $scope.$apply();
+                        }
+                    );
+                },
+                goNext: function ($event) {
+                    $event.preventDefault();
+                    if ($scope.data.season == '' || $scope.data.clientID === '' || $scope.data.supplierID === '') {
+                        alert('Please select all option before proceed to the next step');
+                        return;
+                    }
+                    else {
+                        window.location = '@Url.Action("Edit", "Booking")/0?cID=' + $scope.data.clientID + '&sID=' + $scope.data.supplierID + '&se=' + $scope.data.season;
+                    }
+                }
+            };
+
+            $scope.event.load();
+        }]);
+    </script>
+}
+

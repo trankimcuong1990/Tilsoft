@@ -1,0 +1,68 @@
+﻿<div id="frmSearchModel" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title"><i class="fa fa-search"></i> Search Model</h4>
+            </div>
+            <div class="modal-body no-padding">
+                <div class="smart-form">
+                    <fieldset>
+                        <section>
+                            <label class="label">&nbsp;</label>
+                            <label class="input">
+                                <input id="txtSearchModel" type="text" placeholder="Type at least 3 characters to search for model" />
+                            </label>
+                        </section>
+                    </fieldset>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" ng-click="event.selectModel()">
+                    OK
+                </button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    jQuery('#txtSearchModel').QuickSearchBox({
+        url: context.supportServiceUrl + 'quicksearchmodel2',
+        minChars: 3,
+        token: context.token
+    }, scope.selectedModel);
+
+    scope.event.selectModel = function () {
+        if (!scope.selectedModel.id) {
+            alert('Please select model!');
+            return;
+        }
+        scope.currentProduct.modelID = scope.selectedModel.id;
+        scope.currentProduct.modelUD = scope.selectedModel.data.optionUD;
+        scope.currentProduct.articleDescription = scope.selectedModel.data.optionNM;
+
+        // get model image
+        scope.jsonService.getModelImage(
+            scope.selectedModel.id,
+            function (data) {
+                scope.currentProduct.modelThumbnailLocation = data.thumbnailLocation;
+                scope.currentProduct.modelFileLocation = data.fileLocation;
+
+                if (scope.currentProduct.sampleReferenceImages.length == 0) {
+                    scope.currentProduct.thumbnailLocation = scope.currentProduct.modelThumbnailLocation;
+                    scope.currentProduct.fileLocation = scope.currentProduct.modelFileLocation;
+                }
+
+                jQuery('#frmSearchModel').modal('hide');
+            },
+            function (error) {
+                jsHelper.showMessage('warning', error);
+            }
+        );
+    };
+</script>

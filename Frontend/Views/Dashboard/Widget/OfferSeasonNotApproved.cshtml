@@ -1,0 +1,242 @@
+﻿@{
+    Frontend.APIDTO.APIUserInformation userInfo = (Frontend.APIDTO.APIUserInformation)ViewBag.CurrentLoginUserInfo;
+    string currentSeason = Library.Helper.GetCurrentSeason();
+    string nextSeason = Library.Helper.GetNextSeason(currentSeason);
+    string prevSeason = Library.Helper.GetPreviousSeason(currentSeason);
+
+    if (DateTime.Now.Month == 8)
+    {
+        currentSeason = nextSeason;
+    }
+    nextSeason = Library.Helper.GetNextSeason(currentSeason);
+    prevSeason = Library.Helper.GetPreviousSeason(currentSeason);
+}
+
+<style>
+    .tilsoft-table .tilsoft-table-body {
+        height: auto !important;
+        max-height: none
+    }
+
+    .border-left {
+        border-left: solid;
+        border-left-color: coral;
+    }
+
+    .border-top {
+        border-top: solid;
+        border-top-color: coral;
+    }
+
+    .border-right {
+        border-right: solid !important;
+        border-right-color: coral !important;
+    }
+
+    tbody.border-section-1 td:first-child {
+        border-left: solid 1px #959595;
+        border-bottom: solid 1px #959595 !important;
+    }
+
+    tbody.border-section-1 td:last-child {
+        border-right: solid 1px #959595;
+    }
+
+    tbody.border-section-1 tr:first-child td {
+        border-top: solid 1px #959595;
+    }
+
+    tbody.border-section-1 tr:last-child td {
+        border-bottom: solid 1px #959595;
+    }
+</style>
+
+<div class="col-sm-12" ng-controller="offerSeasonNotApprovedController">
+
+    <div class="well" style="padding: 10px;">
+        <h1 style="margin-top: 0px;">OFFER NOT APPROVED YET @currentSeason - @nextSeason</h1>
+        <div class="avs-table-wrapper" avs-table grid-handler="offerSeasonNotApproved.offerNotApprovedHandler" id="widget-offerSeasonNotApproved-container" style="display:none">
+            <div class="avs-table-header">
+                <div class="avs-table-header-container">
+                    <table>
+                        <tr class="header-row">
+                            <td style="width:65px;" class="sorting" data-colname="season">Season</td>
+                            <td style="width:300px;text-align:center" class="sorting" data-colname="offerSeasonUD">Offer File Name</td>
+                            <td style="width:250px" class="sorting" data-colname="clientNM">Client Name</td>
+                            <td style="width:110px" class="sorting" data-colname="saleNM">Account Manager</td>
+                            <td style="width:90px" class="sorting" data-colname="saleAmount">Sale Amount</td>
+                            <td style="width:60px" class="sorting" data-colname="deltaPercent">% Delta 9</td>
+                            <td style="width:80px" class="sorting" data-colname="offerSeasonTypeNM">Type</td>
+                            <td style="width:80px;text-align:center" class="sorting">Approved Rate</td>
+                            <td style="width:110px" class="sorting" data-colname="approvedUser">Approved Person</td>
+                            <td style="width:75px;text-align:center" class="sorting" data-colname="approvedDate">Approved Date</td>
+                            <td style="width:100px;text-align:center" class="sorting" data-colname="offerSeasonCreatorName">Created By</td>
+                            <td style="width:80px;text-align:center" class="sorting" data-colname="remark">Mana. Remark</td>
+                        </tr>
+                        <tr class="filter-row">
+                            <td></td>
+                            <td><input type="text" ng-model="offerSeasonNotApproved.offerNotApprovedFilter.offerSeasonUD" /></td>
+                            <td><input type="text" ng-model="offerSeasonNotApproved.offerNotApprovedFilter.clientNM" /></td>
+                            <td>
+                                <select ng-model="offerSeasonNotApproved.offerNotApprovedFilter.saleID"
+                                        ng-options="gItem.saleID as gItem.saleNM for gItem in offerSeasonNotApproved.sales">
+                                    <option value=""></option>
+                                </select>
+                            </td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td><input type="text" ng-model="offerSeasonNotApproved.offerNotApprovedFilter.approvedUser" /></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div class="avs-table-body">
+                <table>
+                    <tr ng-repeat="item in offerSeasonNotApproved.offerNotApprovedData | offerSeasonNotApprovedCustomFilter : null : 1 : offerSeasonNotApproved.offerNotApprovedFilter.offerSeasonUD : offerSeasonNotApproved.offerNotApprovedFilter.clientNM : offerSeasonNotApproved.offerNotApprovedFilter.saleID : offerSeasonNotApproved.offerNotApprovedFilter.approvedUser | orderBy : offerSeasonNotApproved.offerNotApprovedHandler.orderByColumn">
+                        <td style="text-align:center">{{item.season}}</td>
+                        <td>
+                            <a target="_blank" href="@Url.Action("Edit", "OfferSeasonMng")/{{item.offerSeasonID}}#/edit-fob-product-form/4/allofferitem/-1/true">{{item.offerSeasonUD}}</a>
+                        </td>
+                        <td>
+                            <a target="_blank" href="@Url.Action("Overview", "Client")/{{item.clientID}}">{{item.clientNM}}</a>
+                        </td>
+                        <td>
+                            {{item.saleNM}}
+                        </td>
+                        <td style="text-align: right;">${{item.saleAmount | number : 2}}</td>
+                        <td style="text-align: right;">{{item.deltaPercent | number : 1}}%</td>
+                        <td>{{item.offerSeasonTypeNM}}</td>
+                        <td style="text-align:center">
+                            {{item.totalReadyToApproved}}/{{item.totalOfferItem}}
+                        </td>
+                        <td>
+                            {{item.approvedUser}}
+                        </td>
+                        <td style="text-align:center">
+                            {{item.approvedDate}}
+                        </td>
+                        <td style="text-align:left">
+                            {{item.offerSeasonCreatorName}}
+                        </td>
+                        <td style="text-align:center">
+                            <a href="javascript:void(0)" class="btn btn-default" ng-if="item.remark" title="{{item.remark}}" style="color:darkgreen"><i class="fa fa-check-square"></i></a>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="smart-form" id="widget-offerSeasonNotApproved-loading">
+            <fieldset>
+                <section>
+                    <i class="fa fa-spin fa-refresh"></i> LOADING ...
+                </section>
+            </fieldset>
+        </div>
+    </div>
+
+    <div class="well" style="padding: 10px;">
+        <h1 style="margin-top: 0px;">OFFER APPROVED @currentSeason - @nextSeason</h1>
+        <div class="avs-table-wrapper" avs-table grid-handler="offerSeasonNotApproved.offerApprovedHandler" id="widget-offerSeasonApproved-container" style="display:none">
+            <div class="avs-table-header">
+                <div class="avs-table-header-container">
+                    <table>
+                        <tr class="header-row">
+                            <td style="width:65px;" class="sorting" data-colname="season">Season</td>
+                            <td style="width:300px;text-align:center" class="sorting" data-colname="offerSeasonUD">Offer File Name</td>
+                            <td style="width:250px" class="sorting" data-colname="clientNM">Client Name</td>
+                            <td style="width:110px" class="sorting" data-colname="saleNM">Account Manager</td>
+                            <td style="width:90px" class="sorting" data-colname="saleAmount">Sale Amount</td>
+                            <td style="width:60px" class="sorting" data-colname="deltaPercent">
+                                % Delta 9
+                                <p style="color:red; text-align:right"> {{offerSeasonNotApproved.deltaApproved | number : 1}}% </p>
+                            </td>
+                            <td style="width:80px;text-align:center" class="sorting" data-colname="offerSeasonTypeNM">Type</td>
+                            <td style="width:80px;text-align:center" class="sorting">Approved Rate</td>
+                            <td style="width:110px" class="sorting" data-colname="approvedUser">Approved Person</td>
+                            <td style="width:75px;text-align:center" class="sorting" data-colname="approvedDate">Approved Date</td>
+                            <td style="width:100px;text-align:center" class="sorting" data-colname="offerSeasonCreatorName">Created By</td>
+                            <td style="width:80px;text-align:center" class="sorting" data-colname="remark">Mana. Remark</td>
+                        </tr>
+                        <tr class="filter-row">
+                            <td></td>
+                            <td><input type="text" ng-model="offerSeasonNotApproved.offerApprovedFilter.offerSeasonUD" /></td>
+                            <td><input type="text" ng-model="offerSeasonNotApproved.offerApprovedFilter.clientNM" /></td>
+                            <td>
+                                <select ng-model="offerSeasonNotApproved.offerApprovedFilter.saleID"
+                                        ng-options="gItem.saleID as gItem.saleNM for gItem in offerSeasonNotApproved.sales">
+                                    <option value=""></option>
+                                </select>
+                            </td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td><input type="text" ng-model="offerSeasonNotApproved.offerApprovedFilter.approvedUser" /></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div class="avs-table-body">
+                <table>
+                    <tr ng-repeat="item in offerSeasonNotApproved.offerNotApprovedData | offerSeasonNotApprovedCustomFilter : 1 : null : offerSeasonNotApproved.offerApprovedFilter.offerSeasonUD : offerSeasonNotApproved.offerApprovedFilter.clientNM : offerSeasonNotApproved.offerApprovedFilter.saleID : offerSeasonNotApproved.offerApprovedFilter.approvedUser | orderBy : offerSeasonNotApproved.offerApprovedHandler.orderByColumn">
+                        <td style="text-align: center;">{{item.season}}</td>
+                        <td>
+                            <a target="_blank" href="@Url.Action("Edit", "OfferSeasonMng")/{{item.offerSeasonID}}#/edit-fob-product-form">{{item.offerSeasonUD}}</a>
+                        </td>
+                        <td>
+                            <a target="_blank" href="@Url.Action("Overview", "Client")/{{item.clientID}}">{{item.clientNM}}</a>
+                        </td>
+                        <td>
+                            {{item.saleNM}}
+                        </td>
+                        <td style="text-align: right;">${{item.saleAmount | number : 2}}</td>
+                        <td style="text-align: right;">{{item.deltaPercent | number : 1}}%</td>
+                        <td>{{item.offerSeasonTypeNM}}</td>
+                        <td style="text-align: center;">
+                            {{item.totalApproved}}/{{item.totalOfferItem}}
+                        </td>
+                        <td>
+                            {{item.approvedUser}}
+                        </td>
+                        <td style="text-align: center;">
+                            {{item.approvedDate}}
+                        </td>
+                        <td style="text-align:left">
+                            {{item.offerSeasonCreatorName}}
+                        </td>
+                        <td style="text-align:center">
+                            <a href="javascript:void(0)" class="btn btn-default"  ng-if="item.remark" title="{{item.remark}}"  style="color:darkgreen"><i class="fa fa-check-square"></i></a>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="smart-form" id="widget-offerSeasonApproved-loading">
+            <fieldset>
+                <section>
+                    <i class="fa fa-spin fa-refresh"></i> LOADING ...
+                </section>
+            </fieldset>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var offerSeasonNotApprovedContext = {
+        serviceUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/dashboardmng/',
+        token: '@ViewBag.Token',
+        currentSeason: '@currentSeason',
+        prevSeason: '@prevSeason',
+        nextSeason: '@nextSeason'
+    }
+</script>

@@ -1,0 +1,185 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+
+    ViewBag.Title = "Default price for production item";
+    ViewBag.SubTitle = "Default price for production item";
+    ViewBag.Module = "Default price for production item";
+
+    string userManualUrl = string.Empty;
+    if (System.IO.File.Exists(Server.MapPath("~/UserManual/" + ViewBag.ModuleCode + ".pdf")))
+    {
+        userManualUrl = "/UserManual/" + ViewBag.ModuleCode + ".pdf";
+    }
+}
+
+<style>
+    .tilsoft-table-header, .tilsoft-table-body {
+        width: {{400 + (countPurchasing * 180)}}px;
+    }
+
+        .tilsoft-table-header > div {
+            height: 60px !important;
+            text-align: center !important;
+            background-color: #eee;
+        }
+
+    .tilsoft-table-body {
+        margin-top: 60px !important;
+    }
+
+        .tilsoft-table-header > div:nth-child(1),
+        .tilsoft-table-body table > tbody > tr > td:nth-child(1) {
+            width: 120px;
+            text-align: center;
+        }
+
+        .tilsoft-table-header > div:nth-child(2),
+        .tilsoft-table-body table > tbody > tr > td:nth-child(2) {
+            width: 220px;
+            text-align: left;
+        }
+
+        .tilsoft-table-header > div:nth-child(3),
+        .tilsoft-table-body table > tbody > tr > td:nth-child(3) {
+            width: 50px;
+            text-align: right;
+        }
+</style>
+
+<div class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-table"></i>
+                </span>
+                <h2>Search Result</h2>
+            </header>
+            <div>
+                <div class="jarviswidget-editbox"></div>
+                <div class="widget-body">
+                    <div class="row">
+                        <div class="smart-form">
+                            <fieldset class="no-padding">
+                                <section class="col col-sm-2">
+                                    <label class="label">Production Item</label>
+                                    <label class="input">
+                                        <input type="text" class="form-control" style="font-family: Arial;" ng-model="filters.filters.productionItemUD" />
+                                    </label>
+                                </section>
+                                <section class="col col-sm-2">
+                                    <label class="label">Sub Supplier <em class="note-error note" ng-if="filters.filters.factoryRawMaterialID == null || filters.filters.factoryRawMaterialID == ''">(Required)</em></label>
+                                    <label class="input">
+                                        <select class="select2" ng-options="item.factoryRawMaterialID as item.factoryRawMaterialShortNM for item in subSuppliers" ng-model="filters.filters.factoryRawMaterialID" required>
+                                            <option value=""></option>
+                                        </select>
+                                        <i></i>
+                                    </label>
+                                </section>
+                                <section class="col col-sm-2">
+                                    <label class="label">Status(Is Default)</label>
+                                    <label class="input">
+                                        <select class="select form-control" style="height: 30px;" ng-options="item.yesNoValue as item.yesNoText for item in statusDefaults" ng-model="filters.filters.yesNoValue">
+                                            <option value=""></option>
+                                        </select>
+                                        <i></i>
+                                    </label>
+                                </section>
+                            </fieldset>
+                        </div>
+                    </div>
+                    <div class="row no-padding">
+                        <div class="smart-form">
+                            <div avs-scrollable-table class="tilsoft-table-wrapper">
+                                <div class="tilsoft-table">
+                                    <div class="tilsoft-table-header">
+                                        <div>Item Code</div>
+                                        <div>Item Name</div>
+                                        <div>Unit</div>
+                                        <div class="no-padding" style="width: 180px" ng-repeat="header in purchasingHeader">
+                                            <div class="no-padding" style="width: 100%; height: 30px; border-right: none; line-height: 30px">{{header.commonHeader}}</div>
+                                            <div class="no-padding" style="width: 100%; height: 30px;">
+                                                <div class="no-padding" style="width: 90px; text-align: center; height: 30px; line-height: 30px;">{{header.priceHeader}}</div>
+                                                <div class="no-padding" style="text-align: center; height: 30px; line-height: 30px;">{{header.quantityHeader}}</div>
+                                            </div>
+                                        </div>
+                                        <div style="border-bottom: none"></div>
+                                    </div>
+                                    <div class="tilsoft-table-body">
+                                        <table>
+                                            <tbody ng-repeat="item in productionItem">
+                                                <tr>
+                                                    <td rowspan="2">{{item.productionItemUD}}</td>
+                                                    <td rowspan="2">{{item.productionItemNM}}</td>
+                                                    <td rowspan="2">{{item.unitNM}}</td>
+                                                    <td style="width: 90px" ng-repeat="wItem in purchasingDetail | filter : {'productionItemID': item.productionItemID} : true">
+                                                        <div style="text-align: right; margin-top: -2px" ng-if="wItem.colName == 'PRICE'">
+                                                            <input type="checkbox" ng-model="wItem.isDefault" ng-if="wItem.unitPrice != null" ng-click="event.checkedItem(wItem)">
+                                                            {{wItem.unitPrice | number:2}}
+                                                        </div>
+                                                        <div style="text-align: right; margin-top: 3px" ng-if="wItem.colName == 'ORDER'">{{wItem.orderQnt | number:4}}</div>
+                                                    </td>
+                                                    <td style="border-bottom: none"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="2" style="width: 180px" ng-repeat="sItem in purchasingSupplier | filter : {'productionItemID': item.productionItemID} : true">
+                                                        <div>{{sItem.factoryRawMaterialUD}}</div>
+                                                        <div>{{sItem.validFrom}} <span ng-if="sItem.validTo != null && sItem.validTo != ''">- {{sItem.validTo}}</span></div>
+                                                    </td>
+                                                    <td style="border-bottom: none; border-right: none"></td>
+                                                    <td style="border-bottom: none; border-right: none"></td>
+                                                    <td style="border-bottom: none"></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction{
+<ul id="sparks">
+    <li class="sparks-info">
+        <a href="@Url.Action("Index", "PurchaseQuotationMng")" class="btn btn-default btn-sm" title="Back Purchase Quotation">
+            <i class="fa fa-arrow-left"></i>
+        </a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0)" class="btn btn-default btn-sm" title="Search List Default Price for Production Item" ng-click="event.searchDefaultPrice()">
+            <i class="fa fa-search"></i>
+        </a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0)" class="btn btn-default btn-sm" title="Update default price for production item" ng-click="event.setIsDefaultPrice()">
+            <i class="fa fa-floppy-o"></i>
+        </a>
+    </li>
+    @if (!string.IsNullOrEmpty(userManualUrl))
+    {
+        <li class="sparks-info">
+            <a target="_blank" href="@userManualUrl" class="btn btn-default" title="Help"><i class="fa fa-info"></i></a>
+        </li>
+    }
+</ul>
+}
+
+@section pagejs{
+    <script type="text/javascript">
+        var context = {
+            backUrl: '@Url.Action("Index", "PurchaseQuotationMng")',
+            serviceUrl: '@(serviceRoot)/api/purchaseQuotationMng/',
+            token: '@token'
+        }
+    </script>
+    <script type="text/javascript" src="~/Angular/app/purchaseQuotationMng/defaultPrice.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/purchaseQuotationMng/service.js?v=@guid"></script>
+}

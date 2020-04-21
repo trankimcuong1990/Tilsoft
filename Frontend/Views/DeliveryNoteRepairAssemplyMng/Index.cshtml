@@ -1,0 +1,118 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    var pageSize = System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"];
+    var cookieID = HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString();
+
+    ViewBag.Title = "Search Delivery Note Repair/Assemply";
+    ViewBag.Module = "Delivery Note Repair/Assemply";
+}
+<form class="row" id="main-form">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-search-result" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Search Result</h2>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div avs-scroll grid-handler="gridHandler" class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table">
+                            <div style="width:1000px" class="tilsoft-table-header">
+                                <div style="width:100px">Found(s)<br /><strong style="color:maroon">{{totalRows}}</strong></div>
+                                <div style="width:130px">Delivery Note Nr.</div>
+                                <div style="width:150px">Delivery Note Date</div>
+                                <div style="width:120px">From Warehouse</div>
+                                <div style="width:150px">Description</div>
+                                <div>More Information</div>
+                            </div>
+                            <div style="width:1000px" class="tilsoft-table-filter">
+                                <div style="width:100px; text-align:center">
+                                    <a href="javascript:void(0)" class="btn btn-{{isDefaultFilter ? 'default' : 'primary'}} btn-xs" title="Apply Filter" ng-click="event.refresh()">
+                                        <i class="fa fa-filter"></i>
+                                    </a>
+                                    <a href="javascript:void(0)" class="btn btn-default btn-xs" title="Clear Filter">
+                                        <i class="fa fa-ban"></i>
+                                    </a>
+                                </div>
+                                <div style="width:130px">
+                                    <input type="text" class="form-control search-filter" style="width:100%" ng-model="filters.deliveryNoteUD" />
+                                </div>
+                                <div style="width:150px; padding:0px; text-align:center;">
+                                    <div class="input-group" style="border:none">
+                                        <input type="text" class="form-control search-filter" style="width:100%" ng-model="filters.deliveryNoteDate" avs-calendar />
+                                        <span class="input-group-addon">
+                                            <i class="fa fa-calendar"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div style="width:120px"></div>
+                                <div style="width:150px"></div>
+                                <div></div>
+                            </div>
+                            <div style="width:1000px" class="tilsoft-table-body">
+                                <table>
+                                    <tbody>
+                                        <tr ng-repeat="item in data">
+                                            <td style="width:99px; text-align:center">
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current) == "disabled")
+                                                {
+                                                    <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "DeliveryNoteRepairAssemplyMng")/{{item.deliveryNoteID}}" title="View (Read Only)" target="_blank"><i class="fa fa-folder-open"></i> View</a>
+                                                }
+                                                else
+                                                {
+                                                    <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "DeliveryNoteRepairAssemplyMng")/{{item.deliveryNoteID}}" title="Edit" target="_blank" style="width: 60px"><i class="fa fa-pencil-square-o"></i> Edit</a>
+                                                }
+
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current) != "disabled")
+                                                {
+                                                    <a class="btn btn-danger btn-xs font-11" href="#" title="Delete" ng-click="event.deleterow(item.deliveryNoteID, $index)" style="width: 60px; margin-top: 3px"><i class="fa fa-times"></i> Delete</a>
+                                                }
+                                            </td>
+                                            <td style="width:130px; text-align:center">{{item.deliveryNoteUD}}</td>
+                                            <td style="width:150px; text-align:center">{{item.deliveryNoteDate}}</td>
+                                            <td style="width:120px">{{item.fromFactoryWarehouseNM}}</td>
+                                            <td style="width:150px">{{item.description}}</td>
+                                            <td></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Search" ng-click="event.refresh()"><i class="fa fa-search"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Search" ng-click="event.refresh()"><i class="fa fa-refresh"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="@Url.Action("Edit", "DeliveryNoteRepairAssemplyMng", new { id = UrlParameter.Optional })/0" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="Create new Delivery Note Repair/Assemply" target="_blank"><i class="fa fa-file-o"></i></a>
+        </li>
+    </ul>
+}
+@section pagepopup2{
+}
+
+@section pagejs {
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(serviceRoot)/api/DeliveryNoteRepairAssemplyMng/',
+            token: '@token',
+            pageSize: '@pageSize',
+            cookieID: '@cookieID'
+        }
+    </script>
+    <script type="text/javascript" src="~/Angular/app/deliveryNoteRepairAssemplyMng/index.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/deliveryNoteRepairAssemplyMng/service.js?v=@guid"></script>
+}

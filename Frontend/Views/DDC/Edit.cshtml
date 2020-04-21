@@ -1,0 +1,90 @@
+﻿@{
+    if (ViewBag.ID == 0)
+    {
+        ViewBag.Title = "Create New DDC";
+    }
+    else
+    {
+        ViewBag.Title = "Edit DDC";
+    }
+
+    ViewBag.Module = "DDC";
+    string season = string.Empty;
+    if (Request.Params["s"] != null)
+    {
+        season = Request.Params["s"].ToString();
+    }
+}
+
+
+<form class="row" name="editForm" id="main-form">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-product-information" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>DDC Information</h2>
+            </header>
+            <div>
+                <div class="widget-body">
+                    <div class="smart-form">
+                        <fieldset>
+                            <div class="row">
+                                <section class="col col-3">
+                                    <label class="label">Season</label>
+                                    <label class="input">
+                                        <span class="form-control">{{data.season}}</span>
+                                    </label>
+                                </section>
+                            </div>
+                            <div class="row" style="padding: 15px;">
+                                <div ui-grid="grdDDC" class="grid" style="width: 100%; height: 500px;" ui-grid-resize-columns ui-grid-pinning ui-grid-edit ui-grid-cellnav></div>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "DDC")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="event.update($event)" ng-disabled="data.isConfirmed"><i class="fa fa-save"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default@(ViewBag.ID==0?" disabled":"") @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="Delete" style="color: #ff0000;" ng-click="event.delete($event)" ng-disabled="data.isConfirmed"><i class="fa fa-times"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default" title="Print"><i class="fa fa-print"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Approve, HttpContext.Current))" title="Approve" ng-click="event.approve($event)" ng-disabled="data.isConfirmed || @ViewBag.ID == 0"><i class="fa fa-thumbs-o-up"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Reset, HttpContext.Current))" title="Reset Approval status" ng-click="event.reset($event)" ng-disabled="!data.isConfirmed || @ViewBag.ID == 0"><i class="fa fa-thumbs-o-down"></i></a>
+        </li>
+    </ul>
+}
+@section pagejs {
+    <script src="~/Angular/app/jsonService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script type="text/javascript">
+    jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/ddc/';
+    jsonService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+        var context = {
+            id: @ViewBag.ID,
+            season: '@season',
+            backUrl: '@Url.Action("Index", "Quotation")',
+            refreshUrl: '@Url.Action("Edit", "Quotation", new { id = UrlParameter.Optional })/',
+            errMsg: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED'
+        }
+    </script>
+    <script src="~/Angular/app/ddc/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/ddc/edit.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}

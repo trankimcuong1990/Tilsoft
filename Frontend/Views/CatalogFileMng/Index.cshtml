@@ -1,0 +1,102 @@
+﻿@{
+    ViewBag.Title = "Search Catalog File";
+    ViewBag.Module = "Catalog File";
+    ViewBag.Icon = "fa-search";
+}
+
+<div class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-0" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Search Result</h2>
+            </header>
+
+            <div>
+                <div class="widget-body no-padding">
+                    <div avs-scroll grid-handler="gridHandler" class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header" style="width: 1050px;">
+                                <div style="width: 171px; text-transform: none; font-weight: bold;">Found: {{totalRows}}</div>
+                                <div style="width: 80px;">Season</div>
+                                <div style="width: 250px;">Catalog File Name</div>
+                                <div style="width: 250px;">Price List File Name</div>
+                                <div><i class="fa fa-list"></i> Tracking</div>
+                            </div>
+                            <div class="tilsoft-table-filter" style="width: 1050px;">
+                                <div style="width: 171px;">
+                                    <a href="javascript:void(0)" class="btn btn-{{isDefaultFilter?'default':'primary'}} btn-xs" title="Apply Filter" ng-click="event.reload()"><i class="fa fa-filter"></i></a>
+                                    <a href="javascript:void(0)" class="btn btn-default btn-xs" title="Clear Filter" ng-click="event.clearFilter()"><i class="fa fa-ban"></i></a>
+                                </div>
+                                <div style="width: 80px;">
+                                    <select class="search-filter" ng-model="filters.Season" ng-options="season.seasonValue as season.seasonText for season in seasons">
+                                        <option></option>
+                                    </select>
+                                </div>
+                                <div style="width: 250px;"><input class="search-filter" type="text" ng-model="filters.FriendlyName" /></div>
+                                <div style="width: 250px;"><input class="search-filter" type="text" ng-model="filters.PLFriendlyName" /></div>
+                                <div></div>
+                            </div>
+                            <div class="tilsoft-table-body" style="width: 1050px; margin-top: 95px; height: auto; max-height: 450px;">
+                                <table>
+                                    <tr ng-repeat="item in data">
+                                        <td style="text-align: center; width: 170px;">
+                                            <a style="width: 50px;" class="btn btn-default btn-xs font-11" href="mailto:?body=Download link: {{item.fileLocation}}" title="Send Email"><i class="fa fa-envelope-o"></i> Email</a>
+                                            <a style="width: 50px;" class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "CatalogFileMng")/{{item.catalogFileID}}" title="Edit"><i class="fa fa-pencil"></i> Edit</a>
+
+                                            @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current) != "disabled")
+                                            {
+                                                <a style="width: 50px;" class="btn btn-danger btn-xs font-11" href="javascript:void(0);" title="Delete" ng-click="event.delete(item)"><i class=" fa fa-times"></i> Del</a>
+                                            }
+                                        </td>
+                                        <td style="text-align: center; width: 80px;">{{item.season}}</td>
+                                        <td style="width: 250px;"><a target="_blank" href="{{item.fileLocation}}">{{item.friendlyName}}</a></td>
+                                        <td style="width: 250px;"><a target="_blank" href="{{item.plFileLocation}}">{{item.plFriendlyName}}</a></td>
+                                        <td>
+                                            Updated by:
+                                            <a ng-if="item.updatedBy" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.updatedBy}}" dat data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                {{item.updatorName}}
+                                            </a>
+                                            on {{item.updatedDate}}
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Search" ng-click="event.reload()"><i class="fa fa-search"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Refresh" ng-click="event.reload()"><i class="fa fa-refresh"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="@Url.Action("Edit", "CatalogFileMng")/0" target="_blank" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="New"><i class="fa fa-file-o"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default disabled" title="Print"><i class="fa fa-print"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script type="text/javascript">
+        var context = {
+            serviceUrl : '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/catalogfile/',
+            token : '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]',
+            pageSize : @System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"],
+            cookieId: '@HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString()'
+        }
+    </script>
+    <script src="~/Views/CatalogFileMng/index.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/jsonService2.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/CatalogFileMng/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}

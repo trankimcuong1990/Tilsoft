@@ -1,0 +1,605 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var supportServiceRoot = (System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"]);
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+
+    var modelID = ViewBag.ModelID;
+    var sampleProductID = ViewBag.SampleProductID;
+
+    ViewBag.Title = "Product Break Down(PAL)";
+    ViewBag.Module = "Product Break Down(PAL)";
+    ViewBag.Icon = "fa-database";
+}
+
+<style>
+    .ui-autocomplete {
+        max-height: 500px;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+</style>
+
+<div class="row" name="editForm" style="margin-top: {{openSubForm == true ? 3 : 0}}px">
+    <article class="col col-sm-12">
+        <div class="jarviswidget" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>@((ViewBag.ID == 0) ? "Create" : "Edit") Product Break Down(PAL)</h2>
+            </header>
+            <div class="no-padding" ng-if="!openSubForm">
+                <div class="widget-body" style="padding-bottom: 0px">
+                    <div class="smart-form">
+                        <fieldset>
+                            <section class="col col-sm-2">
+                                <label>Model <em class="note note-error" ng-if="data.modelID == null && data.productID == null && data.sampleProductID == null">(Required)</em></label>
+                                <label class="input" ng-class="{'state-error': data.modelID == null && data.productID == null && data.sampleProductID == null}">
+                                    <input id="supportModelID" class="form-control" style="height: 30px; font-family: Arial" type="text" avs-remote-auto-complete ng-request-param="autocompleteModel.api" ng-init-param="data.modelUD" ng-model="data.modelUD" ng-item-value="autocompleteModel.model" ng-item-selected="event.selectModel(autocompleteModel.model)" ng-change="event.changeModel(autocompleteModel.model)" data-method="POST" data-format-function="formatModel" ng-required="data.modelID == null && data.productID == null && data.sampleProductID == null" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-9">
+                                <label>&nbsp;</label>
+                                <label class="input">
+                                    <input class="form-control" style="height: 30px; font-family: Arial" type="text" readonly ng-model="data.modelNM" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-1">
+                                <label>&nbsp;</label>
+                                <label class="input">
+                                    <a class="btn btn-primary btn-sm" style="width:100%" ng-click="event.getModelDefaultOption(data.modelID)" ng-disabled="data.modelID == null">Get Default</a>
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label>Product <em class="note note-error" ng-if="data.modelID == null && data.productID == null && data.sampleProductID == null">(Required)</em></label>
+                                <label class="input" ng-class="{'state-error': data.modelID == null && data.productID == null && data.sampleProductID == null}">
+                                    <input id="supportProductID" class="form-control" style="height: 30px; font-family: Arial" type="text" avs-remote-auto-complete ng-request-param="autocompleteProduct.api" ng-init-param="data.articleCode" ng-init-param-2="modelID" ng-model="data.articleCode" ng-item-value="autocompleteProduct.product" ng-item-selected="event.selectProduct(autocompleteProduct.product)" ng-change="event.changeProduct(autocompleteProduct.product)" data-method="POST" data-format-function="formatProduct" ng-required="data.modelID == null && data.productID == null && data.sampleProductID == null" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-10">
+                                <label>&nbsp;</label>
+                                <label class="input">
+                                    <input class="form-control" style="height: 30px; font-family: Arial" type="text" readonly ng-model="data.description" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label>Sample Product <em class="note note-error" ng-if="data.modelID == null && data.productID == null && data.sampleProductID == null">(Required)</em></label>
+                                <label class="input" ng-class="{'state-error': data.modelID == null && data.productID == null && data.sampleProductID == null}">
+                                    <input id="supportSampleProductID" class="form-control" style="height: 30px; font-family: Arial" type="text" avs-remote-auto-complete ng-request-param="autocompleteSample.api" ng-init-param="data.sampleProductUD" ng-init-param-2="modelID" ng-model="data.sampleProductUD" ng-item-value="autocompleteSample.sample" ng-item-selected="event.selectSample(autocompleteSample.sample)" ng-change="event.changeSample(autocompleteSample.sample)" data-method="POST" data-format-function="formatSample" ng-required="data.modelID == null && data.productID == null && data.sampleProductID == null" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-10">
+                                <label>&nbsp;</label>
+                                <label class="input">
+                                    <input class="form-control" style="height: 30px; font-family: Arial" type="text" readonly ng-model="data.articleDescription" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label>Item Size</label>
+                                <label class="input">
+                                    <input class="form-control" style="height: 30px; font-family: Arial" type="text" ng-model="data.itemSize" ng-readonly="data.isConfirmed" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label>Carton Size</label>
+                                <label class="input">
+                                    <input class="form-control" style="height: 30px; font-family: Arial" type="text" ng-model="data.cartonSize" ng-readonly="data.isConfirmed" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label>Frame Desceiption</label>
+                                <label class="input">
+                                    <input class="form-control" style="height: 30px; font-family: Arial" type="text" ng-model="data.frameDescription" ng-readonly="data.isConfirmed" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label>Cushion Desceiption</label>
+                                <label class="input">
+                                    <input class="form-control" style="height: 30px; font-family: Arial" type="text" ng-model="data.cushionDescription" ng-readonly="data.isConfirmed" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-4">
+                                <label>Remark</label>
+                                <label class="input">
+                                    <input class="form-control" style="height: 30px; font-family: Arial" type="text" ng-model="data.remark" ng-readonly="data.isConfirmed" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label>Client</label>
+                                <label class="input">
+                                    <input id="supportClientID" style="height: 30px; font-family: Arial" class="form-control" avs-remote-auto-complete ng-request-param="autocompleteClient.api" ng-init-param="data.clientUD" ng-model="data.clientUD" ng-item-value="autocompleteClient.client" ng-item-selected="event.selectClient(autocompleteClient.client)" ng-change="event.changeClient(autocompleteClient.client)" data-method="POST" data-format-function="formatClient" ng-readonly="data.isConfirmed" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label>Price Date</label>
+                                <label class="input-group">
+                                    <input style="height: 30px; font-family: Arial" class="form-control" avs-calendar ng-data-source="data.priceDate" ng-readonly="data.isConfirmed" />
+                                    <span class="input-group-addon">
+                                        <i class="fa fa-calendar"></i>
+                                    </span>
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label>
+                                    Currency <em class="note note-error" ng-if="data.currencyID == null">(Required)</em>
+                                </label>
+                                <label class="input" ng-class="{'state-error': data.currencyID == null}">
+                                    <select class="form-control" style="height: 28px !important;" ng-model="data.currencyID" ng-options="item.currencyID as item.currencyNM for item in support.currency" ng-change="event.changeCurrency(data.currencyID)" ng-required="data.currencyID == null">
+                                        <option value=""></option>
+                                    </select>
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label>
+                                    Exchange Rate <em class="note note-error" ng-if="data.exchangeRate == null || data.exchangeRate == ''">(Required)</em>
+                                </label>
+                                <label class="input" ng-class="{'state-error': (data.exchangeRate == null || data.exchangeRate == '')}">
+                                    <input type="text" class="form-control" style="height: 30px; text-align: right; font-family: Arial;" avs-number ng-data-source="data.exchangeRate" ng-required="data.exchangeRate == null || data.exchangeRate == ''" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-4">
+                                <label>&nbsp;</label>
+                                <label class="input">
+                                    <br>&nbsp;
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label>Total Amount(VND)</label>
+                                <label class="input">
+                                    <input class="form-control" style="height: 30px; font-family: Arial; text-align: right" type="text" readonly avs-number ng-data-source="event.getTotalAmountPAL()" ng-decimal="0" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label>Total Amount(USD)</label>
+                                <label class="input">
+                                    <input class="form-control" style="height: 30px; font-family: Arial; text-align: right" type="text" readonly avs-currency ng-data-source="event.getTotalAmountWithUSD()" ng-decimal="2" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label>Season Spec(%) <em class="note note-error" ng-if="data.seasonSpec == null || data.seasonSpec == ''">(Required)</em></label>
+                                <label class="input" ng-class="{'state-error': data.seasonSpec == null || data.seasonSpec == ''}">
+                                    <input class="form-control" style="height: 30px; font-family: Arial; text-align: right" type="text" avs-number ng-data-source="data.seasonSpec" ng-decimal="2" ng-required="data.seasonSpec == null || data.seasonSpec == ''" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label>Final Amount(VND)</label>
+                                <label class="input">
+                                    <input class="form-control" style="height: 30px; font-family: Arial; text-align: right" type="text" readonly avs-number ng-data-source="event.getTotalPricePAL()" ng-decimal="0" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label>Final Amount<label ng-if="data.currencyID != null">({{data.currencyNM}})</label></label>
+                                <label class="input">
+                                    <input class="form-control" style="height: 30px; font-family: Arial; text-align: right" type="text" readonly avs-currency ng-data-source="event.getTotalPricePALExchange()" ng-decimal="2" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label>Loading Ability(40HC)</label>
+                                <label class="input">
+                                    <input class="form-control" style="height: 30px; font-family: Arial; text-align: right" type="text" avs-number ng-data-source="data.qnt40HC" ng-decimal="4" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-3" ng-if="data.updatedBy != null">
+                                Updated by
+                                <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{data.updatedBy}}" data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                    <i class="fa fa-user"></i> {{data.updatorName}}
+                                </a> on {{data.updatedDate}}
+                            </section>
+                            <section class="col col-sm-3" ng-if="data.confirmedBy != null">
+                                Confirmed by
+                                <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{data.confirmedBy}}" data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                    <i class="fa fa-user"></i> {{data.confirmerName}}
+                                </a> on {{data.confirmedDate}}
+                            </section>
+                            <section class="col col-sm-12">
+                                <h2 style="margin-bottom:3px;">Product BreakDown Category Amount</h2>
+                                <hr>
+                                <a href="javascript:void(0);" class="btn btn-sm btn-primary" style="margin-top:5px;" title="Add product break down category" ng-click="event.addCategoryAmount()">
+                                    <i class="fa fa-plus"></i> Add amount category
+                                </a>
+                                <a href="javascript:void(0);" class="btn btn-sm btn-success" style="margin-top:5px;" title="Add all product break down default category with amount" ng-click="event.fillCategoryAmount()">
+                                    <i class="fa fa-sort-amount-desc"></i> Auto-fill amount category
+                                </a>
+                                <div avs-scrollable-table class="tilsoft-table-wrapper" style="margin-top:5px;">
+                                    <div class="tilsoft-table">
+                                        <div class="tilsoft-table-header" style="width: 1110px;">
+                                            <div style="width: 55px; height: 60px;">TOTAL<br /><b style="color: #0026ff">{{data.productBreakDownCategoryAmountPAL.length | number}}</b></div>
+                                            <div style="width: 45px; height: 60px;">#</div>
+                                            <div style="width: 200px; height: 60px;">Name</div>
+                                            <div style="width: 90px; height: 60px;">SubTotal<br />(VND)</div>
+                                            <div style="width: 80px; height: 60px;">Percent<br />Wastage</div>
+                                            <div style="width: 180px; height: 60px;" class="no-padding">
+                                                <div class="no-padding" style="width: 100%; height: 30px; border-right: none; line-height: 30px;">Amount Wastage</div>
+                                                <div class="no-padding" style="width: 100%; height: 30px;">
+                                                    <div class="no-padding" style="width: 90px; text-align: center; height: 30px; line-height: 30px;">VND</div>
+                                                    <div class="no-padding" style="text-align: center; height: 30px; line-height: 30px;">USD</div>
+                                                </div>
+                                            </div>
+                                            <div style="width: 200px; height: 60px;">Remark</div>
+                                            <div style="width: 250px; height: 60px;">Image</div>
+                                            <div style="border-bottom: none; height: 60px;"></div>
+                                        </div>
+                                        <div class="tilsoft-table-totalrow" style="width: 1110px; margin-top: 60px">
+                                            <div style="width: 300px">Total Of Amount</div>
+                                            <div style="width: 90px">{{event.getTotalAmountPricePAL() | number : 0}}</div>
+                                            <div style="width: 80px"></div>
+                                            <div style="width: 90px">{{event.getTotalAmountDetailPAL() | number : 0}}</div>
+                                            <div style="width: 90px">$ {{event.getTotalAmountWithExchangeRate(data.exchangeRate) | number : 2}}</div>
+                                            <div style="width: 450px"></div>
+                                            <div style="border-bottom: none"></div>
+                                        </div>
+                                        <div class="tilsoft-table-body" style="width: 1110px; max-height:none; margin-top: 90px">
+                                            <table>
+                                                <tbody>
+                                                    <tr ng-repeat="itemAmount in data.productBreakDownCategoryAmountPAL | orderBy : 'displayOrder'">
+                                                        <td style="text-align: center; width: 55px">
+                                                            <a href="javascript:void(0);" class="btn btn-danger btn-xs font-11" title="Remove product break down category with amount" ng-click="event.removeCategoryAmount(itemAmount)" ng-if="!data.isConfirmed">
+                                                                <i class="fa fa-times"></i> Del
+                                                            </a>
+                                                        </td>
+                                                        <td style="text-align: center; width: 45px">
+                                                            <label ng-if="data.isConfirmed">{{itemAmount.displayOrder}}</label>
+                                                            <input type="text" class="form-control" style="height: 30px; text-align: center" avs-number ng-data-source="itemAmount.displayOrder" ng-if="!data.isConfirmed" />
+                                                        </td>
+                                                        <td style="text-align: center; width: 200px">
+                                                            <div class="input-group">
+                                                                <input type="text" class="form-control" style="height: 30px" avs-remote-auto-complete ng-request-param="autocompleteCategory.api" ng-init-param="itemAmount.productBreakDownCategoryNM" ng-init-param-2="1" ng-model="itemAmount.productBreakDownCategoryNM" ng-item-value="autocompleteCategory.category" ng-item-selected="event.selectCategoryAmount(autocompleteCategory.category, itemAmount)" data-method="POST" data-format-function="formatCategory" ng-readonly="data.isConfirmed" />
+                                                                <a href="#" class="btn btn-default input-group-addon" ng-click="event.getFormDetail(itemAmount)">
+                                                                    <i class="fa fa-list"></i>
+                                                                </a>
+                                                            </div>
+                                                        </td>
+                                                        <td style="width: 90px">
+                                                            <label style="text-align: right" ng-if="data.isConfirmed">{{itemAmount.unitPrice | number : 0}}</label>
+                                                            <input type="text" class="form-control" style="height: 30px; text-align: right" avs-number ng-data-source="itemAmount.unitPrice" ng-decimal="0" ng-on-change="event.getTotalAmountPAL2(itemAmount, 1)" ng-if="!data.isConfirmed" />
+                                                        </td>
+                                                        <td style="width: 80px; text-align: right;">
+                                                            <label ng-if="itemAmount.percentWastage != null">{{itemAmount.percentWastage | number : 2}}%</label>
+                                                        </td>
+                                                        <td style="text-align: right; width: 90px">
+                                                            {{method.getBaseAmount(itemAmount, 1) | number : 0}}
+                                                        </td>
+                                                        <td style="text-align: right; width: 90px">
+                                                            $ {{method.getBaseAmountWithExchangeRate(itemAmount, 1, data.exchangeRate) | number : 2}}
+                                                        </td>
+                                                        <td style="text-align: center; width: 200px">
+                                                            <input type="text" class="form-control" style="height: 30px" ng-model="itemAmount.remark" ng-if="!data.isConfirmed" />
+                                                        </td>
+                                                        <td style="width: 250px">
+                                                            <a href="javascript:void(0)" class="btn btn-primary btn-xs font-11" style="margin-bottom: 5px" ng-click="event.addImage(itemAmount)" ng-if="!data.isConfirmed">
+                                                                <i class="fa fa-plus"></i> Add images
+                                                            </a>
+                                                            <section class="col col-sm-12 no-padding" ng-if="itemAmount.productBreakDownCategoryImagePAL.length > 0">
+                                                                <div ng-repeat="image in itemAmount.productBreakDownCategoryImagePAL">
+                                                                    <div class="input-group" style="margin-bottom: {{itemAmount.productBreakDownCategoryImagePAL.indexOf(image) == (itemAmount.productBreakDownCategoryImagePAL.length - 1) ? 0 : 5}}px">
+                                                                        <input type="text" class="form-control" style="height: 30px" readonly ng-model="image.friendlyName" />
+                                                                        <a href="javascript:void(0)" class="btn btn-default btn-sm input-group-addon" ng-click="event.downloadImage(image)">
+                                                                            <i class="fa fa-download"></i>
+                                                                        </a>
+                                                                        <a href="javascript:void(0)" class="btn btn-default btn-sm input-group-addon" ng-click="event.changeImage(image)" ng-if="!data.isConfirmed">
+                                                                            <i class="fa fa-pencil"></i>
+                                                                        </a>
+                                                                        <a href="javascript:void(0)" class="btn btn-default btn-sm input-group-addon" ng-click="event.removeImage(image, itemAmount.productBreakDownCategoryImagePAL)" ng-if="!data.isConfirmed">
+                                                                            <i class="fa fa-times"></i>
+                                                                        </a>
+                                                                    </div>
+                                                                </div>
+                                                            </section>
+                                                        </td>
+                                                        <td style="border-bottom: none"></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                            <section class="col col-sm-12">
+                                <h2 style="margin-bottom:3px;">Product BreakDown Category Percent</h2>
+                                <hr>
+                                <a href="javascript:void(0);" class="btn btn-sm btn-primary" style="margin-top:5px;" title="Add product break down category" ng-click="event.addCategoryPercent()">
+                                    <i class="fa fa-plus"></i> Add percent category
+                                </a>
+                                <a href="javascript:void(0);" class="btn btn-sm btn-success" style="margin-top:5px;" title="Add all product break down default category with percent" ng-click="event.fillCategoryPercent()">
+                                    <i class="fa fa-sort-amount-desc"></i> Auto-fill percent category
+                                </a>
+                                <div avs-scrollable-table class="tilsoft-table-wrapper" style="margin-top:5px;">
+                                    <div class="tilsoft-table">
+                                        <div class="tilsoft-table-header" style="width: 1110px;">
+                                            <div style="width: 55px; height: 60px;">TOTAL<br /><b style="color: #0026ff">{{data.productBreakDownCategoryPercentPAL.length | number}}</b></div>
+                                            <div style="width: 45px; height: 60px;">#</div>
+                                            <div style="width: 200px; height: 60px;">Name</div>
+                                            <div style="width: 80px; height: 60px;">%</div>
+                                            <div style="width: 90px; height: 60px;">Based On<br />(VND)</div>
+                                            <div style="width: 180px; height: 60px;" class="no-padding">
+                                                <div class="no-padding" style="width: 100%; height: 30px; border-right: none; line-height: 30px;">Amount Wastage</div>
+                                                <div class="no-padding" style="width: 100%; height: 30px;">
+                                                    <div class="no-padding" style="width: 90px; text-align: center; height: 30px; line-height: 30px;">VND</div>
+                                                    <div class="no-padding" style="text-align: center; height: 30px; line-height: 30px;">USD</div>
+                                                </div>
+                                            </div>
+                                            <div style="width: 200px; height: 60px;">Remark</div>
+                                            <div style="width: 250px; height: 60px;">Image</div>
+                                            <div style="border-bottom: none; height: 60px;"></div>
+                                        </div>
+                                        <div class="tilsoft-table-totalrow" style="width: 1110px; margin-top: 60px">
+                                            <div style="width: 300px">Total Of Percent</div>
+                                            <div style="width: 80px">{{event.getTotalPercentQntPAL() | number : 2}}</div>
+                                            <div style="width: 90px;"></div>
+                                            <div style="width: 90px">{{event.getTotalPercentDetailPAL() | number : 0}}</div>
+                                            <div style="width: 90px;">$ {{event.getTotalPercentWithExchangeRate(data.exchangeRate) | number : 2}}</div>
+                                            <div style="width: 450px"></div>
+                                            <div style="border-bottom: none"></div>
+                                        </div>
+                                        <div class="tilsoft-table-body" style="width: 1110px; max-height:none; margin-top: 90px;">
+                                            <table>
+                                                <tbody>
+                                                    <tr ng-repeat="itemPercent in data.productBreakDownCategoryPercentPAL | orderBy : 'displayOrder'">
+                                                        <td style="text-align: center; width: 55px">
+                                                            <a href="javascript:void(0);" class="btn btn-danger btn-xs font-11" title="Remove product break down category with amount" ng-click="event.removeCategoryPercent(itemPercent)" ng-if="!data.isConfirmed">
+                                                                <i class="fa fa-times"></i> Del
+                                                            </a>
+                                                        </td>
+                                                        <td style="text-align: center; width: 45px">
+                                                            <label ng-if="data.isConfirmed">{{itemPercent.displayOrder}}</label>
+                                                            <input type="text" class="form-control" style="height: 30px; text-align: center" avs-number ng-data-source="itemPercent.displayOrder" ng-if="!data.isConfirmed" />
+                                                        </td>
+                                                        <td style="text-align: center; width: 200px">
+                                                            <div class="input-group">
+                                                                <input type="text" class="form-control" style="height: 30px" avs-remote-auto-complete ng-request-param="autocompleteCategory.api" ng-init-param="itemPercent.productBreakDownCategoryNM" ng-init-param-2="2" ng-model="itemPercent.productBreakDownCategoryNM" ng-item-value="autocompleteCategory.category" ng-item-selected="event.selectCategoryPercent(autocompleteCategory.category, itemPercent)" data-method="POST" data-format-function="formatCategory" ng-readonly="data.isConfirmed" />
+                                                                <a href="#" class="btn btn-default input-group-addon" ng-click="event.getFormDetail(itemPercent)">
+                                                                    <i class="fa fa-list"></i>
+                                                                </a>
+                                                            </div>
+                                                        </td>
+                                                        <td style="width: 80px">
+                                                            <label style="text-align: right" ng-if="data.isConfirmed">{{itemPercent.quantityPercent | number : 2}}</label>
+                                                            <input type="text" class="form-control" style="height: 30px; text-align: right" avs-number ng-data-source="itemPercent.quantityPercent" ng-decimal="2" ng-on-change="event.getTotalAmountPAL2(itemPercent, 2)" ng-if="!data.isConfirmed" />
+                                                        </td>
+                                                        <td style="text-align: right; width: 90px">
+                                                            {{itemPercent.unitPrice | number : 0}}
+                                                        </td>
+                                                        <td style="text-align: right; width: 90px">
+                                                            {{method.getBaseAmount(itemPercent, 2) | number : 0}}
+                                                        </td>
+                                                        <td style="text-align: right; width: 90px">
+                                                            $ {{method.getBaseAmountWithExchangeRate(itemPercent, 2, data.exchangeRate) | number : 2}}
+                                                        </td>
+                                                        <td style="text-align: center; width: 200px">
+                                                            <label ng-if="data.isConfirmed">{{itemPercent.remark}}</label>
+                                                            <input type="text" class="form-control" style="height: 30px" ng-model="itemPercent.remark" ng-if="!data.isConfirmed" />
+                                                        </td>
+                                                        <td style="width: 250px">
+                                                            <a href="javascript:void(0)" class="btn btn-primary btn-xs font-11" style="margin-bottom: 5px" ng-click="event.addImage(itemPercent)" ng-if="!data.isConfirmed">
+                                                                <i class="fa fa-plus"></i> Add images
+                                                            </a>
+                                                            <section class="col col-sm-12 no-padding" ng-if="itemPercent.productBreakDownCategoryImagePAL.length > 0">
+                                                                <div ng-repeat="image in itemPercent.productBreakDownCategoryImagePAL">
+                                                                    <div class="input-group" style="margin-bottom: {{itemPercent.productBreakDownCategoryImagePAL.indexOf(image) == (itemPercent.productBreakDownCategoryImagePAL.length - 1) ? 0 : 5}}px">
+                                                                        <input type="text" class="form-control" style="height: 30px" readonly ng-model="image.friendlyName" />
+                                                                        <a href="javascript:void(0)" class="btn btn-default btn-sm input-group-addon" ng-click="event.downloadImage(image)">
+                                                                            <i class="fa fa-download"></i>
+                                                                        </a>
+                                                                        <a href="javascript:void(0)" class="btn btn-default btn-sm input-group-addon" ng-click="event.changeImage(image)" ng-if="!data.isConfirmed">
+                                                                            <i class="fa fa-pencil"></i>
+                                                                        </a>
+                                                                        <a href="javascript:void(0)" class="btn btn-default btn-sm input-group-addon" ng-click="event.removeImage(image, itemPercent.productBreakDownCategoryImagePAL)" ng-if="!data.isConfirmed">
+                                                                            <i class="fa fa-times"></i>
+                                                                        </a>
+                                                                    </div>
+                                                                </div>
+                                                            </section>
+                                                        </td>
+                                                        <td style="border-bottom: none"></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+            <div class="no-padding" ng-if="openSubForm">
+                <div class="widget-body" style="padding-bottom: 0px">
+                    <div class="smart-form">
+                        <fieldset>
+                            <section class="col col-sm-6" style="text-align: left">
+                                <a href="javascript:void(0)" class="btn btn-default btn-sm btn-primary" style="height: 30px" ng-click="event.addCategoryTypePAL()" ng-if="!data.isConfirmed">
+                                    <i class="fa fa-plus"></i> Add product break down category type
+                                </a>
+                            </section>
+                            <section class="col col-sm-6" style="text-align: right">
+                                <a href="javascript:void(0)" class="btn btn-default btn-sm" style="height: 30px" ng-click="event.saveFormDetail(dataDetail)" ng-if="!data.isConfirmed">
+                                    <i class="fa fa-floppy-o"></i> Save
+                                </a>
+                                <a href="javascript:void(0)" class="btn btn-default btn-sm btn-success" style="height: 30px" ng-click="event.downloadTemplateDetailPAL()" ng-if="!data.isConfirmed">
+                                    <i class="fa fa-download"></i> Download template
+                                </a>
+                                <a href="javascript:void(0)" class="btn btn-default btn-sm btn-warning" style="height: 30px" ng-click="event.uploadTemplateDetailPAL(dataDetail)" ng-if="!data.isConfirmed">
+                                    <i class="fa fa-upload"></i> Upload template
+                                </a>
+                                <a href="javascript:void(0)" class="btn btn-default btn-sm btn-danger" style="height: 30px" ng-click="event.closeFormDetail(dataDetail)">
+                                    <i class="fa fa-times"></i> Close
+                                </a>
+                            </section>
+                            <section class="col col-sm-3">
+                                <label>Exchange Rate</label>
+                                <label class="input" style="display: inline-flex;">
+                                    <input class="form-control" style="height: 30px; font-family: Arial; text-align: right;" avs-number ng-data-source="data.exchangeRate" ng-decimal="0" readonly />
+                                </label>
+                            </section>
+                            <section class="col col-sm-3">
+                                <label>Loading Ability(40HC)</label>
+                                <label class="input" style="display: inline-flex;">
+                                    <input class="form-control" style="height: 30px; font-family: Arial; text-align: right" type="text" avs-number ng-data-source="data.qnt40HC" ng-decimal="4" />
+                                </label>
+                            </section>
+                        </fieldset>
+                    </div>
+                    <div avs-scrollable-table class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header" style="width: 1300px">
+                                <div style="width: 65px">Total<br /><b style="color: #0026ff">{{dataDetail.productBreakDownCategoryTypePAL.length | number}}</b></div>
+                                <div style="width: 45px">#</div>
+                                <div style="width: 250px">NAME</div>
+                                <div style="width: 250px">English Name</div>
+                                <div style="width: 150px">IMAGE</div>
+                                <div style="width: 80px">Unit</div>
+                                <div style="width: 90px">Qnt</div>
+                                <div style="width: 90px">Price<br />(VND)</div>
+                                <div style="width: 90px">Price<br />(USD)</div>
+                                <div style="width: 90px">Amount<br />(VND)</div>
+                                <div style="width: 90px">Amount<br />(USD)</div>
+                                <div style="border-bottom: none"></div>
+                            </div>
+                            <div class="tilsoft-table-body" style="width: 1300px; margin-top: 50px">
+                                <table>
+                                    <tbody ng-repeat="categoryType in dataDetail.productBreakDownCategoryTypePAL">
+                                        <tr>
+                                            <th style="text-align: center; width: 65px">
+                                                <a href="javascript:void(0);" class="btn btn-primary btn-xs font-11" title="Add product breakdown category type detail" ng-if="data.isConfirmed == null || !data.isConfirmed" ng-click="event.addDetailPAL(categoryType)">
+                                                    <i class="fa fa-plus"></i>
+                                                </a>
+                                                <a href="javascript:void(0);" class="btn btn-danger btn-xs font-11" title="Remove product breakdown category type" ng-if="data.isConfirmed == null || !data.isConfirmed" ng-click="event.removeCategoryTypePAL(categoryType)">
+                                                    <i class="fa fa-times"></i>
+                                                </a>
+                                            </th>
+                                            <th colspan="5" style="width: 775px">
+                                                <input type="text" class="form-control" style="height: 30px" ng-model="categoryType.productBreakDownCategoryTypeNM" ng-if="data.isConfirmed == null || !data.isConfirmed" />
+                                                <span ng-if="data.isConfirmed">{{categoryType.productBreakDownCategoryTypeNM}}</span>
+                                            </th>
+                                            <th style="width: 90px"></th>
+                                            <th style="width: 90px"></th>
+                                            <th style="width: 90px"></th>
+                                            <th style="width: 90px"></th>
+                                            <th style="width: 90px"></th>
+                                            <th style="border-bottom: 0px"></th>
+                                        </tr>
+                                        <tr style="background: #eff7f7">
+                                            <th colspan="6" style="text-align: right; color: #666; background: #eff7f7;"><b>TOTAL OF {{categoryType.productBreakDownCategoryTypeNM}}</b></th>
+                                            <th style="text-align: right; background: #eff7f7">{{method.getTotalQntDetailPAL(categoryType) | number:4}}</th>
+                                            <th style="text-align: right; background: #eff7f7"></th>
+                                            <th style="text-align: right; background: #eff7f7"></th>
+                                            <th style="text-align: right; background: #eff7f7">{{method.getTotalAmountDetailPAL(categoryType) | number : 0}}</th>
+                                            <th style="text-align: right; background: #eff7f7"><label ng-if="method.getTotalAmountDetailPALUSD(categoryType) > 0">$ {{method.getTotalAmountDetailPALUSD(categoryType) | number : 2}}</label></th>
+                                            <th style="background: #eff7f7; border-bottom: none"></th>
+                                        </tr>
+                                        <tr ng-repeat="detailData in categoryType.productBreakDownDetailPAL | orderBy: 'displayOrder'">
+                                            <td style="width: 65px; text-align: center">
+                                                <a href="javascript:void(0);" class="btn btn-danger btn-xs font-11" title="Remove product breakdown category type detail" ng-if="data.isConfirmed == null || !data.isConfirmed" ng-click="event.removeDetailPAL(categoryType, detailData)">
+                                                    <i class="fa fa-times"></i> Del
+                                                </a>
+                                            </td>
+                                            <td style="width: 45px; text-align: center">
+                                                <input type="text" class="form-control" style="height: 30px; text-align: center" avs-number ng-if="data.isConfirmed == null || !data.isConfirmed" ng-data-source="detailData.displayOrder" />
+                                            </td>
+                                            <td style="width: 250px;">
+                                                <input style="height: 30px; font-family: Arial" class="form-control" avs-remote-auto-complete ng-request-param="autocompleteProduction.api" ng-init-param="detailData.productBreakDownDetailNM" ng-init-param-2="data.priceDate" ng-model="detailData.productBreakDownDetailNM" ng-item-value="autocompleteProduction.productionItem" ng-item-selected="event.selectProduction(autocompleteProduction.productionItem, detailData)" ng-change="event.changeProductBreakDownDetailNM(detailData)" data-method="POST" data-format-function="formatProduction" ng-if="!data.isConfirmed" />
+                                            </td>
+                                            <td style="width: 250px;">
+                                                <label ng-if="detailData.productionItemID != null">{{detailData.productBreakDownDetailVNNM}}</label>
+                                                <input type="text" class="form-control" style="height:30px; text-transform:uppercase;" ng-model="detailData.productBreakDownDetailVNNM" ng-if="detailData.productionItemID == null" />
+                                            </td>
+                                            <td style="width:150px; text-align:center;">
+                                                <a href="{{detailData.fileLocation}}" target="_blank" title="{{detailData.friendlyName}}">
+                                                    <img src="{{detailData.thumbnailLocation}}" style="width:55px;" />
+                                                </a>
+                                            </td>
+                                            <td style="width: 80px; text-align: center">
+                                                <div class="smart-form">
+                                                    <label class="input" ng-class="{'state-error': detailData.productBreakDownDetailNM != null && detailData.productBreakDownDetailNM != '' && detailData.unitID == null}">
+                                                        <select class="form-control" style="height:30px;" ng-model="detailData.unitID" ng-options="supportUnit.unitID as supportUnit.unitNM for supportUnit in support.unitAmount" ng-if="dataDetail.productBreakDownCalculationTypeID == 1 && detailData.productionItemID == null" ng-required="detailData.productBreakDownDetailNM != null && detailData.productBreakDownDetailNM != '' && detailData.unitID == null">
+                                                            <option value=""></option>
+                                                        </select>
+                                                        <select class="form-control" style="height:30px;" ng-model="detailData.unitID" ng-options="supportUnit.unitID as supportUnit.unitNM for supportUnit in support.unitPercent" ng-if="dataDetail.productBreakDownCalculationTypeID == 2 && detailData.productionItemID == null" ng-required="detailData.productBreakDownDetailNM != null && detailData.productBreakDownDetailNM != '' && detailData.unitID == null">
+                                                            <option value=""></option>
+                                                        </select>
+                                                    </label>
+                                                </div>
+                                                <label ng-if="detailData.productionItemID != null">{{detailData.unitNM}}</label>
+                                            </td>
+                                            <td>
+                                                <div>
+                                                    <input type="text" class="form-control" style="height: 30px; text-align: right" avs-number ng-data-source="detailData.quantity" ng-decimal="4" ng-if="data.isConfirmed == null || !data.isConfirmed" ng-on-change="event.getAmountPAL(detailData, categoryType)" />
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div>
+                                                    <input type="text" class="form-control" style="height: 30px; text-align: right" avs-number ng-data-source="detailData.unitPrice" ng-decimal="0" ng-if="data.isConfirmed == null || !data.isConfirmed" ng-on-change="event.getAmountPAL(detailData, categoryType)" />
+                                                </div>
+                                            </td>
+                                            <td style="text-align:right;">
+                                                <label ng-if="detailData.unitPrice != null && detailData.unitPrice != ''">$ {{method.getPriceUSDInDetailMaterialItem(detailData, data.exchangeRate) | number : 2}}</label>
+                                            </td>
+                                            <td style="text-align: right">
+                                                <label ng-if="detailData.amount > 0">{{detailData.amount | number : 0}}</label>
+                                            </td>
+                                            <td style="text-align: right">
+                                                <label ng-if="detailData.amount > 0">$ {{(data.exchangeRate == null || data.exchangeRate == '') ? (detailData.amount / 1) : (detailData.amount / data.exchangeRate) | number : 2}}</label>
+                                            </td>
+                                            <td style="border-bottom: none"></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction{
+    <ul id="sparks">
+        <li class="sparks-info" ng-if="!openSubForm">
+            <a href="javascript:void(0)" class="btn btn-default btn-sm" ng-click="event.backUrl()">
+                <i class="fa fa-arrow-left"></i> Back
+            </a>
+        </li>
+        <li class="sparks-info" ng-if="(data.isConfirmed == null || data.isConfirmed == 0) && !openSubForm">
+            <a href="javascript:void(0)" class="btn btn-default btn-sm" ng-click="event.update()">
+                <i class="fa fa-floppy-o"></i> Update
+            </a>
+        </li>
+        <li class="sparks-info" ng-if="(data.isConfirmed == null || data.isConfirmed == 0) && !openSubForm">
+            <a href="javascript:void(0)" class="btn btn-default btn-sm hide" @*ng-class="{'disabled': data.productBreakDownID == 0}" ng-click="event.copy(data)"*@>
+                <i class="fa fa-files-o"></i> Copy
+            </a>
+        </li>
+        <li class="sparks-info" ng-if="(data.isConfirmed == null || data.isConfirmed == 0) && !openSubForm">
+            <a href="javascript:void(0)" class="btn btn-default btn-sm" title="Delete" ng-class="{'disabled': data.productBreakDownID == 0}" ng-click="event.delete()">
+                <i class="fa fa-times"></i> Delete
+            </a>
+        </li>
+        <li class="sparks-info" ng-if="(data.isConfirmed == null || data.isConfirmed == 0) && !openSubForm">
+            <a href="javascript:void(0)" class="btn btn-default btn-sm" ng-class="{'disabled': data.productBreakDownID == 0}" ng-click="event.approve()">
+                <i class="fa fa-check"></i> Confirm
+            </a>
+        </li>
+    </ul>
+}
+
+@section pagejs{
+    <script type="text/javascript">
+        var context = {
+            id: '@ViewBag.ID',
+            modelID: '@modelID',
+            sampleProductID: '@sampleProductID',
+            token: '@token',
+            backUrl: '@Url.Action("Index", "ProductBreakDownPALMng")',
+            refreshUrl: '@Url.Action("Edit", "ProductBreakDownPALMng", new { id = UrlParameter.Optional })/',
+            viewUrl: '@Url.Action("View", "ProductBreakDownPALMng", new { id = UrlParameter.Optional })/',
+            copyUrl: '@Url.Action("Copy", "ProductBreakDownPALMng", new { id = UrlParameter.Optional })/',
+            serviceUrl: '@(serviceRoot)/api/productbreakdown-pal/',
+            servicePath: '@(serviceRoot)/Reports/'
+        }
+    </script>
+    <script type="text/javascript" src="~/Views/ProductBreakDownPALMng/edit.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Views/ProductBreakDownPALMng/service.js?v=@guid"></script>
+}

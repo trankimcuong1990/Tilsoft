@@ -1,0 +1,2768 @@
+﻿@{
+    if (ViewBag.ID == 0)
+    {
+        ViewBag.Title = "Create New PI";
+    }
+    else
+    {
+        ViewBag.Title = "Edit PI";
+    }
+    ViewBag.Module = "Proforma Invoice";
+
+    string orderType = string.Empty;
+    if (Request.Params.AllKeys.Contains("t"))
+    {
+        orderType = Request.Params["t"].ToString();
+    }
+
+}
+<form name="editForm" id="main-form" class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <ul class="nav nav-tabs pull-left in">
+                    <li class="active">
+                        <a data-toggle="tab" href="#tabGeneral"> <i class="fa fa-database"></i> <span class="hidden-mobile hidden-tablet"> General Information </span> </a>
+                    </li>
+                    <li>
+                        <a data-toggle="tab" href="#tabTermAndCurrency"> <i class="fa fa-database"></i> <span class="hidden-mobile hidden-tablet"> Term & Currency Information <span ng-show="editForm.vatPercent.$error.required"><i class="fa fa-warning" style="color:red"></i>VAT is require</span></span> </a>
+                    </li>
+
+                    <li>
+                        <a data-toggle="tab" href="#tabPIPrintout"> <i class="fa fa-database"></i> <span class="hidden-mobile hidden-tablet"> PI Printout Description</span> </a>
+                    </li>
+
+                    <li>
+                        <a data-toggle="tab" href="#tabWarehouseReturn"> <i class="fa fa-database"></i> <span class="hidden-mobile hidden-tablet">Warehouse Return</span> </a>
+                    </li>
+
+                    <li>
+                        <a data-toggle="tab" href="#tabTracking"> <i class="fa fa-database"></i> <span class="hidden-mobile hidden-tablet"> Tracking</span> </a>
+                    </li>
+
+                </ul>
+            </header>
+            <div>
+                <div class="jarviswidget-editbox"></div>
+
+                <div class="widget-body">
+                    <div class="tab-content">
+
+                        <div class="tab-pane active" id="tabGeneral">
+                            <div>
+                                <div class="row">
+                                    <div class="col col-lg-2 ">
+                                        <label>Prof.No / <a href="#" class="btn btn-primary btn-xs" style="font-size: 9px;" ng-click="returnGoodsForm.event.load($event)">Return goods</a></label>
+                                        <span class="form-control">{{saleorder.saleOrderData.proformaInvoiceNo}}</span>
+                                    </div>
+
+                                    <div class="col col-lg-1 ">
+                                        <label>Order Type</label>
+                                        <span class="form-control">{{saleorder.saleOrderData.orderType}}</span>
+                                    </div>
+
+                                    <div class="col col-lg-1 ">
+                                        <label>Season</label>
+                                        <select name="season" class="form-control" ng-model="saleorder.saleOrderData.season" ng-options="season.seasonValue as season.seasonText for season in saleorder.seasons" required>
+                                            <option value=""></option>
+                                        </select>
+                                        <span class="help-block" ng-show="editForm.season.$error.required"><i class="fa fa-warning"></i>Season is required.</span>
+                                    </div>
+
+                                    <div class="col col-lg-2 ">
+                                        <label>
+                                            <label ng-if="saleorder.saleOrderData.ldsClients.length == 0 || saleorder.saleOrderData.ldsClients == null">LDS /</label><label ng-if="saleorder.saleOrderData.ldsClients.length > 0">LDS {{ldsTitle}} /</label>
+                                            <a href="javascript:void(0)" class="btn btn-default btn-primary btn-xs font-11 @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" 
+                                               ng-click="formLDSClient.showAddLDS()" ng-if="saleorder.saleOrderData.trackingStatusID ==3 || saleorder.saleOrderData.trackingStatusID==5" style="margin-top: -5px">
+                                                Add
+                                            </a>
+                                            <a href="javascript:void(0)" class="btn btn-primary btn-xs font-11" ng-click="formLDSClient.openHictory()" style="width:45px; background-color: green;margin-top: -5px"> History</a>
+                                        </label>
+                                        <div class="input-group" ng-if="saleorder.saleOrderData.trackingStatusID !=3 && saleorder.saleOrderData.trackingStatusID!=5" style="margin-top: -5px">
+                                            <input type="text" class="form-control datepicker" data-dateformat="dd/mm/yy" ng-model="saleorder.saleOrderData.ldsFormated" name="ldsFormated" ng-required="ldS_DeliveryDate_Require()">
+                                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                        </div>
+                                        <input class="form-control" type="text" ng-model="saleorder.saleOrderData.ldsFormated" readonly ng-if="saleorder.saleOrderData.trackingStatusID ==3 || saleorder.saleOrderData.trackingStatusID==5" style="margin-top: -5px">
+                                        <span class="help-block" ng-show="editForm.ldsFormated.$error.required && editForm.deliveryDateFormated.$error.required"><i class="fa fa-warning"></i>LDS required.</span>
+                                    </div>
+
+                                    <div class="col col-lg-2 ">
+                                        <label>Delivery Date</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control datepicker" data-dateformat="dd/mm/yy" ng-model="saleorder.saleOrderData.deliveryDateFormated" name="deliveryDateFormated" ng-required="ldS_DeliveryDate_Require()">
+                                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                        </div>
+                                        <span class="help-block" ng-show="editForm.ldsFormated.$error.required && editForm.deliveryDateFormated.$error.required"><i class="fa fa-warning"></i>Delivery date is required.</span>
+                                    </div>
+
+                                    <div class="col col-lg-2">
+                                        <label>View on prinout</label><br />
+                                        <label><input type="checkbox" ng-model="saleorder.saleOrderData.isViewLDSOnPrintout"> LDS &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="checkbox" ng-model="saleorder.saleOrderData.isViewDeliveryDateOnPrintout"> Delivery Date</label>
+                                    </div>
+
+                                    <div class="col col-lg-2 ">
+                                        <label>Delivery Date Internal</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control datepicker" data-dateformat="dd/mm/yy" ng-model="saleorder.saleOrderData.deliveryDateInternalFormated">
+                                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                        </div>
+                                    </div>
+
+
+
+                                </div>
+
+                                <div class="row">
+                                    <div class="col col-lg-2 ">
+                                        <label>Invoice Date</label>
+                                        <div class="input-group">
+                                            <input name="invoiceDateFormated" type="text" class="form-control datepicker" data-dateformat="dd/mm/yy" ng-model="saleorder.saleOrderData.invoiceDateFormated" required>
+                                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                        </div>
+                                        <span class="help-block" ng-show="editForm.invoiceDateFormated.$error.required"><i class="fa fa-warning"></i>Invoice date is required.</span>
+                                    </div>
+
+
+                                    <div class="col col-lg-2 ">
+                                        <label>Client Reference</label>
+                                        <input class="form-control" type="text" id="reference" ng-model="saleorder.saleOrderData.reference">
+                                    </div>
+
+                                    <div class="col col-lg-2 ">
+                                        <label>Conditions</label>
+                                        <input class="form-control" type="text" id="conditions" ng-model="saleorder.saleOrderData.conditions">
+                                    </div>
+
+                                    <div class="col col-lg-2 ">
+                                        <label>
+                                            Payment Status
+                                        </label>
+
+                                        <select name="paymentStatus" class="form-control" ng-model="saleorder.saleOrderData.paymentStatusID" ng-options="item.paymentStatusID as item.paymentStatusNM for item in saleorder.paymentStatuses">
+                                            <option value=""></option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col col-lg-2 ">
+                                        <label>Payment Date</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control datepicker" data-dateformat="dd/mm/yy" ng-model="saleorder.saleOrderData.paymentDateFormated" ng-required="saleorder.saleOrderData.paymentStatusID==1 || saleorder.saleOrderData.paymentStatusID==2" name="paymentDateFormated">
+                                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                        </div>
+                                        <span class="help-block" ng-show="editForm.paymentDateFormated.$error.required"><i class="fa fa-warning"></i>Payment Date is required in case pament status is LC DONE or DP DONE</span>
+                                    </div>
+
+                                    <div class="col col-lg-2 ">
+                                        <label>Payment Remark</label>
+                                        <input class="form-control" type="text" id="paymentRemark" ng-model="saleorder.saleOrderData.paymentRemark" name="paymentRemark" ng-required="saleorder.saleOrderData.paymentStatusID==3">
+                                        <span class="help-block" ng-show="editForm.paymentRemark.$error.required"><i class="fa fa-warning"></i>Payment Remark is required in case put in production without LC/DP</span>
+                                    </div>
+
+                                </div>
+
+                                <div class="row">
+                                    <div class="col col-lg-2 m-bottom-15">
+                                        <label><input type="checkbox" id="ispiReceived" ng-model="saleorder.saleOrderData.ispiReceived" ng-change="ispiReceivedChecked()"> Signed PI Received/Received Date</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control datepicker" data-dateformat="dd/mm/yy" ng-model="saleorder.saleOrderData.piReceivedDateFormated">
+                                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="col col-lg-2 m-bottom-15">
+                                        <label>Signed PI Received By</label>
+                                        <input class="form-control" type="text" id="piReceivedBy" ng-model="saleorder.saleOrderData.piReceivedBy">
+                                    </div>
+
+                                    <div class="col col-lg-2 m-bottom-15">
+                                        <label>Signed PI Remark</label>
+                                        <input class="form-control" type="text" id="piReceivedRemark" ng-model="saleorder.saleOrderData.piReceivedRemark">
+                                    </div>
+
+                                    @*<div class="col col-lg-2">
+                                            <label><a href="@Url.Action("Edit", "ClientPayment")/{{saleorder.saleOrderData.clientPaymentID}}" target="_blank">Payment Received Detail</a></label>
+                                            <ul>
+                                                <li style="display:inline"><input type="checkbox"  ng-model="saleorder.saleOrderData.isdpReceived"  disabled="disabled"/>&nbsp;DP&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</li>
+                                                <li style="display:inline"><input type="checkbox" ng-model="saleorder.saleOrderData.islcReceived"  disabled="disabled"/>&nbsp;LC&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</li>
+                                                <li style="display:inline"><input type="checkbox"  ng-model="saleorder.saleOrderData.isnaReceived" disabled="disabled"/>&nbsp;N/A&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</li>
+                                            </ul>
+                                        </div>
+
+                                        <div class="col col-lg-2">
+                                            <label>Payment Received Date</label>
+                                            <span class="form-control">{{saleorder.saleOrderData.paymentDateFormated}}</span>
+                                        </div>*@
+
+                                    <div class="col col-lg-2">
+                                        <label>Client Order Number</label>
+                                        <input class="form-control" type="text" id="clientOrderNumber" ng-model="saleorder.saleOrderData.clientOrderNumber">
+                                    </div>
+
+                                    <div class="col col-lg-2 m-bottom-15">
+                                        <label><input type="checkbox" id="ispiReceived" ng-model="saleorder.saleOrderData.isViewQuantity20DCOnPrintout"> View printout <b>/ 20/ 40/ 40'HC/ LCL</b></label>
+                                        <table>
+                                            <tr>
+                                                <td style="text-align:center"><input class="form-control" ng-model="saleorder.saleOrderData.quantity20DC" placeholder="20DC" name="quantity20DC" ng-required="quantityContainerRequire()" /></td>
+                                                <td style="text-align:center"><input class="form-control" ng-model="saleorder.saleOrderData.quantity40DC" placeholder="40DC" name="quantity40DC" ng-required="quantityContainerRequire()" /></td>
+                                                <td style="text-align:center"><input class="form-control" ng-model="saleorder.saleOrderData.quantity40HC" placeholder="40'HC" name="quantity40HC" ng-required="quantityContainerRequire()" /></td>
+                                                <td style="text-align:center"><input class="form-control" ng-model="saleorder.saleOrderData.lessThanContainerLoad" placeholder="LCL" name="lessThanContainerLoad" ng-required="quantityContainerRequire()" /></td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="4">
+                                                    <span class="help-block" ng-show="editForm.quantity20DC.$error.required && editForm.quantity40DC.$error.required && editForm.quantity40HC.$error.required && editForm.lessThanContainerLoad.$error.required"><i class="fa fa-warning"></i>One of 4 fiels 20DC / 40DC / 40HC / LDL is require</span>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                    <div class="col col-lg-2" ng-if="saleorder.saleOrderData.paymentStatusID == 1">
+                                        <label>LC Number</label>
+                                        <input class="form-control" type="text" id="clientOrderNumber" ng-model="saleorder.saleOrderData.lcNumber">
+                                    </div>
+
+
+                                </div>
+
+                                <div class="row">
+                                    <div class="col col-lg-2" ng-if="saleorder.saleOrderData.paymentStatusID == 1">
+                                        <br />
+                                        <label>LC Attachment: @Html.Partial("~/Views/Shared/_Controls/_FileUploadBox.cshtml", new Frontend.Models.FileUploadViewModel() { ControlID = "1", URLBinding = "saleorder.saleOrderData.lcFileURL", FileName = "saleorder.saleOrderData.lcFileFriendlyName", JSOnChangeHandler = "changeLCFile", JSONRemoveHandler = "removeLCFile" }) </label>
+
+                                    </div>
+                                    <div class="col col-lg-2">
+                                        <br />
+                                        <label>Signed PI Attach File: @Html.Partial("~/Views/Shared/_Controls/_FileUploadBox.cshtml", new Frontend.Models.FileUploadViewModel() { ControlID = "1", URLBinding = "saleorder.saleOrderData.signedPIFileURL", FileName = "saleorder.saleOrderData.signedPIFileFriendlyName", JSOnChangeHandler = "changeSignedPIFile", JSONRemoveHandler = "removeSignedPIFile" }) </label>
+
+                                    </div>
+                                    <div class="col col-lg-2">
+                                        <br />
+                                        <label>Client's PO Attach File: @Html.Partial("~/Views/Shared/_Controls/_FileUploadBox.cshtml", new Frontend.Models.FileUploadViewModel() { ControlID = "2", URLBinding = "saleorder.saleOrderData.clientPOFileURL", FileName = "saleorder.saleOrderData.clientPOFriendlyName", JSOnChangeHandler = "changeClientPOFile", JSONRemoveHandler = "removeClientPOFile" }) </label>
+                                    </div>
+                                    <div class="col col-lg-2">
+                                        <label>Total amount</label>
+                                        <span class="form-control">{{(calTotalAmountPI() | number : 2)}}</span>
+                                    </div>
+                                    <div class="col col-lg-2">
+                                        <label>Client code</label>
+                                        <span class="form-control">{{saleorder.saleOrderData.clientUD}}</span>
+                                    </div>
+                                    <div class="col col-lg-2">
+                                        <label>Client name</label>
+                                        <span class="form-control">{{saleorder.saleOrderData.clientNM}}</span>
+                                    </div>
+                                    <div class="col col-lg-2 ">
+                                        <label>PI Status</label>
+                                        <span class="form-control">{{saleorder.saleOrderData.trackingStatusNM}}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane" id="tabTermAndCurrency">
+                            <div class="row">
+                                <div class="col-sm-2 m-bottom-15">
+                                    <label>Payment Term</label>
+                                    <select class="form-control" ng-model="saleorder.saleOrderData.paymentTermID" ng-options="item.paymentTermID as item.paymentTermNM for item in saleorder.paymentTerms" ng-click="selectedPaymentTerm(saleorder.saleOrderData.paymentTermID)">
+                                        <option value=""></option>
+                                    </select>
+                                </div>
+
+                                <div class="col-sm-2 m-bottom-15">
+                                    <label>Delivery Term</label>
+                                    <select class="form-control" ng-model="saleorder.saleOrderData.deliveryTermID" ng-options="item.deliveryTermID as item.deliveryTermNM for item in saleorder.deliveryTerms" ng-click="selectedDelivery(saleorder.saleOrderData.deliveryTermID)">
+                                        <option value=""></option>
+                                    </select>
+                                </div>
+
+                                <div class="col-sm-2 m-bottom-15">
+                                    <label>Payment Type</label>
+                                    <span class="form-control">{{saleorder.saleOrderData.paymentTypeNM}}</span>
+                                </div>
+
+                                <div class="col-sm-2 m-bottom-15">
+                                    <label>Delivery Type</label>
+                                    <span class="form-control">{{saleorder.saleOrderData.deliveryTypeNM}}</span>
+                                </div>
+                            </div>
+
+                            <div class="row">
+
+                                <div class="col-sm-2 m-bottom-15">
+                                    <label>VAT</label>
+                                    <select class="form-control" name="vatPercent" ng-model="saleorder.saleOrderData.vatPercent" ng-options="item.vatPercentValue as item.vatPercentText for item in saleorder.vatPercents" required>
+                                        <option value=""></option>
+                                    </select>
+                                    <span class="help-block" ng-show="editForm.vatPercent.$error.required"><i class="fa fa-warning"></i>VAT is required.</span>
+                                </div>
+
+                                <div class="col-sm-2 m-bottom-15">
+                                    <label>Currency</label>
+                                    <span class="form-control">{{saleorder.saleOrderData.currency}}</span>
+                                </div>
+
+                                <div class="col-sm-2 m-bottom-15">
+                                    <label>Discount</label>
+                                    <input class="form-control" type="text" id="discount" ng-model="saleorder.saleOrderData.discount" style="text-align:right">
+                                </div>
+
+                                <div class="col-sm-2 m-bottom-15">
+                                    <label>Transportation</label>
+                                    <input class="form-control" type="text" id="transportation" ng-model="saleorder.saleOrderData.transportation" style="text-align:right">
+                                </div>
+
+                                <div class="col-sm-2 m-bottom-15">
+                                    <label>Commission Percent(%)</label>
+                                    <input class="form-control" type="text" id="commissionPercent" ng-model="saleorder.saleOrderData.commissionPercent" style="text-align:right">
+                                </div>
+
+                                @*<div class="col-sm-2 m-bottom-15">
+                                        <label>Commission</label>
+                                        <input class="form-control" type="text" id="commission" ng-model="saleorder.saleOrderData.commission" style="text-align:right">
+                                    </div>*@
+
+
+                            </div>
+                        </div>
+
+                        <div class="tab-pane" id="tabPIPrintout">
+                            <div class="row">
+                                <div class="col-sm-6 m-bottom-15">
+                                    <div>
+                                        <a class="btn btn-primary btn-xs font-11" href="javascript:void(0);" ng-click="addDescription($event,'TOP')" style="margin-bottom: 10px;"><i class="fa fa-plus"></i> Add line</a>
+                                    </div>
+                                    <div id="topDescription" class="tilsoft-table-wrapper">
+                                        <div class="tilsoft-table">
+                                            <div class="tilsoft-table-body" style="width: 600px; height: auto;margin-top:0px">
+                                                <table>
+                                                    <tr>
+                                                        <th style="width: 120px;"></th>
+                                                        <th style="width: 70px;" class="sorting" data-colname="rowIndex">INDEX</th>
+                                                        <th style="width: 90px;" class="sorting" data-colname="costType">COST TYPE</th>
+                                                        <th class="sorting" data-colname="description">TOP DESCRIPTION</th>
+                                                        <th style="width: 100px;" class="sorting" data-colname="totalAmount">Amount</th>
+                                                    </tr>
+                                                    <tr ng-repeat="top_item in saleorder.saleOrderData.saleOrderExtends | filter : { position: 'TOP' } | orderBy : 'rowIndex'">
+                                                        <td style="text-align: center; ">
+                                                            <a href="#" class="btn btn-primary btn-xs font-11" title="Insert" ng-click="insertDescription($event, 'TOP',top_item.rowIndex)"><i class="fa fa-level-down"></i> Insert</a>
+                                                            <a href="#" class="btn btn-danger btn-xs font-11" title="Delete" ng-click="removeDescription($event, top_item.saleOrderExtendID)"><i class="fa fa-times"></i>Del</a>
+                                                        </td>
+                                                        <td><input class="form-control" type="text" name="rowIndex" ng-model="top_item.rowIndex"></td>
+                                                        <td>
+                                                            <select class="form-control" name="costType" ng-model="top_item.costType" ng-options="sItem.costTypeValue as sItem.costTypeText for sItem in saleorder.costTypes">
+                                                                <option value=""></option>
+                                                            </select>
+                                                        </td>
+                                                        <td><input class="form-control" type="text" name="description" ng-model="top_item.description"></td>
+                                                        <td>
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon">{{saleorder.saleOrderData.currency == 'USD' ? '$' : ''}} {{saleorder.saleOrderData.currency == 'EUR' ? '€' : ''}}</span>
+                                                                <input type="text" class="form-control" ng-model="top_item.totalAmount" style="text-align:right" ng-currency fraction="2" currency-symbol="" />
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-6 m-bottom-15">
+                                    <div>
+                                        <a class="btn btn-primary btn-xs font-11" href="javascript:void(0);" ng-click="addDescription($event,'BOTTOM')" style="margin-bottom: 10px;"><i class="fa fa-plus"></i> Add line</a>
+                                    </div>
+
+                                    <div id="bottomDescription" class="tilsoft-table-wrapper">
+                                        <div class="tilsoft-table">
+                                            <div class="tilsoft-table-body" style="width: 600px; height:auto;margin-top:0px">
+                                                <table>
+                                                    <tr>
+                                                        <th style="width: 120px;"></th>
+                                                        <th style="width: 70px;" class="sorting" data-colname="rowIndex">INDEX</th>
+                                                        <th style="width: 90px;" class="sorting" data-colname="costType">COST TYPE</th>
+                                                        <th class="sorting" data-colname="description">BOTTOM DESCRIPTION</th>
+                                                        <th style="width: 100px;" class="sorting" data-colname="totalAmount">Amount</th>
+                                                    </tr>
+                                                    <tr ng-repeat="item in saleorder.saleOrderData.saleOrderExtends | filter : { position: 'BOTTOM' } | orderBy : 'rowIndex'">
+                                                        <td style="text-align: center; ">
+                                                            <a href="#" class="btn btn-primary btn-xs font-11" title="Insert" ng-click="insertDescription($event, 'BOTTOM',item.rowIndex)"><i class="fa fa-level-down"></i> Insert</a>
+                                                            <a href="#" class="btn btn-danger btn-xs font-11" title="Delete" ng-click="removeDescription($event, item.saleOrderExtendID)"><i class="fa fa-times"></i>Del</a>
+                                                        </td>
+                                                        <td><input class="form-control" type="text" name="rowIndex" ng-model="item.rowIndex"></td>
+                                                        <td>
+                                                            <select class="form-control" name="costType" ng-model="item.costType" ng-options="sItem.costTypeValue as sItem.costTypeText for sItem in saleorder.costTypes">
+                                                                <option value=""></option>
+                                                            </select>
+                                                        </td>
+                                                        <td><input class="form-control" type="text" name="description" ng-model="item.description"></td>
+                                                        <td style="text-align:right">
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon">{{saleorder.saleOrderData.currency == 'USD' ? '$' : ''}} {{saleorder.saleOrderData.currency == 'EUR' ? '€' : ''}}</span>
+                                                                <input type="text" class="form-control" ng-model="item.totalAmount" style="text-align:right" ng-currency fraction="2" currency-symbol="" />
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <div class="tab-pane" id="tabWarehouseReturn">
+                            <div class="row">
+                                <div id="warehouseImport" class="tilsoft-table-wrapper">
+                                    <div class="tilsoft-table">
+                                        <div class="tilsoft-table-body" style="width: 1000px; height:auto;margin-top:0px">
+                                            <table>
+                                                <tr>
+                                                    <th data-colname="invoiceNo" style="width: 80px;"></th>
+                                                    <th data-colname="invoiceNo" style="width: 300px;">Warehouse Import Receipt No</th>
+                                                    <th data-colname="factoryInvoiceNo" style="width: 300px;">Import Date</th>
+                                                    <th data-colname="blNo">Import Type</th>
+                                                </tr>
+                                                <tr ng-repeat="item in saleorder.saleOrderData.warehouseImports">
+                                                    <td style="text-align:center">
+                                                        <a href="@Url.Action("Return", "WarehouseImport")/{{item.warehouseImportID}}" title="Open warehouse import" class="btn btn-primary btn-xs font-11" target="_blank"><i class="fa fa-folder-open">View</i></a>
+                                                    </td>
+                                                    <td>
+                                                        {{item.receiptNo}}
+                                                    </td>
+                                                    <td>
+                                                        {{item.importedDate}}
+                                                    </td>
+                                                    <td>
+                                                        {{item.importTypeNM}}
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                            </div>
+                        </div>
+
+                        <div class="tab-pane" id="tabTracking">
+                            <div class="row">
+                                <div class="col-sm-2 m-bottom-15">
+                                    <label>Created By</label>
+                                    <span class="form-control">
+                                        <a ng-show="(saleorder.saleOrderData.createdBy != null && saleorder.saleOrderData.creatorName2 != null)" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{saleorder.saleOrderData.createdBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                            <i class="fa fa-user"></i> {{saleorder.saleOrderData.creatorName2}}
+                                        </a>
+                                        <span ng-show="(saleorder.saleOrderData.createdBy != null && saleorder.saleOrderData.creatorName2 == null && saleorder.saleOrderData.creatorName != null)">{{saleorder.saleOrderData.creatorName}}</span>
+                                    </span>
+                                </div>
+                                <div class="col-sm-2 m-bottom-15">
+                                    <label>Created Date</label>
+                                    <span class="form-control">{{saleorder.saleOrderData.createdDateFormated}}</span>
+                                </div>
+                                <div class="col-sm-2 m-bottom-15">
+                                    <label>Updated By</label>
+                                    <span class="form-control">
+                                        <a ng-show="(saleorder.saleOrderData.updatedBy != null && saleorder.saleOrderData.updatorName2 != null)" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{saleorder.saleOrderData.updatedBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                            <i class="fa fa-user"></i> {{saleorder.saleOrderData.updatorName2}}
+                                        </a>
+                                        <span ng-show="(saleorder.saleOrderData.updatedBy != null && saleorder.saleOrderData.updatorName2 == null && saleorder.saleOrderData.updatorName != null)">{{saleorder.saleOrderData.updatorName}}</span>
+                                    </span>
+                                </div>
+                                <div class="col-sm-2 m-bottom-15">
+                                    <label>Updated Date</label>
+                                    <span class="form-control">{{saleorder.saleOrderData.updatedDateFormated}}</span>
+                                </div>
+                            </div>
+                            @*<div class="row">
+                                    <div class="col-sm-2 m-bottom-15">
+                                        <label>SaleOrderID</label>
+                                        <input class="form-control" type="text" id="v4ID" ng-model="saleorder.saleOrderData.v4id">
+                                    </div>
+                                    <div class="col-sm-2 m-bottom-15">
+                                        <label>OMSv4 ProformaInvoice No</label>
+                                        <input class="form-control" type="text" id="v4ID" ng-model="saleorder.saleOrderData.v4piNo">
+                                    </div>
+                                </div>*@
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <ul class="nav nav-tabs pull-left in">
+                    <li class="active">
+                        <a data-toggle="tab" href="#tabProduct"> <i class="fa fa-database"></i> <span class="hidden-mobile hidden-tablet">Product</span> </a>
+                    </li>
+                    <li>
+                        <a data-toggle="tab" href="#tabSparepart"> <i class="fa fa-database"></i> <span class="hidden-mobile hidden-tablet">Sparepart</span> </a>
+                    </li>
+                    <li>
+                        <a data-toggle="tab" href="#tabSample"> <i class="fa fa-database"></i> <span class="hidden-mobile hidden-tablet">Sample</span> </a>
+                    </li>
+                </ul>
+            </header>
+            <div>
+                <div class="jarviswidget-editbox"></div>
+
+                <div class="widget-body">
+                    <div class="tab-content">
+
+                        <div class="tab-pane active" id="tabProduct">
+                            <div class="row">
+                                <div class="col-sm-12 m-bottom-15">
+                                    <a href="javascript:void(0)" class="btn btn-primary btn-xs" style="margin-bottom: 10px;" ng-click="frmAddProduct_onOpen()">Add Product</a>
+                                    <a href="javascript:void(0)" class="btn btn-danger btn-xs" style="margin-bottom: 10px;" ng-click="removeAllProduct()">Remove All Product</a>
+                                    <div id="saleOrderDetail" class="tilsoft-table-wrapper">
+                                        <div class="tilsoft-table">
+                                            <div class="tilsoft-table-header" style="width: {{saleorder.saleOrderData.orderType=='WAREHOUSE' ? '1950' : '1500'}}px">
+                                                <div style="width: 100px; "></div>
+                                                <div style="width: 50px; ">Row Index</div>
+                                                <div style="width: 300px;" class="sorting" data-colname="description">Desciption</div>
+                                                <div style="width: 70px; " class="sorting" data-colname="quantity">Offer Qnt</div>
+                                                <div style="width: 70px; " class="sorting" data-colname="physicalQnt" ng-if="saleorder.saleOrderData.orderType=='WAREHOUSE'">Physi cal</div>
+                                                <div style="width: 70px; " class="sorting" data-colname="onSeaQnt" ng-if="saleorder.saleOrderData.orderType=='WAREHOUSE'">on Sea</div>
+                                                <div style="width: 70px; " class="sorting" data-colname="tobeShippedQnt" ng-if="saleorder.saleOrderData.orderType=='WAREHOUSE'">tobe Shipped</div>
+                                                <div style="width: 70px; " class="sorting" data-colname="reservationQnt" ng-if="saleorder.saleOrderData.orderType=='WAREHOUSE'">reser vation</div>
+                                                <div style="width: 70px; " class="sorting" data-colname="ftsQnt" ng-if="saleorder.saleOrderData.orderType=='WAREHOUSE'">FTS</div>
+                                                <div style="width: 90px; " class="sorting" data-colname="productStatusID" ng-if="saleorder.saleOrderData.orderType=='WAREHOUSE'">Product Status</div>
+                                                <div style="width: 90px;" class="sorting" data-colname="orderQnt">
+                                                    Order Qnt
+                                                    <a ng-if="!hasQnt" ng-click="toggFilterQnt()" title="show item has quantity"><i class="fa fa-eye"></i></a>
+                                                    <a ng-if="hasQnt" ng-click="toggFilterQnt()" title="show all item"><i class="fa fa-eye-slash"></i></a>
+                                                </div>
+                                                <div style="width: 60px; ">% COM</div>
+                                                <div style="width: 110px; " class="sorting" data-colname="unitPrice">Unit Price</div>
+                                                <div style="width: 130px; " class="sorting" data-colname="unitPrice">Amount</div>
+                                                <div style="width: 100px;" class="sorting" data-colname="clientArticleCode">Client Art Code</div>
+                                                <div style="width: 150px; " class="sorting" data-colname="clientArticleName">Client Art Name</div>
+                                                <div style="width: 150px;" class="sorting" data-colname="clientEANCode">Client EAN Code</div>
+                                                <div class="sorting" data-colname="reference">Reference</div>
+                                            </div>
+
+                                            <div class="tilsoft-table-body" style="width: {{saleorder.saleOrderData.orderType=='WAREHOUSE' ? '1950' : '1500'}}px">
+                                                <table>
+                                                    <tbody ng-repeat="item in saleorder.saleOrderData.saleOrderDetails | saleOrderDetail_Filter : articleCode_filter : description_filter : quantity_filter : v4id_filter : hasQnt">
+                                                        <tr>
+                                                            <td style="width: 100px; text-align: center; ">
+                                                                <a href="javascript:void(0)" style="width: 85px; margin-bottom: 5px;" class="btn btn-primary btn-xs" title="Add Product Line Desription" ng-click="viewDetailExtend($event,item.saleOrderDetailID)"><i id="icon-detail-description-{{item.saleOrderDetailID}}" class="fa fa-plus-square-o"></i> Description</a>
+                                                                <a href="javascript:void(0)" style="width: 85px; margin-bottom: 5px;" class="btn btn-danger btn-xs" title="Remove" ng-click="removeProduct(item)" ng-if="!item.isFactoryOrderCreated">Remove</a>
+                                                            </td>
+                                                            <td style="width: 50px; text-align: center; ">
+                                                                {{item.rowIndex}}
+                                                            </td>
+                                                            <td style="width: 300px;text-align:left;">
+                                                                <strong>{{item.articleCode}}</strong>
+                                                                <br />
+                                                                {{item.description}}
+                                                                <span ng-if="item.offerItemTypeID === 5" style="color: #0000ff;">
+                                                                    <br />
+                                                                    APPROVED
+                                                                    @*({{item.approverName}} on {{item.approvedDate}})*@
+                                                                </span>
+                                                                <span ng-if="item.offerItemTypeID === 1" style="color: #a76318;">
+                                                                    <br />
+                                                                    PENDING
+                                                                </span>
+                                                                <span ng-if="item.offerItemTypeID === 2" style="color: #a76318;">
+                                                                    <br />
+                                                                    NEED MAKE QUOTATION
+                                                                </span>
+                                                                <span ng-if="item.offerItemTypeID === 3" style="color: #a76318;">
+                                                                    <br />
+                                                                    HAS PRICE, NEED CHECK QUOTATION
+                                                                </span>
+                                                                <span ng-if="item.offerItemTypeID === 4" style="color: #a76318;">
+                                                                    <br />
+                                                                    NEED APPROVE
+                                                                </span>
+                                                            </td>
+                                                            <td style="width: 70px; text-align: right; vertical-align:central"><span class="form-control">{{item.quantity | number}}</span></td>
+                                                            <td style="width: 70px; text-align: right; vertical-align:central" ng-if="saleorder.saleOrderData.orderType=='WAREHOUSE'"><span class="form-control">{{item.physicalQnt | number}}</span></td>
+                                                            <td style="width: 70px; text-align: right; vertical-align:central" ng-if="saleorder.saleOrderData.orderType=='WAREHOUSE'"><span class="form-control">{{item.onSeaQnt | number}}</span></td>
+                                                            <td style="width: 70px; text-align: right; vertical-align:central" ng-if="saleorder.saleOrderData.orderType=='WAREHOUSE'"><span class="form-control">{{item.tobeShippedQnt | number}}</span></td>
+                                                            <td style="width: 70px; text-align: right; vertical-align:central" ng-if="saleorder.saleOrderData.orderType=='WAREHOUSE'"><span class="form-control">{{item.reservationQnt | number}}</span></td>
+                                                            <td style="width: 70px; text-align: right; vertical-align:central" ng-if="saleorder.saleOrderData.orderType=='WAREHOUSE'"><span class="form-control">{{item.ftsQnt | number}}</span></td>
+                                                            <td style="width: 90px;" ng-if="saleorder.saleOrderData.orderType=='WAREHOUSE'">
+                                                                <select class="form-control" name="productStatusID" ng-model="item.productStatusID" ng-options="sItem.productStatusID as sItem.productStatusNM for sItem in saleorder.productStatuses">
+                                                                    <option value=""></option>
+                                                                </select>
+                                                            </td>
+                                                            <td style="width: 90px; "><input class="form-control" type="text" name="orderQnt" ng-model="item.orderQnt" style="text-align:right" ng-keyup="orderQntKeyUp($event,$index)" id="{{$index}}"></td>
+                                                            <td style="width: 60px; "><input class="form-control" type="text" avs-number ng-decimal="2" name="commissionPercent" ng-data-source="item.commissionPercent" style="text-align:right"></td>
+                                                            <td style="width: 110px; text-align: right;">
+                                                                {{item.unitPrice| currency : (saleorder.saleOrderData.currency == 'USD' ? '$' : '€') : 2}}
+                                                                <div class="input-group" style="display: none;">
+                                                                    <span class="input-group-addon">{{saleorder.saleOrderData.currency == 'USD' ? '$' : ''}} {{saleorder.saleOrderData.currency == 'EUR' ? '€' : ''}}</span>
+                                                                    <input type="text" class="form-control furnindo-currency" ng-model="item.unitPrice" style="text-align:right" ng-currency fraction="2" currency-symbol="" />
+                                                                </div>
+                                                            </td>
+                                                            <td style="width: 130px; text-align: right">
+                                                                <div class="input-group">
+                                                                    <span class="input-group-addon">{{saleorder.saleOrderData.currency == 'USD' ? '$' : ''}} {{saleorder.saleOrderData.currency == 'EUR' ? '€' : ''}}</span>
+                                                                    <span class="form-control" style="text-align:right">
+                                                                        {{item.unitPrice * item.orderQnt | number : 2}}
+                                                                    </span>
+                                                                </div>
+                                                            </td>
+                                                            <td style="width: 100px;"><input class="form-control" type="text" name="clientArticleCode" ng-model="item.clientArticleCode"></td>
+                                                            <td style="width: 150px;"><input class="form-control" type="text" name="clientArticleName" ng-model="item.clientArticleName"></td>
+                                                            <td style="width: 150px;"><input class="form-control" type="text" name="clientEANCode" ng-model="item.clientEANCode"></td>
+                                                            <td><input class="form-control" type="text" name="reference" ng-model="item.reference"></td>
+                                                        </tr>
+
+                                                        <tr style="display:none" id="{{item.saleOrderDetailID}}">
+                                                            <td></td>
+                                                            <td colspan="12">
+                                                                <a class="btn btn-primary btn-xs font-11" href="javascript:void(0);" ng-click="detailExtendForm.event.add($event,item.saleOrderDetailID)" style="margin-bottom: 10px;"><i class="fa fa-plus"></i> Add line</a>
+                                                                <div class="tilsoft-table">
+                                                                    <div class="tilsoft-table-body" style="width: 1000px; height: auto; margin-top:0px">
+                                                                        <table>
+                                                                            <tr style="width: 1000px;">
+                                                                                <th style="width: 120px;"></th>
+                                                                                <th style="width: 70px;" class="sorting" data-colname="rowIndex">Index</th>
+                                                                                <th class="sorting" data-colname="description">Description</th>
+                                                                            </tr>
+                                                                            <tr ng-repeat="item_detail_description in item.saleOrderDetailExtends | orderBy : 'rowIndex'">
+                                                                                <td text-align center;">
+                                                                                    <a href="#" class="btn btn-primary btn-xs font-11" title="Insert" ng-click="detailExtendForm.event.insert($event,item.saleOrderDetailID,item_detail_description.rowIndex)"><i class="fa fa-level-down"></i> Insert</a>
+                                                                                    <a href="#" class="btn btn-danger btn-xs font-11" title="Delete" ng-click="detailExtendForm.event.remove($event,item.saleOrderDetailID,item_detail_description.saleOrderDetailExtendID)"><i class="fa fa-times"></i>Del</a>
+                                                                                </td>
+                                                                                <td><input class="form-control" type="text" name="rowIndex" ng-model="item_detail_description.rowIndex"></td>
+                                                                                <td><input class="form-control" type="text" name="description" ng-model="item_detail_description.description"></td>
+                                                                            </tr>
+                                                                        </table>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+
+                                                    <tr>
+                                                        <td style="width: 100px; text-align: center; ">
+                                                            Total Price:
+                                                        </td>
+                                                        <td style="width:50px"></td>
+                                                        <td style="width: 300px;"></td>
+                                                        <td style="width: 60px; text-align: right; "></td>
+                                                        <td style="width: 70px; text-align: right; " ng-if="saleorder.saleOrderData.orderType=='WAREHOUSE'"></td>
+                                                        <td style="width: 70px; text-align: right; " ng-if="saleorder.saleOrderData.orderType=='WAREHOUSE'"></td>
+                                                        <td style="width: 70px; text-align: right; " ng-if="saleorder.saleOrderData.orderType=='WAREHOUSE'"></td>
+                                                        <td style="width: 70px; text-align: right; " ng-if="saleorder.saleOrderData.orderType=='WAREHOUSE'"></td>
+                                                        <td style="width: 70px; text-align: right; " ng-if="saleorder.saleOrderData.orderType=='WAREHOUSE'"></td>
+                                                        <td style="width: 90px;" ng-if="saleorder.saleOrderData.orderType=='WAREHOUSE'"></td>
+                                                        <td style="width: 70px;"></td>
+                                                        <td style="width: 60px;"></td>
+                                                        <td style="width: 110px;"></td>
+                                                        <td style="width: 130px; text-align: right">
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon">{{saleorder.saleOrderData.currency == 'USD' ? '$' : ''}} {{saleorder.saleOrderData.currency == 'EUR' ? '€' : ''}}</span>
+                                                                <span class="form-control" style="text-align:right">
+                                                                    {{calTotalAmount() | number : 2}}
+                                                                </span>
+                                                            </div>
+                                                        </td>
+                                                        <td style="width: 100px;"></td>
+                                                        <td style="width: 150px;"></td>
+                                                        <td style="width: 150px;"></td>
+                                                        <td></td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane" id="tabSparepart">
+                            <div class="row">
+                                <div class="col-sm-12 m-bottom-15">
+                                    <a href="javascript:void(0)" class="btn btn-primary btn-xs" style="margin-bottom: 10px;" ng-click="frmAddSparepart_onOpen()">Add Sparepart</a>
+                                    <a href="javascript:void(0)" class="btn btn-danger btn-xs" style="margin-bottom: 10px;" ng-click="removeAllSparepart()">Remove All Sparepart</a>
+                                    <div id="saleOrderDetailSparepart" class="tilsoft-table-wrapper">
+                                        <div class="tilsoft-table">
+                                            <div class="tilsoft-table-header" style="width: 1500px;">
+                                                <div style="width: 80px;"></div>
+                                                <div style="width: 50px;">Row Index</div>
+                                                <div style="width: 320px;" class="sorting" data-colname="description">Desciption</div>
+                                                <div style="width: 150px; " class="sorting" data-colname="productStatusID">Product Status</div>
+                                                <div style="width: 90px;" class="sorting" data-colname="orderQnt">
+                                                    Order Qnt
+                                                    <a ng-if="!hasQntSparepart" ng-click="toggFilterQntSparepart()" title="show item has quantity"><i class="fa fa-eye"></i></a>
+                                                    <a ng-if="hasQntSparepart" ng-click="toggFilterQntSparepart()" title="show all item"><i class="fa fa-eye-slash"></i></a>
+                                                </div>
+                                                <div style="width: 60px; ">% Com</div>
+                                                <div style="width: 110px; " class="sorting" data-colname="unitPrice">Unit Price</div>
+                                                <div style="width: 110px; " class="sorting" data-colname="unitPrice">Amount</div>
+                                                <div style="width: 200px; " class="sorting" data-colname="clientArticleCode">Client Art.Code</div>
+                                                <div style="width: 200px; " class="sorting" data-colname="clientArticleName">Cient Art.Name</div>
+                                                <div class="sorting" data-clienteancode="unitPrice">Client EAN Code</div>
+                                            </div>
+                                            <div class="tilsoft-table-body" style="width: 1500px;">
+                                                <table>
+                                                    <tr ng-repeat="item in saleorder.saleOrderData.saleOrderDetailSpareparts | saleOrderDetailSpareparts : hasQntSparepart">
+                                                        <td style="width: 80px;">
+                                                            <a href="javascript:void(0)" class="btn btn-danger btn-xs" ng-if="!item.isFactoryOrderCreated" ng-click="removeSparepart(item)">Remove</a>
+                                                        </td>
+                                                        <td style="width: 50px; text-align: center;">
+                                                            {{item.rowIndex}}
+                                                        </td>
+                                                        <td style="width: 320px; text-align:left;"><span style="font-weight:bold;">{{item.articleCode}}</span><br />{{item.description}}</td>
+                                                        <td style="width: 150px;">
+                                                            <select class="form-control" name="productStatusID" ng-model="item.productStatusID" ng-options="sItem.productStatusID as sItem.productStatusNM for sItem in saleorder.productStatuses">
+                                                                <option value=""></option>
+                                                            </select>
+                                                        </td>
+                                                        <td style="width: 90px;"><input class="form-control" type="text" name="orderQnt" ng-model="item.orderQnt" style="text-align:right"></td>
+                                                        <td style="width: 60px;"><input class="form-control" type="text" avs-number ng-decimal="2" name="commissionPercent" ng-data-source="item.commissionPercent" style="text-align:right"></td>
+                                                        <td style="width: 110px;">
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon">{{saleorder.saleOrderData.currency == 'USD' ? '$' : ''}} {{saleorder.saleOrderData.currency == 'EUR' ? '€' : ''}}</span>
+                                                                <input type="text" class="form-control furnindo-currency" ng-model="item.unitPrice" style="text-align:right" ng-currency fraction="2" currency-symbol="" />
+                                                            </div>
+                                                        </td>
+                                                        <td style="width: 110px;">
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon">{{saleorder.saleOrderData.currency == 'USD' ? '$' : ''}} {{saleorder.saleOrderData.currency == 'EUR' ? '€' : ''}}</span>
+                                                                <span class="form-control" style="text-align:right">
+                                                                    {{item.unitPrice * item.orderQnt | number : 2}}
+                                                                </span>
+                                                            </div>
+                                                        </td>
+                                                        <td style="width:200px"><input class="form-control" ng-model="item.clientArticleCode" /></td>
+                                                        <td style="width:200px"><input class="form-control" ng-model="item.clientArticleName" /></td>
+                                                        <td><input class="form-control" ng-model="item.clientEANCode" /></td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane" id="tabSample">
+                            <div class="row">
+                                <div class="col-sm-12 m-bottom-15">
+                                    <a href="javascript:void(0)" class="btn btn-primary btn-xs" style="margin-bottom: 10px;" ng-click="frmAddSample_onOpen()">Add Sample</a>
+                                    <a href="javascript:void(0)" class="btn btn-danger btn-xs" style="margin-bottom: 10px;" ng-click="removeAllSample()">Remove All Sample</a>
+                                    <div id="saleOrderDetailSample" class="tilsoft-table-wrapper">
+                                        <div class="tilsoft-table">
+                                            <div class="tilsoft-table-header" style="width: 1650px;">
+                                                <div style="width: 80px;"></div>
+                                                <div style="width: 120px;">Image</div>
+                                                <div style="width: 340px;" class="sorting" data-colname="description">Desciption</div>
+                                                <div style="width: 90px;" class="sorting" data-colname="orderQnt">Quantity</div>
+                                                <div style="width: 80px;">QNT/40HC</div>
+                                                <div style="width: 130px; " class="sorting" data-colname="unitPrice">Unit amount</div>
+                                                <div style="width: 130px; " class="sorting" data-colname="unitPrice">Amount</div>
+                                                <div style="width: 150px; " class="sorting" data-colname="unitPrice">Factory Price (USD)</div>
+                                                <div style="width: 100px;" class="sorting" data-colname="clientArticleCode">Client Art Code</div>
+                                                <div style="width: 150px; " class="sorting" data-colname="clientArticleName">Client Art Name</div>
+                                                <div style="width: 150px;" class="sorting" data-colname="clientEANCode">Client EAN Code</div>
+                                                <div></div>
+                                            </div>
+                                            <div class="tilsoft-table-body" style="width: 1650px;">
+                                                <table>
+                                                    <tr ng-repeat="item in saleorder.saleOrderData.saleOrderDetailSamples | saleOrderDetailSamples : hasQntSample">
+                                                        <td style="width:80px">
+                                                            <a href="javascript:void(0)" class="btn btn-danger btn-xs" ng-if="!item.isFactoryOrderCreated" ng-click="removeSample(item)">Remove</a>
+                                                        </td>
+                                                        <td style="width:120px">
+                                                            <a href="{{item.fileLocation}}" data-featherlight="image">
+                                                                <img style="width:95%" ng-src="{{item.thumbnailLocation}}" />
+                                                            </a>
+                                                        </td>
+                                                        <td style="width:340px">
+                                                            <span style="font-weight:bold;">{{item.articleCode}}</span>
+                                                            <br />
+                                                            {{item.description}}
+                                                            <br />
+                                                            <u>Packing:</u> {{item.packagingMethodText}}
+                                                            <br />
+                                                            <i style="color: #{{item.offerItemTypeID === 1 ? 'a76318' : '1aa50b'}};">{{item.offerItemTypeNM}}</i>
+                                                            &nbsp;
+                                                            <span style="color: #0000ff;" ng-if="item.offerItemTypeID === 5">APPROVED</span>
+                                                        </td>
+                                                        <td style="width:90px">
+                                                            <input type="text" number ng-model="item.quantity" style="text-align: right;width:99%" />
+                                                        </td>
+                                                        <td style="text-align: right; width:80px">
+                                                            {{item.quantity / item.qnt40HC | number : 2}}
+                                                        </td>
+                                                        <td style="text-align: right; width:130px"> {{item.salePrice | number:2}} </td>
+                                                        <td style="text-align: right; width:130px">{{item.quantity * item.salePrice | number:2}}</td>
+                                                        <td style="text-align: right; width:150px">
+                                                            <span style="text-align: right;">{{item.planingPurchasingPrice | currency:'$':2}}</span>
+                                                            <br />
+                                                            <br />
+                                                            <span style="display: block;" ng-if="item.planingPurchasingPrice">
+                                                                Source: {{item.planingPurchasingPriceSourceID}}
+                                                            </span>
+                                                        </td>
+                                                        <td style="width: 100px;"><input class="form-control" type="text" name="clientArticleCode" ng-model="item.clientArticleCode"></td>
+                                                        <td style="width: 150px;"><input class="form-control" type="text" name="clientArticleName" ng-model="item.clientArticleName"></td>
+                                                        <td style="width: 150px;"><input class="form-control" type="text" name="clientEANCode" ng-model="item.clientEANCode"></td>
+                                                        <td></td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+<div id="reportTemplate" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title" id="myModalLabel">Select template to print</h4>
+            </div>
+            <div class="modal-body no-padding">
+                <div class="smart-form">
+                    <fieldset>
+                        <div class="col-xs-9 col-lg-6">
+                            <select class="form-control" id="reportName" ng-model="saleorder.saleOrderData.defaultPiReport" ng-options="reportTemplate.reportTemplateNM as reportTemplate.reportTemplateNM for reportTemplate in saleorder.reportTemplates | filter:{'reportType':'PI'}:true">
+                                <option value=""></option>
+                            </select>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Cancel
+                </button>
+                <button type="button" class="btn btn-primary" ng-click="printPI($event,saleorder.saleOrderData.defaultPiReport)">
+                    PRINT
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="frmAddProduct" class="modal fade">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="margin-top:90px !important">
+            <div class="modal-header">
+                <button aria-hidden="true" data-dismiss="modal" class="close" type="button">
+                    ×
+                </button>
+                <h4 class="modal-title">Add Product</h4>
+            </div>
+            <div class="modal-body smart-form" style="padding: 0px;">
+                <div>
+                    <div class="widget-body">
+                        <table class="table table-bordered table-striped" style="box-sizing: border-box;">
+                            <thead>
+                                <tr>
+                                    <th style="width: 70px;">
+                                        <a href="javascript:void(0)" ng-click="frmAddProduct_selectAll()">Select All</a>
+                                        <a href="javascript:void(0)" ng-click="frmAddProduct_unSelectAll()">Un-Select All</a>
+                                    </th>
+                                    <th>Description <br><input class="form-control" ng-model="searchArt" placeholder="Search Article Code" ng-change="SearchWithArt()"></th>
+                                    <th>Sale Price</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="item in offerLine">
+                                    <td><input type="checkbox" ng-model="item.isSelected" ng-if="item.offerItemTypeID !== 1 || item.approverName" /></td>
+                                    <td>
+                                        <strong>{{item.articleCode}}</strong>
+                                        <br />
+                                        {{item.description}}
+                                        <br />
+                                        <span ng-if="item.offerItemTypeID === 5" style="color: #0000ff;">
+                                            APPROVED
+                                            @*({{item.approverName}} on {{item.approvedDate}})*@
+                                        </span>
+                                        <span ng-if="item.offerItemTypeID === 1" style="color: #a76318;">PENDING</span>
+                                    </td>
+                                    <td style="text-align: right;">
+                                        {{item.offerSalePrice | currency : (saleorde.saleOrderData.currency == 'USD' ? '$' : '€') : 2}}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal" ng-click="frmAddProduct_onOK()">
+                    Add
+                </button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="frmAddSparepart" class="modal fade">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="margin-top:90px !important">
+            <div class="modal-header">
+                <button aria-hidden="true" data-dismiss="modal" class="close" type="button">
+                    ×
+                </button>
+                <h4 class="modal-title">Add Sparepart</h4>
+            </div>
+            <div class="modal-body smart-form" style="padding: 0px;">
+                <div>
+                    <div class="widget-body">
+                        <table class="table table-bordered table-striped" style="box-sizing: border-box;">
+                            <thead>
+                                <tr>
+                                    <th style="width: 70px;">
+                                        <a href="javascript:void(0)" ng-click="frmAddSparepart_selectAll()">Select All</a>
+                                        <a href="javascript:void(0)" ng-click="frmAddSparepart_unSelectAll()">Un-Select All</a>
+                                    </th>
+                                    <th>Description <br><input class="form-control" ng-model="searchArtSparepart" placeholder="Search Article Code" ng-change="SearchWithArtSparepart()"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="item in offerLineSparepart">
+                                    <td><input type="checkbox" ng-model="item.isSelected" /></td>
+                                    <td>
+                                        <strong>{{item.articleCode}}</strong>
+                                        <br />
+                                        {{item.description}}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal" ng-click="frmAddSparepart_onOK()">
+                    Add
+                </button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="frmAddSample" class="modal fade">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="margin-top:90px !important">
+            <div class="modal-header">
+                <button aria-hidden="true" data-dismiss="modal" class="close" type="button">
+                    ×
+                </button>
+                <h4 class="modal-title">Add Sample</h4>
+            </div>
+            <div class="modal-body smart-form" style="padding: 0px;">
+                <div>
+                    <div class="widget-body">
+                        <table class="table table-bordered table-striped" style="box-sizing: border-box;">
+                            <thead>
+                                <tr>
+                                    <th style="width: 70px;">
+                                        <a href="javascript:void(0)" ng-click="frmAddSample_selectAll()">Select All</a>
+                                        <a href="javascript:void(0)" ng-click="frmAddSample_unSelectAll()">Un-Select All</a>
+                                    </th>
+                                    <th>Description <br><input class="form-control" ng-model="searchSample" placeholder="Search Sample Code" ng-change="SearchWithSample()"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="item in offerLineSample">
+                                    <td><input type="checkbox" ng-model="item.isSelected" /></td>
+                                    <td>
+                                        <strong>{{item.articleCode}}</strong>
+                                        <br />
+                                        {{item.description}}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal" ng-click="frmAddSample_onOK()">
+                    Add
+                </button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@*Add LDSClient*@
+<div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="frmLDSClient" class="modal fade" style="display: none;" data-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button aria-hidden="true" data-dismiss="modal" class="close" type="button">
+                    ×
+                </button>
+                <h4 id="myModalLabel" class="modal-title">View Add LDS</h4>
+            </div>
+            <div class="modal-body smart-form">
+                <div class="row">
+                    <div class="col col-lg-4">
+                        <label>LDS</label>
+                        <div class="input-group">
+                            <input name="ldsDate" type="text" class="form-control datepicker" data-dateformat="dd/mm/yy" ng-model="formLDSClient.filters.ldsDate">
+                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                            <span class="help-block" ng-show="eformLDSClient.filters.ldsDate == '' || formLDSClient.filters.ldsDate == null"><i class="fa fa-warning"></i>LDS is required.</span>
+                        </div>
+                    </div>
+                    <div class="col col-lg-6">
+                        <label>Remark</label>
+                        <label class="input"><input type="text" class="form-control" ng-model="formLDSClient.filters.remark"/></label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" type="button" ng-click="formLDSClient.saveLDSClient()">
+                    Save
+                </button>
+                <button data-dismiss="modal" class="btn btn-default" type="button">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@*LDSClient Hictory*@
+<div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="frmLDSClientHistory" class="modal fade" style="display: none;" data-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button aria-hidden="true" data-dismiss="modal" class="close" type="button">
+                    ×
+                </button>
+                <h4 id="myModalLabel" class="modal-title">View LDS History</h4>
+            </div>
+            <div class="modal-body smart-form">
+                <div class="row">
+                    <div class="col col-lg-12">
+                        <div class="tilsoft-table-wrapper">
+                            <div class="tilsoft-table">
+                                <div class="tilsoft-table-body" style="width: 600px; height:600px; margin-top:0px">
+                                    <table>
+                                        <tr>
+                                            <th style="width: 70px">Type</th>
+                                            <th style="width: 70px">LDS</th>
+                                            <th style="width: 140px">Updated By</th>
+                                            <th style="width: 100px">Updated Date</th>
+                                            <th>Remark</th>
+                                        </tr>
+                                        <tbody ng-repeat="subItem in saleorder.saleOrderData.ldsClients">
+                                            <tr>
+                                                <td>
+                                                    <span ng-if="subItem.version > 0">{{subItem.ldsTypeNM}} {{subItem.version}}</span>
+                                                    <span ng-if="subItem.version == 0">{{subItem.ldsTypeNM}}</span>
+                                                </td>
+                                                <td>
+                                                    <span>{{subItem.ldshtml}}</span>
+                                                </td>
+                                                <td>
+                                                    <span>{{subItem.updatorName}}</span>
+                                                </td>
+                                                <td>
+                                                    {{subItem.updatedDate}}
+                                                </td>
+                                                <td>
+                                                    {{subItem.remark}}
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button data-dismiss="modal" class="btn btn-default" type="button">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section pagepopup2
+{
+    <div id="returnOrderFormMain" class="row" style="display:none">
+        <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+            <div class="jarviswidget" id="wid-id-product-information" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+                <header>
+                    <h2>Return Product</h2>
+                </header>
+                <div>
+                    <div class="widget-body no-padding">
+                        <div class="smart-form">
+                            <fieldset>
+                                <a class="btn btn-primary btn-xs font-11" href="javascript:void(0);" ng-click="returnOrderForm.event.openAddGoodsForm($event)" style="margin-bottom: 10px;"><i class="fa fa-plus"></i> Add goods</a>
+                                <table class="table table-bordered table-hover custom-table dataTable">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 100px; text-align:center" data-colname="cotainerNo">CONTAINER NO</th>
+                                            <th style="width: 100px; text-align: center" data-colname="blNo">BL NO</th>
+                                            <th style="width: 100px; text-align: center" data-colname="loadingPlanUD">LOADING REF</th>
+                                            <th style="width: 100px; text-align: center" data-colname="factoryOrderUD">FACTORY ORDER</th>
+                                            <th style="width: 100px; text-align: center" data-colname="factoryUD">FACTORY</th>
+                                            <th style="width: 100px; text-align: center" data-colname="articleCode">ARTICLECODE</th>
+                                            <th data-colname="description" style="text-align: center">DESCRIPTION</th>
+                                            <th style="width: 60px; text-align: center" data-colname="remaingReturnQnt">RETURN REMAINING QNT</th>
+                                            <th style="width: 60px; text-align: center" data-colname="orderQnt">RETURN QNT</th>
+                                            <th style="width: 70px; text-align: center" data-colname="cotainerNo">RETURN AT PI. NO</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="item in saleorder.saleOrderData.saleOrderProductReturns">
+                                            <td>{{item.containerNo}}</td>
+                                            <td>{{item.blNo}}</td>
+                                            <td>{{item.loadingPlanUD}}</td>
+                                            <td>{{item.factoryOrderUD}}</td>
+                                            <td>{{item.factoryUD}}</td>
+                                            <td>{{item.articleCode}}</td>
+                                            <td>{{item.description}}</td>
+                                            <td>{{item.remaingReturnQnt}}</td>
+                                            <td>{{item.orderQnt}}</td>
+                                            <td><a href="@Url.Action("Edit", "SaleOrder", new { id = UrlParameter.Optional, id2 = UrlParameter.Optional })/{{item.newSaleOrderID}}/{{item.newOfferID}}" target="_blank">{{item.newPINo}} </a></td>
+                                        </tr>
+                                        <tr ng-repeat="item in saleorder.saleOrderData.saleOrderSparepartReturns">
+                                            <td>{{item.containerNo}}</td>
+                                            <td>{{item.blNo}}</td>
+                                            <td>{{item.loadingPlanUD}}</td>
+                                            <td>{{item.factoryOrderUD}}</td>
+                                            <td>{{item.factoryUD}}</td>
+                                            <td>{{item.articleCode}}</td>
+                                            <td>{{item.description}}</td>
+                                            <td>{{item.remaingReturnQnt}}</td>
+                                            <td>{{item.orderQnt}}</td>
+                                            <td><a href="@Url.Action("Edit", "SaleOrder", new { id = UrlParameter.Optional, id2 = UrlParameter.Optional })/{{item.newSaleOrderID}}/{{item.newOfferID}}" target="_blank">{{item.newPINo}} </a></td>
+                                        </tr>
+
+                                    </tbody>
+                                </table>
+
+                            </fieldset>
+                            <footer>
+                                <button class="btn btn-primary" type="button" ng-click="returnOrderForm.event.confirmReturnData($event)">
+                                    ACCEPT RETURN GOODS
+                                </button>
+                                <button class="btn btn-default" type="button" ng-click="returnOrderForm.event.cancel($event)">
+                                    CANCEL
+                                </button>
+                            </footer>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </article>
+    </div>
+
+    <div id="returnOrderForm" class="row" style="display:none">
+        <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+            <div class="jarviswidget" id="wid-id-product-information" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+                <header>
+                    <h2>Select product to return</h2>
+                </header>
+                <div>
+                    <div class="widget-body no-padding">
+                        <div class="smart-form">
+                            <fieldset>
+                                <table class="table table-bordered table-hover custom-table dataTable">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 100px;" data-colname="cotainerNo">CONTAINER NO</th>
+                                            <th style="width: 100px;" data-colname="blNo">BL NO</th>
+                                            <th>GOODS INFO</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="item in returnOrderForm.loadingPlanData">
+                                            <td>
+                                                {{item.containerNo}}
+                                            </td>
+                                            <td>
+                                                {{item.blNo}}
+                                            </td>
+                                            <td>
+                                                <div class="add_product">
+                                                    <table class="table table-bordered table-hover custom-table dataTable">
+                                                        <thead>
+                                                            <tr>
+                                                                <th style="width: 20px;"></th>
+                                                                <th style="width: 100px;" data-colname="articleCode">ARTICLECODE</th>
+                                                                <th style="width: 40px;" data-colname="quantity">ORDER QNT</th>
+                                                                <th style="width: 40px;" data-colname="quantity">SHIPPED QNT</th>
+                                                                <th style="width: 40px;" data-colname="totalReturnQnt">TOTAL RETURN QNT</th>
+                                                                <th style="width: 40px;" data-colname="remaingReturnQnt">REMAINING QNT</th>
+                                                                <th data-colname="description">DESCRIPTION</th>
+                                                                <th style="width: 40px;" data-colname="quantity">RETURN QNT</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr ng-repeat="item_detail in item.loadingPlanDetails">
+                                                                <td style="text-align:center"><input type="checkbox" ng-model="item_detail.isSelected" id="chk-{{item_detail.loadingPlanDetailID}}" /></td>
+                                                                <td>{{item_detail.articleCode}}</td>
+                                                                <td style="text-align:right">{{item_detail.saleOrderQnt}}</td>
+                                                                <td style="text-align:right">{{item_detail.shippedQnt}}</td>
+                                                                <td style="text-align:right">{{item_detail.totalReturnQnt}}</td>
+                                                                <td style="text-align:right">{{item_detail.remaingReturnQnt}}</td>
+                                                                <td>{{item_detail.description}}</td>
+                                                                <td><input type="text" ng-model="item_detail.returnQnt" class="form-control" /></td>
+                                                            </tr>
+                                                            <tr ng-repeat="item_detail in item.loadingPlanSparepartDetails">
+                                                                <td style="text-align:center"><input type="checkbox" ng-model="item_detail.isSelected" id="chk-{{item_detail.loadingPlanSparepartDetailID}}" /></td>
+                                                                <td>{{item_detail.articleCode}}</td>
+                                                                <td style="text-align:right">{{item_detail.saleOrderQnt}}</td>
+                                                                <td style="text-align:right">{{item_detail.shippedQnt}}</td>
+                                                                <td style="text-align:right">{{item_detail.totalReturnQnt}}</td>
+                                                                <td style="text-align:right">{{item_detail.remaingReturnQnt}}</td>
+                                                                <td>{{item_detail.description}}</td>
+                                                                <td><input type="text" ng-model="item_detail.returnQnt" class="form-control" /></td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </fieldset>
+                            <footer>
+                                <button class="btn btn-primary" type="button" ng-click="returnOrderForm.event.addGoods($event)">
+                                    ADD
+                                </button>
+                                <button class="btn btn-default" type="button" ng-click="returnOrderForm.event.cancel($event)">
+                                    CANCEL
+                                </button>
+                            </footer>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </article>
+    </div>
+
+    <div id="returnGoodsForm" class="row" style="display:none">
+        <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+            <div class="jarviswidget" id="wid-id-product-information" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+                <header>
+                    <h2>Select product to return</h2>
+                </header>
+                <div>
+                    <div class="widget-body no-padding">
+                        <div class="smart-form">
+                            <fieldset>
+                                <table class="table table-bordered table-hover custom-table dataTable">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 20px;"></th>
+                                            <th style="width: 100px;" data-colname="cotainerNo">CONTAINER NO</th>
+                                            <th style="width: 100px;" data-colname="blNo">BL NO</th>
+                                            <th>GOODS INFO</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="item in returnGoodsForm.loadingPlanData">
+                                            <td style="text-align:center"><input type="checkbox" ng-model="item.isSelected" id="chk-{{item.loadingPlanID}}" ng-change="returnGoodsForm.event.selectedCont($event,item.isSelected,item.loadingPlanID)" /></td>
+                                            <td>
+                                                {{item.containerNo}}
+                                            </td>
+                                            <td>
+                                                {{item.blNo}}
+                                            </td>
+                                            <td>
+                                                <div class="add_product">
+                                                    <table class="table table-bordered table-hover custom-table dataTable">
+                                                        <thead>
+                                                            <tr>
+                                                                <th style="width: 100px;" data-colname="articleCode">ARTICLECODE</th>
+                                                                <th style="width: 40px;" data-colname="quantity">ORDER QNT</th>
+                                                                <th style="width: 40px;" data-colname="quantity">SHIPPED QNT</th>
+                                                                <th style="width: 40px;" data-colname="totalReturnQnt">TOTAL RETURN QNT</th>
+                                                                <th style="width: 40px;" data-colname="remaingReturnQnt">REMAINING QNT</th>
+                                                                <th style="width: 40px;" data-colname="quantity">RETURN QNT</th>
+                                                                <th data-colname="description">DESCRIPTION</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr ng-repeat="item_detail in item.loadingPlanDetail2s">
+                                                                <td>{{item_detail.articleCode}}</td>
+                                                                <td style="text-align:right">{{item_detail.saleOrderQnt}}</td>
+                                                                <td style="text-align:right">{{item_detail.shippedQnt}}</td>
+                                                                <td style="text-align:right">{{item_detail.totalReturnQnt}}</td>
+                                                                <td style="text-align:right">{{item_detail.remaingReturnQnt}}</td>
+                                                                <td><input type="text" ng-model="item_detail.returnQnt" class="form-control" style="text-align:center" /></td>
+                                                                <td>{{item_detail.description}}</td>
+                                                            </tr>
+                                                            <tr ng-repeat="item_detail in item.loadingPlanSparepartDetail2s">
+                                                                <td>{{item_detail.articleCode}}</td>
+                                                                <td style="text-align:right">{{item_detail.saleOrderQnt}}</td>
+                                                                <td style="text-align:right">{{item_detail.shippedQnt}}</td>
+                                                                <td style="text-align:right">{{item_detail.totalReturnQnt}}</td>
+                                                                <td style="text-align:right">{{item_detail.remaingReturnQnt}}</td>
+                                                                <td><input type="text" ng-model="item_detail.returnQnt" class="form-control" style="text-align:center" /></td>
+                                                                <td>{{item_detail.description}}</td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </fieldset>
+                            <footer>
+                                <button class="btn btn-primary" type="button" ng-click="returnGoodsForm.event.ok($event)">
+                                    Accept return goods
+                                </button>
+                                <button class="btn btn-default" type="button" ng-click="returnGoodsForm.event.cancel($event)">
+                                    Cancel
+                                </button>
+                            </footer>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </article>
+    </div>
+
+}
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="#" ng-if="saleorder.saleOrderData.trackingStatusID!=3 && saleorder.saleOrderData.trackingStatusID!=5" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="update($event)"><i class="fa fa-save"></i></a>
+        </li>
+
+        <li class="sparks-info">
+            <a href="@Url.Action("PI", "SaleOrder")/{{saleorder.saleOrderData.offerID}}" class="btn btn-default" title="Back to PI"><i class="fa fa-arrow-left"></i></a>
+        </li>
+
+
+        <li class="sparks-info">
+            <a href="javascript:void(0);" ng-if="saleorder.saleOrderData.trackingStatusID!=3 && saleorder.saleOrderData.trackingStatusID!=5" class="btn btn-default@(ViewBag.ID==0?" disabled":"") @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Approve, HttpContext.Current))" title="Confirm" style="color: #0066ff; " ng-click="confirm($event,@ViewBag.ID,false)"><i class="fa fa-check"></i></a>
+        </li>
+
+        <li class="sparks-info">
+            <a href="javascript:void(0);" ng-if="saleorder.saleOrderData.trackingStatusID!=3 && saleorder.saleOrderData.trackingStatusID!=5" class="btn btn-default@(ViewBag.ID==0?" disabled":"") @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Approve, HttpContext.Current))" title="Confirm without signed" style="color: #0066ff; " ng-click="confirm($event,@ViewBag.ID,true)"><i class="fa fa-check-square-o"></i></a>
+        </li>
+
+        <li class="sparks-info">
+            <a href="javascript:void(0);" ng-if="saleorder.saleOrderData.trackingStatusID ==3 || saleorder.saleOrderData.trackingStatusID==5" class="btn btn-default@(ViewBag.ID==0?" disabled":"") @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Approve, HttpContext.Current))" title="Revise" style="color: #ff0000;" ng-click="revise($event,@ViewBag.ID)"><i class="fa fa-reply"></i></a>
+        </li>
+
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default@(ViewBag.ID==0?" disabled":"") @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Print, HttpContext.Current))" title="Print PI" ng-click="getPrintTemplate($event)"><i class="fa fa-print"></i></a>
+        </li>
+
+        <li class="sparks-info">
+            <a href="javascript:void(0);" ng-if="saleorder.saleOrderData.trackingStatusID!=3 && saleorder.saleOrderData.trackingStatusID!=5 && !item.isFactoryOrderCreated" class="btn btn-default@(ViewBag.ID==0?" disabled":"") @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current))" title="Delete" style="color: #ff0000;" ng-click="delete($event)"><i class="fa fa-times"></i></a>
+        </li>
+
+        <li class="sparks-info">
+            <a href="@Url.Action("Edit", "OfferToClientMng")/{{saleorder.saleOrderData.offerID}}?ClientID={{saleorder.saleOrderData.clientID}}&season={{saleorder.saleOrderData.season}}&currency={{saleorder.saleOrderData.currency}}#/" class="btn btn-default" title="Go to Offer To Client" style="color: #0066ff;" target="_blank"><i class="fa fa-arrow-left"></i></a>
+        </li>
+
+        <li class="sparks-info">
+            <a href="@Url.Action("FaO", "FactoryOrder")/@ViewBag.ID/{{saleorder.saleOrderData.offerID}}" class="btn btn-default" title="Go to factory order" style="color: #0066ff;" target="_blank"><i class="fa fa-arrow-right"></i></a>
+        </li>
+
+
+
+    </ul>
+}
+
+@section pagejs {
+    <script src="~/Angular/app/saleorder/service.js?c=@System.Guid.NewGuid().ToString().Replace("-","")"></script>
+    <script type="text/javascript">
+    saleOrderService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/saleorder/';
+    saleOrderService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+    var saleOrderDetailGrid = jQuery('#saleOrderDetail').scrollableTable(null,function(sortedBy, sortedDirection){
+        var scope = angular.element(jQuery('body')).scope();
+        datasource = scope.saleorder.saleOrderData.saleOrderDetails;
+
+        if (sortedDirection == 'asc') {
+            datasource.sort(function(a,b){
+                return a[sortedBy] > b[sortedBy] ? 1: -1;
+            });
+        }
+        else if (sortedDirection == 'desc') {
+            datasource.sort(function(a,b){
+                return a[sortedBy] < b[sortedBy] ? 1: -1;
+            });
+        }
+        scope.$apply();
+    });
+
+    var saleOrderDetailSparepartGrid = jQuery('#saleOrderDetailSparepart').scrollableTable(null,function(sortedBy, sortedDirection){
+        var scope = angular.element(jQuery('body')).scope();
+        datasource = scope.saleorder.saleOrderData.saleOrderDetailSpareparts;
+        if (sortedDirection == 'asc') {
+            datasource.sort(function(a,b){
+                return a[sortedBy] > b[sortedBy] ? 1: -1;
+            });
+        }
+        else if (sortedDirection == 'desc') {
+            datasource.sort(function(a,b){
+                return a[sortedBy] < b[sortedBy] ? 1: -1;
+            });
+        }
+        scope.$apply();
+    });
+
+    var saleOrderDetailSparepartGrid = jQuery('#saleOrderDetailSample').scrollableTable(null, function (sortedBy, sortedDirection) {
+        var scope = angular.element(jQuery('body')).scope();
+        datasource = scope.saleorder.saleOrderData.saleOrderDetailSamples;
+        if (sortedDirection == 'asc') {
+            datasource.sort(function (a, b) {
+                return a[sortedBy] > b[sortedBy] ? 1 : -1;
+            });
+        }
+        else if (sortedDirection == 'desc') {
+            datasource.sort(function (a, b) {
+                return a[sortedBy] < b[sortedBy] ? 1 : -1;
+            });
+        }
+        scope.$apply();
+    });
+
+    var saleorderApp = angular.module('tilsoftApp', ['ng-currency', 'avs-directives']);
+
+    saleorderApp.filter('saleOrderDetailSpareparts', function () {
+        return function (saleOrderDetailSpareparts, hasQntSparepart) {
+            var result = [];
+            if (!hasQntSparepart) return saleOrderDetailSpareparts;
+
+            angular.forEach(saleOrderDetailSpareparts, function (item) {
+                if (item.orderQnt) {
+                    result.push(item);
+                }
+            });
+
+            return result;
+        };
+    });
+
+        saleorderApp.filter('saleOrderDetailSamples', function () {
+            return function (saleOrderDetailSamples, hasQntSample) {
+                var result = [];
+                if (!hasQntSample) return saleOrderDetailSamples;
+
+                angular.forEach(saleOrderDetailSamples, function (item) {
+                    if (item.quantity) {
+                        result.push(item);
+                    }
+                });
+
+                return result;
+            };
+        });
+
+    saleorderApp.filter('saleOrderDetail_Filter', function () {
+        return function (saleOrderDetails, articleCode, description, quantity, v4id, hasQnt) {
+            var items = {
+                articleCode: articleCode,
+                description: description,
+                quantity : quantity,
+                v4id: v4id,
+                out: []
+            }
+
+            if (!hasQnt) {
+                angular.forEach(saleOrderDetails, function (value, key) {
+                    pushed = true;
+
+                    if (this.articleCode != '') {
+                        pushed = pushed && (value.articleCode.toUpperCase().indexOf(this.articleCode.toUpperCase()) >= 0);
+                    }
+
+                    if (this.description != '') {
+                        pushed = pushed && (value.description.toUpperCase().indexOf(this.description.toUpperCase()) >= 0);
+                    }
+
+                    if (pushed) {
+                        this.out.push(value);
+                    }
+                }, items);
+                return items.out;
+            }
+
+            angular.forEach(saleOrderDetails, function (value, key) {
+                pushed = true;
+
+                if (this.articleCode != '') {
+                    pushed = pushed && (value.articleCode.toUpperCase().indexOf(this.articleCode.toUpperCase()) >= 0);
+                }
+
+                if (this.description != '') {
+                    pushed = pushed && (value.description.toUpperCase().indexOf(this.description.toUpperCase()) >= 0);
+                }
+
+                if (pushed && value.orderQnt) {
+                    this.out.push(value);
+                }
+            }, items);
+            return items.out;
+
+        };
+    });
+
+
+    saleorderApp.controller('tilsoftController', ['$scope', function ($scope) {
+        $scope.saleorder = null;
+        $scope.selected_detail_extends = null; //store data when select one row on grid detail
+
+        $scope.offerLine = null;
+        $scope.isOfferLineLoaded = false;
+        $scope.offerLineSparepart = null;
+        $scope.isOfferLineSparepartLoaded = false;
+        $scope.isOfferLineSampleLoaded = false;
+
+        $scope.articleCode_filter = '';
+        $scope.description_filter = '';
+        $scope.quantity_filter = '';
+        $scope.v4id_filter = '';
+        $scope.newId = 0;
+        $scope.ldsTitle = "";
+
+        $scope.searchArt = "";
+        $scope.searchArtSparepart = "";
+
+        $scope.hasQnt = false;
+        $scope.toggFilterQnt = function () {
+            $scope.hasQnt = !$scope.hasQnt;
+        };
+
+        $scope.hasQntSparepart = false;
+        $scope.toggFilterQntSparepart = function () {
+            $scope.hasQntSparepart = !$scope.hasQntSparepart;
+        };
+
+        $scope.hasQntSample = false;
+        $scope.toggFilterQntSample = function () {
+            $scope.hasQntSample = !$scope.hasQntSample;
+        };
+
+        $scope.removeProduct = function (item) {
+            $scope.saleorder.saleOrderData.saleOrderDetails.splice($scope.saleorder.saleOrderData.saleOrderDetails.indexOf(item), 1);
+        };
+        $scope.removeAllProduct = function () {
+            var tobeRemoved = $scope.saleorder.saleOrderData.saleOrderDetails.filter(o => !o.isFactoryOrderCreated);
+            angular.forEach(angular.copy(tobeRemoved), function (item) {
+                $scope.saleorder.saleOrderData.saleOrderDetails.splice($scope.saleorder.saleOrderData.saleOrderDetails.indexOf(item), 1);
+            });
+        };
+
+        $scope.removeSparepart = function (item) {
+            $scope.saleorder.saleOrderData.saleOrderDetailSpareparts.splice($scope.saleorder.saleOrderData.saleOrderDetailSpareparts.indexOf(item), 1);
+        };
+        $scope.removeAllSparepart = function () {
+            var tobeRemoved = $scope.saleorder.saleOrderData.saleOrderDetailSpareparts.filter(o => !o.isFactoryOrderCreated);
+            angular.forEach(angular.copy(tobeRemoved), function (item) {
+                $scope.saleorder.saleOrderData.saleOrderDetailSpareparts.splice($scope.saleorder.saleOrderData.saleOrderDetailSpareparts.indexOf(item), 1);
+            });
+        };
+
+        $scope.removeSample = function (item) {
+            $scope.saleorder.saleOrderData.saleOrderDetailSamples.splice($scope.saleorder.saleOrderData.saleOrderDetailSamples.indexOf(item), 1);
+        };
+        $scope.removeAllSample = function () {
+            var tobeRemoved = $scope.saleorder.saleOrderData.saleOrderDetailSamples.filter(o => !o.isFactoryOrderCreated);
+            angular.forEach(angular.copy(tobeRemoved), function (item) {
+                $scope.saleorder.saleOrderData.saleOrderDetailSamples.splice($scope.saleorder.saleOrderData.saleOrderDetailSamples.indexOf(item), 1);
+            });
+        };
+
+
+        $scope.getNewId = function () {
+            $scope.newId--;
+            return $scope.newId;
+        }
+
+        $scope.SearchWithArt = function () {
+            if ($scope.searchArt.length === 0 || $scope.searchArt.length >= 3) {
+                var orderType = '@orderType';
+                if ($scope.saleorder.saleOrderData.saleOrderID > 0 && $scope.saleorder.saleOrderData.orderType) {
+                    orderType = $scope.saleorder.saleOrderData.orderType;
+                }
+                saleOrderService.getOfferLine(
+                    $scope.saleorder.saleOrderData.offerID,
+                    orderType,
+                    $scope.searchArt,
+                    function (data) {
+                        if (data.message.type === 0) {
+                            $scope.offerLine = data.data;
+                            $scope.isOfferLineLoaded = true;
+                            $scope.$apply();
+                        }
+                    },
+                    function (error) {
+                        jsHelper.showMessage('warning', error);
+                        $scope.$apply();
+                    }
+                );
+            }
+        };
+
+        $scope.frmAddProduct_onOpen = function () {
+            //if (!$scope.isOfferLineLoaded) {
+                var orderType = '@orderType';
+                if ($scope.saleorder.saleOrderData.saleOrderID > 0 && $scope.saleorder.saleOrderData.orderType) {
+                    orderType = $scope.saleorder.saleOrderData.orderType;
+                }
+
+                saleOrderService.getOfferLine(
+                    $scope.saleorder.saleOrderData.offerID,
+                    orderType,
+                    $scope.searchArt,
+                    function (data) {
+                        if (data.message.type === 0) {
+                            $scope.offerLine = data.data;
+
+                            for (var i = $scope.offerLine.length - 1; i >= 0; i--) {
+                                var keepGoing = true;
+                                angular.forEach($scope.saleorder.saleOrderData.saleOrderDetails, function (item) {
+                                    if (keepGoing) {
+                                        if ($scope.offerLine[i].offerLineID === item.offerLineID) {
+                                            $scope.offerLine.splice(i, 1);
+                                            keepGoing = false;
+                                        }
+                                    }
+                                });
+                            }
+
+                            $scope.isOfferLineLoaded = true;
+                            $scope.$apply();
+                            $('#frmAddProduct').modal('show');
+                        }
+                    },
+                    function (error) {
+                        jsHelper.showMessage('warning', error);
+                        $scope.$apply();
+                    }
+                );
+            //}
+            //else {
+            //    angular.forEach($scope.offerLine, function (item) {
+            //        item.isSelected = false;
+            //    });
+            //    $('#frmAddProduct').modal('show');
+            //}
+        }
+        $scope.frmAddProduct_onOK = function () {
+            angular.forEach($scope.offerLine.filter(o => o.isSelected), function (item) {
+                if ($scope.saleorder.saleOrderData.saleOrderDetails.filter(o => o.offerLineID === item.offerLineID).length === 0) {
+                    var itemCloned = angular.copy(item);
+                    itemCloned.saleOrderDetailID = $scope.getNewId();
+                    $scope.saleorder.saleOrderData.saleOrderDetails.push(itemCloned);
+                }
+            });
+        }
+        $scope.frmAddProduct_selectAll = function () {
+            angular.forEach($scope.offerLine.filter(o => o.offerItemTypeID !== 1 || (o.offerItemTypeID === 1 && o.approverName)), function (item) {
+                item.isSelected = true;
+            });
+        }
+        $scope.frmAddProduct_unSelectAll = function () {
+            angular.forEach($scope.offerLine.filter(o => o.offerItemTypeID === 1 && o.approverName), function (item) {
+                item.isSelected = false;
+            });
+        }
+
+        $scope.SearchWithArtSparepart = function () {
+            if ($scope.searchArtSparepart.length === 0 || $scope.searchArtSparepart.length >= 3) {
+                var orderType = '@orderType';
+                if ($scope.saleorder.saleOrderData.saleOrderID > 0 && $scope.saleorder.saleOrderData.orderType) {
+                    orderType = $scope.saleorder.saleOrderData.orderType;
+                }
+                saleOrderService.getOfferLineSparepart(
+                    $scope.saleorder.saleOrderData.offerID,
+                    orderType,
+                    $scope.searchArtSparepart,
+                    function (data) {
+                        if (data.message.type === 0) {
+                            $scope.offerLineSparepart = data.data;
+                            $scope.isOfferLineSparepartLoaded = true;
+                            $scope.$apply();
+                        }
+                    },
+                    function (error) {
+                        jsHelper.showMessage('warning', error);
+                        $scope.$apply();
+                    }
+                );
+            }
+        };
+
+        $scope.frmAddSparepart_onOpen = function () {
+            var orderType = '@orderType';
+            if ($scope.saleorder.saleOrderData.saleOrderID > 0 && $scope.saleorder.saleOrderData.orderType) {
+                orderType = $scope.saleorder.saleOrderData.orderType;
+            }
+            //if (!$scope.isOfferLineSparepartLoaded) {
+                saleOrderService.getOfferLineSparepart(
+                    $scope.saleorder.saleOrderData.offerID,
+                    orderType,
+                    $scope.searchArtSparepart,
+                    function (data) {
+                        if (data.message.type === 0) {
+                            $scope.offerLineSparepart = data.data;
+
+                            for (var i = $scope.offerLineSparepart.length - 1; i >= 0; i--) {
+                                var keepGoing = true;
+                                angular.forEach($scope.saleorder.saleOrderData.saleOrderDetailSpareparts, function (item) {
+                                    if (keepGoing) {
+                                        if ($scope.offerLineSparepart[i].offerLineSparepartID === item.offerLineSparepartID) {
+                                            $scope.offerLineSparepart.splice(i, 1);
+                                            keepGoing = false;
+                                        }
+                                    }
+                                });
+                            }
+
+                            $scope.isOfferLineSparepartLoaded = true;
+                            $scope.$apply();
+                            $('#frmAddSparepart').modal('show');
+                        }
+                    },
+                    function (error) {
+                        jsHelper.showMessage('warning', error);
+                        $scope.$apply();
+                    }
+                );
+            //}
+            //else {
+            //    angular.forEach($scope.offerLineSparepart, function (item) {
+            //        item.isSelected = false;
+            //    });
+            //    $('#frmAddSparepart').modal('show');
+            //}
+        }
+        $scope.frmAddSparepart_onOK = function () {
+            angular.forEach($scope.offerLineSparepart.filter(o => o.isSelected), function (item) {
+                if ($scope.saleorder.saleOrderData.saleOrderDetailSpareparts.filter(o => o.offerLineSparepartID === item.offerLineSparepartID).length === 0) {
+                    var itemCloned = angular.copy(item);
+                    itemCloned.saleOrderDetailSparepartID = $scope.getNewId();
+                    $scope.saleorder.saleOrderData.saleOrderDetailSpareparts.push(itemCloned);
+                }
+            });
+        }
+        $scope.frmAddSparepart_selectAll = function () {
+            angular.forEach($scope.offerLineSparepart, function (item) {
+                item.isSelected = true;
+            });
+        }
+        $scope.frmAddSparepart_unSelectAll = function () {
+            angular.forEach($scope.offerLineSparepart, function (item) {
+                item.isSelected = false;
+            });
+        }
+
+
+        $scope.SearchWithSample = function () {
+            if ($scope.searchSample.length === 0 || $scope.searchSample.length >= 3) {
+                var orderType = '@orderType';
+                if ($scope.saleorder.saleOrderData.saleOrderID > 0 && $scope.saleorder.saleOrderData.orderType) {
+                    orderType = $scope.saleorder.saleOrderData.orderType;
+                }
+                saleOrderService.getOfferLineSample(
+                    $scope.saleorder.saleOrderData.offerID,
+                    orderType,
+                    $scope.searchSample,
+                    function (data) {
+                        if (data.message.type === 0) {
+                            $scope.offerLineSample = data.data;
+                            $scope.isOfferLineSampleLoaded = true;
+                            $scope.$apply();
+                        }
+                    },
+                    function (error) {
+                        jsHelper.showMessage('warning', error);
+                        $scope.$apply();
+                    }
+                );
+            }
+        };
+        $scope.frmAddSample_onOpen = function () {
+            //if (!$scope.isOfferLineLoaded) {
+                var orderType = '@orderType';
+                if ($scope.saleorder.saleOrderData.saleOrderID > 0 && $scope.saleorder.saleOrderData.orderType) {
+                    orderType = $scope.saleorder.saleOrderData.orderType;
+                }
+
+                saleOrderService.getOfferLineSample(
+                    $scope.saleorder.saleOrderData.offerID,
+                    orderType,
+                    $scope.searchArt,
+                    function (data) {
+                        if (data.message.type === 0) {
+                            $scope.offerLineSample = data.data;
+
+                            for (var i = $scope.offerLineSample.length - 1; i >= 0; i--) {
+                                var keepGoing = true;
+                                angular.forEach($scope.saleorder.saleOrderData.saleOrderDetailSamples, function (item) {
+                                    if (keepGoing) {
+                                        if ($scope.offerLineSample[i].offerLineSampleProductID === item.offerLineSampleProductID) {
+                                            $scope.offerLineSample.splice(i, 1);
+                                            keepGoing = false;
+                                        }
+                                    }
+                                });
+                            }
+
+                            $scope.isOfferLineLoaded = true;
+                            $scope.$apply();
+                            $('#frmAddSample').modal('show');
+                        }
+                    },
+                    function (error) {
+                        jsHelper.showMessage('warning', error);
+                        $scope.$apply();
+                    }
+                );
+            //}
+            //else {
+            //    angular.forEach($scope.offerLine, function (item) {
+            //        item.isSelected = false;
+            //    });
+            //    $('#frmAddSample').modal('show');
+            //}
+        }
+        $scope.frmAddSample_onOK = function () {
+            angular.forEach($scope.offerLineSample.filter(o => o.isSelected), function (item) {
+                debugger;
+                if ($scope.saleorder.saleOrderData.saleOrderDetailSamples.filter(o => o.offerLineSampleProductID === item.offerLineSampleProductID).length === 0) {
+                    var itemCloned = angular.copy(item);
+                    itemCloned.saleOrderDetailSampleID = $scope.getNewId();
+                    $scope.saleorder.saleOrderData.saleOrderDetailSamples.push(itemCloned);
+                }
+            });
+        }
+        $scope.frmAddSample_selectAll = function () {
+            angular.forEach($scope.offerLineSample, function (item) {
+                item.isSelected = true;
+            });
+        }
+        $scope.frmAddSample_unSelectAll = function () {
+            angular.forEach($scope.offerLineSample, function (item) {
+                item.isSelected = false;
+            });
+        }
+
+        $scope.calTotalAmount = function(){
+            if ($scope.saleorder == null) return;
+            var total = 0;
+            angular.forEach($scope.saleorder.saleOrderData.saleOrderDetails, function(item){
+                total = total + item.unitPrice * item.orderQnt;
+            })
+            return total;
+        }
+
+        $scope.calTotalAmountSparepart = function () {
+            if ($scope.saleorder == null) return;
+            var total = 0;
+            angular.forEach($scope.saleorder.saleOrderData.saleOrderDetailSpareparts, function (item) {
+                total = total + item.unitPrice * item.orderQnt;
+            })
+            return total;
+        }
+
+        $scope.calTotalAmountSample = function () {
+            if ($scope.saleorder == null) return;
+            var total = 0;
+            angular.forEach($scope.saleorder.saleOrderData.saleOrderDetailSamples, function (item) {
+                total = total + item.salePrice * item.quantity;
+            })
+            return total;
+        }
+
+        $scope.calTotalAmountPI = function () {
+            if ($scope.saleorder == null) return;
+            var total = 0;
+            angular.forEach($scope.saleorder.saleOrderData.saleOrderExtends, function (item) {
+                total = total + item.totalAmount;
+            })
+            return total + $scope.calTotalAmount() + $scope.calTotalAmountSparepart() + $scope.calTotalAmountSample();
+        }
+
+        $scope.quantityContainerRequire = function(){
+            if ($scope.saleorder == null ) return;
+            return  ($scope.saleorder.saleOrderData.quantity20DC == null || $scope.saleorder.saleOrderData.quantity20DC == '')
+                    && ($scope.saleorder.saleOrderData.quantity40DC == null || $scope.saleorder.saleOrderData.quantity40DC == '')
+                    && ($scope.saleorder.saleOrderData.quantity40HC == null || $scope.saleorder.saleOrderData.quantity40HC == '')
+                    && ($scope.saleorder.saleOrderData.lessThanContainerLoad == null || $scope.saleorder.saleOrderData.lessThanContainerLoad == '');
+        }
+
+        $scope.ldS_DeliveryDate_Require = function(){
+            if ($scope.saleorder == null ) return;
+            return  ($scope.saleorder.saleOrderData.ldsFormated == null || $scope.saleorder.saleOrderData.ldsFormated == '')
+                    && ($scope.saleorder.saleOrderData.deliveryDateFormated == null || $scope.saleorder.saleOrderData.deliveryDateFormated == '');
+        }
+
+        $scope.load = function()
+        {
+            saleOrderService.load(
+                @ViewBag.ID,
+                @ViewBag.OfferID,
+                '@orderType',
+                function (data) {
+                    $scope.saleorder = data.data;
+                    //$scope.saleorder.saleOrderData.saleOrderDetails = data.data.saleOrderData.saleOrderDetails;
+
+                    $scope.$apply();
+                    var total = 0;
+                    for(var i = 0; i < $scope.saleorder.saleOrderData.saleOrderDetails.length; i++){
+                        var item = $scope.saleorder.saleOrderData.saleOrderDetails[i];
+                        total += (item.unitPrice * item.orderQnt);
+                    }
+
+                    //show lds
+                    if ($scope.saleorder.saleOrderData.ldsClients != null) {
+                        if ($scope.saleorder.saleOrderData.ldsClients.length > 0) {
+                            var sItem = $scope.saleorder.saleOrderData.ldsClients[$scope.saleorder.saleOrderData.ldsClients.length - 1];
+                            if (sItem.ldsTypeID == 0) {
+                                $scope.ldsTitle = sItem.ldsTypeNM;
+                            }
+                            else {
+                                $scope.ldsTitle = sItem.ldsTypeNM + " " + sItem.version;
+                            }
+                        }
+                    }
+                    
+                    $scope.total = total;
+                    $scope.$apply();
+
+                    jQuery('#content').show();
+                    // monitor changes
+                    $scope.$watch('saleorder', function() {
+                        jQuery('#changeNotification').html('<i class="fa fa-save blink_me"></i>');
+                    });
+
+                    setTimeout(function () { runAllForms() }, 200);
+                },
+                function (error) {
+                    jsHelper.showMessage('warning', error);
+                    $scope.saleorder = null;
+                    $scope.$apply();
+                }
+            );
+        }
+
+        $scope.update = function ($event) {
+            $event.preventDefault();
+            debugger;
+            if($scope.editForm.$valid)
+            {
+                var err = false;
+                if ($scope.saleorder.saleOrderData.saleOrderDetails.length > 0) {
+                    angular.forEach($scope.saleorder.saleOrderData.saleOrderDetails, function (item) {
+                        if (item.commissionPercentOTC > 0) {
+                            if (item.commissionPercent > item.commissionPercentOTC) {
+                                err = true;
+                            }
+                        }
+                    });
+                }
+                if ($scope.saleorder.saleOrderData.saleOrderDetailSpareparts.length > 0) {
+                    angular.forEach($scope.saleorder.saleOrderData.saleOrderDetailSpareparts, function (item) {
+                        if (item.commissionPercentOTC > 0) {
+                            if (item.commissionPercent > item.commissionPercentOTC) {
+                                err = true;
+                            }
+                        }
+                    });
+                }
+                if (!err) {
+                    saleOrderService.update(@ViewBag.ID, $scope.saleorder.saleOrderData,
+                        function (data) {
+                            jsHelper.processMessage(data.message);
+                            if (data.message.type == 0) {
+                                window.location = '@Url.Action("Edit", "SaleOrder", new { id = UrlParameter.Optional,id2 = UrlParameter.Optional})/' + data.data.saleOrderID + '/' + $scope.saleorder.saleOrderData.offerID;
+                            }
+                        },
+                        function (error) {
+                            jsHelper.showMessage('warning', error);
+                        }
+                    );
+                }
+                else {
+                    jsHelper.showMessage('warning', "% Commission can't greater than % Commission from OTC");
+                }
+            }
+            else
+            {
+                jsHelper.showMessage('warning', '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED');
+            }
+        }
+
+        $scope.delete = function ($event) {
+            $event.preventDefault();
+
+            if (confirm('Are you sure ?')) {
+                saleOrderService.delete(@ViewBag.ID,
+                function (data) {
+                    jsHelper.processMessage(data.message);
+                    if(data.message.type == 0) {
+                        window.location = '@Url.Action("PI", "SaleOrder")/' + $scope.saleorder.saleOrderData.offerID;
+                    }
+                },
+                function (error) {
+                    jsHelper.showMessage('warning', error);
+                }
+            );
+            }
+        }
+
+        $scope.confirm = function ($event,id,withoutsigned) {
+            $event.preventDefault();
+
+            if (confirm('Are you sure want to confirm ' + (withoutsigned ? ' without signed ?' : '?'))) {
+                saleOrderService.confirm(@ViewBag.ID, $scope.saleorder.saleOrderData, withoutsigned,
+                function (data) {
+                    $scope.saleorder.saleOrderData.trackingStatusNM = data.data.trackingStatusNM;
+                    $scope.saleorder.saleOrderData.concurrencyFlag_String = data.data.concurrencyFlag_String;
+                    jsHelper.processMessage(data.message);
+                    $scope.$apply();
+                    if (data.message.type == 0) {
+                        location.reload();
+                    }
+                },
+                function (error) {
+                    jsHelper.showMessage('warning', error);
+                }
+            );
+            }
+        }
+
+        $scope.revise = function ($event,id) {
+            $event.preventDefault();
+
+            if (confirm('Are you sure want to revise ?')) {
+                saleOrderService.revise(@ViewBag.ID, $scope.saleorder.saleOrderData,
+                function (data) {
+                    $scope.saleorder.saleOrderData.trackingStatusNM = data.data.trackingStatusNM;
+                    $scope.saleorder.saleOrderData.concurrencyFlag_String = data.data.concurrencyFlag_String;
+                    jsHelper.processMessage(data.message);
+                    $scope.$apply();
+                    if (data.message.type == 0) {
+                        location.reload();
+                    }
+                },
+                function (error) {
+                    jsHelper.showMessage('warning', error);
+                }
+            );
+            }
+        }
+
+        $scope.getPrintTemplate = function ($event) {
+            $('#reportTemplate').modal('show');
+        }
+
+        $scope.printPI = function ($event,reportName) {
+            $event.preventDefault();
+            saleOrderService.printPI(@ViewBag.ID,reportName,
+                function (data) {
+                    window.open('@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]' + data.data);
+                },
+                function (error) {
+                    jsHelper.showMessage('warning', error);
+                }
+            );
+        }
+
+        $scope.ispiReceivedChecked = function () {
+
+            if($scope.saleorder.saleOrderData.ispiReceived == true)
+            {
+                var date = new Date();
+                pad = '00';
+                $scope.saleorder.saleOrderData.piReceivedDateFormated = pad.substring(0,pad.length - date.getDate().toString().length) +  date.getDate().toString() + '/' + pad.substring(0,pad.length-(date.getMonth()+1).toString().length) + (date.getMonth()+1).toString() + '/' + date.getFullYear();
+                $scope.saleorder.saleOrderData.piReceivedBy = '@Frontend.Helper.AuthHelper.GetCurrentUserInfo(HttpContext.Current).Data.FullName';
+            }
+            else
+            {
+                $scope.saleorder.saleOrderData.piReceivedDateFormated = '';
+                $scope.saleorder.saleOrderData.piReceivedBy = "";
+            }
+        }
+
+        $scope.changeSignedPIFile = function ($event,controlID) {
+            $event.preventDefault();
+            masterUploader.multiSelect = true;
+            masterUploader.imageOnly = false;
+            masterUploader.callback = function () {
+                var scope = angular.element(jQuery('body')).scope();
+                scope.$apply(function () {
+                    angular.forEach(masterUploader.selectedFiles, function (img) {
+                        scope.saleorder.saleOrderData.signedPIFileURL = img.fileURL;
+                        scope.saleorder.saleOrderData.signedPIFileFriendlyName = img.filename;
+                        scope.saleorder.saleOrderData.newSignedPIFile = img.filename;
+                        //call server to update file
+                        scope.uploadSignedPIFile();
+                    }, null);
+                });
+            };
+            masterUploader.open();
+        };
+
+        $scope.removeSignedPIFile = function ($event,controlID) {
+            $scope.saleorder.saleOrderData.signedPIFileURL =  '';
+            $scope.saleorder.saleOrderData.signedPIFileFriendlyName =  '';
+            $scope.saleorder.saleOrderData.newSignedPIFile =  '';
+            //call server to update file
+            scope.uploadSignedPIFile();
+        };
+
+        $scope.uploadSignedPIFile = function(){
+            saleOrderService.uploadSignedPIFile(
+                $scope.saleorder.saleOrderData.saleOrderID,
+                $scope.saleorder.saleOrderData.newSignedPIFile,
+                $scope.saleorder.saleOrderData.signedPIFile,
+                function (data) {
+                    jsHelper.processMessage(data.message);
+                    if (data.message.type !=2)
+                    {
+                        $scope.saleorder.saleOrderData.signedPIFile = data.data.signedPIFile;
+                        $scope.saleorder.saleOrderData.concurrencyFlag_String = data.data.concurrencyFlag_String;
+                    }
+                },
+                function (error) {
+                    jsHelper.showMessage('warning', error);
+                }
+            );
+        }
+
+        $scope.changeClientPOFile = function ($event,controlID) {
+            $event.preventDefault();
+            masterUploader.multiSelect = true;
+            masterUploader.imageOnly = false;
+            masterUploader.callback = function () {
+                var scope = angular.element(jQuery('body')).scope();
+                scope.$apply(function () {
+                    angular.forEach(masterUploader.selectedFiles, function (img) {
+                        scope.saleorder.saleOrderData.clientPOFileURL = img.fileURL;
+                        scope.saleorder.saleOrderData.clientPOFriendlyName = img.filename;
+                        scope.saleorder.saleOrderData.newClientPOFile = img.filename;
+                        //call server to update file
+                        scope.uploadClientPOFile();
+                    }, null);
+                });
+            };
+            masterUploader.open();
+        };
+
+        $scope.removeClientPOFile = function ($event,controlID) {
+            $scope.saleorder.saleOrderData.clientPOFileURL =  '';
+            $scope.saleorder.saleOrderData.clientPOFriendlyName =  '';
+            $scope.saleorder.saleOrderData.newClientPOFile =  '';
+            //call server to update file
+            scope.uploadClientPOFile();
+        };
+
+        $scope.uploadClientPOFile = function(){
+            saleOrderService.uploadClientPOFile(
+                $scope.saleorder.saleOrderData.saleOrderID,
+                $scope.saleorder.saleOrderData.newClientPOFile,
+                $scope.saleorder.saleOrderData.clientPOFile,
+                function (data) {
+                    jsHelper.processMessage(data.message);
+                    if (data.message.type !=2)
+                    {
+                        $scope.saleorder.saleOrderData.clientPOFile = data.data.clientPOFile;
+                        $scope.saleorder.saleOrderData.concurrencyFlag_String = data.data.concurrencyFlag_String;
+                    }
+                },
+                function (error) {
+                    jsHelper.showMessage('warning', error);
+                }
+            );
+        };
+        //LC file
+        $scope.changeLCFile = function ($event, controlID) {
+            debugger;
+            $event.preventDefault();
+            masterUploader.multiSelect = true;
+            masterUploader.imageOnly = false;
+            masterUploader.callback = function () {
+                var scope = angular.element(jQuery('body')).scope();
+                scope.$apply(function () {
+                    angular.forEach(masterUploader.selectedFiles, function (img) {
+                        scope.saleorder.saleOrderData.lcFileURL = img.fileURL;
+                        scope.saleorder.saleOrderData.lcFileFriendlyName = img.filename;
+                        scope.saleorder.saleOrderData.newLCFile = img.filename;
+                        //call server to update file
+                        scope.uploadLCFile();
+                    }, null);
+                });
+            };
+            masterUploader.open();
+        };
+
+        $scope.removeLCFile = function ($event, controlID) {
+            $scope.saleorder.saleOrderData.lcFileURL = '';
+            $scope.saleorder.saleOrderData.lcFileFriendlyName = '';
+            $scope.saleorder.saleOrderData.newLCFile = '';
+            //call server to update file
+            scope.uploadLCFile();
+        };
+
+        $scope.uploadLCFile = function () {
+            saleOrderService.uploadLCFile(
+                $scope.saleorder.saleOrderData.saleOrderID,
+                $scope.saleorder.saleOrderData.newLCFile,
+                $scope.saleorder.saleOrderData.lcAttachFile,
+                function (data) {
+                    jsHelper.processMessage(data.message);
+                    if (data.message.type != 2) {
+                        debugger;
+                        $scope.saleorder.saleOrderData.lcAttachFile = data.data.lcAttachFile;
+                        $scope.saleorder.saleOrderData.concurrencyFlag_String = data.data.concurrencyFlag_String;
+                    }
+                },
+                function (error) {
+                    jsHelper.showMessage('warning', error);
+                }
+            );
+        };
+
+        $scope.orderQntKeyUp = function($event,index){
+            $event.preventDefault();
+            if ($event.keyCode ==13) {
+                $("#" + (index + 1)).focus();
+                $("#" + (index + 1)).select();
+            }
+        }
+
+
+
+        //
+        //ADD/INSERT/REMOVE TOP-BOTTOM DESCRIPTION FOR SALEORDER
+        //
+
+        $scope.addDescription = function($event,position){
+            $event.preventDefault();
+
+            var descrip = $scope.saleorder.saleOrderData.saleOrderExtends;
+            max_rowIndex = 1;
+            if (descrip.length > 0)
+            {
+                descrip.sort(function(a,b){return b.rowIndex - a.rowIndex});
+                max_rowIndex = descrip[0].rowIndex + 1;
+            }
+            $scope.saleorder.saleOrderData.saleOrderExtends.push({
+                saleOrderExtendID : max_rowIndex * (-1),
+                rowIndex : max_rowIndex,
+                position : position
+            });
+        }
+
+        $scope.removeDescription = function($event, id){
+            $event.preventDefault();
+
+            isExist = false;
+            for(j=0; j< $scope.saleorder.saleOrderData.saleOrderExtends.length; j++) {
+                if($scope.saleorder.saleOrderData.saleOrderExtends[j].saleOrderExtendID == id) {
+                    isExist = true;
+                    break;
+                }
+            }
+            if(isExist){
+                $scope.saleorder.saleOrderData.saleOrderExtends.splice(j, 1);
+            }
+        }
+
+        $scope.insertDescription = function($event,position,rowIndex){
+            $event.preventDefault();
+            var descrip = $scope.saleorder.saleOrderData.saleOrderExtends;
+            for(i = 0; i< descrip.length; i++)
+            {
+                if ($scope.saleorder.saleOrderData.saleOrderExtends[i].rowIndex > rowIndex)
+                {
+                    $scope.saleorder.saleOrderData.saleOrderExtends[i].rowIndex = $scope.saleorder.saleOrderData.saleOrderExtends[i].rowIndex + 1;
+                    if ($scope.saleorder.saleOrderData.saleOrderExtends[i].saleOrderExtendID < 0)
+                    {
+                        $scope.saleorder.saleOrderData.saleOrderExtends[i].saleOrderExtendID = $scope.saleorder.saleOrderData.saleOrderExtends[i].saleOrderExtendID - 1;
+                    }
+                }
+            }
+            $scope.saleorder.saleOrderData.saleOrderExtends.push({
+                saleOrderExtendID : (rowIndex + 1) * (-1),
+                rowIndex : rowIndex + 1,
+                position : position
+
+            });
+        }
+
+
+        //
+        // ADD DESCRIPTION FOR EVERY PRODUCT LINE
+        //
+        $scope.viewDetailExtend = function($event,saleOrderDetailID){
+            $event.preventDefault();
+            $scope.detailExtendForm.event.load(saleOrderDetailID);
+        }
+
+
+        //
+        //PROCESS EVENT WHEN SELECT PaymenTerm AND DeliveryTerm
+        //
+        $scope.selectedDelivery = function(id)
+        {
+            $($scope.saleorder.deliveryTerms).each(function(){
+                if (this.deliveryTermID == id)
+                {
+                    $scope.saleorder.saleOrderData.deliveryTypeNM = this.deliveryTypeNM;
+                    $scope.$apply();
+                }
+            });
+        }
+
+        $scope.selectedPaymentTerm = function(id)
+        {
+            $($scope.saleorder.paymentTerms).each(function(){
+                if (this.paymentTermID == id)
+                {
+                    $scope.saleorder.saleOrderData.paymentTypeNM = this.paymentTypeNM;
+                    $scope.$apply();
+                }
+            });
+        }
+
+        //
+        // SORT GRID DETAIL AT CLIENT
+        //
+
+        $scope.sortAtClient = function ($event) {
+            $event.preventDefault();
+            colName = jQuery($event.target).data('colname');
+            tableId = jQuery($event.target).data('tableid')
+
+            datasource = $scope.saleorder.saleOrderData.saleOrderDetails;
+
+            if (jQuery($event.target).hasClass('sorting_asc')) {
+                datasource.sort(function(a,b){
+                    return a[colName] > b[colName] ? 1: -1;
+                });
+            }
+            else if (jQuery($event.target).hasClass('sorting_desc') || jQuery($event.target).hasClass('sorting')) {
+                datasource.sort(function(a,b){
+                    return a[colName] < b[colName] ? 1: -1;
+                });
+            }
+        }
+
+        //
+        // ADD PRODUCT LINE DESCRIPTION FORM
+        //
+        $scope.detailExtendForm = {
+            selected_detail_extends : null,
+            event : {
+                load : function(saleOrderDetailID){
+                    $("#" + saleOrderDetailID).toggle();
+                    //$("#icon-detail-description-" + saleOrderDetailID).toggleClass("fa-minus-square-o");
+                    if ($("#icon-detail-description-" + saleOrderDetailID).hasClass('fa-plus-square-o'))
+                    {
+                        $("#icon-detail-description-" + saleOrderDetailID).removeClass('fa-plus-square-o');
+                        $("#icon-detail-description-" + saleOrderDetailID).addClass('fa-minus-square-o');
+                    }
+                    else  if ($("#icon-detail-description-" + saleOrderDetailID).hasClass('fa-minus-square-o'))
+                    {
+                        $("#icon-detail-description-" + saleOrderDetailID).removeClass('fa-minus-square-o');
+                        $("#icon-detail-description-" + saleOrderDetailID).addClass('fa-plus-square-o');
+                    }
+                },
+
+                add : function($event,saleOrderDetailID){
+                    $event.preventDefault();
+                    $scope.detailExtendForm.method.add(saleOrderDetailID);
+                },
+
+                remove : function($event,saleOrderDetailID,saleOrderDetailExtendID){
+                    $event.preventDefault();
+                    $scope.detailExtendForm.method.remove(saleOrderDetailID,saleOrderDetailExtendID);
+                },
+
+                insert : function($event,saleOrderDetailID,rowIndex){
+                    $event.preventDefault();
+                    $scope.detailExtendForm.method.insert(saleOrderDetailID,rowIndex);
+                },
+            },
+            method : {
+                add : function(saleOrderDetailID){
+                    var order_details = $scope.saleorder.saleOrderData.saleOrderDetails.filter(function(o){ return o.saleOrderDetailID == saleOrderDetailID});
+                    if (order_details[0].saleOrderDetailExtends == null)
+                    {
+                        order_details[0].saleOrderDetailExtends = [];
+                    }
+                    var arr = order_details[0].saleOrderDetailExtends;
+
+                    max_rowIndex = 1;
+                    if (arr.length > 0)
+                    {
+                        arr.sort(function(a,b){return b.rowIndex - a.rowIndex});
+                        max_rowIndex = arr[0].rowIndex + 1;
+                    }
+                    arr.push({
+                        saleOrderDetailExtendID : max_rowIndex * (-1),
+                        rowIndex : max_rowIndex,
+                    });
+                    $scope.$apply();
+                },
+                remove : function(saleOrderDetailID,saleOrderDetailExtendID){
+                    var order_details = $scope.saleorder.saleOrderData.saleOrderDetails.filter(function(o){ return o.saleOrderDetailID == saleOrderDetailID});
+                    var arr = order_details[0].saleOrderDetailExtends;
+                    isExist = false;
+                    for(j=0; j< arr.length; j++) {
+
+                        if(arr[j].saleOrderDetailExtendID == saleOrderDetailExtendID) {
+                            isExist = true;
+                            break;
+                        }
+                    }
+                    if(isExist){
+                        arr.splice(j, 1);
+                    }
+                    $scope.$apply();
+                },
+
+                insert : function(saleOrderDetailID,rowIndex){
+                    var order_details = $scope.saleorder.saleOrderData.saleOrderDetails.filter(function(o){ return o.saleOrderDetailID == saleOrderDetailID});
+                    if (order_details[0].saleOrderDetailExtends == null)
+                    {
+                        order_details[0].saleOrderDetailExtends = [];
+                    }
+                    var arr = order_details[0].saleOrderDetailExtends;
+                    for(i = 0; i< arr.length; i++)
+                    {
+                        if (arr[i].rowIndex > rowIndex)
+                        {
+                            arr[i].rowIndex = arr[i].rowIndex + 1;
+                            if (arr[i].saleOrderDetailExtendID < 0)
+                            {
+                                arr[i].saleOrderDetailExtendID = arr[i].saleOrderDetailExtendID - 1;
+                            }
+                        }
+                    }
+                    arr.push({
+                        saleOrderDetailExtendID : (rowIndex + 1) * (-1),
+                        rowIndex : rowIndex + 1,
+                    });
+                }
+            }
+
+        }
+
+        $scope.returnOrderForm = {
+            loadingPlanData : null,
+            event : {
+                load : function($event) {
+                    $event.preventDefault();
+                    jsHelper.showPopup('returnOrderFormMain',function(){});
+                },
+
+                openAddGoodsForm : function($event){
+                    $event.preventDefault();
+                    jsHelper.hidePopup('returnOrderFormMain',function(){});
+                    $scope.returnOrderForm.method.getLoadingPlan($scope.saleorder.saleOrderData.saleOrderID);
+                },
+
+                addGoods : function($event){
+                    $event.preventDefault();
+
+                    data = $scope.saleorder.saleOrderData;
+                    //add product again
+                    angular.forEach($scope.returnOrderForm.loadingPlanData,function(value,key){
+                        jQuery.each(value.loadingPlanDetails,function(i,val){
+                            if (val.isSelected)
+                            {
+                                data.saleOrderProductReturns.push({
+                                    saleOrderProductReturnID : -1,
+                                    saleOrderDetailID : val.saleOrderDetailID,
+                                    loadingPlanDetailID : val.loadingPlanDetailID,
+
+                                    loadingPlanUD : val.loadingPlanUD,
+                                    blNo : val.blNo,
+                                    containerNo : val.containerNo,
+                                    factoryOrderUD : val.factoryOrderUD,
+                                    factoryUD : val.factoryUD,
+                                    articleCode : val.articleCode,
+                                    description : val.description,
+                                    orderQnt : val.returnQnt,
+
+                                    loadingPlanID : val.loadingPlanID,
+                                    productID : val.productID,
+                                    offerLineID : val.offerLineID,
+                                    modelID : val.modelID,
+                                    materialID : val.materialID,
+                                    materialTypeID : val.materialTypeID,
+                                    materialColorID : val.materialColorID,
+                                    frameMaterialID : val.frameMaterialID,
+                                    frameMaterialColorID : val.frameMaterialColorID,
+                                    subMaterialID : val.subMaterialID,
+                                    subMaterialColorID : val.subMaterialColorID,
+                                    seatCushionID : val.seatCushionID,
+                                    backCushionID : val.backCushionID,
+                                    cushionColorID : val.cushionColorID,
+                                    fSCTypeID : val.fscTypeID,
+                                    fSCPercentID : val.fscPercentID,
+
+                                    remaingReturnQnt : val.remaingReturnQnt,
+                                });
+                            }
+                        });
+                    },data)
+
+                    //add sparepart again
+                    angular.forEach($scope.returnOrderForm.loadingPlanData,function(value,key){
+                        jQuery.each(value.loadingPlanSparepartDetails,function(i,val){
+                            if (val.isSelected)
+                            {
+                                data.saleOrderSparepartReturns.push({
+                                    saleOrderSparepartReturnID : -1,
+                                    saleOrderDetailSparepartID : val.saleOrderDetailSparepartID,
+                                    loadingPlanSparepartDetailID : val.loadingPlanSparepartDetailID,
+
+                                    loadingPlanUD : val.loadingPlanUD,
+                                    blNo : val.blNo,
+                                    containerNo : val.containerNo,
+                                    factoryOrderUD : val.factoryOrderUD,
+                                    factoryUD : val.factoryUD,
+                                    articleCode : val.articleCode,
+                                    description : val.description,
+                                    orderQnt : val.returnQnt,
+
+                                    loadingPlanID : val.loadingPlanID,
+                                    sparepartID : val.sparepartID,
+                                    offerLineSparepartID : val.offerLineSparepartID,
+                                    modelID : val.modelID,
+                                    partID : val.partID,
+                                });
+                            }
+                        });
+                    },data)
+
+                    jsHelper.hidePopup('returnOrderForm',function(){});
+                    jsHelper.showPopup('returnOrderFormMain',function(){});
+                },
+
+                cancel : function($event) {
+                    $event.preventDefault();
+                    jsHelper.hidePopup('returnOrderFormMain',function(){});
+                    jsHelper.hidePopup('returnOrderForm',function(){});
+                },
+
+                confirmReturnData : function(){
+                    if (confirm('Are you sure you want to return goods?\nSystem will automatic created order for these goods return for Eurofar client and automatic to import to warehouse')) {
+                        var data = angular.copy($scope.saleorder.saleOrderData);
+                        data.saleOrderDetails = [];
+                        data.SaleOrderExtends = [];
+                        data.SaleOrderDetailSpareparts = [];
+
+                        $scope.returnOrderForm.method.createReturnData(data);
+                    };
+                },
+            },
+            method : {
+                getLoadingPlan : function(saleOrderID){
+                    saleOrderService.getLoadingPlan(saleOrderID,
+                        function (data) {
+                            if(data.message.type == 0) {
+                                $scope.returnOrderForm.loadingPlanData = data.data;
+                                $scope.$apply();
+                                jsHelper.showPopup('returnOrderForm',function(){});
+                            }
+                            else if (data.message.type == 2)
+                            {
+                                jsHelper.processMessage(data.message);
+                                $scope.returnOrderForm.loadingPlanData = null;
+                            }
+                        },
+                        function (error) {
+                            jsHelper.showMessage('warning', error);
+                            $scope.returnOrderForm.loadingPlanData = null;
+                        }
+                    );
+                },
+
+                createReturnData : function(data){
+                    saleOrderService.createReturnData(data,
+                        function (data) {
+                            jsHelper.processMessage(data.message);
+                            if(data.message.type == 0) { //success
+                                jsHelper.hidePopup('returnOrderFormMain',function(){
+                                    //reset id
+                                    for(i = 0 ; i < $scope.saleorder.saleOrderData.saleOrderProductReturns.length; i ++)
+                                    {
+                                        $scope.saleorder.saleOrderData.saleOrderProductReturns[i].saleOrderProductReturnID = 1;
+                                    }
+                                    for(i = 0 ; i < $scope.saleorder.saleOrderData.saleOrderSparepartReturns.length; i ++)
+                                    {
+                                        $scope.saleorder.saleOrderData.saleOrderSparepartReturns[i].saleOrderSparepartReturnID = 1;
+                                    }
+                                });
+                            }
+                        },
+                        function (error) {
+                            jsHelper.showMessage('warning', error);
+                        }
+                    );
+                }
+
+
+            }
+        }
+
+        $scope.returnGoodsForm = {
+            loadingPlanData : null,
+            event : {
+                load : function($event) {
+                    $event.preventDefault();
+                    jsHelper.hidePopup('returnGoodsForm',function(){});
+                    $scope.returnGoodsForm.method.getLoadingPlan2($scope.saleorder.saleOrderData.saleOrderID);
+                },
+                cancel : function($event) {
+                    $event.preventDefault();
+                    jsHelper.hidePopup('returnGoodsForm',function(){});
+                },
+                ok : function($event){
+                    $event.preventDefault();
+                    if (confirm('Are you sure you want to return goods?\nSystem will automate to import to warehouse')) {
+                        $scope.returnGoodsForm.method.createReturnData2($scope.returnGoodsForm.loadingPlanData);
+                    };
+                },
+                selectedCont : function($event,isSelected,loadingPlanID){
+                    var loadingPlan = $scope.returnGoodsForm.loadingPlanData.filter(function(o){return o.loadingPlanID == loadingPlanID});
+                    for (i = 0; i<loadingPlan[0].loadingPlanDetail2s.length;i ++ )
+                    {
+                        if (isSelected)
+                        {
+                            loadingPlan[0].loadingPlanDetail2s[i].returnQnt = loadingPlan[0].loadingPlanDetail2s[i].remaingReturnQnt;
+                        }
+                        else
+                        {
+                            loadingPlan[0].loadingPlanDetail2s[i].returnQnt = null;
+                        }
+                    }
+                    for (i = 0; i<loadingPlan[0].loadingPlanSparepartDetail2s.length;i ++ )
+                    {
+                        if (isSelected)
+                        {
+                            loadingPlan[0].loadingPlanSparepartDetail2s[i].returnQnt = loadingPlan[0].loadingPlanSparepartDetail2s[i].remaingReturnQnt;
+                        }
+                        else
+                        {
+                            loadingPlan[0].loadingPlanSparepartDetail2s[i].returnQnt = null;
+                        }
+                    }
+                },
+            },
+            method : {
+                getLoadingPlan2 : function(saleOrderID){
+                    saleOrderService.getLoadingPlan2(saleOrderID,
+                        function (data) {
+                            if(data.message.type == 0) {
+                                $scope.returnGoodsForm.loadingPlanData = data.data;
+                                $scope.$apply();
+                                jsHelper.showPopup('returnGoodsForm',function(){});
+                            }
+                            else if (data.message.type == 2)
+                            {
+                                jsHelper.processMessage(data.message);
+                                $scope.returnGoodsForm.loadingPlanData = null;
+                            }
+                        },
+                        function (error) {
+                            jsHelper.showMessage('warning', error);
+                            $scope.returnGoodsForm.loadingPlanData = null;
+                        }
+                    );
+                },
+                createReturnData2 : function(data){
+                    saleOrderService.createReturnData2(data,
+                        function (data) {
+                            jsHelper.processMessage(data.message);
+                            if(data.message.type == 0) { //success
+                                jsHelper.hidePopup('returnGoodsForm',function(){});
+                            }
+                        },
+                        function (error) {
+                            jsHelper.showMessage('warning', error);
+                        }
+                    );
+                }
+            }
+        }
+
+
+        //LDS Client
+        $scope.formLDSClient = {
+            filters: {
+                ldsDate: '',
+                remark: ''
+            },
+            showAddLDS: function () {
+                jQuery("#frmLDSClient").modal('show');
+            },
+            openHictory: function () {
+                jQuery("#frmLDSClientHistory").modal('show');
+            },
+            saveLDSClient: function () {
+                if ($scope.formLDSClient.filters.ldsDate === null || $scope.formLDSClient.filters.ldsDate === '') {
+                    jsHelper.showMessage('warning', 'Please input LDS.');
+                    return false;
+                }
+
+                saleOrderService.saveLDSClient(
+                    $scope.saleorder.saleOrderData.saleOrderID,
+                    $scope.formLDSClient.filters.ldsDate,
+                    $scope.formLDSClient.filters.remark,
+                    function (data) {
+                        jsHelper.processMessage(data.message);
+                        debugger;
+                        if (data.message.type === 0) {
+                            jQuery("#frmLDSClient").modal('hide');
+                            location.reload();
+                        }
+                        
+                    },
+                    function (error) {
+                        jsHelper.showMessage('warning', error);
+                    });
+            }
+        };
+
+        //load form
+        $scope.load();
+    }]);
+
+    </script>
+}
+

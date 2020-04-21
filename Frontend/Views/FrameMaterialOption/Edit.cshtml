@@ -1,0 +1,265 @@
+﻿@{
+    if (ViewBag.ID == 0)
+    {
+        ViewBag.Title = "Create New Frame Material Option";
+    }
+    else
+    {
+        ViewBag.Title = "Edit Frame Material Option";
+    }
+
+    ViewBag.Module = "Frame Material Option";
+}
+<style>
+    .tilsoft-table .tilsoft-table-body {
+        max-height: none !important;
+        margin-top: 0px;
+    }
+</style>
+<form class="row" name="editForm" id="main-form">
+    <article class="col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-0" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <ul class="nav nav-tabs pull-left in">
+                    <li class="active">
+                        <a data-toggle="tab" href="#tabGeneral"> <span> General Information </span> </a>
+                    </li>
+                    <li>
+                        <a data-toggle="tab" href="#tabMaterial"> <span> Material Option </span> </a>
+                    </li>
+           
+                </ul>
+            </header>
+            <div>
+                <div class="widget-body">
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="tabGeneral">
+                            <div class="smart-form">
+                                <fieldset>
+                                    <div class="row">
+                                        <section class="col col-3">
+                                            <label class="label">Frame Material</label>
+                                            <label class="select">
+                                                <select ng-model="data.frameMaterialID" ng-change="event.onOptionChange()" ng-options="frameMaterial.frameMaterialID as frameMaterial.frameMaterialNM for frameMaterial in frameMaterials | orderBy:'+frameMaterialNM'" required>
+                                                    <option value=""></option>
+                                                </select>
+                                                <i></i>
+                                            </label>
+                                        </section>
+                                        <section class="col col-3">
+                                            <label class="label">Frame Material Color</label>
+                                            <label class="select">
+                                                <select ng-model="data.frameMaterialColorID" ng-change="event.onOptionChange()" ng-options="frameMaterialColor.frameMaterialColorID as frameMaterialColor.frameMaterialColorNM for frameMaterialColor in frameMaterialColors | orderBy:'+frameMaterialColorNM'" required>
+                                                    <option value=""></option>
+                                                </select>
+                                                <i></i>
+                                            </label>
+                                        </section>
+                                        <section class="col col-6">
+                                            <label class="label">Remark</label>
+                                            <label class="input">
+                                                <input type="text" ng-model="data.remark" />
+                                            </label>
+                                        </section>
+                                    </div>
+                                    <div class="row">
+                                        <section class="col col-3">
+                                            <label class="label">Code</label>
+                                            <label class="input">
+                                                <span class="form-control">{{data.frameMaterialOptionUD}}</span>
+                                            </label>
+                                        </section>
+                                        <section class="col col-6">
+                                            <label class="label">Name</label>
+                                            <label class="input">
+                                                <span class="form-control">{{data.frameMaterialOptionNM}}</span>
+                                            </label>
+                                        </section>
+                                    </div>
+                                    <div class="row">
+                                        <section class="col col-3">
+                                            <label class="label">Season</label>
+                                            <label class="select">
+                                                <select class="form-control" ng-model="data.season" ng-options="season.seasonValue as season.seasonText for season in seasons">
+                                                    <option value=""></option>
+                                                </select>
+                                                <i></i>
+                                            </label>
+                                        </section>
+                                        <section class="col col-2">
+                                            <label class="label">Display Index</label>
+                                            <label class="input">
+                                                <input type="text" ng-model="data.displayIndex" />
+                                            </label>
+                                        </section>
+                                        <section class="col col-2">
+                                            <label class="label">&nbsp;</label>
+                                            <label class="checkbox">
+                                                <input type="checkbox" ng-model="data.isStandard">
+                                                <i></i>Standard
+                                            </label>
+                                        </section>
+                                        <section class="col col-2">
+                                            <label class="label">&nbsp;</label>
+                                            <label class="checkbox">
+                                                <input type="checkbox" ng-model="data.isEnabled">
+                                                <i></i>Enabled
+                                            </label>
+                                        </section>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col col-6">
+                                            <section>
+                                                <label class="label">Image</label>
+                                                <div class="input-group" style="width: 100%;">
+                                                    @Html.Partial("~/Views/Shared/_Controls/_ImageBox.cshtml", new Frontend.Models.ImageBoxViewModel() { URLBinding = "data.imageFile_DisplayUrl", JSOnChangeHandler = "event.changeImage", JSONRemoveHandler = "event.removeImage" })
+                                                </div>
+                                            </section>
+                                        </div>
+                                        <div class="col col-6">
+                                            <section>
+                                                <label class="label">Make this frame option available for the below product group</label>
+                                                <div class="row">
+                                                    <div class="col col-8">
+                                                        <label class="checkbox" ng-repeat="group in data.productGroups | orderBy:'+productGroupNM'">
+                                                            <input type="checkbox" ng-model="group.isEnabled">
+                                                            <i></i>{{group.productGroupNM}}
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </section>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="tabMaterial">
+                            <div class="smart-form">
+                                <fieldset style="padding: 0px;">
+                                    <section>
+                                        <label class="input">
+                                            <input type="text" placeholder="type at least 3 chars to search material option" id="quicksearchBoxMaterial" ng-keyup="quicksearchMaterial.event.searchBoxKeyUp($event)" autocomplete="off" />
+                                            <i class="icon-append fa fa-search"></i>
+                                        </label>
+                                        <div id="material-popup" class="popup-container-2">
+                                            <div style="float: right; margin-bottom: 8px;">
+                                                <a ng-click="quicksearchMaterial.event.close($event)" class="btn btn-primary btn-xs" href="javascript:void(0);"><i class="fa fa-remove"></i> Close</a>
+                                            </div>
+                                            <div class="clear"></div>
+                                            <div id="grdMaterialSearchResult" class="tilsoft-table-wrapper">
+                                                <div class="tilsoft-table">
+                                                    <div class="tilsoft-table-header" style="width: 660px;">
+                                                        <div style="width: 60px;"></div>
+                                                        <div style="width: 100px;">Image</div>
+                                                        <div style="width: 100px;">Code</div>
+                                                        <div>Name</div>
+                                                    </div>
+                                                    <div class="tilsoft-table-body" style="width: 660px; margin-top: 50px">
+                                                        <table>
+                                                            <tr ng-repeat="item in quicksearchMaterial.data | orderBy:'+materialOptionNM'">
+                                                                <td style="width: 60px; text-align: center;">
+                                                                    <a ng-click="quicksearchMaterial.event.ok($event, item.materialOptionID)" class="btn btn-primary btn-xs font-11" href="javascript:void(0);"><i class="fa fa-plus"></i> Add</a>
+                                                                </td>
+                                                                <td style="width: 100px; text-align: center; vertical-align: middle;">
+                                                                    <img style="width: 95%;" ng-src="{{item.imageFile_DisplayUrl}}" />
+                                                                </td>
+                                                                <td style="width: 100px;">{{item.materialOptionUD}}</td>
+                                                                <td>{{item.materialOptionNM}}</td>
+                                                            </tr>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+                                </fieldset>
+                                <fieldset style="padding: 0px; border-top: none;">
+                                    <div id="grdMaterial" class="tilsoft-table-wrapper">
+                                        <div class="tilsoft-table">
+                                            <div class="tilsoft-table-body" style="width: 100%; overflow-y: hidden; height: auto; min-height: 100px;">
+                                                <table>
+                                                    <tr>
+                                                        <th style="width: 80px;"></th>
+                                                        <th style="width: 100px;">Image</th>
+                                                        <th style="width: 100px;">Code</th>
+                                                        <th>Name</th>
+                                                    </tr>
+                                                    <tr ng-repeat="item in data.materialOptions">
+                                                        <td style="text-align: center; width: 80px;">
+                                                            <a class="btn btn-danger btn-xs font-11" href="javascript:void(0);" ng-click="event.removeMaterial($event, item.frameMaterialOptionMaterialOptionID)"><i class="fa fa-times-circle"></i> Remove</a>
+                                                        </td>
+                                                        <td style="width: 100px; text-align: center; vertical-align: middle;"><img style="width: 95%;" ng-src="{{item.imageFile_DisplayUrl}}" /></td>
+                                                        <td style="width: 100px; text-align: center;">{{item.materialOptionUD}}</td>
+                                                        <td style="">{{item.materialOptionNM}}</td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+                        <div class="note">
+                            <div ng-show="(data.createdBy && data.creatorName)">
+                                <strong>Created Date</strong>
+                                <a ng-if="data.createdBy" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{data.createdBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                    <i class="fa fa-user"></i> {{data.creatorName}}
+                                </a>
+                                on {{data.createdDate}}
+                            </div>
+                            <br />
+                            <div ng-show="(data.updatedBy && data.updatorName)">
+                                <strong>Updated By</strong>
+                                <a ng-if="data.updatedBy" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{data.updatedBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                    <i class="fa fa-user"></i> {{data.updatorName}}
+                                </a>
+                                on {{data.updatedDate}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "FrameMaterialOption")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="event.update($event)"><i class="fa fa-save"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default@(ViewBag.ID==0?" disabled":"") @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="Delete" style="color: #ff0000;" ng-click="event.delete($event)"><i class="fa fa-times"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default disabled" title="Print"><i class="fa fa-print"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default disabled" title="Approve"><i class="fa fa-thumbs-o-up"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default disabled" title="Reset Approval status"><i class="fa fa-thumbs-o-down"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script src="~/Angular/app/jsonService.js"></script>
+    <script type="text/javascript">
+        jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/framematerialoption/';
+        jsonService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+        jsonService.supportServiceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/support/';
+        var context = {
+            id: @ViewBag.ID,
+            errMsg: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED',
+            backURL: '@Url.Action("Index", "FrameMaterialOption")',
+            refreshURL: '@Url.Action("Edit", "FrameMaterialOption", new { id = UrlParameter.Optional })/'
+        }
+    </script>
+    <script src="~/Views/FrameMaterialOption/service.js"></script>
+    <script src="~/Views/FrameMaterialOption/edit.js"></script>
+}
+

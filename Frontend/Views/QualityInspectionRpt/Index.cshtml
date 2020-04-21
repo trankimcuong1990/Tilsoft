@@ -1,0 +1,689 @@
+﻿@{
+    if (ViewBag.WorkCenterNM == "WEAVING")
+    {
+        ViewBag.WorkCenterNM = "Weaving";
+    }
+
+    ViewBag.Title = ViewBag.WorkCenterNM + " Quality Inspection";
+    ViewBag.Module = ViewBag.WorkCenterNM + " Quality Inspection";
+
+    var guid = System.Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+
+    var id = ViewBag.ID;
+    var workOrderID = ViewBag.WorkOrderID;
+    var clientID = ViewBag.ClientID;
+    var productionItemID = ViewBag.ProductionItemID;
+    var workCenterNM = ViewBag.WorkCenterNM;
+}
+
+<style>
+    input[type="text"].form-control {
+        font-family: Arial;
+        height: 30px !important;
+    }
+</style>
+
+<form name="editForm" class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>General @ViewBag.WorkCenterNM Quality Inspection</h2>
+            </header>
+            <div>
+                <div class="jarviswidget-editbox"></div>
+                <div class="widget-body">
+                    <div class="smart-form">
+                        <div class="row">
+                            <section class="col col-sm-6">
+                                <a href="javascript:void(0)" class="btn btn-default btn-sm" title="Configure Quality Inspection to display Category" ng-click="event.openConfigure()">
+                                    <i class="fa fa-cogs"></i> Configure
+                                </a>
+                            </section>
+                            <section class="col col-sm-6" style="text-align: right">
+                                <a href="javascript:void(0)" class="btn btn-default btn-sm" title="Update Quality Inspection" ng-click="event.update()">
+                                    <i class="fa fa fa-floppy-o"></i> Save
+                                </a>
+                                <a href="javascript:void(0)" class="btn btn-default btn-sm" title="Delete Quality Inspection" ng-click="event.delete(editFormData.qualityInspectionID, editFormData.workOrderID, editFormData.clientID, editFormData.productionItemID, @ViewBag.WorkCenterNM)" ng-if="editFormData.qualityInspectionID > 0">
+                                    <i class="fa fa fa-times"></i> Delete
+                                </a>
+                                <a href="javascript:void(0)" class="btn btn-default btn-sm" title="Clear Quality Inspection" ng-click="event.clear()">
+                                    <i class="fa fa fa-ban"></i> Clear
+                                </a>
+                            </section>
+                        </div>
+                        <div class="row">
+                            <section class="col col-sm-2">
+                                <label class="label">
+                                    Quality Inspection Type
+                                    <a href="javascript:void(0)" class="btn btn-primary btn-xs font-11" style="display: inline-block" ng-click="event.openType()">
+                                        <i class="fa fa-plus"></i>
+                                    </a>
+                                </label>
+                                <label class="input">
+                                    <select avs-select ng-data-source="editFormData.qualityInspectionTypeID">
+                                        <option value=""></option>
+                                        <option ng-repeat="item in supportQIType" value="{{item.qualityInspectionTypeID}}">{{item.qualityInspectionTypeNM}}</option>
+                                    </select>
+                                </label>
+                            </section>
+
+                            <section class="col col-sm-2">
+                                <label class="label">Date Of @ViewBag.WorkCenterNM</label>
+                                <label class="input-group">
+                                    <input type="text" class="form-control" style="height: 30px" avs-calendar ng-data-source="editFormData.workCenterWorkingDate">
+                                    <span class="input-group-addon">
+                                        <i class="fa fa-calendar"></i>
+                                    </span>
+                                </label>
+                            </section>
+
+                            <section class="col col-sm-2">
+                                <label class="label">QC's Name</label>
+                                <label class="input-group">
+                                    <input type="text" class="form-control" style="height: 30px" avs-remote-auto-complete ng-request-param="apiEmployee" ng-init-param="editFormData.qcName" ng-model="editFormData.qcName" ng-item-value="itemEmployee" ng-item-selected="event.selectQCName(itemEmployee)" data-method="POST" data-format-function="formatData">
+                                    <span class="input-group-addon">
+                                        <i class="fa fa-search"></i>
+                                    </span>
+                                </label>
+                            </section>
+
+                            <section class="col col-sm-2">
+                                <label class="label">Date Inspection</label>
+                                <label class="input-group">
+                                    <input type="text" class="form-control" style="height: 30px" avs-calendar ng-data-source="editFormData.inspectionDate">
+                                    <span class="input-group-addon">
+                                        <i class="fa fa-calendar"></i>
+                                    </span>
+                                </label>
+                            </section>
+
+                            <section class="col col-sm-2">
+                                <label class="label">Supplier</label>
+                                <label class="input">
+                                    <select avs-select ng-data-source="editFormData.supplierID">
+                                        <option value=""></option>
+                                        <option ng-repeat="item in supportSupplier" value="{{item.subSupplierID}}">{{item.subSupplierFullNM}}</option>
+                                    </select>
+                                </label>
+                            </section>
+
+                            <section class="col col-sm-2">
+                                <label class="label">Received Date</label>
+                                <label class="input-group">
+                                    <input type="text" class="form-control" style="height: 30px" avs-calendar ng-data-source="editFormData.receivedDate">
+                                    <span class="input-group-addon">
+                                        <i class="fa fa-calendar"></i>
+                                    </span>
+                                </label>
+                            </section>
+                        </div>
+
+                        <div class="row">
+                            <section class="col col-sm-2">
+                                <label class="label">Work Order</label>
+                                <label class="input">
+                                    <span class="form-control">{{editFormData.workOrderUD}}</span>
+                                </label>
+                            </section>
+
+                            <section class="col col-sm-2">
+                                <label class="label">Code Of Client</label>
+                                <label class="input">
+                                    <span class="form-control">{{editFormData.clientUD}}</span>
+                                </label>
+                            </section>
+
+                            <section class="col col-sm-2">
+                                <label class="label">Product</label>
+                                <label class="input">
+                                    <span class="form-control">{{editFormData.productionItemUD}}</span>
+                                </label>
+                            </section>
+
+                            <section class="col col-sm-6">
+                                <label class="label">&nbsp;</label>
+                                <label class="input">
+                                    <span class="form-control">{{editFormData.productionItemNM}}</span>
+                                </label>
+                            </section>
+                        </div>
+
+                        <div class="row">
+                            <section class="col col-sm-2">
+                                <label class="label">Quality Of Repairing Or @ViewBag.WorkCenterNM</label>
+                                <label class="input">
+                                    <input id="workCenterQuantity" type="text" class="form-control" style="text-align: right" avs-number ng-data-source="editFormData.workCenterQuantity" ng-decimal="2">
+                                </label>
+                            </section>
+
+                            <section class="col col-sm-2">
+                                <label class="label">
+                                    Corrective Action
+                                    <a href="javascript:void(0)" class="btn btn-primary btn-xs font-11" style="display: inline-block" ng-click="event.openCorrectAction()">
+                                        <i class="fa fa-plus"></i>
+                                    </a>
+                                </label>
+                                <label class="input">
+                                    <select avs-select ng-data-source="editFormData.qualityInspectionCorrectActionID">
+                                        <option value=""></option>
+                                        <option ng-repeat="item in supportQICorrectAction" value="{{item.qualityInspectionCorrectActionID}}">{{item.qualityInspectionCorrectActionNM}}</option>
+                                    </select>
+                                </label>
+                            </section>
+
+                            <section class="col col-sm-2">
+                                <label class="label">Team Leader Of @ViewBag.WorkCenterNM</label>
+                                <label class="input-group">
+                                    <input type="text" class="form-control" style="height: 30px" avs-remote-auto-complete ng-request-param="apiEmployee" ng-init-param="editFormData.teamLeaderName" ng-model="editFormData.teamLeaderName" ng-item-value="itemEmployee" ng-item-selected="event.selectTeamLeaderName(itemEmployee)" data-method="POST" data-format-function="formatData">
+                                    <span class="input-group-addon">
+                                        <i class="fa fa-search"></i>
+                                    </span>
+                                </label>
+                            </section>
+
+                            <section class="col col-sm-2">
+                                <label class="label">Production Supervisor Of @ViewBag.WorkCenterNM</label>
+                                <label class="input-group">
+                                    <input type="text" class="form-control" style="height: 30px" avs-remote-auto-complete ng-request-param="apiEmployee" ng-init-param="editFormData.productionSupervisorName" ng-model="editFormData.productionSupervisorName" ng-item-value="itemEmployee" ng-item-selected="event.selectProductionSupervisorName(itemEmployee)" data-method="POST" data-format-function="formatData">
+                                    <span class="input-group-addon">
+                                        <i class="fa fa-search"></i>
+                                    </span>
+                                </label>
+                            </section>
+
+                            <section class="col col-sm-2">
+                                <label class="label">Color Wicker</label>
+                                <label class="input">
+                                    <select avs-select ng-data-source="editFormData.materialColorID">
+                                        <option value=""></option>
+                                        <option ng-repeat="item in supportWickerColor" value="{{item.materialColorID}}">{{item.materialColorNM}}</option>
+                                    </select>
+                                </label>
+                            </section>
+
+                            <section class="col col-sm-2">
+                                <label class="label">@ViewBag.WorkCenterNM Method</label>
+                                <label class="input">
+                                    <input type="text" class="form-control" ng-model="editFormData.workCenterMethod">
+                                </label>
+                            </section>
+                        </div>
+                        <div class="row" ng-repeat="subItem in editFormData.qualityInspectionCategories">
+                            <section class="col col-sm-10">
+                                <label class="label">
+                                    {{subItem.description}}
+                                    <a href="javascript:void(0)" class="btn btn-primary btn-xs font-11" ng-click="event.addImage(subItem)">
+                                        <i class="fa fa-plus"></i>
+                                    </a>
+                                </label>
+                                <label class="input-group" ng-repeat="wItem in subItem.qualityInpsectionCategoryImages" ng-style="{'margin-top': subItem.qualityInpsectionCategoryImages.indexOf(wItem) == 1 ? '3px' : '0px'}">
+                                    <span class="form-control">
+                                        <a href="{{wItem.fileLocation}}" target="_blank">
+                                            {{wItem.friendlyName}}
+                                        </a>
+                                    </span>
+                                    <span class="btn btn-default btn-sm input-group-addon" ng-click="event.removeImage(wItem.qualityInspectionCategoryImageID, subItem)">
+                                        <i class="fa fa-times"></i>
+                                    </span>
+                                    <span class="btn btn-default btn-sm input-group-addon" ng-click="event.changeImage(wItem.qualityInspectionCategoryImageID, subItem)">
+                                        <i class="fa fa-pencil"></i>
+                                    </span>
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label class="label">Result</label>
+                                <label class="input">
+                                    <select class="form-control" ng-model="subItem.qualityInspectionResultID" ng-options="item.qualityInspectionResultID as item.qualityInspectionResultNM for item in supportResult">
+                                        <option value=""></option>
+                                    </select>
+                                </label>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+<form name="searchForm" class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-search"></i>
+                </span>
+                <h2>Search @ViewBag.WorkCenterNM Quality Inspection</h2>
+            </header>
+            <div>
+                <div class="widget-body">
+                    <div avs-scroll grid-handler="gridHandler" class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header">
+                                <div style="width: 80px">Total<br><b>0</b></div>
+                                <div style="width: 120px">Date Inspection</div>
+                                <div style="width: 250px">QC's Name</div>
+                                <div style="width: 200px">Quality Inspection<br>Type</div>
+                                <div style="width: 120px">Corrective Action</div>
+                                <div>Approve Information</div>
+                            </div>
+                            <div class="tilsoft-table-body">
+                                <table>
+                                    <tbody>
+                                        <tr ng-repeat="item in searchFormData">
+                                            <td style="width: 79px">
+                                                <a href="javascript:void(0)" class="btn btn-danger btn-xs font-11" style="width: 68px" ng-click="event.delete(item.qualityInspectionID, item.workOrderID, item.clientID, item.productionItemID, @ViewBag.WorkCenterNM)">
+                                                    <i class="fa fa-times"></i> Delete
+                                                </a>
+                                            </td>
+                                            <td style="width: 120px; text-align: center">
+                                                <a href="javascript:void(0)" ng-click="event.edit(item.qualityInspectionID)">
+                                                    {{item.inspectionDate}}
+                                                </a>
+                                            </td>
+                                            <td style="width: 250px">
+                                                <a href="javascript:void(0)" ng-if="item.qcid != null">
+                                                    <i class="fa fa-user"></i> {{item.qcName}}
+                                                </a>
+                                            </td>
+                                            <td style="width: 200px">
+                                                {{item.qualityInspectionTypeNM}}
+
+                                            </td>
+                                            <td style="width: 120px; text-align: center">
+                                                {{item.qualityInspectionCorrectActionNM}}
+                                            </td>
+                                            <td>
+                                                <label ng-if="item.approvedBy != null">
+                                                    {{item.approveName}} on {{item.approvedDate}}
+                                                </label>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+<form id="frmDefaultSetting" aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" class="modal fade" data-backdrop="static">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <a href="javascript:void(0)" aria-hidden="true" data-dismiss="modal" class="close" ng-click="event.closeConfigure()">x</a>
+                <h5 id="myModalLabel" class="modal-title">
+                    <i class="fa fa-cogs"></i> Quality Inspection Default Setting
+                </h5>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                        <div class="jarviswidget" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+                            <header>
+                                <span class="widget-icon">
+                                    <i class="fa fa-database"></i>
+                                </span>
+                                <h2>General Quality Inspection Default Setting</h2>
+                            </header>
+                            <div>
+                                <div class="jarviswidget-editbox"></div>
+                                <div class="widget-body">
+                                    <div class="smart-form">
+                                        <div class="row">
+                                            <section class="col col-sm-3">
+                                                <label class="label">Configure Group</label>
+                                                <label class="input">
+                                                    <select avs-select ng-data-source="editQIDefaultSettingData.qualityInspectionDefaultSection">
+                                                        <option></option>
+                                                        <option ng-repeat="item in supportWorkCenter" value="{{item.workCenterNM}}">{{item.workCenterNM}}</option>
+                                                    </select>
+                                                </label>
+                                            </section>
+                                            <section class="col col-sm-9">
+                                                <label class="label">Configure Description</label>
+                                                <label class="input">
+                                                    <input type="text" class="form-control" ng-model="editQIDefaultSettingData.description">
+                                                </label>
+                                            </section>
+                                        </div>
+                                        <div class="row">
+                                            <section class="col col-sm-12" style="text-align: right">
+                                                <a href="javascript:void(0)" class="btn btn-default btn-sm" ng-click="event.clearConfigure()">
+                                                    <i class="fa fa-ban"></i> Clear
+                                                </a>
+                                            </section>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                        <div class="jarviswidget jarviswidget-color" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+                            <header>
+                                <span class="widget-icon">
+                                    <i class="fa fa-search"></i>
+                                </span>
+                                <h2>Search Quality Inspection Default Setting</h2>
+                            </header>
+                            <div>
+                                <div class="widget-body">
+                                    <div class="tilsoft-table-wrapper">
+                                        <div class="tilsoft-table">
+                                            <div class="tilsoft-table-body" style="margin-top: 0px">
+                                                <table>
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width: 80px">Total<br><b>{{searchQIDefaultSettingData.length}}</b></th>
+                                                            <th style="width: 150px">Configure Group</th>
+                                                            <th>Configure Description</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr ng-repeat="item in searchQIDefaultSettingData">
+                                                            <td style="text-align: center">
+                                                                <a href="javascript:void(0)" class="btn btn-danger btn-xs font-11" style="width: 70px" ng-click="event.deleteConfigure(item)">
+                                                                    <i class="fa fa-times"></i> Delete
+                                                                </a>
+                                                            </td>
+                                                            <td>
+                                                                <span class="form-control">
+                                                                    {{item.qualityInspectionDefaultSection}}
+                                                                </span>
+                                                            </td>
+                                                            <td>
+                                                                <span class="form-control">
+                                                                    <a href="javascript:void(0)" ng-click="event.editConfigure(item)">
+                                                                        {{item.description}}
+                                                                    </a>
+                                                                </span>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+                <div class="row">
+                    <section class="col col-sm-12" style="text-align: right">
+                        <a href="javascript:void(0)" class="btn btn-default btn-sm" ng-click="event.updateConfigure()">
+                            <i class="fa fa fa-floppy-o"></i> Save
+                        </a>
+                        <a href="javascript:void(0)" class="btn btn-default btn-sm" ng-click="event.closeConfigure()">
+                            <i class="fa fa fa-times"></i> Close
+                        </a>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<form id="frmTypeSetting" aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" class="modal fade" data-backdrop="static">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <a href="javascript:void(0)" aria-hidden="true" data-dismiss="modal" class="close" ng-click="event.closeType()">x</a>
+                <h5 id="myModalLabel" class="modal-title">
+                    <i class="fa fa-list-ul"></i> Quality Inspection Type
+                </h5>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                        <div class="jarviswidget" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+                            <header>
+                                <span class="widget-icon">
+                                    <i class="fa fa-database"></i>
+                                </span>
+                                <h2>General Quality Inspection Type Setting</h2>
+                            </header>
+                            <div>
+                                <div class="jarviswidget-editbox"></div>
+                                <div class="widget-body">
+                                    <div class="smart-form">
+                                        <div class="row">
+                                            <section class="col col-sm-3">
+                                                <label class="label">Type Code</label>
+                                                <label class="input">
+                                                    <input type="text" class="form-control" ng-model="editQITypeData.qualityInspectionTypeUD" ng-readonly="editQITypeData.qualityInspectionTypeID > 0">
+                                                </label>
+                                            </section>
+                                            <section class="col col-sm-9">
+                                                <label class="label">Type Name</label>
+                                                <label class="input">
+                                                    <input type="text" class="form-control" ng-model="editQITypeData.qualityInspectionTypeNM">
+                                                </label>
+                                            </section>
+                                        </div>
+                                        <div class="row">
+                                            <section class="col col-sm-12" style="text-align: right">
+                                                <a href="javascript:void(0)" class="btn btn-default btn-sm" ng-click="event.clearType()">
+                                                    <i class="fa fa-ban"></i> Clear
+                                                </a>
+                                            </section>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                        <div class="jarviswidget jarviswidget-color" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+                            <header>
+                                <span class="widget-icon">
+                                    <i class="fa fa-search"></i>
+                                </span>
+                                <h2>Search Quality Inspection Type Setting</h2>
+                            </header>
+                            <div>
+                                <div class="widget-body">
+                                    <div class="tilsoft-table-wrapper">
+                                        <div class="tilsoft-table">
+                                            <div class="tilsoft-table-body" style="margin-top: 0px">
+                                                <table>
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width: 80px">Total<br><b>{{searchQITypeData.length}}</b></th>
+                                                            <th style="width: 150px">Code</th>
+                                                            <th>Name</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr ng-repeat="item in searchQITypeData">
+                                                            <td style="text-align: center">
+                                                                <a href="javascript:void(0)" class="btn btn-danger btn-xs font-11" style="width: 70px; margin-top: 3px" ng-click="event.deleteType(item)">
+                                                                    <i class="fa fa-times"></i> Delete
+                                                                </a>
+                                                            </td>
+                                                            <td>
+                                                                <span class="form-control">
+                                                                    <a href="javascript:void(0)" ng-click="event.editType(item)">
+                                                                        {{item.qualityInspectionTypeUD}}
+                                                                    </a>
+                                                                </span>
+                                                            </td>
+                                                            <td>
+                                                                <span class="form-control">{{item.qualityInspectionTypeNM}}</span>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+                <div class="row">
+                    <section class="col col-sm-12" style="text-align: right">
+                        <a href="javascript:void(0)" class="btn btn-default btn-sm" ng-click="event.updateType()">
+                            <i class="fa fa fa-floppy-o"></i> Save
+                        </a>
+                        <a href="javascript:void(0)" class="btn btn-default btn-sm" ng-click="event.closeType()">
+                            <i class="fa fa fa-times"></i> Close
+                        </a>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<form id="frmCorrectActionSetting" aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" class="modal fade" data-backdrop="static">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <a href="javascript:void(0)" aria-hidden="true" data-dismiss="modal" class="close" ng-click="event.closeCorrectAction()">x</a>
+                <h5 id="myModalLabel" class="modal-title">
+                    <i class="fa fa-list-ul"></i> Quality Inspection Correct Action
+                </h5>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                        <div class="jarviswidget" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+                            <header>
+                                <span class="widget-icon">
+                                    <i class="fa fa-database"></i>
+                                </span>
+                                <h2>General Quality Inspection Correct Action Setting</h2>
+                            </header>
+                            <div>
+                                <div class="jarviswidget-editbox"></div>
+                                <div class="widget-body">
+                                    <div class="smart-form">
+                                        <div class="row">
+                                            <section class="col col-sm-3">
+                                                <label class="label">Correct Action Code</label>
+                                                <label class="input">
+                                                    <input type="text" class="form-control" ng-model="editQICorrectActionData.qualityInspectionCorrectActionUD" ng-readonly="editQICorrectActionData.qualityInspectionCorrectActionID > 0">
+                                                </label>
+                                            </section>
+                                            <section class="col col-sm-9">
+                                                <label class="label">Correct Action Name</label>
+                                                <label class="input">
+                                                    <input type="text" class="form-control" ng-model="editQICorrectActionData.qualityInspectionCorrectActionNM">
+                                                </label>
+                                            </section>
+                                        </div>
+                                        <div class="row">
+                                            <section class="col col-sm-12" style="text-align: right">
+                                                <a href="javascript:void(0)" class="btn btn-default btn-sm" ng-click="event.clearCorrectAction()">
+                                                    <i class="fa fa-ban"></i> Clear
+                                                </a>
+                                            </section>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                        <div class="jarviswidget jarviswidget-color" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+                            <header>
+                                <span class="widget-icon">
+                                    <i class="fa fa-search"></i>
+                                </span>
+                                <h2>Search Quality Inspection Correct Action Setting</h2>
+                            </header>
+                            <div>
+                                <div class="widget-body">
+                                    <div class="tilsoft-table-wrapper">
+                                        <div class="tilsoft-table">
+                                            <div class="tilsoft-table-body" style="margin-top: 0px">
+                                                <table>
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width: 80px">Total<br><b>{{searchQICorrectActionData.length}}</b></th>
+                                                            <th style="width: 150px">Code</th>
+                                                            <th>Name</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr ng-repeat="item in searchQICorrectActionData">
+                                                            <td style="text-align: center">
+                                                                <a href="javascript:void(0)" class="btn btn-danger btn-xs font-11" style="width: 70px; margin-top: 3px" ng-click="event.deleteCorrectAction(item)">
+                                                                    <i class="fa fa-times"></i> Delete
+                                                                </a>
+                                                            </td>
+                                                            <td>
+                                                                <span class="form-control">
+                                                                    <a href="javascript:void(0)" ng-click="event.editCorrectAction(item)">
+                                                                        {{item.qualityInspectionCorrectActionUD}}
+                                                                    </a>
+                                                                </span>
+                                                            </td>
+                                                            <td>
+                                                                <span class="form-control">{{item.qualityInspectionCorrectActionNM}}</span>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+                <div class="row">
+                    <section class="col col-sm-12" style="text-align: right">
+                        <a href="javascript:void(0)" class="btn btn-default btn-sm" ng-click="event.updateCorrectAction()">
+                            <i class="fa fa fa-floppy-o"></i> Save
+                        </a>
+                        <a href="javascript:void(0)" class="btn btn-default btn-sm" ng-click="event.closeCorrectAction()">
+                            <i class="fa fa fa-times"></i> Close
+                        </a>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section FormAction{
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default" title="Return Work Order">
+                <i class="fa fa-arrow-left"></i>
+            </a>
+        </li>
+    </ul>
+}
+
+@section pagejs{
+    <script type="text/javascript">
+        var context = {
+            id: '@id',
+            serviceUrl: '@(serviceRoot)/api/qualityInspectionRpt/',
+            token: '@token',
+            workOrderID: '@workOrderID',
+            workCenterNM: '@workCenterNM',
+            productionItemID: '@productionItemID',
+            clientID: '@clientID',
+            refreshUrl: '@Url.Action("Index", "QualityInspectionRpt")/',
+            supportServiceUrl: '@(serviceRoot)/api/support/'
+        }
+    </script>
+    <script type="text/javascript" src="~/Views/QualityInspectionRpt/index.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Views/QualityInspectionRpt/service.js?v=@guid"></script>
+}

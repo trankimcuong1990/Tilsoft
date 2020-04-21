@@ -1,0 +1,419 @@
+﻿@{
+    ViewBag.Title = ViewBag.ID == 0 ? "Create Transport CI Charge" : "Edit Transport CI Charge";
+
+    ViewBag.Module = "TransportCICharge";
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var serviceReportRoot = System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"];
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+
+}
+<form name="editForm" class="row">
+
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-database"></i> </span>
+                <h2>General Information </h2>
+            </header>
+
+            <div class="widget-body">
+                <div class="smart-form">
+                    <fieldset>
+                        <div class="row">
+                            <section class="col col-lg-12" ng-show="editData.transportCIChargeID == 0">
+                                <label class="label">
+                                    <strong>Client </strong>
+                                    <em class="note note-error" ng-show="editForm.clientNM.$error.required">(Required)</em>
+                                </label>
+                                <label class="input" ng-class="{'state-error': editForm.clientNM.$error.required}">
+                                    <input type="text" id="inClientNM" name="clientNM" placeholder="Please input client name" autocomplete="off" required ng-model="editData.clientNM" ng-keyup="quickSearchClient.event.searchBoxUp()">
+                                    <input type="hidden" ng-model="editData.clientID">
+                                    <i class="icon-append fa fa-search"></i>
+                                </label>
+                                <div id="clientPopup" class="popup-container-2">
+                                    <div style="float: right; margin-bottom: 8px;">
+                                        <a class="btn btn-default btn-xs" href="javascript:void(0);" ng-click="quickSearchClient.event.close()"><i class="fa fa-remove"></i> Close</a>
+                                    </div>
+                                    <div class="clear"></div>
+                                    <div id="quickSearchClientTable" class="tilsoft-table-wrapper" style="width: 98%;">
+                                        <div class="tilsoft-table">
+                                            <div class="tilsoft-table-header">
+                                                <div style="width: 80px;"></div>
+                                                <div style="width: 100px;">Code</div>
+                                                <div>Name</div>
+                                            </div>
+                                            <div class="tilsoft-table-body">
+                                                <table>
+                                                    <tbody>
+                                                        <tr ng-repeat="item in quickSearchClient.data">
+                                                            <td style="width: 79px;">
+                                                                <a ng-click="quickSearchClient.event.ok(item.clientID)" class="btn btn-primary btn-xs" href="javascript:void(0);"><i class="fa fa-check"></i> Select</a>
+                                                            </td>
+                                                            <td style="width: 100px;">{{item.clientUD}}</td>
+                                                            <td>{{item.clientNM}}</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                            <section class="col col-lg-2" ng-show="editData.transportCIChargeID > 0">
+                                <label class="label">
+                                    <strong>Client Code</strong>
+                                </label>
+                                <label class="input">
+                                    <span class="form-control">{{editData.clientUD}}</span>
+                                </label>
+                            </section>
+                            <section class="col col-lg-10" ng-show="editData.transportCIChargeID > 0">
+                                <label class="label">
+                                    <strong>Client Name</strong>
+                                </label>
+                                <label class="input">
+                                    <span class="form-control">{{editData.clientNM}}</span>
+                                </label>
+                            </section>
+                            <section class="col col-lg-12" ng-show="editData.transportCIChargeID == 0">
+                                <label class="label">
+                                    <strong>Booking </strong>
+                                    <em class="note note-error" ng-show="editForm.bookingUD.$error.required">(Required)</em>
+                                </label>
+                                <label class="input" ng-class="{'state-error': editForm.bookingUD.$error.required}">
+                                    <input type="text" id="inBookingUD" name="bookingUD" placeholder="Please input booking code" autocomplete="off" required ng-model="editData.bookingUD" ng-keyup="quickSearchBooking.event.searchBoxKeyUp()">
+                                    <input type="hidden" ng-model="editData.bookingID">
+                                    <input type="hidden" ng-model="editData.blNo">
+                                    <i class="icon-append fa fa-search"></i>
+                                </label>
+                                <div id="booking-popup" class="popup-container-2" style="width: 89%">
+                                    <div style="float: right; margin-bottom: 8px;">
+                                        <a ng-click="quickSearchBooking.event.close($event, true)" class="btn btn-primary btn-xs" href="javascript:void(0);"><i class="fa fa-remove"></i> Close</a>
+                                    </div>
+                                    <div class="clear"></div>
+                                    <div id="quickSearchBookingTable" class="tilsoft-table-wrapper">
+                                        <div class="tilsoft-table">
+                                            <div class="tilsoft-table-header" style="width: 360px;">
+                                                <div style="width: 75px;"></div>
+                                                <div style="width: 150px;">Booking UD</div>
+                                                <div style="display: none;"></div>
+                                                <div style="display: none;"></div>
+                                                <div style="display: none;"></div>
+                                                <div>BL No</div>
+                                            </div>
+                                            <div class="tilsoft-table-body" style="width: 360px;">
+                                                <table>
+                                                    <tr ng-repeat="item in quickSearchBooking.data">
+                                                        <td style="width: 74px; text-align: center;"><a ng-click="quickSearchBooking.event.ok($event, item.bookingID)" class="btn btn-primary btn-xs" href="javascript:void(0);"><i class="fa fa-check"></i> Select</a></td>
+                                                        <td style="width: 150px;">{{item.bookingUD}}</td>
+                                                        <td style="display: none;">{{item.settingValue}}</td>
+                                                        <td style="display: none;">{{item.etd}}</td>
+                                                        <td style="display: none;">{{item.polid}}</td>
+                                                        <td>{{item.blNo}}</td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                            <section class="col col-lg-2" ng-show="editData.transportCIChargeID > 0">
+                                <label class="label">
+                                    <strong>Booking Code</strong>
+                                </label>
+                                <label class="input">
+                                    <span class="form-control">{{editData.bookingUD}}</span>
+                                </label>
+                            </section>
+                            <section class="col col-lg-8" ng-show="editData.transportCIChargeID > 0">
+                                <label class="label">
+                                    <strong>B/L Nr.</strong>
+                                </label>
+                                <label class="input">
+                                    <span class="form-control">{{editData.blNo}}</span>
+                                </label>
+                            </section>
+                            <section class="col col-lg-2" ng-show="editData.transportCIChargeID > 0">
+                                <label class="label">
+                                    <strong>ETD</strong>
+                                </label>
+                                <label class="input">
+                                    <span class="form-control">
+                                        <i class="fa fa-calendar"></i> {{editData.etd}}
+                                    </span>
+                                </label>
+                            </section>
+                            <section class="col col-lg-10" ng-show="editData.transportCIChargeID == 0">
+                                <label class="label">
+                                    <strong>B/L nr.</strong>
+                                </label>
+                                <label class="input">
+                                    <span class="form-control">{{editData.blNo}}</span>
+                                </label>
+                            </section>
+                            <section class="col col-lg-2" ng-show="editData.transportCIChargeID == 0">
+                                <label class="label">
+                                    <strong>ETD</strong>
+                                </label>
+                                <label class="input">
+                                    <span class="form-control">
+                                        <i class="fa fa-calendar"></i> {{editData.etd}}
+                                    </span>
+                                </label>
+                            </section>
+                            <section class="col col-lg-2">
+                                <label class="label">
+                                    <strong>Eurofar Invoice nr. </strong>
+                                    <em class="note note-error" ng-show="editForm.eurofarInvoiceNo.$error.required">(Required)</em>
+                                </label>
+                                <label class="input" ng-class="{'state-error': editForm.eurofarInvoiceNo.$error.required}" ng-show="editData.transportCIChargeID == 0">
+                                    <input type="text" id="inEurofarInvoice" name="eurofarInvoiceNo" required ng-model="editData.eurofarInvoiceNo">
+                                </label>
+                                <label class="input" ng-show="editData.transportCIChargeID > 0">
+                                    <span class="form-control">{{editData.eurofarInvoiceNo}}</span>
+                                </label>
+                            </section>
+                            <section class="col col-lg-2">
+                                <label class="label">
+                                    <strong>Invoice Date </strong>
+                                    <em class="note note-error" ng-show="editForm.invoiceDate.$error.required">(Required)</em>
+                                </label>
+                                <label class="input" ng-class="{'state-error': editForm.invoiceDate.$error.required}">
+                                    <i class="icon-append fa fa-calendar"></i>
+                                    <input type="text" id="inInvoiceDate" name="invoiceDate" class="datepicker" data-dateformat="dd/mm/yy" required ng-model="editData.invoiceDate">
+                                </label>
+                            </section>
+                            <section class="col col-lg-2">
+                                <label class="label">
+                                    <strong>Payment Term </strong>
+                                    <em class="note note-error" ng-show="(editData.paymentTermID == null || editData.paymentTermID == 0)">(Required)</em>
+                                </label>
+                                <label class="select" ng-class="{'state-error': (editData.paymentTermID == null || editData.paymentTermID == 0)}">
+                                    <select id="sltPaymentTerm" name="paymentTermID" class="form-control" required ng-model="editData.paymentTermID" ng-options="paymentTerm.paymentTermID as paymentTerm.paymentTermNM for paymentTerm in paymentTerms">
+                                        <option value=""></option>
+                                    </select>
+                                    <i></i>
+                                </label>
+                            </section>
+                            <section class="col col-lg-1">
+                                <label class="label">
+                                    <strong>VAT Rate </strong>(%)
+                                </label>
+                                <label class="input">
+                                    <input type="text" style="text-align: right;" format ng-model="editData.vatRate" ng-change="event.getVATAmount(editData.vatRate, editData.netAmount)">
+                                </label>
+                            </section>
+                            <section class="col col-lg-2">
+                                <label class="label">
+                                    <strong>Net Amount</strong>
+                                </label>
+                                <label class="input">
+                                    <span class="form-control" style="text-align: right;" format>{{editData.netAmount | number:0}}</span>
+                                </label>
+                            </section>
+                            <section class="col col-lg-1">
+                                <label class="label">
+                                    <strong>VAT Amount</strong>
+                                </label>
+                                <label class="input">
+                                    <span class="form-control" style="text-align: right;" format>{{editData.vatAmount | number:0}}</span>
+                                </label>
+                            </section>
+                            <section class="col col-lg-2">
+                                <label class="label">
+                                    <strong>Total Amount</strong>
+                                </label>
+                                <label class="input">
+                                    <span class="form-control" style="text-align: right;" format>{{editData.totalAmount | number:0}}</span>
+                                </label>
+                            </section>
+                            <section class="col col-lg-2">
+                                <label class="label">
+                                    <strong>Created By</strong>
+                                </label>
+                                <label class="input">
+                                    <span class="form-control" ng-show="editData.createdBy != null && editData.createEmployeeNM != null">
+                                        <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{editData.createdBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                            <i class="fa fa-user"></i> {{editData.createEmployeeNM}}
+                                        </a>
+                                    </span>
+                                    <span class="form-control" ng-show="editData.createdBy != null && editData.createEmployeeNM == null">
+                                        <i class="fa fa-user"></i> {{editData.createFullName}}
+                                    </span>
+                                </label>
+                            </section>
+                            <section class="col col-lg-2">
+                                <label class="label">
+                                    <strong>Created Date</strong>
+                                </label>
+                                <label class="input">
+                                    <span class="form-control">
+                                        <i class="fa fa-calendar"></i> {{editData.createdDate}}
+                                    </span>
+                                </label>
+                            </section>
+                            <section class="col col-lg-2">
+                                <label class="label">
+                                    <strong>Updated By</strong>
+                                </label>
+                                <label class="input">
+                                    <span class="form-control" ng-show="editData.updatedBy != null && editData.updateEmployeeNM != null">
+                                        <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{editData.updatedBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                            <i class="fa fa-user"></i> {{editData.updateEmployeeNM}}
+                                        </a>
+                                    </span>
+                                    <span class="form-control" ng-show="editData.updatedBy != null && editData.updateEmployeeNM == null">
+                                        <i class="fa fa-user"></i> {{editData.updateFullName}}
+                                    </span>
+                                </label>
+                            </section>
+                            <section class="col col-lg-2">
+                                <label class="label">
+                                    <strong>Updated Date</strong>
+                                </label>
+                                <label class="input">
+                                    <span class="form-control">
+                                        <i class="fa fa-calendar"></i> {{editData.updatedDate}}
+                                    </span>
+                                </label>
+                            </section>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+        </div>
+    </article>
+
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-details" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-info-circle"></i> </span>
+                <h2>Detail Information</h2>
+            </header>
+
+            <div class="widget-body">
+                <div class="smart-form">
+                    <fieldset>
+                        <div>
+                            <a class="btn btn-primary btn-xs" style="margin-bottom: 10px;" ng-click="event.addInvoiceDetail($event)"><i class="fa fa-plus"></i> Add details</a>
+                        </div>
+                    </fieldset>
+                    <fieldset>
+                        <div id="topDescriptionTable" class="table-responsive">
+                            <table class="table table-bordered table-hover custom-table dataTable">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 50px;"></th>
+                                        <th style="width: 260px; text-align: center"><strong>Type of Charge</strong></th>
+                                        <th style="width: 120px; text-align: center"><strong>Container nr.</strong></th>
+                                        <th style="width: 100px; text-align: center"><strong>Type of container</strong></th>
+                                        <th style="text-align: center"><strong>Description</strong></th>
+                                        <th style="width: 100px; text-align: center;"><strong>Currency</strong></th>
+                                        <th style="width: 100px; text-align: center"><strong>Price per unit</strong></th>
+                                        <th style="width: 100px; text-align:center"><strong>Number of units</strong></th>
+                                        <th style="width: 130px; text-align: center"><strong>Amount</strong></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="item in editData.transportCIChargeDetail">
+                                        <td style="text-align: center;">
+                                            <a class="btn btn-danger btn-xs" ng-click="event.removeInvoiceDetail($event, $index)"><i class="fa fa-times"></i> Delete</a>
+                                        </td>
+                                        <td>
+                                            <select class="form-control" ng-model="item.chargeTypeID" ng-options="chargeType.typeOfChargeID as chargeType.typeOfChargeNM for chargeType in chargeTypes" ng-change="event.getPricePerUnit(item, editData.etd, editData.clientID, editData.polid)">
+                                                <option value=""></option>
+                                            </select>
+                                            <i></i>
+                                        </td>
+                                        <td>
+                                            <select class="form-control" ng-model="item.containerNo" ng-options="containerNo.containerNo as containerNo.containerNo for containerNo in containerNrs" ng-change="event.getPricePerUnit(item, editData.etd, editData.clientID, editData.polid)">
+                                                <option value=""></option>
+                                            </select>
+                                            <i></i>
+                                        </td>
+                                        <td>
+                                            <select class="form-control" ng-model="item.containerTypeID" ng-options="containerType.containerTypeID as containerType.containerTypeNM for containerType in containerTypes" ng-change="event.getPricePerUnit(item, editData.etd, editData.clientID, editData.polid)">
+                                                <option value=""></option>
+                                            </select>
+                                            <i></i>
+                                        </td>
+                                        <td hidden>
+                                            <label class="input">
+                                                <span class="form-control">{{item.containerNm}}</span>
+                                            </label>
+                                        </td>
+                                        <td>
+                                            <input class="form-control" type="text" name="description" ng-model="item.description" />
+                                        </td>
+                                        <td>
+                                            <select class="form-control" ng-model="item.currencyTypeID" ng-options="currencyType.entryValue as currencyType.displayText for currencyType in currencyTypes">
+                                                <option value=""></option>
+                                            </select>
+                                            <i></i>
+                                        </td>
+                                        <td>
+                                            <input class="form-control" style="text-align: right" type="text" name="pricePerUnit" format ng-model="item.pricePerUnit" ng-change="event.getAmount(item)" />
+                                        </td>
+                                        <td>
+                                            <input class="form-control" style="text-align: right" type="text" name="numberOfUnits" format ng-model="item.numberOfUnits" ng-change="event.getAmount(item)" />
+                                        </td>
+                                        <td>
+                                            <div class="input-group">
+                                                <span class="input-group-addon">{{item.currencyTypeID == 1 ? '$' : ''}} {{item.currencyTypeID == 2 ? '€' : ''}}</span>
+                                                <label class="input">
+                                                    <span class="form-control furnindo-currency" style="text-align: right;" ng-currency fraction="2" currency-symbol="">{{item.amount | number:0}}</span>
+                                                </label>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+        </div>
+    </article>
+
+</form>
+
+
+@section pagepopup
+{
+}
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "TransportCICharge")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="#" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="event.update($event)"><i class="fa fa-save"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default" title="Print CIS" ng-click="event.printCIS()"><i class="fa fa-print"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script type="text/javascript">
+        var context = {
+            id: @ViewBag.ID,
+            errMsg: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED',
+            backUrl: '@Url.Action("Index", "TransportCICharge")',
+            refreshUrl: '@Url.Action("Edit", "TransportCICharge", new { id = UrlParameter.Optional })/',
+
+            backendReportUrl: '@serviceReportRoot',
+            serviceUrl: '@(serviceRoot)api/transportcicharge/',
+            supportServiceUrl: '@(serviceRoot)api/support/',
+            token: '@token'
+        };
+    </script>
+    <script src="~/Angular/app/transportCICharge/edit.js?v=@guid" type="text/javascript"></script>
+    <script src="~/Angular/app/jsonService2.js?v=@guid" type="text/javascript"></script>
+    <script src="~/Angular/app/transportCICharge/service.js?v=@guid" type="text/javascript"></script>
+}
+
+

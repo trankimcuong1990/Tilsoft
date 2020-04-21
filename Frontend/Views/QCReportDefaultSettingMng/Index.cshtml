@@ -1,0 +1,109 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    var pageSize = System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"];
+    var cookieID = HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString();
+
+    ViewBag.Title = "Search QC Report Default Setting";
+    ViewBag.Module = "QC Report Default Setting";
+}
+
+<div class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"><i class="fa fa-table"></i></span>
+                <h2>Search Result</h2>
+            </header>
+            <div>
+                <div class="widget-body">
+                    <div class="tilsoft-table-wrapper" avs-scroll grid-handler="gridHandler">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header" style="width: 1050px">
+                                <div style="width: 70px">FOUND<br>{{totalRows | number}}</div>
+                                <div style="width: 180px">QC REPORT<br>SECTION</div>
+                                <div style="width: 350px">DESCRIPTION</div>
+                                <div style="width: 80px">UNIT</div>
+                                <div>SPECIFICATION</div>
+                            </div>
+                            <div class="tilsoft-table-filter" style="width: 1050px">
+                                <div style="width: 70px">
+                                    <a href="javascript:void(0)" class="btn btn-default btn-xs font-11" title="Apply Filter" ng-click="event.refresh()">
+                                        <i class="fa fa-filter"></i>
+                                    </a>
+                                    <a href="javascript:void(0)" class="btn btn-default btn-xs font-11" title="Clear Filter" ng-click="event.clear()">
+                                        <i class="fa fa-ban"></i>
+                                    </a>
+                                </div>
+                                <div style="width: 180px">
+                                    <input class=" search-filter" type="text" style="width: 100%; min-height: 32px" ng-model="filters.QCReportSection" />
+                                </div>
+                                <div style="width: 350px">
+                                    <input class=" search-filter" type="text" style="width: 100%; min-height: 32px" ng-model="filters.Description" />
+                                </div>
+                                <div style="width: 80px">
+                                </div>
+                                <div></div>
+                            </div>
+                            <div class="tilsoft-table-body" style="width: 1050px">
+                                <table>
+                                    <tbody>
+                                        <tr ng-repeat="item in data">
+                                            <td style="width:69px">
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current) == "disabled")
+                                                {
+                                                    <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "QCReportDefaultSettingMng")/{{item.qcReportDefaultSettingID}}" style="width: 59px" title="View (Read Only)" target="_blank"><i class="fa fa-folder-open"></i> View</a>
+                                                }
+                                                else
+                                                {
+                                                    <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "QCReportDefaultSettingMng")/{{item.qcReportDefaultSettingID}}" title="Edit" target="_blank" style="width: 59px"><i class="fa fa-pencil-square-o"></i> Edit</a>
+                                                }
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current) != "disabled")
+                                                {
+                                                    <a class="btn btn-danger btn-xs font-11" href="#" title="Delete" style="width: 59px; margin-top: 3px" ng-click="event.remove(item)"><i class="fa fa-times"></i> Del</a>
+                                                }
+                                            </td>
+                                            <td style="width:180px;">{{item.qcReportSection}}</td>
+                                            <td style="width:350px;">{{item.description}}</td>
+                                            <td style="width:80px; text-align:center;">{{item.unit}}</td>                                                                                                                             
+                                            <td>{{item.specification}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction{
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default btn-sm" title="Search" ng-click="event.refresh()"><i class="fa fa-search"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default btn-sm" title="Refresh Page" ng-click="event.clear()"><i class="fa fa-refresh"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="@Url.Action("Edit", "QCReportDefaultSettingMng", new { id = UrlParameter.Optional })/0" class="btn btn-default btn-sm @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" target="_blank"><i class="fa fa-file-o"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs{
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(serviceRoot)/api/qcReportDefaultSetting/',
+            token: '@token',
+            pageSize: '@pageSize',
+            cookieID: '@cookieID'
+        }
+    </script>
+    <script type="text/javascript" src="~/Views/QCReportDefaultSettingMng/index.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Views/QCReportDefaultSettingMng/service.js?v=@guid"></script>
+}

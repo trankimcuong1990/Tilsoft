@@ -1,0 +1,66 @@
+﻿@{
+    string season = Library.Helper.GetCurrentSeason();
+    if (ViewData["season"] != null)
+    {
+        season = ViewData["season"].ToString();
+    }
+    string prevSeason = Library.Helper.GetPreviousSeason(season);
+}
+
+<div ng-controller="MISaleByItemRpt_PiConfirmedController">
+    <h2 style="margin-bottom:0px">PROFORMA INVOICE CONFIRMED BY ITEM CATEGORY @season</h2>
+    <div class="row">
+        <div class="col col-lg-6">
+            <div ng-show="miSaleByItemRpt.piConfirmeds" class="tilsoft-table">
+                <div style="width: 100%; overflow-y: hidden; height: auto; margin-top: 0px;" class="tilsoft-table-body">
+                    <table>
+                        <tbody>
+                            <tr>
+                                <th style="width: 30px; text-align: center;">#</th>
+                                <th style="">ITEM CATEGORY</th>
+                                <th style="width: 60px;font-weight: bold;">Total Cont</th>
+                                <th style="width: 60px;font-weight: bold;">Total Item</th>
+                                <th style="width: 110px;font-weight: bold;">Total Amount</th>
+                                <th style="width: 50px;font-weight: bold;">%</th>
+                            </tr>
+                            <tr style="background:#eff">
+                                <td style="font-weight:bold"></td>
+                                <td style="text-align:right;font-weight:bold">Total</td>
+                                <td style="text-align:right;font-weight:bold">{{miSaleByItemRpt.piConfirmeds | sumFunc : 'totalCont' | number : 1}}</td>
+                                <td style="text-align:right;font-weight:bold">{{miSaleByItemRpt.piConfirmeds | sumFunc : 'totalItem' | number : 0}}</td>
+                                <td style="text-align:right;font-weight:bold">{{miSaleByItemRpt.piConfirmeds | sumFunc : 'saleAmountUSD' | currency : '$' : 0}}</td>
+                                <td style="text-align:right;font-weight:bold">100%</td>
+                            </tr>
+                            <tr ng-repeat="item in miSaleByItemRpt.piConfirmeds">
+                                <td style="text-align: right;">{{$index+1}}</td>
+                                <td style="text-align:left">{{item.productCategoryNM}}</td>
+                                <td style="text-align:right">{{item.totalCont | number : 1}}</td>
+                                <td style="text-align:right">{{item.totalItem | number : 0}}</td>
+                                <td style="text-align:right">{{item.saleAmountUSD | currency : '$' : 0}}</td>
+                                <td style="text-align:right">{{item.saleAmountUSD * 100 / (miSaleByItemRpt.piConfirmeds | sumFunc : 'saleAmountUSD') | number : 1}}%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div ng-show="!miSaleByItemRpt.piConfirmeds">
+                <i class="fa fa-spin fa-refresh"></i> LOADING ...
+            </div>
+        </div>
+        <div class="col col-lg-6">
+            <div id="piConfirmedPieChart"></div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var miSaleByItemRpt_PiConfirmed_Context = {
+        serviceUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/misalebyitem/',
+        token: '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]',
+        param: {
+            season: '@season',
+        }
+    }
+</script>
+

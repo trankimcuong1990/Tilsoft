@@ -1,0 +1,302 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+    <Schema Namespace="PODMngModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="ClientCountry">
+          <Key>
+            <PropertyRef Name="ClientCountryID" />
+          </Key>
+          <Property Name="ClientCountryID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="ClientCountryNM" Type="varchar" MaxLength="50" />
+          <Property Name="ClientCountryUD" Type="varchar" MaxLength="5" />
+          <Property Name="CreatedBy" Type="int" />
+          <Property Name="CreatedDate" Type="datetime" />
+          <Property Name="UpdatedBy" Type="int" />
+          <Property Name="UpdatedDate" Type="datetime" />
+          <Property Name="ConcurrencyFlag" Type="timestamp" StoreGeneratedPattern="Computed" />
+          <Property Name="IsInsideEU" Type="bit" />
+          <Property Name="ClientCodeForLog" Type="nchar" MaxLength="2" />
+        </EntityType>
+        <EntityType Name="POD">
+          <Key>
+            <PropertyRef Name="PoDID" />
+          </Key>
+          <Property Name="PoDID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="PoDUD" Type="varchar" MaxLength="10" />
+          <Property Name="PoDName" Type="varchar" MaxLength="255" />
+          <Property Name="IsIncludedInTransportOffer" Type="bit" />
+          <Property Name="ClientCountryID" Type="int" />
+        </EntityType>
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'Tilsoft.dbo.LIst_ClientCountry_View' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="LIst_ClientCountry_View">
+          <Key>
+            <PropertyRef Name="ClientCountryID" />
+          </Key>
+          <Property Name="ClientCountryID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="ClientCountryUD" Type="varchar" MaxLength="5" />
+          <Property Name="ClientCountryNM" Type="varchar" MaxLength="50" />
+        </EntityType>
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'Tilsoft.dbo.PODMng_POD_View' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="PODMng_POD_View">
+          <Key>
+            <PropertyRef Name="PoDID" />
+          </Key>
+          <Property Name="PoDID" Type="int" Nullable="false" StoreGeneratedPattern="Identity" />
+          <Property Name="PoDUD" Type="varchar" MaxLength="10" />
+          <Property Name="PoDName" Type="varchar" MaxLength="255" />
+          <Property Name="ClientCountryNM" Type="varchar" MaxLength="50" />
+          <Property Name="ClientCountryID" Type="int" />
+        </EntityType>
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'Tilsoft.dbo.PODMng_PODSearchResult_View' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="PODMng_PODSearchResult_View">
+          <Key>
+            <PropertyRef Name="PoDID" />
+          </Key>
+          <Property Name="PoDID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="PoDUD" Type="varchar" MaxLength="10" />
+          <Property Name="PoDName" Type="varchar" MaxLength="255" />
+        </EntityType>
+        <Association Name="FK_POD_ClientCountry">
+          <End Role="ClientCountry" Type="Self.ClientCountry" Multiplicity="0..1" />
+          <End Role="POD" Type="Self.POD" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ClientCountry">
+              <PropertyRef Name="ClientCountryID" />
+            </Principal>
+            <Dependent Role="POD">
+              <PropertyRef Name="ClientCountryID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Function Name="PODMng_function_SearchPOD" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="PoDUD" Type="varchar" Mode="In" />
+          <Parameter Name="PoDName" Type="varchar" Mode="In" />
+          <Parameter Name="SortedBy" Type="varchar" Mode="In" />
+          <Parameter Name="SortedDirection" Type="varchar" Mode="In" />
+        </Function>
+        <EntityContainer Name="PODMngModelStoreContainer">
+          <EntitySet Name="ClientCountry" EntityType="Self.ClientCountry" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="POD" EntityType="Self.POD" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="LIst_ClientCountry_View" EntityType="Self.LIst_ClientCountry_View" store:Type="Views" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+    [LIst_ClientCountry_View].[ClientCountryID] AS [ClientCountryID], 
+    [LIst_ClientCountry_View].[ClientCountryUD] AS [ClientCountryUD], 
+    [LIst_ClientCountry_View].[ClientCountryNM] AS [ClientCountryNM]
+    FROM [dbo].[LIst_ClientCountry_View] AS [LIst_ClientCountry_View]</DefiningQuery>
+          </EntitySet>
+          <EntitySet Name="PODMng_POD_View" EntityType="Self.PODMng_POD_View" store:Type="Views" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+    [PODMng_POD_View].[PoDID] AS [PoDID], 
+    [PODMng_POD_View].[PoDUD] AS [PoDUD], 
+    [PODMng_POD_View].[PoDName] AS [PoDName], 
+    [PODMng_POD_View].[ClientCountryNM] AS [ClientCountryNM], 
+    [PODMng_POD_View].[ClientCountryID] AS [ClientCountryID]
+    FROM [dbo].[PODMng_POD_View] AS [PODMng_POD_View]</DefiningQuery>
+          </EntitySet>
+          <EntitySet Name="PODMng_PODSearchResult_View" EntityType="Self.PODMng_PODSearchResult_View" store:Type="Views" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+    [PODMng_PODSearchResult_View].[PoDID] AS [PoDID], 
+    [PODMng_PODSearchResult_View].[PoDUD] AS [PoDUD], 
+    [PODMng_PODSearchResult_View].[PoDName] AS [PoDName]
+    FROM [dbo].[PODMng_PODSearchResult_View] AS [PODMng_PODSearchResult_View]</DefiningQuery>
+          </EntitySet>
+          <AssociationSet Name="FK_POD_ClientCountry" Association="Self.FK_POD_ClientCountry">
+            <End Role="ClientCountry" EntitySet="ClientCountry" />
+            <End Role="POD" EntitySet="POD" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema></edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="PODMngModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="POD">
+          <Key>
+            <PropertyRef Name="PoDID" />
+          </Key>
+          <Property Name="PoDID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="PoDUD" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="PoDName" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="IsIncludedInTransportOffer" Type="Boolean" />
+          <Property Name="ClientCountryID" Type="Int32" />
+          <NavigationProperty Name="ClientCountry" Relationship="PODMngModel.FK_POD_ClientCountry" FromRole="POD" ToRole="ClientCountry" />
+        </EntityType>
+        <EntityType Name="PODMng_POD_View">
+          <Key>
+            <PropertyRef Name="PoDID" />
+          </Key>
+          <Property Name="PoDID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="PoDUD" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="PoDName" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="ClientCountryNM" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="ClientCountryID" Type="Int32" />
+        </EntityType>
+        <EntityType Name="PODMng_PODSearchResult_View">
+          <Key>
+            <PropertyRef Name="PoDID" />
+          </Key>
+          <Property Name="PoDID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="PoDUD" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="PoDName" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityContainer Name="PODMngEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="POD" EntityType="Self.POD" />
+          <EntitySet Name="PODMng_POD_View" EntityType="Self.PODMng_POD_View" />
+          <EntitySet Name="PODMng_PODSearchResult_View" EntityType="Self.PODMng_PODSearchResult_View" />
+          <FunctionImport Name="PODMng_function_SearchPOD" EntitySet="PODMng_PODSearchResult_View" ReturnType="Collection(PODMngModel.PODMng_PODSearchResult_View)">
+            <Parameter Name="PoDUD" Mode="In" Type="String" />
+            <Parameter Name="PoDName" Mode="In" Type="String" />
+            <Parameter Name="SortedBy" Mode="In" Type="String" />
+            <Parameter Name="SortedDirection" Mode="In" Type="String" />
+          </FunctionImport>
+          <EntitySet Name="ClientCountry" EntityType="PODMngModel.ClientCountry" />
+          <EntitySet Name="LIst_ClientCountry_View" EntityType="PODMngModel.LIst_ClientCountry_View" />
+          <AssociationSet Name="FK_POD_ClientCountry" Association="PODMngModel.FK_POD_ClientCountry">
+            <End Role="ClientCountry" EntitySet="ClientCountry" />
+            <End Role="POD" EntitySet="POD" />
+          </AssociationSet>
+          <AssociationSet Name="LIst_ClientCountry_ViewPODMng_POD_View" Association="PODMngModel.LIst_ClientCountry_ViewPODMng_POD_View">
+            <End Role="LIst_ClientCountry_View" EntitySet="LIst_ClientCountry_View" />
+            <End Role="PODMng_POD_View" EntitySet="PODMng_POD_View" />
+          </AssociationSet>
+        </EntityContainer>
+        <EntityType Name="ClientCountry">
+          <Key>
+            <PropertyRef Name="ClientCountryID" />
+          </Key>
+          <Property Name="ClientCountryID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="ClientCountryNM" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="ClientCountryUD" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="CreatedBy" Type="Int32" />
+          <Property Name="CreatedDate" Type="DateTime" Precision="3" />
+          <Property Name="UpdatedBy" Type="Int32" />
+          <Property Name="UpdatedDate" Type="DateTime" Precision="3" />
+          <Property Name="ConcurrencyFlag" Type="Binary" MaxLength="8" FixedLength="true" annotation:StoreGeneratedPattern="Computed" />
+          <Property Name="IsInsideEU" Type="Boolean" />
+          <Property Name="ClientCodeForLog" Type="String" MaxLength="2" FixedLength="true" Unicode="true" />
+          <NavigationProperty Name="POD" Relationship="PODMngModel.FK_POD_ClientCountry" FromRole="ClientCountry" ToRole="POD" />
+        </EntityType>
+        <EntityType Name="LIst_ClientCountry_View">
+          <Key>
+            <PropertyRef Name="ClientCountryID" />
+          </Key>
+          <Property Name="ClientCountryID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="ClientCountryUD" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="ClientCountryNM" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <Association Name="FK_POD_ClientCountry">
+          <End Type="PODMngModel.ClientCountry" Role="ClientCountry" Multiplicity="0..1" />
+          <End Type="PODMngModel.POD" Role="POD" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ClientCountry">
+              <PropertyRef Name="ClientCountryID" />
+            </Principal>
+            <Dependent Role="POD">
+              <PropertyRef Name="ClientCountryID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="LIst_ClientCountry_ViewPODMng_POD_View">
+          <End Type="PODMngModel.LIst_ClientCountry_View" Role="LIst_ClientCountry_View" Multiplicity="0..1" />
+          <End Type="PODMngModel.PODMng_POD_View" Role="PODMng_POD_View" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="LIst_ClientCountry_View">
+              <PropertyRef Name="ClientCountryID" />
+            </Principal>
+            <Dependent Role="PODMng_POD_View">
+              <PropertyRef Name="ClientCountryID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="PODMngModelStoreContainer" CdmEntityContainer="PODMngEntities">
+          <EntitySetMapping Name="POD">
+            <EntityTypeMapping TypeName="PODMngModel.POD">
+              <MappingFragment StoreEntitySet="POD">
+                <ScalarProperty Name="ClientCountryID" ColumnName="ClientCountryID" />
+                <ScalarProperty Name="PoDID" ColumnName="PoDID" />
+                <ScalarProperty Name="PoDUD" ColumnName="PoDUD" />
+                <ScalarProperty Name="PoDName" ColumnName="PoDName" />
+                <ScalarProperty Name="IsIncludedInTransportOffer" ColumnName="IsIncludedInTransportOffer" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="PODMng_POD_View">
+            <EntityTypeMapping TypeName="PODMngModel.PODMng_POD_View">
+              <MappingFragment StoreEntitySet="PODMng_POD_View">
+                <ScalarProperty Name="ClientCountryID" ColumnName="ClientCountryID" />
+                <ScalarProperty Name="ClientCountryNM" ColumnName="ClientCountryNM" />
+                <ScalarProperty Name="PoDID" ColumnName="PoDID" />
+                <ScalarProperty Name="PoDUD" ColumnName="PoDUD" />
+                <ScalarProperty Name="PoDName" ColumnName="PoDName" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="PODMng_PODSearchResult_View">
+            <EntityTypeMapping TypeName="PODMngModel.PODMng_PODSearchResult_View">
+              <MappingFragment StoreEntitySet="PODMng_PODSearchResult_View">
+                <ScalarProperty Name="PoDID" ColumnName="PoDID" />
+                <ScalarProperty Name="PoDUD" ColumnName="PoDUD" />
+                <ScalarProperty Name="PoDName" ColumnName="PoDName" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <FunctionImportMapping FunctionImportName="PODMng_function_SearchPOD" FunctionName="PODMngModel.Store.PODMng_function_SearchPOD" />
+          <EntitySetMapping Name="ClientCountry">
+            <EntityTypeMapping TypeName="PODMngModel.ClientCountry">
+              <MappingFragment StoreEntitySet="ClientCountry">
+                <ScalarProperty Name="ClientCodeForLog" ColumnName="ClientCodeForLog" />
+                <ScalarProperty Name="IsInsideEU" ColumnName="IsInsideEU" />
+                <ScalarProperty Name="ConcurrencyFlag" ColumnName="ConcurrencyFlag" />
+                <ScalarProperty Name="UpdatedDate" ColumnName="UpdatedDate" />
+                <ScalarProperty Name="UpdatedBy" ColumnName="UpdatedBy" />
+                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
+                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="ClientCountryUD" ColumnName="ClientCountryUD" />
+                <ScalarProperty Name="ClientCountryNM" ColumnName="ClientCountryNM" />
+                <ScalarProperty Name="ClientCountryID" ColumnName="ClientCountryID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="LIst_ClientCountry_View">
+            <EntityTypeMapping TypeName="PODMngModel.LIst_ClientCountry_View">
+              <MappingFragment StoreEntitySet="LIst_ClientCountry_View">
+                <ScalarProperty Name="ClientCountryNM" ColumnName="ClientCountryNM" />
+                <ScalarProperty Name="ClientCountryUD" ColumnName="ClientCountryUD" />
+                <ScalarProperty Name="ClientCountryID" ColumnName="ClientCountryID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="false" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="True" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

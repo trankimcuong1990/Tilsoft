@@ -1,0 +1,147 @@
+﻿@{
+    ViewBag.Title = "Initialize to create new purchasing credit note invoice";
+    ViewBag.Module = "Purchasing credit note";
+}
+
+<div class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+
+
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-0" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-search"></i> </span>
+                <h2>Select invoice type to create invoice</h2>
+            </header>
+            <div>
+                <div class="jarviswidget-editbox"></div>
+                <div class="widget-body">
+                    <form class="smart-form">
+                        <fieldset>
+                            <section>
+                                <div class="inline-group">
+                                    <label class="radio" ng-repeat="item in creditNoteTypes">
+                                        <input type="radio" name="radio-inline-invoicetype" ng-model="$parent.creditNoteTypeSelectedValue" ng-value="item.value" ng-change="event.selectedCreditNoteType(creditNoteTypeSelectedValue)">
+                                        <i></i>{{item.name}}
+                                    </label>
+                                </div>
+                            </section>
+                        </fieldset>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-search-result" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false" ng-show="creditNoteTypeSelectedValue==1">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Purchasing invoice search result</h2>
+            </header>
+            <div>
+                <div class="jarviswidget-editbox"></div>
+                <div class="widget-body">
+
+                    <input class="form-control search-filter m-bottom-15" type="text" id="invoiceQuerySearch" ng-model="filters.invoiceQuerySearch" placeholder="fill in Invoice No or BL No or Supplier Name and press enter to search">
+
+                    <div id="grdSearchResult" class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header" style="width: 1000px;">
+                                <div style="width: 60px;"></div>
+                                <div style="width: 150px;" class="sorting" data-colname="invoiceNo">Invoice No</div>
+                                <div style="width: 150px;" class="sorting" data-colname="blNo">BL No</div>
+                                <div class="sorting" data-colname="supplierNM">Supplier</div>
+                            </div>
+                            <div class="tilsoft-table-body" style="width: 1000px; ">
+                                <table>
+                                    <tr ng-repeat="item in purchasingInvoices">
+                                        <td style="text-align: center; width: 60px;">
+                                            <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "PurchasingCreditNote")/0?creditNoteType={{creditNoteTypeSelectedValue}}&purchasingInvoiceID={{item.purchasingInvoiceID}}" title="Select invoice to make credit note" target="_blank">Select</a>
+                                        </td>
+                                        <td style="width: 150px;">{{item.invoiceNo}}</td>
+                                        <td style="width: 150px;">{{item.blNo}}</td>
+                                        <td>{{item.supplierNM}}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-search-result" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false" ng-if="creditNoteTypeSelectedValue==2">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Factory search result</h2>
+            </header>
+            <div>
+                <div class="jarviswidget-editbox"></div>
+                <div class="widget-body">
+
+                    <input class="form-control m-bottom-15" type="text" id="supplierValueSearch" ng-model="supplierFilterValue" placeholder="enter supplier name or code to search">
+
+                    <div id="grdSearchResult" class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header" style="width: 1000px;">
+                                <div style="width: 60px;"></div>
+                                <div style="width: 150px;" class="sorting" data-colname="supplierUD">Supplier Code</div>
+                                <div class="sorting" data-colname="supplierNM">Supplier Name</div>
+                            </div>
+                            <div class="tilsoft-table-body" style="width: 1000px; ">
+                                <table>
+                                    <tr ng-repeat="item in suppliers | supplier_Filter : supplierFilterValue | orderBy: 'supplierUD'">
+                                        <td style="text-align: center; width: 60px;">
+                                            <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "PurchasingCreditNote")/0?creditNoteType={{creditNoteTypeSelectedValue}}&supplierID={{item.supplierID}}" title=" select factory to make credit note" target="_blank">Select</a>
+                                        </td>
+                                        <td style="width: 150px;">{{item.supplierUD}}</td>
+                                        <td>{{item.supplierNM}}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </article>
+</div>
+
+
+@section pagepopup
+{
+}
+
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Search" ng-click="event.reload()"><i class=" fa fa-search"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Refresh" ng-click="event.reload()"><i class="fa fa-refresh"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script src="~/Angular/app/jsonService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/support/service.js?c=@System.Guid.NewGuid().ToString().Replace("-","")"></script>
+    <script type="text/javascript">
+        jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/purchasingCreditNote/';
+        jsonService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+        supportService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/support/';
+        supportService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+        jsonService.searchFilter.pageSize = '@System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"]';
+        var context = {
+            editUrl: '@Url.Action("Edit", "FactoryMaterial")',
+            reportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]'
+        }
+    </script>
+    <script src="~/Angular/app/purchasingCreditNote/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/purchasingCreditNote/init.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}

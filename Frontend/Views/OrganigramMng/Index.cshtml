@@ -1,0 +1,91 @@
+﻿@{
+    ViewBag.Title = "Search Organization chart";
+    ViewBag.Module = "Organization chart Management";
+    ViewBag.Icon = "fa-search";
+}
+
+<div class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-1" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Search Result</h2>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div avs-scroll grid-handler="gridHandler" class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header" style="width: 700px;">
+                                <div style="width: 65px;"></div>
+                                <div style="width: 150px;"> Organization Chart</div>
+                                <div style="width: 100px;"> Company / Factory</div>
+                                <div style="width: 120px;"><i class="fa fa-user"></i> Number of Employee</div>
+                                <div>Company Address</div>
+                            </div>
+                            <div class="tilsoft-table-filter" style="width: 700px;">
+                                <div style="width: 65px;">
+                                    <a href="javascript:void(0)" class="btn btn-{{isDefaultFilter?'default':'primary'}} btn-xs" title="Apply Filter" ng-click="event.reload()"><i class="fa fa-filter"></i></a>
+                                    <a href="javascript:void(0)" class="btn btn-default btn-xs" title="Clear Filter" ng-click="event.clearFilter()"><i class="fa fa-ban"></i></a>
+                                </div>
+                                <div style="width: 150px;"></div>
+                                <div style="width: 100px;">
+                                    <select class="search-filter" ng-model="filters.CompanyID" ng-options="company.internalCompanyID as company.internalCompanyNM for company in companies">
+                                        <option value=""></option>
+                                    </select>
+                                </div>
+                                <div style="width: 120px;"><input class="search-filter" type="text" ng-model="filters.TotalEmp" /></div>
+                                <div></div>
+                            </div>
+                            <div class="tilsoft-table-body" style="width: 700px; margin-top: 95px;height:700px;">
+                                <table>
+                                    <tr ng-repeat="item in data">
+                                        <td style="text-align: center; width: 65px;"><a href="@Url.Action("Edit", "OrganigramMng")/{{item.companyID}}" ta target="_blank" class="btn btn-primary btn-xs">Detail</a></td>
+                                        <td style="width: 150px;">
+                                            <a href="{{item.organizationChart.fileLocation}}" target="_blank">
+                                                <img style="max-width: 95%;" ng-src="{{item.organizationChart.thumbnailLocation}}" />
+                                            </a>
+                                        </td>
+                                        <td style="width: 100px;">{{item.internalCompanyNM}}</td>
+                                        <td style="width: 120px;">{{item.totalEmp}}</td>
+                                        <td>
+                                            {{item.organizationChart.address}}
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <span>Found: {{totalRows}} record(s)</span>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Search" ng-click="event.reload()"><i class="fa fa-search"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Refresh" ng-click="event.reload()"><i class="fa fa-refresh"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="@Url.Action("Edit", "OrganigramMng")/0" target="_blank" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="New"><i class="fa fa-file-o"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/OrganigramMng/',
+            token: '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]',
+            pageSize: 50,
+            cookieId: '@HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString()'
+        }
+    </script>
+    <script src="~/Angular/app/organigramMng/index.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/jsonService2.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/organigramMng/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}

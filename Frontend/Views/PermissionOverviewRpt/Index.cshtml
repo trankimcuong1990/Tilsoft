@@ -1,0 +1,146 @@
+﻿@{
+    ViewBag.Title = "Permission Overview";
+    ViewBag.Module = "Permission Overview";
+    ViewBag.Icon = "fa-bar-chart-o";
+}
+<style>
+    .tilsoft-table .tilsoft-table-body {
+        max-height: none !important;
+    }
+</style>
+<div class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-search-filter" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Filters</h2>
+            </header>
+
+            <div>
+                <div class="widget-body no-padding">
+                    <div class="smart-form">
+                        <fieldset>
+                            <section class="col col-2">
+                                <label class="label">User</label>
+                                <label class="select">
+                                    <select id="userId" class="search-filter js-example-basic-single" ng-model="selection.userId" ng-options="user.userId as user.fullName for user in users | orderBy: 'fullname'">
+                                        <option value="">--ALL--</option>
+                                    </select>
+                                </label>
+                            </section>
+                            <section class="col col-2">
+                                <label class="label">User Group</label>
+                                <label class="select">
+                                    <select id="userGroupId" class="search-filter js-example-basic-single" ng-model="selection.userGroupId" ng-options="userGroup.userGroupID as userGroup.userGroupNM for userGroup in userGroups | orderBy: 'userGroupNM'">
+                                        <option value="">--ALL--</option>
+                                    </select>
+                                </label>
+                            </section>
+                            <section class="col col-2">
+                                <label class="label">Module</label>
+                                <label class="select">
+                                    <select id="moduleId" class="search-filter js-example-basic-single" ng-model="selection.moduleId" ng-options="module.moduleID as module.displayText for module in modules | orderBy: 'displayOrder'">
+                                        <option value="">--ALL--</option>
+                                    </select>
+                                </label>
+                            </section>
+                            <section class="col col-2">
+                                <label class="label">Office</label>
+                                <label class="select">
+                                    <select id="officeId" class="search-filter js-example-basic-single" ng-model="selection.officeId" ng-options="office.internalCompanyID as office.internalCompanyNM for office in offices | orderBy: 'internalCompanyNM'">
+                                        <option value="">--ALL--</option>
+                                    </select>
+                                </label>
+                            </section>
+                        </fieldset>
+                        <footer>
+                            <a href="javascript:void(0)" class="btn btn-primary" ng-click="event.generateReport()" style="float: none;"><i class="fa fa-file-excel-o"></i> Generate report</a>
+                            <a href="javascript:void(0);" ng-click="event.clearFilter()" class="btn btn-default btn-xs" style="float:none;"><i class="fa fa-ban"></i> Clear Filters</a>
+                        </footer>
+                        <fieldset class="no-padding">
+                            <div class="tilsoft-table-wrapper">
+                                <div class="tilsoft-table">
+                                    <h2>Overview Report</h2>
+                                    <div class="tilsoft-table-body" style="width: 100%; overflow-y: hidden; height: auto; min-height: 100px; margin: auto;">                                        
+                                        <table>
+                                            <tr>
+                                                <th style="width: 250px;">Module</th>
+                                                <th>Read</th>
+                                                <th>Create</th>
+                                                <th>Update</th>
+                                                <th>Delete</th>
+                                                <th>Print</th>
+                                                <th>Approve</th>
+                                                <th>Reset</th>
+                                            </tr>
+                                            <tbody ng-repeat="item in data | orderBy: 'displayOrder'">
+                                                <tr class="{{item.isParent?'parent-level':''}}">
+                                                    <td style="">{{item.displayText}} <a href="javascript:void(0)" style="float: right;" ng-click="event.getDetail(item)">Detail</a></td>
+                                                    <td style="text-align: right;"><i class="fa fa-check-square-o" ng-if="item.readCount"></i></td>
+                                                    <td style="text-align: right;"><i class="fa fa-check-square-o" ng-if="item.createCount"></i></td>
+                                                    <td style="text-align: right;"><i class="fa fa-check-square-o" ng-if="item.updateCount"></i></td>
+                                                    <td style="text-align: right;"><i class="fa fa-check-square-o" ng-if="item.deleteCount"></i></td>
+                                                    <td style="text-align: right;"><i class="fa fa-check-square-o" ng-if="item.printCount"></i></td>
+                                                    <td style="text-align: right;"><i class="fa fa-check-square-o" ng-if="item.approveCount"></i></td>
+                                                    <td style="text-align: right;"><i class="fa fa-check-square-o" ng-if="item.resetCount"></i></td>
+                                                </tr>
+                                                <tr ng-if="item.userPermissions">
+                                                    <td>&nbsp;</td>
+                                                    <td colspan="7" style="padding: 0px;">
+                                                        <table>
+                                                            <tr>
+                                                                <th>User</th>
+                                                                <th>Group</th>
+                                                                <th>Office</th>
+                                                                <th>Read</th>
+                                                                <th>Create</th>
+                                                                <th>Update</th>
+                                                                <th>Delete</th>
+                                                                <th>Print</th>
+                                                                <th>Approve</th>
+                                                                <th>Reset</th>
+                                                            </tr>
+                                                            <tr ng-repeat="permission in item.userPermissions | orderBy: 'fullname'">
+                                                                <td>
+                                                                    <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{permission.userId}}" data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                                        <i class="fa fa-user"></i> {{permission.fullname}}
+                                                                    </a>
+                                                                </td>
+                                                                <td>{{permission.userGroupNM}}</td>
+                                                                <td>{{permission.officeNM}}</td>
+                                                                <td style="text-align: center;"><i class="fa fa-check-square-o" ng-if="permission.canRead"></i></td>
+                                                                <td style="text-align: center;"><i class="fa fa-check-square-o" ng-if="permission.canCreate"></i></td>
+                                                                <td style="text-align: center;"><i class="fa fa-check-square-o" ng-if="permission.canUpdate"></i></td>
+                                                                <td style="text-align: center;"><i class="fa fa-check-square-o" ng-if="permission.canDelete"></i></td>
+                                                                <td style="text-align: center;"><i class="fa fa-check-square-o" ng-if="permission.canPrint"></i></td>
+                                                                <td style="text-align: center;"><i class="fa fa-check-square-o" ng-if="permission.canApprove"></i></td>
+                                                                <td style="text-align: center;"><i class="fa fa-check-square-o" ng-if="permission.canReset"></i></td>
+                                                            </tr>
+                                                        </table>
+                                                    </td>
+                                                </tr>
+                                            </tbody>                                            
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section pagejs {
+    <script src="~/Angular/app/jsonService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script type="text/javascript">
+        jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/permissionoverviewrpt/';
+        jsonService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+        var context = {
+            backendReportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]'
+        }
+    </script>
+    <script src="~/Views/PermissionOverviewRpt/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/PermissionOverviewRpt/index.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}

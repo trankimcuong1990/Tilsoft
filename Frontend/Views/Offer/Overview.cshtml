@@ -1,0 +1,910 @@
+﻿@{
+    ViewBag.Title = "OverView Offer";
+    ViewBag.Module = "Eurofar Offer";
+    ViewBag.CurrentSeason = Frontend.Helper.Common.GetCurrentSeason();
+    bool PurchasingAccessPermission = Frontend.Helper.AuthHelper.GetActionButtonStatus("EurofarPurchasingPriceMng", Frontend.Helper.ActionEnum.Read, HttpContext.Current) != "disabled";
+}
+
+
+<form name="editForm" id="main-form">
+
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <ul class="nav nav-tabs pull-left in">
+                    <li class="active">
+                        <a data-toggle="tab" href="#hb1"><i class="fa fa-database"></i> <span class="hidden-mobile hidden-tablet"> General Information </span> </a>
+                    </li>
+
+                    <li>
+                        <a data-toggle="tab" href="#hb2"> <i class="fa fa-database"></i> <span class="hidden-mobile hidden-tablet"> Client Information </span> </a>
+                    </li>
+
+                    <li>
+                        <a data-toggle="tab" href="#hb3"> <i class="fa fa-database"></i> <span class="hidden-mobile hidden-tablet"> Payment & Delivery</span> </a>
+                    </li>
+
+                    <li>
+                        <a data-toggle="tab" href="#hb4"> <i class="fa fa-database"></i> <span class="hidden-mobile hidden-tablet"> Labeling & Packaging </span> </a>
+                    </li>
+
+                    <li>
+                        <a data-toggle="tab" href="#hb5"> <i class="fa fa-database"></i> <span class="hidden-mobile hidden-tablet"> Forwarder </span> </a>
+                    </li>
+
+                    <li>
+                        <a data-toggle="tab" href="#hb6"> <i class="fa fa-database"></i> <span class="hidden-mobile hidden-tablet"> Other </span> </a>
+                    </li>
+
+                </ul>
+            </header>
+            <div>
+                <div class="jarviswidget-editbox"></div>
+
+                <div class="widget-body">
+                    <div class="tab-content">
+
+                        <div class="tab-pane active" id="hb1">
+                            <div class="row">
+                                <div class="col-sm-2 m-bottom-15">
+                                    <label>Season</label>
+                                    <span class="form-control">{{offerDataContainer.offerData.season}}</span>
+                                </div>
+                                <div class="col-sm-2 m-bottom-15">
+                                    <label>Offer Date</label>
+                                    <span class="form-control">{{offerDataContainer.offerData.offerDateFormated}}</span>
+                                </div>
+
+                                <div class="col-sm-2 m-bottom-15">
+                                    <label>Valid Until</label>
+                                    <span class="form-control">{{offerDataContainer.offerData.validUntilFormated}}</span>
+                                </div>
+
+                                <div class="col-sm-2 m-bottom-15">
+                                    <label>Acc Manager</label>
+                                    <span class="form-control">{{offerDataContainer.offerData.saleNM}}</span>
+                                </div>
+
+                                <div class="col-sm-2 m-bottom-15">
+                                    <label>Offer Status</label>
+                                    <span class="form-control">{{offerDataContainer.offerData.trackingStatusNM}}</span>
+                                </div>
+
+                                <div class="col-sm-2 m-bottom-15">
+                                    <label>Version</label>
+                                    <span class="form-control">{{offerDataContainer.offerData.offerVersion}}</span>
+                                </div>
+
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6 m-bottom-15">
+                                    <label>Offer File Name</label>
+                                    <span class="form-control">{{offerDataContainer.offerData.offerUD}}</span>
+                                </div>
+
+                                @if (PurchasingAccessPermission)
+                                {
+                                    <div class="col-sm-3 m-bottom-15">
+                                        <label>% Delta</label>
+                                        <span class="form-control">{{calTotalPurchase() > 0 ? (calTotalTotal() * (offerDataContainer.offerData.currency === ' EUR' ? offerDataContainer.offerData.exchangeRate : 1) - calTotalPurchase()) * 100 / calTotalPurchase() : null | number : 2}}%</span>
+                                    </div>
+                                }
+
+                                <div class="col-sm-3 m-bottom-15">
+                                    <label>&nbsp;</label>
+                                    <span class="form-control" style="background: none !important; border: none !important;">
+                                        <i class="fa fa-check-square-o" ng-if="offerDataContainer.offerData.isPotential"></i>
+                                        <i class="fa fa-square-o" ng-if="!offerDataContainer.offerData.isPotential"></i>
+                                        Potential
+                                    </span>
+                                </div>
+                            </div>                            
+                        </div>
+
+                        <div class="tab-pane" id="hb2">
+                            <div class="row">
+                                <div class="col-sm-6 m-bottom-15">
+                                    @*<label>Client</label>
+                                        <select name="clientID" class="form-control" ng-model="offerDataContainer.offerData.clientID" ng-options="item.clientID as item.clientNM for item in offerDataContainer.supportData.clients | orderBy : 'clientNM' " required>
+                                            <option value=""></option>
+                                        </select>
+                                        <span class="help-block" ng-show="editForm.clientID.$error.required"><i class="fa fa-warning"></i>Client is required.</span>*@
+
+                                    <label>Client</label>
+                                    <span class="form-control">{{offerDataContainer.offerData.clientNM}}</span>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-sm-2 m-bottom-15">
+                                    <label>Client Code</label>
+                                    <span class="form-control">{{offerDataContainer.offerData.clientUD}}</span>
+                                </div>
+
+
+                                <div class="col-sm-2 m-bottom-15">
+                                    <label>Contact Person</label>
+                                    <span class="form-control">{{offerDataContainer.offerData.clientContactPerson}}</span>
+                                </div>
+
+                                <div class="col-sm-2 m-bottom-15">
+                                    <label>Phone</label>
+                                    <span class="form-control">{{offerDataContainer.offerData.clientTelephone}}</span>
+                                </div>
+
+                                <div class="col-sm-2 m-bottom-15">
+                                    <label>Email</label>
+                                    <span class="form-control">{{offerDataContainer.offerData.clientEmail}}</span>
+                                </div>
+
+                                <div class="col-sm-2 m-bottom-15">
+                                    <label>Address 1</label>
+                                    <span class="form-control">{{offerDataContainer.offerData.clientStreetAddress1}}</span>
+                                </div>
+
+                                <div class="col-sm-2 m-bottom-15">
+                                    <label>Address 2</label>
+                                    <span class="form-control">{{offerDataContainer.offerData.clientStreetAddress2}}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane" id="hb3">
+
+                            <div class="row">
+
+                                <div class="col-sm-2 m-bottom-15">
+                                    <label>Payment Term</label>
+                                    <span class="form-control">{{offerDataContainer.offerData.paymentTermNM}}</span>
+                                </div>
+
+                                <div class="col-sm-2 m-bottom-15">
+                                    <label>Delivery Term</label>
+                                    <span class="form-control">{{offerDataContainer.offerData.deliveryTermNM}}</span>
+                                </div>
+
+                                <div class="col-sm-2 m-bottom-15">
+                                    <label>TransportFee/Cont40HC</label>
+                                    <div class="input-group">
+                                        <span class="input-group-addon">€</span>
+                                        <span class="form-control" style="text-align: right">{{offerDataContainer.offerData.transportationFee | number : 2}}</span>
+                                    </div>
+                                </div>
+
+                                @*<div class="col-sm-2 m-bottom-15">
+                                        <label>POD</label>
+                                        <select class="form-control" ng-model="offerDataContainer.offerData.podid" ng-options="item.podid as item.podName for item in offerDataContainer.supportData.poDs">
+                                            <option value=""></option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-sm-2 m-bottom-15">
+                                        <label>LDS</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control datepicker" data-dateformat="dd/mm/yy" ng-model="offerDataContainer.offerData.ldsFormated">
+                                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-sm-2 m-bottom-15">
+                                        <label>Client Delivery Date</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control datepicker" data-dateformat="dd/mm/yy" ng-model="offerDataContainer.offerData.estimatedDeliveryDateFormated">
+                                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                        </div>
+                                    </div>*@
+
+                            </div>
+
+                            <div class="row">
+
+                                <div class="col-sm-2 m-bottom-15">
+                                    <label>Currency</label>
+                                    <span class="form-control">{{offerDataContainer.offerData.currency}}</span>
+                                </div>
+
+                                <div class="col-sm-2 m-bottom-15">
+                                    <label>VAT</label>
+                                    <span class="form-control">{{offerDataContainer.offerData.vat}}</span>
+                                </div>
+
+                                <div class="col-sm-2 m-bottom-15">
+                                    <label>Exchange Rate</label>
+                                    <span class="form-control" style="text-align: right;">{{offerDataContainer.offerData.exchangeRate | number:2}}</span>
+                                </div>
+
+                                <div class="col-sm-2 m-bottom-15">
+                                    <label>% Surcharge</label>
+                                    <span class="form-control">{{offerDataContainer.offerData.surChargePercent}}</span>
+                                </div>
+
+                                <div class="col-sm-2 m-bottom-15">
+                                    <label>% Commission</label>
+                                    <span class="form-control">{{offerDataContainer.offerData.commissionPercent}}</span>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="tab-pane" id="hb4">
+                            <div class="row">
+                                <div class="col-sm-3 m-bottom-15">
+                                    <label>Labeling</label>
+                                    <span class="form-control">{{offerDataContainer.offerData.labelingType}}</span>
+                                </div>
+
+                                <div class="col-sm-3 m-bottom-15">
+                                    <label>Labeling Note</label>
+                                    <span class="form-control">{{offerDataContainer.offerData.labelingNote}}</span>
+                                </div>
+
+                                <div class="col-sm-3 m-bottom-15">
+                                    <label>Packaging</label>
+                                    <span class="form-control">{{offerDataContainer.offerData.packagingType}}</span>
+                                </div>
+
+                                <div class="col-sm-3 m-bottom-15">
+                                    <label>Packaging Note </label>
+                                    <span class="form-control">{{offerDataContainer.offerData.packagingNote}}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane" id="hb5">
+                            <div class="row">
+                                <div class="col-sm-2 m-bottom-15">
+                                    <label>Forwarder</label>
+                                    <span class="form-control">{{offerDataContainer.offerData.forwarderNM}}</span>
+                                </div>
+
+                                <div class="col-sm-2 m-bottom-15">
+                                    <label>Forwarder Contract Number</label>
+                                    <span class="form-control">{{offerDataContainer.offerData.forwarderContractNo}}</span>
+                                </div>
+
+                                <div class="col-sm-2 m-bottom-15">
+                                    <label>Forwarder Contract Person</label>
+                                    <span class="form-control">{{offerDataContainer.offerData.forwarderPIC}}</span>
+                                </div>
+
+                                <div class="col-sm-2 m-bottom-15">
+                                    <label>Forwarder Mobile</label>
+                                    <span class="form-control">{{offerDataContainer.offerData.forwarderPIC}}</span>
+                                </div>
+
+                                <div class="col-sm-2 m-bottom-15">
+                                    <label>Forwarder Mobile</label>
+                                    <span class="form-control">{{offerDataContainer.offerData.forwarderMobile}}</span>
+                                </div>
+
+                                <div class="col-sm-2 m-bottom-15">
+                                    <label>Forwarder Email</label>
+                                    <span class="form-control">{{offerDataContainer.offerData.forwarderEmail}}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane" id="hb6">
+                            <div class="row">
+                                <div class="col-sm-2 m-bottom-15">
+                                    <label>Put In Production Term</label>
+                                    <span class="form-control">{{offerDataContainer.offerData.putInProductionTermID}}</span>
+                                </div>
+
+                                <div class="col-sm-2 m-bottom-15">
+                                    <label>Put In Production Remark</label>
+                                    <span class="form-control">{{offerDataContainer.offerData.putInProductionRemark}}</span>
+                                </div>
+
+                                <div class="col-sm-2 m-bottom-15">
+                                    <label>20DC Qnt</label>
+                                    <span class="form-control">{{offerDataContainer.offerData.qntIn20DC}}</span>
+                                </div>
+
+                                <div class="col-sm-2 m-bottom-15">
+                                    <label>40DC Qnt</label>
+                                    <span class="form-control">{{offerDataContainer.offerData.qntIn40DC}}</span>
+                                </div>
+
+                                <div class="col-sm-2 m-bottom-15">
+                                    <label>40HC Qnt</label>
+                                    <span class="form-control">{{offerDataContainer.offerData.qntIn40HC}}</span>
+                                </div>
+
+                                <div class="col-sm-2 m-bottom-15">
+                                    <label>Partial Qnt</label>
+                                    <span class="form-control">{{offerDataContainer.offerData.partialQnt}}</span>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-12 m-bottom-15">
+                                    <label>Remark for Qnt</label>
+                                    <span class="form-control">{{offerDataContainer.offerData.qntRemark}}</span>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-12 m-bottom-15">
+                                    <label>OMSv4 OfferID</label>
+                                    <span class="form-control">{{offerDataContainer.offerData.v4id}}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <ul class="nav nav-tabs pull-left in">
+                    <li class="active">
+                        <a data-toggle="tab" href="#hb7"> <i class="fa fa-database"></i> <span class="hidden-mobile hidden-tablet">Product</span> </a>
+                    </li>
+                    <li>
+                        <a data-toggle="tab" href="#hb8"> <i class="fa fa-database"></i> <span class="hidden-mobile hidden-tablet">Sparepart</span> </a>
+                    </li>
+                </ul>
+            </header>
+            <div>
+                <div class="jarviswidget-editbox"></div>
+
+                <div class="widget-body">
+                    <div class="tab-content">
+
+                        <div class="tab-pane active" id="hb7">
+
+                            <div class="row">
+                                <div class="col-sm-12 m-bottom-15">
+                                    <div id="offerLineGrid" class="tilsoft-table-wrapper">
+                                        <div class="tilsoft-table">
+                                            <div class="tilsoft-table-header" style="width: 1480px; ">
+                                                <div style="width: 40px;">No</div>
+                                                <div style="width: 80px">Image</div>
+                                                <div style="width: 300px;">Description</div>
+                                                <div style="width: 50px;">Qnt</div>
+                                                <div style="width: 60px;">Unit Price</div>
+                                                @if (PurchasingAccessPermission)
+                                                {
+                                                    <div style="width: 60px;">Fact Price</div>
+                                                    <div style="width: 60px;">% Delta</div>
+                                                }
+
+                                                <div style="width: 100px;">Client Art Code</div>
+                                                <div style="width: 150px;">Client Ar Name</div>
+                                                <div style="width: 100px;">Client Order No</div>
+                                                <div style="width: 100px;">Client EAN Code</div>
+                                                <div style="width: 50px;">Qnt/ 40HC</div>
+                                                <div style="width: 60px;">Final Price</div>
+                                                <div style="width: 60px;">VAT Amount</div>
+                                                <div style="width: 100px;">Total Amount</div>
+                                                
+                                                @if (PurchasingAccessPermission)
+                                                {
+                                                    <div style="width: 100px; text-align: right;">Purchasing Amount</div>
+                                                }
+
+                                                <div></div>
+                                            </div>
+                                            <div class="tilsoft-table-totalrow" style="width: 1480px; margin-top: 50px;">
+                                                <div style="width: 40px;"></div>
+                                                <div style="width: 80px"></div>
+                                                <div style="width: 300px;">TOTAL</div>
+                                                <div style="width: 50px; text-align: right;">{{calTotalQuantity() | number:0}}</div>
+                                                <div style="width: 60px;"></div>
+
+                                                @if (PurchasingAccessPermission)
+                                                {
+                                                    <div style="width: 60px;"></div>
+                                                    <div style="width: 60px; text-align: right;">{{calTotalPurchase() > 0 ? (calTotalTotal() * (offerDataContainer.offerData.currency === ' EUR' ? offerDataContainer.offerData.exchangeRate : 1) - calTotalPurchase()) * 100 / calTotalPurchase() : null | number : 2}}%</div>
+                                                }
+
+                                                <div style="width: 100px;"></div>
+                                                <div style="width: 150px;"></div>
+                                                <div style="width: 100px;"></div>
+                                                <div style="width: 100px;"></div>
+                                                <div style="width: 50px; text-align: right;">{{calTotal40HCQuantity() | number:2}}</div>
+                                                <div style="width: 60px;"></div>
+                                                <div style="width: 60px; text-align: right;">{{calTotalVAT() | currency: (offerDataContainer.offerData.currency == 'USD' ? '$' : '&euro;') : 2}}</div>
+                                                <div style="width: 100px; text-align: right;">{{calTotalTotal() | currency: (offerDataContainer.offerData.currency == 'USD' ? '$' : '&euro;') : 2}}</div>
+
+                                                @if (PurchasingAccessPermission)
+                                                {
+                                                    <div style="width: 100px; text-align: right;">{{calTotalPurchase() | currency: '$' : 2}}</div>
+                                                }
+
+                                                <div></div>
+                                            </div>
+
+                                            <div class="tilsoft-table-body" style="width: 1480px; margin-top: 80px;">
+                                                <table id="table-sort">
+                                                    <tr ng-repeat="item in offerDataContainer.offerData.offerLines">
+                                                        <td class="index" style="width: 40px; text-align: right;">{{item.rowIndex | number:0}}</td>
+                                                        <td style="width: 80px; text-align: center; vertical-align: middle;">
+                                                            <a href="{{item.productFileLocation}}" data-featherlight="image">
+                                                                <img style="width: 95%;" ng-src="{{item.productThumbnailLocation}}" />
+                                                            </a>
+                                                        </td>
+                                                        <td style="width: 300px;text-align:left;"><span style="font-weight:bold;">{{item.articleCode}}</span><br />{{item.description}}</td>
+                                                        <td style="width: 50px; text-align: right;">{{item.quantity | number:0}}</td>
+                                                        <td style="width: 60px; text-align: right;">
+                                                            {{item.unitPrice | currency: (offerDataContainer.offerData.currency == 'USD' ? '$' : '&euro;') : 2}}
+                                                        </td>
+
+                                                        @if (PurchasingAccessPermission)
+                                                        {
+                                                        <td style="width: 60px; text-align: right;">{{item.avtPurchasingPrice | currency:(offerDataContainer.offerData.currency == 'USD' ? '$' : '&euro;'):2}}</td>
+                                                            <td style="width: 60px; text-align: right;">{{item.avtPurchasingPrice > 0 ? (item.unitPrice * ($parent.offerDataContainer.offerData.currency === ' EUR' ? $parent.offerDataContainer.offerData.exchangeRate : 1) - item.avtPurchasingPrice) * 100 / item.avtPurchasingPrice : null | number:2}}%</td>
+                                                        }
+
+                                                        <td style="width: 100px;">{{item.clientArticleCode}}</td>
+                                                        <td style="width: 150px;">{{item.clientArticleName}}</td>
+                                                        <td style="width: 100px;">{{item.clientOrderNumber}}</td>
+                                                        <td style="width: 100px;">{{item.clientEANCode}}</td>
+                                                        <td style="width: 50px; text-align: right;">
+                                                            {{item.orderQntIn40HC | number : 2}}
+                                                        </td>
+                                                        <td style="width: 60px; text-align: right">
+                                                            {{item.finalPrice | currency: (offerDataContainer.offerData.currency == 'USD' ? '$' : '&euro;') : 2}}
+                                                        </td>
+                                                        <td style="width: 60px; text-align: right; ">
+                                                            {{item.vatAmount | currency: (offerDataContainer.offerData.currency == 'USD' ? '$' : '&euro;') : 2}}
+                                                        </td>
+                                                        <td style="width: 100px; text-align: right; ">
+                                                            {{item.totalAmount | currency: (offerDataContainer.offerData.currency == 'USD' ? '$' : '&euro;') : 2}}
+                                                        </td>
+
+                                                        @if (PurchasingAccessPermission)
+                                                        {
+                                                            <td style="width: 100px; text-align: right;">{{item.quantity * item.avtPurchasingPrice | currency:'$':2}}</td>
+                                                        }
+                                                        
+                                                        <td></td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane" id="hb8">
+
+                            <div class="row">
+                                <div class="col-sm-12 m-bottom-15">
+                                    <div id="OffeLineSparepartGrid" class="tilsoft-table-wrapper">
+                                        <div class="tilsoft-table">
+                                            <div class="tilsoft-table-header" style="width: 1500px;">
+                                                <div style="width: 40px;">No</div>
+                                                <div style="width: 400px;">Description</div>
+                                                <div style="width: 50px;">Qnt</div>
+                                                <div style="width: 80px;">Unit Price</div>
+                                                <div style="width: 200px;">remark</div>
+                                                <div></div>
+                                            </div>
+                                            <div class="tilsoft-table-body" style="width: 1500px;">
+                                                <table>
+                                                    <tr ng-repeat="item in offerDataContainer.offerData.offerLineSpareparts">
+                                                        <td style="width: 40px; text-align: right;">{{item.rowIndex | number:0}}</td>
+                                                        <td style="width: 400px;">
+                                                            <strong>{{item.articleCode}}</strong>
+                                                            <br/>
+                                                            {{item.description}}
+                                                        </td>
+                                                        <td style="width: 50px; text-align: right;">{{item.quantity | number:0}}</td>
+                                                        <td style="width: 80px; text-align: right;">{{item.unitPrice | currency: (offerDataContainer.offerData.currency == 'USD' ? '$' : '&euro;') : 2}}</td>
+                                                        <td style="width: 200px;">{{item.remark}}</td>
+                                                        <td></td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+
+</form>
+
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Edit", "Offer")/@ViewBag.ID/1" class="btn btn-default" title="Back to offer"><i class="fa fa-pencil"></i></a>
+        </li>
+
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default@(ViewBag.ID==0?" disabled":"") @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Print, HttpContext.Current))" title="Print Version 1. With full size image of product" ng-click="printOffer5_FullSizeImage($event)" target="_blank"><i class="fa fa-print"></i></a>
+        </li>
+
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default@(ViewBag.ID==0?" disabled":"") @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Print, HttpContext.Current))" title="Print Version 1. With full size image of product. Email (Auto attach file to outlook to prepare to send email to customer)" ng-click="printOffer5AndSendEmail_FullSizeImage($event)" target="_blank"><i class="fa fa-print"></i></a>
+        </li>
+
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default@(ViewBag.ID==0?" disabled":"") @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Print, HttpContext.Current))" title="Print Version 1. With small size image of product" ng-click="printOffer5($event)" target="_blank"><i class="fa fa-print"></i></a>
+        </li>
+
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default@(ViewBag.ID==0?" disabled":"") @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Print, HttpContext.Current))" title="Print Version 1. With small size image of product Email (Auto attach file to outlook to prepare to send email to customer)" ng-click="printOffer5AndSendEmail($event)" target="_blank"><i class="fa fa-print"></i></a>
+        </li>
+
+    </ul>
+}
+
+@section pagejs {
+    <script src="~/Angular/app/offer/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/support/service.js?c=@System.Guid.NewGuid().ToString().Replace("-","")"></script>
+    <script type="text/javascript">
+
+        var offerLineGrid = jQuery('#offerLineGrid').scrollableTable(null,function(sortedBy, sortedDirection){
+            var scope = angular.element(jQuery('body')).scope();
+            datasource = scope.offerDataContainer.offerData.offerLines;
+            if (sortedDirection == 'asc') {
+                datasource.sort(function(a,b){
+                    return a[sortedBy] > b[sortedBy] ? 1: -1;
+                });
+            }
+            else if (sortedDirection == 'desc') {
+                datasource.sort(function(a,b){
+                    return a[sortedBy] < b[sortedBy] ? 1: -1;
+                });
+            }
+            scope.$apply();
+        });
+
+        var OffeLineSparepartGrid = jQuery('#OffeLineSparepartGrid').scrollableTable(null,function(sortedBy, sortedDirection){
+            var scope = angular.element(jQuery('body')).scope();
+            datasource = scope.offerDataContainer.offerData.offerLineSpareparts;
+            if (sortedDirection == 'asc') {
+                datasource.sort(function(a,b){
+                    return a[sortedBy] > b[sortedBy] ? 1: -1;
+                });
+            }
+            else if (sortedDirection == 'desc') {
+                datasource.sort(function(a,b){
+                    return a[sortedBy] < b[sortedBy] ? 1: -1;
+                });
+            }
+            scope.$apply();
+        });
+
+        var quickSearchClientGrid = jQuery('#quickSearchClientTable').scrollableTable(
+        function(currentPage){
+            var scope = angular.element(jQuery('body')).scope();
+            scope.$apply(function(){
+                scope.quicksearchClient.filters.pageIndex = currentPage;
+                scope.quicksearchClient.method.searchClient();
+            });
+        },
+        function(sortedBy, sortedDirection){
+            //do nothing
+        }
+    );
+
+
+    function drag(){
+        updateIndex = function(e, ui) {
+            $('td.index', ui.item.parent()).each(function (i) {
+                $(this).find('input').val(i+1);
+                $(this).find('input').trigger('input')
+            });
+        };
+        $("#table-sort tbody").sortable({
+            stop: updateIndex
+        });
+    }
+
+    function drop(){
+        $("#table-sort tbody").sortable("destroy");
+    }
+
+
+
+    offerService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/offer/';
+    offerService.supportServiceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/support/';
+    offerService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+    supportService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/support/';
+    supportService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+    var tilsoftApp = angular.module('tilsoftApp', ['customFilters','furnindo-directive', 'ui']);
+
+    tilsoftApp.controller('tilsoftController', ['$scope', function ($scope) {
+        $scope.offerDataContainer = null;
+        $scope.productSupportData = null;
+
+        $scope.load = function()
+        {
+            //load data
+            offerService.getoverview('@ViewBag.ID',
+                function (data) {
+                    $scope.offerDataContainer = data.data;
+                    $scope.$apply();
+
+                    jQuery('#content').show();
+                    // monitor changes
+                    $scope.$watch('offer', function() {
+                        jQuery('#changeNotification').html('<i class="fa fa-save blink_me"></i>');
+                    });
+                },
+                function (error) {
+                    jsHelper.showMessage('warning', error);
+
+                    $scope.offerDataContainer = null;
+                    $scope.$apply();
+                }
+            );
+        }
+
+        //print vesion 1
+        $scope.printOffer = function($event){
+            $event.preventDefault();
+            offerService.getPrintDataOffer(@ViewBag.ID,
+                function (data) {
+                    window.location = '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]' + data.data + '.xlsm';
+                },
+                function (error) {
+                    jsHelper.showMessage('warning', error);
+                }
+            );
+        }
+
+        //print version 2
+        $scope.printOffer2 = function($event){
+            $event.preventDefault();
+            offerService.getPrintDataOffer2(@ViewBag.ID,
+                function (data) {
+                    window.location = '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]' + data.data + '.xlsm';
+                },
+                function (error) {
+                    jsHelper.showMessage('warning', error);
+                }
+            );
+        }
+
+        //print version 5 with small image
+        $scope.printOffer5 = function($event){
+            $event.preventDefault();
+            offerService.getPrintDataOffer5(@ViewBag.ID,false,false,1,
+                function (data) {
+                    jsHelper.processMessage(data.message);
+                    if (data.message.type != 2)
+                    {
+                        window.location = '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]' + data.data;
+                    }
+                },
+                function (error) {
+                    jsHelper.showMessage('warning', error);
+                }
+            );
+        }
+
+        $scope.printOffer5AndSendEmail = function($event){
+            $event.preventDefault();
+            offerService.getPrintDataOffer5(@ViewBag.ID,true,false,1,
+                function (data) {
+                    window.location = '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]' + data.data;
+                },
+                function (error) {
+                    jsHelper.showMessage('warning', error);
+                }
+            );
+        }
+
+        //print version 5 with full size image
+        $scope.printOffer5_FullSizeImage = function($event){
+            $event.preventDefault();
+            offerService.getPrintDataOffer5(@ViewBag.ID,false,true,1,
+                function (data) {
+                    jsHelper.processMessage(data.message);
+                    if (data.message.type != 2)
+                    {
+                        window.location = '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]' + data.data;
+                    }
+                },
+                function (error) {
+                    jsHelper.showMessage('warning', error);
+                }
+            );
+        }
+
+        $scope.printOffer5AndSendEmail_FullSizeImage = function($event){
+            $event.preventDefault();
+            offerService.getPrintDataOffer5(@ViewBag.ID,true,true,1,
+                function (data) {
+                    window.location = '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]' + data.data;
+                },
+                function (error) {
+                    jsHelper.showMessage('warning', error);
+                }
+            );
+        }
+
+
+
+        $scope.calTotalQuantity = function(){
+            if ($scope.offerDataContainer == null) return;
+            var total = parseInt('0');
+            angular.forEach($scope.offerDataContainer.offerData.offerLines, function(item){
+                total +=(JSON.stringify(item.quantity) == 'null' ? parseInt('0') : parseInt(item.quantity));
+            })
+            return total;
+        }
+
+        $scope.calTotal40HCQuantity = function(){
+            if ($scope.offerDataContainer == null) return;
+            var total = parseFloat('0');
+            angular.forEach($scope.offerDataContainer.offerData.offerLines, function(item){
+                total +=(JSON.stringify(item.orderQntIn40HC) == 'null' ? parseFloat('0') : parseFloat(item.orderQntIn40HC));
+            })
+            return total;
+        }
+
+        $scope.calTotalCommission = function(){
+            if ($scope.offerDataContainer == null) return;
+            var total = 0;
+            angular.forEach($scope.offerDataContainer.offerData.offerLines, function(item){
+                total = total + item.commissionAmount;
+            })
+            return total;
+        }
+
+        $scope.calTotalSurcharge = function(){
+            if ($scope.offerDataContainer == null) return;
+            var total = 0;
+            angular.forEach($scope.offerDataContainer.offerData.offerLines, function(item){
+                total = total + item.surchargeAmount;
+            })
+            return total;
+        }
+
+        $scope.calTotalSubTotal = function(){
+            if ($scope.offerDataContainer == null) return;
+            var total = 0;
+            angular.forEach($scope.offerDataContainer.offerData.offerLines, function(item){
+                total = total + item.subTotalAmount;
+            })
+            return total;
+        }
+
+        $scope.calTotalVAT = function(){
+            if ($scope.offerDataContainer == null) return;
+            var total = 0;
+            angular.forEach($scope.offerDataContainer.offerData.offerLines, function(item){
+                total = total + item.vatAmount;
+            })
+            return total;
+        }
+
+        $scope.calTotalTotal = function(){
+            if ($scope.offerDataContainer == null) return;
+            var total = 0;
+            angular.forEach($scope.offerDataContainer.offerData.offerLines, function(item){
+                total = total + item.totalAmount;
+            })
+            return total;
+        }
+
+        $scope.calTotalPurchase = function(){
+            if ($scope.offerDataContainer == null) return;
+            var total = 0;
+            angular.forEach($scope.offerDataContainer.offerData.offerLines, function(item){
+                total = total + parseFloat(item.avtPurchasingPrice * item.quantity);
+            })
+            return total;
+        }
+
+        $scope.validteModelData = function(modelItem){
+            errorInfo = '';
+            if (modelItem.modelNM == null || modelItem.modelNM == '')
+            {
+                errorInfo += "Model Name | ";
+            }
+            if (modelItem.productTypeID == null || modelItem.productTypeID == 0)
+            {
+                errorInfo += "Type | ";
+            }
+            if (modelItem.manufacturerCountryID == null || modelItem.manufacturerCountryID == 0)
+            {
+                errorInfo += "Country | ";
+            }
+            if (modelItem.rangeName == null || modelItem.rangeName == '')
+            {
+                errorInfo += "Range Name | ";
+            }
+            if (modelItem.collection == null || modelItem.collection == '')
+            {
+                errorInfo += "Collection | ";
+            }
+            if (modelItem.modelStatusID == null || modelItem.modelStatusID == 0)
+            {
+                errorInfo += "Status | ";
+            }
+            if (modelItem.season == null || modelItem.season == '')
+            {
+                errorInfo += "Season | ";
+            }
+            if (modelItem.productGroupID == null || modelItem.productGroupID == 0)
+            {
+                errorInfo += "Group | ";
+            }
+            if (modelItem.productCategoryID == null || modelItem.productCategoryID == 0)
+            {
+                errorInfo += "Category | ";
+            }
+            if (modelItem.fileLocation == null || modelItem.fileLocation == '' || modelItem.fileLocation.indexOf('no-image')!=-1)
+            {
+                errorInfo += "Free scan image | ";
+            }
+            if (modelItem.packagingMethodID == null || modelItem.packagingMethodID == 0)
+            {
+                errorInfo += "PackagingMethod | ";
+            }
+            if (modelItem.qnt40HC == null || modelItem.qnt40HC == 0)
+            {
+                errorInfo += "Loadability 40HC | ";
+            }
+            if (modelItem.overallDimL == null || modelItem.overallDimL == '')
+            {
+                errorInfo += "Overall Dim L | ";
+            }
+            if (modelItem.overallDimW == null || modelItem.overallDimW == '')
+            {
+                errorInfo += "Overall Dim W | ";
+            }
+            if (modelItem.overallDimH == null || modelItem.overallDimH == '')
+            {
+                errorInfo += "Overall Dim H | ";
+            }
+            if (modelItem.seatDimL == null || modelItem.seatDimL == '')
+            {
+                errorInfo += "Seat Dim L | ";
+            }
+            if (modelItem.seatDimW == null || modelItem.seatDimW == '')
+            {
+                errorInfo += "Seat Dim W | ";
+            }
+            if (modelItem.seatDimH == null || modelItem.seatDimH == '')
+            {
+                errorInfo += "Seat Dim H | ";
+            }
+            if (modelItem.armDimL == null || modelItem.armDimL == '')
+            {
+                errorInfo += "Arm Dim L | ";
+            }
+            if (modelItem.armDimW == null || modelItem.armDimW == '')
+            {
+                errorInfo += "Arm Dim W | ";
+            }
+            if (modelItem.armDimH == null || modelItem.armDimH == '')
+            {
+                errorInfo += "Arm Dim H | ";
+            }
+
+            if (errorInfo!='')
+            {
+                jsHelper.showMessage('info','You can not add model <a href="@Url.Action("Edit", "Model")/'+ modelItem.modelID +'" style="text-decoration:underline" target="_blank">'+modelItem.modelUD+'</a> to offfer because these fields is empty: ' + errorInfo + '. <a href="@Url.Action("Edit", "Model")/'+ modelItem.modelID +'" style="text-decoration:underline" target="_blank">Click here to edit this model by fill-in these fields</a>');
+                return false;
+            }
+            return true;
+        }
+
+        //load form
+        $scope.load();
+
+    }]);
+
+    </script>
+}
+
+
+
+

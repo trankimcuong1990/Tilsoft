@@ -1,0 +1,138 @@
+﻿
+
+@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    var pageSize = System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"];
+    var cookieID = HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString();
+    ViewBag.Title = "Search Cost Invoice 2 Creditor";
+    ViewBag.Module = "Cost Invoice 2 Creditor";
+}
+
+
+<div class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-table"></i>
+                </span>
+                <h2>Search Result</h2>
+            </header>
+            <div>
+                <div class="jarviswidget-editbox"></div>
+                <div class="widget-body">
+                    <div class="tilsoft-table-wrapper" avs-scroll grid-handler="gridHandler">
+                        <div class="tilsoft-table">
+
+                            <div class="tilsoft-table-header" style="width: 600px">
+                                <div style="width: 81px" >FOUND(s)<br /><b style="color:#a90329;">{{totalRows}}</b></div>
+                                <div style="width:100px">CODE</div>
+                                <div style="width:250px">NAME</div>
+                                <div>Description</div>
+                            </div>              
+                            <div class="tilsoft-table-body" style="width: 600px">
+                                <table>
+                                    <tbody>
+                                        <tr  style="background-color:#eee; text-align:center;">
+                                            <td style="width: 80px">
+                                                <a href="javascript:void(0)" class="btn btn-default btn-xs" title="Apply Filter" ng-click="event.reloadpage()"><i class="fa fa-filter"></i></a>
+                                                <a>&nbsp</a>
+                                                <a href="javascript:void(0)" class="btn btn-default btn-xs" title="Clear Filter" ng-click="event.clearfilter()"><i class="fa fa-ban"></i></a>
+                                            </td>
+                                            <td style="width:100px">
+                                                <input   type="text" class="form-control search-filter" maxlength="255" ng-model="filters.CostInvoice2CreditorUD">                       
+                                            </td>
+                                            <td style="width:250px">
+                                                <input type="text" class="form-control search-filter" maxlength="255" ng-model="filters.CostInvoice2CreditorNM">
+                                            </td>
+                                            <td></td>
+                                        </tr>
+                                        <tr ng-repeat="item in data">
+
+                                            
+                                            <td style="width: 80px">
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current) == "disabled")
+                                                {
+                                                    <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "CostInvoice2CreditorMng")/{{item.costInvoice2CreditorID}}" title="View (Read Only)" target="_blank"><i class="fa fa-folder-open"></i> View</a>
+                                                }
+                                                else
+                                                {
+                                                    <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "CostInvoice2CreditorMng")/{{item.costInvoice2CreditorID}}" title="Edit" target="_blank" style="width:60px"><i class="fa fa-pencil"></i> Edit</a>
+                                                }
+
+                                                <br/>
+
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current) != "disabled")
+                                                {
+                                                    <a class="btn btn-danger btn-xs font-11" href="#" title="Delete" ng-click="event.deleterow(item.costInvoice2CreditorID, $index)" style="margin-top:3px; width:60px"><i class="fa fa-times"></i> Del</a>
+                                                }
+                                            </td>
+
+                                          
+                                            <td style="width:100px">
+                                                {{item.costInvoice2CreditorUD}}
+                                            </td>
+                                            <td style="width:250px">
+                                                {{item.costInvoice2CreditorNM}}
+                                            </td>
+                                            <td>
+                                                {{item.description}}
+                                            </td>
+                                        </tr>
+                                        
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    @*<span>Found: <b>{{totalRows}}</b> record(s).</span>*@
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction{
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default" title="Search" ng-click="event.reloadpage()">
+                <i class="fa fa-search"></i>
+            </a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default" title="Refresh" ng-click="event.reloadpage()">
+                <i class="fa fa-refresh"></i>
+            </a>
+        </li>
+        <li class="sparks-info">
+            <a href="@Url.Action("Edit","CostInvoice2CreditorMng")/0" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="New">
+                <i class="fa fa-file-o"></i>
+            </a>
+        </li>
+    </ul>
+}
+
+@section pagejs{
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(serviceRoot)/api/costinvoice2creditormng/',
+            token: '@token',
+            pageSize: '@pageSize',
+            cookieID: '@cookieID'
+        }
+    </script>
+    <script type="text/javascript" src="~/Angular/app/costInvoice2CreditorMng/index.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/costInvoice2CreditorMng/service.js?v=@guid"></script>
+
+}
+
+
+
+
+
+
+
+

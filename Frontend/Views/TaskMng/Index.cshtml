@@ -1,0 +1,148 @@
+﻿@{
+    ViewBag.Title = "Search Task";
+    ViewBag.Module = "To do list";
+    ViewBag.Icon = "fa-search";
+    Frontend.APIDTO.APIUserInformation userInfo = (Frontend.APIDTO.APIUserInformation)Session[Frontend.Customize.Common.ProjectDefinition.USER_INFO_SESSION];
+}
+
+<div class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-search-filter" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Search Filters</h2>
+            </header>
+            <div>
+                <div class="widget-body">
+                    <div class="smart-form">
+                        <fieldset>
+                            <div class="row">
+                                <section class="col col-2">
+                                    <label class="label">Code</label>
+                                    <label class="input">
+                                        <input class="search-filter" type="text" ng-model="filters.TaskUD" />
+                                    </label>
+                                </section>
+                                <section class="col col-2">
+                                    <label class="label">Name</label>
+                                    <label class="input">
+                                        <input class="search-filter" type="text" ng-model="filters.TaskNM" />
+                                    </label>
+                                </section>
+                                <section class="col col-2">
+                                    <label class="label">Status</label>
+                                    <label class="select">
+                                        <select class="form-control search-filter" ng-model="filters.TaskStatusID" ng-options="taskStatus.taskStatusID as taskStatus.taskStatusNM for taskStatus in taskStatuses">
+                                            <option value=""></option>
+                                        </select>
+                                        <i></i>
+                                    </label>
+                                </section>
+                                <section class="col col-4">
+                                    <label class="label">User</label>
+                                    <label class="select">
+                                        <select class="form-control search-filter" ng-model="filters.TaskUserID" ng-options="user.userId as user.fullName + ' (' + user.officeNM + ')' for user in users">
+                                            <option value=""></option>
+                                        </select>
+                                        <i></i>
+                                    </label>
+                                </section>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-0" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Search Result</h2>
+            </header>
+
+            <div>
+                <div class="widget-body">
+                    <div id="searchResult" class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header" style="width: 1000px;">
+                                <div style="width: 80px;"></div>
+                                <div style="width: 80px">Status</div>
+                                <div style="width: 300px">Task</div>
+                                <div style="width: 100px">Start Date</div>
+                                <div style="width: 100px">Est End Date</div>
+                                <div style="width: 100px">End Date</div>
+                                <div style="width: 80px">%</div>
+                                <div>Tracking</div>
+                            </div>
+                            <div class="tilsoft-table-body" style="width: 1000px;">
+                                <table>
+                                    <tr ng-repeat="model in data">
+                                        <td style="width: 80px; text-align: center;">
+                                            @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current) == "disabled")
+                                            {
+                                                <a style="width: 54px; margin-bottom: 5px;" class="btn btn-primary btn-xs font-11" target="_blank" href="@Url.Action("Edit", "TaskMng")/{{model.taskID}}" title="View (Read Only)"><i class="fa fa-folder-open"></i> View</a>
+                                            }
+                                            else
+                                            {
+                                                <a ng-if="@userInfo.Data.UserId != model.updatedBy" style="width: 54px; margin-bottom: 5px;" class="btn btn-primary btn-xs font-11" target="_blank" href="@Url.Action("ReadOnly", "TaskMng")/{{model.taskID}}" title="View (Read Only)"><i class="fa fa-folder-open"></i> View</a>
+                                                <a ng-if="@userInfo.Data.UserId == model.updatedBy" style="width: 54px; margin-bottom: 5px;" class="btn btn-primary btn-xs font-11" target="_blank" href="@Url.Action("Edit", "TaskMng")/{{model.taskID}}" title="Edit"><i class="fa fa-pencil"></i> Edit</a>
+                                            }
+
+                                            @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current) != "disabled")
+                                            {
+                                                <a style="width: 54px;" class="btn btn-danger btn-xs font-11  {{@userInfo.Data.UserId == model.updatedBy ? '' : 'disabled'}}" href="javascript:void(0)" ng-click="event.delete(model.taskID)" title="Delete"><i class="fa fa-times"></i> Del</a>
+                                            }
+                                        </td>
+                                        <td style="width: 80px; text-align: center;">{{model.taskStatusNM}}</td>
+                                        <td style="width: 300px;">
+                                            <strong>{{model.taskUD}}</strong>
+                                            <br/>
+                                            {{model.taskNM}}
+                                        </td>
+                                        <td style="width: 100px; text-align: center;">{{model.startDate}}</td>
+                                        <td style="width: 100px; text-align: center;">{{model.estEndDate}}</td>
+                                        <td style="width: 100px; text-align: center;">{{model.endDate}}</td>
+                                        <td style="width: 80px; text-align: center;">{{model.completedPercent}}</td>
+                                        <td>
+                                            <strong>{{model.updatorName}}</strong>
+                                            <br/>
+                                            {{model.updatedDate}}
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Search" ng-click="event.reload()"><i class="fa fa-search"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Refresh" ng-click="event.reload()"><i class="fa fa-refresh"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="@Url.Action("Edit", "TaskMng")/0" target="_blank" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="New"><i class="fa fa-file-o"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default disabled" title="Print"><i class="fa fa-print"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script src="~/Angular/app/jsonService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script type="text/javascript">
+        jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/task/';
+        jsonService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+        jsonService.searchFilter.pageSize = @System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"];
+    </script>
+    <script src="~/Angular/app/taskMng/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/taskMng/index.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}

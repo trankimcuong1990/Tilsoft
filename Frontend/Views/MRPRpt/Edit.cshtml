@@ -1,0 +1,265 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var supportServiceRoot = (System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"]);
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    var backendReportUrl = @System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"];
+
+
+
+    var fromDate = ViewBag.FromDate;
+    var toDate = ViewBag.ToDate;
+    var id = ViewBag.ID;
+
+    ViewBag.Title = "MRP OverView";
+    ViewBag.SubTitle = "MRP OverView";
+    ViewBag.Module = "MRP OverView";
+}
+
+<style>
+    .tilsoft-table-header, .tilsoft-table-filter, .tilsoft-table-body {
+        width:{{280 + dateRange.length*80}}px;
+    }
+    .ui-autocomplete {
+        max-height: 150px;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .ui-menu-item > a.ui-corner-all {
+        display: block;
+        padding: 3px 15px;
+        clear: both;
+        /*font-weight: normal;*/
+        line-height: 18px;
+        /*color: #555555;*/
+        white-space: nowrap;
+        font-size: 11px;
+    }
+
+    .modal-dialog {
+        top: 100px !important
+    }
+
+    .tilsoft-table .tilsoft-table-header div, .tilsoft-table .tilsoft-table-filter div, .tilsoft-table .tilsoft-table-totalrow div, .tilsoft-table .tilsoft-table-subtotalrow div {
+        height: 29px;
+    }
+
+ 
+    .missing-project-on-hand {
+        background-color: #ffd800
+    }
+
+    .tilsoft-table-header > div {
+        height: 70px !important;
+    }
+
+    .tilsoft-table-body {
+        margin-top: 0px !important;
+    }
+
+
+</style>
+<form name="editForm" class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>MRP OverView</h2>
+            </header>
+            <div>
+                <div class="jarviswidget-editbox"></div>
+                <div class="widget-body">
+                    <div class="smart-form">
+                        <div class="row">
+                            <section class="col col-sm-4">
+                                <label class="label">Production Code</label>
+                                <label class="input">
+                                    <input type="text" class="form-control" style="font-family:Arial" readonly ng-model="data.productionItemUD" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-8">
+                                <label class="label">Production Name</label>
+                                <label class="input">
+                                    <input type="text" class="form-control" style="font-family:Arial" readonly ng-model="data.productionItemNM" />
+                                </label>
+                            </section>
+                        </div>
+                        <div class="row">
+                            <section class="col col-sm-2">
+                                <label class="label">Minimum QNT</label>
+                                <label class="input">
+                                    <input type="text" class="form-control" style="font-family:Arial; text-align:right" readonly ng-model="data.minQnt" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label class="label">Maximum QNT:</label>
+                                <label class="input">
+                                    <input type="text" class="form-control" style="font-family:Arial;text-align:right" readonly ng-model="data.maxQnt" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label class="label">Lead time (days):</label>
+                                <label class="input">
+                                    <input type="text" class="form-control" style="font-family:Arial;text-align:right" readonly ng-model="data.leadTime" />
+                                </label>
+                            </section>
+                        </div>
+
+                        <div class="well-sm col-lg-12 smart-form m-bottom-15">
+                            <div class="row">
+                                <label class="label" style="margin-left:14px">
+                                    <h1 style="display:inline">MRP Plan</h1>
+                                    <a class="btn btn-primary" style="display:inline-block; margin-top:-8px; width:100px; text-align:center; margin-left:50px" ng-click="event.showActual()"> <i class="fa fa-list"></i> Actual</a>
+                                    <a class="btn btn-primary" style="display:inline-block; margin-top:-8px; width:100px; text-align:center; margin-left:10px" ng-click="event.showPlan(data.minQnt,data.leadTime)"> <i class="fa fa-list"></i> Plan</a>
+                                </label>
+                            </div>
+                            <br />
+                            <hr />
+                            @*This Is For Actual*@
+                            <fieldset style="padding: 0px;" ng-if="isshow === 1" ng-model="isshow">
+                                <div class="widget-body">
+                                    <div id="" class="tilsoft-table-wrapper">
+                                        <div class="tilsoft-table">
+                                            <div class="tilsoft-table-body" style="margin-top:0px">
+                                                <table id="nl">
+                                                    <tbody>
+                                                        <tr style="background-color:darkgrey">
+                                                            <td style="text-align:center; width:150px"></td>
+                                                            <td style="text-align:center; width:130px">Project On Hand</td>
+                                                            <td style="text-align:center; width:80px" ng-repeat="item in dateRange">
+                                                                <span>{{item.date}}</span>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td style="text-align:center; width:150px">Gross Requirements</td>
+                                                            <td style="text-align:center; width:130px"></td>
+                                                            <td style="text-align:right; width:80px" ng-repeat="itemRequest in purchaseRequestArr">
+                                                                <span>{{itemRequest.requestQnt | number : 2}}</span>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td style="text-align:center; width:150px">Scheduled Receipts</td>
+                                                            <td style="text-align:center; width:130px"></td>
+                                                            <td style="text-align:right; width:80px" ng-repeat="itemOrder in purchaseOrderArr">
+                                                                <span>{{itemOrder.plannedReceivingQnt | number: 2}}</span>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td style="text-align:center; width:150px">Projected on Hand</td>
+                                                            <td style="text-align:center; width:130px">{{data.projectOnHand}}</td>
+                                                            <td style="text-align:right; width:80px" ng-repeat="itemPr in projectOnHandArr" ng-class="itemPr.stockQnt<0?'missing-project-on-hand':''">
+                                                                {{itemPr.stockQnt | number: 2}}
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </fieldset>
+
+                            @*This Is For Plan*@
+                            <fieldset style="padding: 0px;" ng-if="isshow === 2" ng-model="isshow">
+                                <div class="widget-body">
+                                    <div id="" class="tilsoft-table-wrapper">
+                                        <div class="tilsoft-table">
+                                            <div class="tilsoft-table-body" style=" overflow-y:auto; height:auto; min-height:100px; margin-top:0px;">
+                                                <table id="nl">
+                                                    <tbody>
+                                                        <tr style="background-color:darkgrey">
+                                                            <td style="text-align:center; width:150px"></td>
+                                                            <td style="text-align:center; width:130px">Project On Hand</td>
+                                                            <td style="text-align:center; width:80px" ng-repeat="item in dateRange">
+                                                                <span>{{item.date}}</span>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td style="text-align:center; width:150px">Gross Requirements</td>
+                                                            <td style="text-align:center; width:130px"></td>
+                                                            <td style="text-align:right; width:80px" ng-repeat="itemRequest in purchaseRequestArr">
+                                                                <span>{{itemRequest.requestQnt | number : 2}}</span>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td style="text-align:center; width:150px">Scheduled Receipts</td>
+                                                            <td style="text-align:center; width:130px"></td>
+                                                            <td style="text-align:right; width:80px" ng-repeat="itemOrder in purchaseOrderArr">
+                                                                <span>{{itemOrder.plannedReceivingQnt | number: 2}}</span>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td style="text-align:center; width:150px">Projected on Hand</td>
+                                                            <td style="text-align:center; width:130px">{{data.projectOnHand}}</td>
+                                                            <td style="text-align:right; width:80px" ng-repeat="itemPl in planProjectOnHandArr">
+                                                                {{itemPl.qnt | number : 2}}
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td style="text-align:center; width:150px">Planned Order Receipts</td>
+                                                            <td style="text-align:center; width:130px"></td>
+                                                            <td style="text-align:right; width:80px" ng-repeat="itemdRceip in planOderRelaseArr">
+                                                                {{itemdRceip.plannedOrderReceipts | number: 2}}
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td style="text-align:center; width:150px">Planned Order Releases</td>
+                                                            <td style="text-align:center; width:130px"></td>
+                                                            <td style="text-align:right; width:80px" ng-repeat="itemPlRe in planOderRelaseArr">
+                                                                {{itemPlRe.planOderReleaseQnt | number : 2}}
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "MRPRpt")" class="btn btn-default" title="Back">
+                <i class="fa fa-arrow-left"></i>
+            </a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Export Excel" style="color: #31B404"><i class="fa fa-file-excel-o"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs{
+
+    <script type="text/javascript">
+        var context = {
+            id: '@id',
+            fromDate: '@fromDate',
+            toDate: '@toDate',
+            token: '@token',
+            backUrl: '@Url.Action("Index", "MRPRpt")',
+            refreshUrl: '@Url.Action("Edit", "MRPRpt", new { id = UrlParameter.Optional })/',
+            serviceUrl: '@(serviceRoot)/api/mrprpt/',
+            servicePath: '@(serviceRoot)/Reports/',
+            supportServiceUrl: '@(serviceRoot)/api/support/',
+            backendReportUrl: '@backendReportUrl'
+        };
+    </script>
+
+    <script type="text/javascript" src="~/Views/MRPRpt/Edit.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Views/MRPRpt/Service.js?v=@guid"></script>
+
+}
+

@@ -1,0 +1,145 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var pageSize = System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"];
+    var cookieID = HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString();
+    ViewBag.Title = "Search Due Color";
+    ViewBag.Module = "Due Color";
+    ViewBag.Icon = "fa-bar-chart-o";
+
+    string userManualUrl = string.Empty;
+    if (System.IO.File.Exists(Server.MapPath("~/UserManual/" + ViewBag.ModuleCode + ".pdf")))
+    {
+        userManualUrl = "/UserManual/" + ViewBag.ModuleCode + ".pdf";
+    }
+
+}
+
+<form class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-search-filter" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-filter"></i> </span>
+                <h2>Search Results</h2>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div avs-scroll grid-handler="gridHandler" class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header">
+                                <div style="width:100px;vertical-align:middle;text-align:center">@*Found(s)<br /><strong style="color:maroon">{{totalRows}} <font style="color:maroon; text-transform:none">row(s)</font></strong>*@</div>
+                                <div class="sorting" style="width:80px;vertical-align:middle;text-align:center" data-colname="DueColorUD">Code</div>
+                                <div class="sorting_asc" style="vertical-align:middle;text-align:center; width:200px;" data-colname="DueColorUD">Name</div>
+                                <div style="width: 70px">From Due</div>
+                                <div style="width: 70px">To Due</div>
+                                <div></div>
+                            </div>
+                            <div class="tilsoft-table-filter" style="top: 50px">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>
+                                                <div style="width:100px;text-align:center;vertical-align:middle;border-right:solid 1px #ddd">
+                                                    <a href="javascript:void(0)" class="btn btn-{{isDefaultFilter?'default':'primary'}} btn-xs" title="Apply Filter" ng-click="event.refresh()"><i class="fa fa-filter"></i></a>
+                                                    <a href="javascript:void(0)" class="btn btn-default btn-xs" title="Clear Filter" ng-click="event.clear()"><i class="fa fa-ban"></i></a>
+                                                </div>
+                                            </th>
+                                            <th>
+                                                <div style="width:80px;text-align:center;vertical-align:middle;border-right:solid 1px #ddd">
+                                                    @*<input class="search-filter" style="text-align:center;font-weight:normal" type="text" maxlength="3" ng-model="filters.DueColorUD" />*@
+                                                </div>
+                                            </th>
+                                            <th>
+                                                <div style="text-align:center;vertical-align:middle;width:200px;border-right:solid 1px #ddd">
+                                                    <input class="search-filter" style="text-align:left;float:left;width:100%;font-weight:normal" type="text" maxlength="255" ng-model="filters.DueColorNM" />
+                                                </div>
+                                            </th>
+                                            <th>
+                                                <div style="width:70px;text-align:center;vertical-align:middle;border-right:solid 1px #ddd">
+                                                    @*<input class="search-filter" style="text-align:center;font-weight:normal" type="text" maxlength="3" ng-model="filters.DueColorUD" />*@
+                                                </div>
+                                            </th>
+                                            <th>
+                                                <div style="width:70px;text-align:center;vertical-align:middle;border-right:solid 1px #ddd">
+                                                    @*<input class="search-filter" style="text-align:center;font-weight:normal" type="text" maxlength="3" ng-model="filters.DueColorUD" />*@
+                                                </div>
+                                            </th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                            <div class="tilsoft-table-body" style="margin-top: 95px">
+                                <table>
+                                    <tbody>
+                                        <tr ng-repeat="item in data">
+                                            <td style="width:99px;text-align:center;vertical-align:middle">
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current) == "disabled")
+                                                {
+                                                    <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "DueColorMng")/{{item.dueColorID}}" style="width:80px" title="View (Read Only)"><i class="fa fa-folder-open"></i> View</a>
+                                                }
+                                                else
+                                                {
+                                                    <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "DueColorMng")/{{item.dueColorID}}" style="width:40px" title="Edit" target="_blank"><i class="fa fa-pencil"></i> Edit</a>
+                                                }
+
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current) != "disabled")
+                                                {
+                                                    <a class="btn btn-danger btn-xs font-11" href="javascript:void(0)" ng-click="event.remove(item)" style="width:40px" title="Del"><i class="fa fa-times"></i> Del</a>
+                                                }
+                                            </td>
+                                            <td style="width:80px;vertical-align:middle">{{item.dueColorUD}}</td>
+                                            <td style="vertical-align:middle;width:200px;">{{item.dueColorNM}}</td>
+                                            <td style="width:70px;text-align:right;vertical-align:middle">{{item.fromDue}}</td>
+                                            <td style="width:70px;text-align:right;vertical-align:middle">{{item.toDue}}</td>
+                                            <td></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <span>Found: <b>{{totalRows}}</b> record(s).</span>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+@section FormAction {
+<ul id="sparks">
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default disabled" title="Search"><i class="fa fa-search"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default" title="Refresh" ng-click="event.refresh()"><i class="fa fa-refresh"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="@Url.Action("Edit", "DueColorMng")/0" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="New"><i class="fa fa-file-o"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default disabled" title="Print"><i class="fa fa-print"></i></a>
+    </li>
+    @if (!string.IsNullOrEmpty(userManualUrl))
+    {
+        <li class="sparks-info">
+            <a target="_blank" href="@userManualUrl" class="btn btn-default" title="Help"><i class="fa fa-info"></i></a>
+        </li>
+    }
+</ul>
+}
+
+@section pagejs {
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(serviceRoot)/api/duecolormng/',
+            token: '@token',
+            pageSize: '@pageSize',
+            cookieID: '@cookieID'
+        }
+    </script>
+    <script type="text/javascript" src="~/Views/DueColorMng/index.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Views/DueColorMng/service.js?v=@guid"></script>
+}

@@ -1,0 +1,138 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    var pageSize = System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"];
+    var cookieID = HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString();
+
+    ViewBag.Title = "Search OP Sequence";
+    ViewBag.Module = "OP Sequence";
+}
+
+<div class="row">
+    <!-- Search Filter -->
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-search"></i>
+                </span>
+                <h2>Search Filter</h2>
+            </header>
+            <div>
+                <div class="widget-body">
+                    <div class="smart-form">
+                        <div class="row">
+                            <section class="col col-lg-2">
+                                <label class="label">
+                                    <strong>OP Sequence</strong>
+                                </label>
+                                <label class="input">
+                                    <input type="text" class="form-control search-filter" maxlength="255" ng-model="filters.OPSequenceNM">
+                                </label>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+    <!-- Search Result -->
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-table"></i>
+                </span>
+                <h2>Search Result</h2>
+            </header>
+            <div>
+                <div class="jarviswidget-editbox"></div>
+                <div class="widget-body">
+                    <div class="tilsoft-table-wrapper" avs-scroll grid-handler="gridHandler">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header">
+                                <div style="width: 110px!important"></div>
+                                <div class="sorting" style="width: 500px!important" data-colname="OPSequenceNM">
+                                    <strong>OP Sequence</strong>
+                                </div>
+                                <div class="sorting_desc" data-colname="UpdatedDate">
+                                    <strong>More Information</strong>
+                                </div>
+                            </div>
+                            <div class="tilsoft-table-body">
+                                <table>
+                                    <tbody>
+                                        <tr ng-repeat="item in data">
+                                            <td style="width: 109px!important; text-align: center; vertical-align: middle">
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current) == "disabled")
+                                                {
+                                                    <a class="btn btn-primary btn-xs" href="@Url.Action("Edit", "OPSequence")/{{item.opSequenceID}}" title="View (Read Only)" target="_blank"><i class="fa fa-folder-open"></i> View</a>
+                                                }
+                                                else
+                                                {
+                                                    <a class="btn btn-primary btn-xs" href="@Url.Action("Edit", "OPSequence")/{{item.opSequenceID}}" title="Edit" target="_blank"><i class="fa fa-pencil"></i> Edit</a>
+                                                }
+
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current) != "disabled")
+                                                {
+                                                    <a class="btn btn-danger btn-xs" href="#" title="Delete" ng-click="event.deleted(item.opSequenceID, $index)"><i class="fa fa-times"></i> Del</a>
+                                                }
+                                            </td>
+                                            <td style="width: 500px!important">
+                                                {{item.opSequenceNM}}
+                                            </td>
+                                            <td>
+                                                <section class="box">
+                                                    <i class="fa fa-user" ng-show="item.profileNM != null || item.employeeNM != null"></i>
+                                                    <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.updatedBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600" ng-show="item.updatedBy != null && item.employeeNM != null">
+                                                        Updated by {{item.employeeNM}} at {{item.updatedDate}}
+                                                    </a>
+                                                </section>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <span>Found: <b>{{totalRows}}</b> record(s).</span>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction{
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default" ng-click="event.reloaded()">
+                <i class="fa fa-search"></i>
+            </a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default" ng-click="event.reloaded()">
+                <i class="fa fa-refresh"></i>
+            </a>
+        </li>
+        <li class="sparks-info">
+            <a href="@Url.Action("Edit", "OPSequence")/0" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))">
+                <i class="fa fa-file-o"></i>
+            </a>
+        </li>
+    </ul>
+}
+
+@section pagejs{
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(serviceRoot)/api/opsequence/',
+            token: '@token',
+            pageSize: '@pageSize',
+            cookieID: '@cookieID'
+        };
+    </script>
+    <script type="text/javascript" src="~/Angular/app/opSequence/index.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/opSequence/service.js?v=@guid"></script>
+}

@@ -1,0 +1,350 @@
+﻿@{
+    ViewBag.Icon = "fa-bar-chart-o";
+    ViewBag.Title = "Sub Supplier Overview";
+    ViewBag.Module = "FactoryRawMaterialMng";
+    Frontend.APIDTO.APIUserInformation userInfo = (Frontend.APIDTO.APIUserInformation)Session[Frontend.Customize.Common.ProjectDefinition.USER_INFO_SESSION];
+
+    string CurrentSeason = Library.OMSHelper.Helper.GetCurrentSeason();
+
+    string NextSeason = Library.OMSHelper.Helper.GetNextSeason(CurrentSeason);
+    string prevSeason = Library.OMSHelper.Helper.GetPrevSeason(CurrentSeason);
+
+    if (DateTime.Now.Month == 8 || DateTime.Now.Month == 9)
+    {
+        CurrentSeason = NextSeason;
+        //Season = currentSeason;
+    }
+
+    string PrevSeason1 = Library.OMSHelper.Helper.GetPrevSeason(CurrentSeason);
+    string PrevSeason2 = Library.OMSHelper.Helper.GetPrevSeason(PrevSeason1);
+    string PrevSeason3 = Library.OMSHelper.Helper.GetPrevSeason(PrevSeason2);
+
+    string userManualUrl = string.Empty;
+    if (System.IO.File.Exists(Server.MapPath("~/UserManual/" + ViewBag.ModuleCode + ".pdf")))
+    {
+        userManualUrl = "/UserManual/" + ViewBag.ModuleCode + ".pdf";
+    }
+}
+<style>
+    .tilsoft-table .tilsoft-table-header div,
+    .tilsoft-table .tilsoft-table-body table th {
+        font-size: 11px;
+        text-transform: inherit;
+    }
+</style>
+<div class="row">
+    <div class="col-sm-12">
+        <div class="well padding-10" style="background: #fff;">
+            <div class="smart-form">
+                <fieldset>
+                    <div class="row">
+                        <section class="col col-3">
+                            <a href="{{data.logoFileLocation}}" data-featherlight="image">
+                                <img ng-src="{{data.logoThumbnailLocation}}" style="width: 100%;" />
+                            </a>
+                            <p class="text-muted">
+                                <i class="fa fa-user-o"></i><span>Contact: {{data.contactPerson}}</span>
+                            </p>
+                            <p class="text-muted">
+                                <i class="fa fa-envelope-o"></i>&nbsp;&nbsp;<a href="mailto:{{data.email}}" target="_top">{{data.email}}</a>
+                            </p>
+                            <p class="text-muted">
+                                <i class="fa fa-phone"></i>&nbsp;&nbsp;<a href="javascript:void(0);" ng-click="openCall(model.phone)">{{data.phone}}</a>
+                            </p>
+                            
+                        </section>
+                        <section class="col col-9" style="line-height:2">
+                            <h2 style="text-transform:uppercase;">{{data.factoryRawMaterialShortNM}} ({{data.factoryRawMaterialUD}})</h2>
+                            <hr />
+                            <br/>
+                            <section class="col col-6">
+                                <ul>
+                                    <li><Strong>Official Name: </Strong>{{data.factoryRawMaterialOfficialNM}}</li>
+                                    <li><strong>Address: </strong> {{data.address}}</li>
+                                   
+                                </ul>
+                            </section>
+                            <section class="col col-6">
+                                <p><u>Key material:</u></p>
+                                <p>{{data.keyRawMaterialNM}}</p>
+                                <p><u>Type Of Supplier</u></p>
+                                <p ng-if="data.isProducer"><strong>Producer: </strong><i class="fa fa-check-square-o"></i></p>
+                                <p ng-if="data.isTrader"><strong>Trader: </strong><i class="fa fa-check-square-o" ></i></p> 
+                                <p ng-if="data.isPacking"><strong>Packing: </strong><i class="fa fa-check-square-o"></i></p>
+                                <p ng-if="data.isAssembler"><strong>Assembler: </strong><i class="fa fa-check-square-o"></i></p>
+                                <p><u>Ownership:</u></p>
+                                <p ng-if="data.isPrivate"><strong>Private: </strong><i class="fa fa-check-square-o"></i></p>
+                                <p ng-if="data.isJointVenture"><strong>Joint Venture: </strong><i class="fa fa-check-square-o"></i></p>
+                                <p ng-if="data.isState"><strong>State: </strong><i class="fa fa-check-square-o"></i></p>
+                                <p ng-if="data.isStockCompany"><strong>Stock Company: </strong><i class="fa fa-check-square-o"></i></p>
+                            </section>  
+                        </section>
+                    </div>
+
+                    <div class="row">
+                        <div class="col col-6 m-bottom-15">
+                            <label class="label">Product description</label>
+                            <label class="textarea">
+                                <i class="icon-append fa fa-comment"></i>
+                                <textarea class="form-control" ng-model="data.productDescription" rows="6" style="padding:5px" readonly></textarea>
+                            </label>
+                        </div>
+                        <div class="col col-6 m-bottom-15">
+                            <label class="label">Manufacturing process description</label>
+                            <label class="textarea">
+                                <i class="icon-append fa fa-comment"></i>
+                                <textarea class="form-control" ng-model="data.manufacturingProcessDescription" rows="6" style="padding:5px" readonly></textarea>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col col-2 m-bottom-15">
+                            <label class="label">Total plant square meters</label>
+                            <label class="input">
+                                <input type="text" id="totalPlantSquareMeters" ng-model="data.totalPlantSquareMeters" readonly/>
+                            </label>
+                        </div>
+                        <div class="col col-2 m-bottom-15">
+                            <label class="label">Number of buildings</label>
+                            <label class="input">
+                                <input type="text" id="numberOfBuildings" ng-model="data.numberOfBuildings" readonly/>
+                            </label>
+                        </div>
+                        <div class="col col-2 m-bottom-15">
+                            <label class="label">Year established</label>
+                            <label class="input">
+                                <input type="text" id="yearEstablished" ng-model="data.yearEstablished" readonly/>
+                            </label>
+                        </div>
+                        <div class="col col-2 m-bottom-15">
+                            <label class="label">Number of workers</label>
+                            <label class="input">
+                                <input type="text" id="numberOfWorkers" ng-model="data.numberOfWorkers" readonly/>
+                            </label>
+                        </div>
+                        <div class="col col-2 m-bottom-15">
+                            <label class="label">Operating hours</label>
+                            <label class="input">
+                                <input type="text" id="operatingHours" ng-model="data.operatingHours" readonly/>
+                            </label>
+                        </div>
+                        <div class="col col-2 m-bottom-15">
+                            <label class="label">Operating days</label>
+                            <label class="input">
+                                <input type="text" id="operatingDays" ng-model="data.operatingDays" readonly/>
+                            </label>
+                        </div>
+                    </div>
+                    <div id="contact-section-1" class="well-sm col-sm-12" style="background: #fff;">
+                        <div class="smart-form">
+                            <h1>Turnover</h1>
+                            <br />
+                            <hr>
+                            <fieldset>
+                                <div class="row">
+                                    <section class="col col-md-12">
+                                        <div class="tilsoft-table-body">
+                                            <table class="table table-bordered">
+                                                <thead>
+                                                    <tr>
+                                                        <td style="width:25%;text-align:center;"><b>@CurrentSeason</b></td>
+                                                        <td style="width:25%;text-align:center;"><b>@PrevSeason1</b></td>
+                                                        <td style="width:25%;text-align:center;"><b>@PrevSeason2</b></td>
+                                                        <td style="width:25%;text-align:center;"><b>@PrevSeason3</b></td>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td ng-repeat="item in data.factoryRawMaterialTurnovers | orderBy: '-season' | limitTo:4" style="width:25%;text-align:right;">
+                                                            <span style="text-align:right">{{item.amount | currency:'':0}}</span><span> $</span>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </section>
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+                   
+                    <div id="contact-section-1" class="well-sm col-sm-12" style="background: #fff;">
+                        <div class="smart-form">
+                            <h1>AVT responsible person</h1>
+                            <br />
+                            <hr>
+                            <fieldset>
+                                <div class="row">
+                                    <div class="col col-6 m-bottom-15">
+                                        <h4>Pricing:</h4>
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered table-striped">
+                                                <tbody>
+                                                    <tr ng-repeat="item in data.factoryRawMaterialPricingPersons">
+                                                        <td>
+                                                            <i class="fa fa-user"></i>
+                                                            <a ng-if="item.employeeID" href="@Url.Action("EmpDetail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.employeeID}}" da dat data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                                {{item.employeeNM}}
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div class="col col-6 m-bottom-15">
+                                        <h4>Quality:</h4>
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered table-striped">
+                                                <tbody>
+                                                    <tr ng-repeat="item in data.factoryRawMaterialQualityPersons">
+                                                        <td>
+                                                            <i class="fa fa-user"></i>
+                                                            <a ng-if="item.employeeID" href="@Url.Action("EmpDetail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.employeeID}}" da dat data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                                {{item.employeeNM}}
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+                    
+                    <div id="contact-section-1" class="well-sm col-sm-12" style="background: #fff;">
+                        <div class="smart-form">
+                            <h1>Certification</h1>
+                            <br />
+                            <hr>
+                            <fieldset>
+                                <div class="row">
+                                    <div class="col col-4 m-bottom-15">
+                                        <label class="label">Available in-house tests</label>
+                                        <section class="col col-lg-12">
+                                            <div id="grdMaterial" class="tilsoft-table-wrapper">
+                                                <div class="tilsoft-table">
+                                                    <div class="tilsoft-table-body" style="width: auto; margin-top:0px;height:auto;">
+                                                        <table>
+                                                            <tr>
+                                                                <th style="width:300px">Description</th>
+                                                            </tr>
+                                                            <tr ng-repeat="item in data.factoryRawMaterialTests">
+                                                                <td>
+                                                                    <input class="form-control" type="text" name="description" ng-model="item.description" readonly>
+                                                                </td>
+                                                            </tr>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </section>
+                                    </div>
+                                    <div class="col col-8 m-bottom-15">
+                                        <label class="label">Available certificates</label>
+                                        <section class="col col-lg-12">
+                                            <div id="grdMaterial" class="tilsoft-table-wrapper">
+                                                <div class="tilsoft-table">
+                                                    <div class="tilsoft-table-body" style="width: 480px; margin-top:0px;height:auto;">
+                                                        <table>
+                                                            <tr>
+                                                                <th style="width:60px">Type</th>
+                                                                <th style="width:60px">Certificate</th>
+                                                                <th style="width:150px">Certificate number</th>
+                                                                <th style="width:80px">Valid until</th>
+                                                                <th style="width:80px">PDF File</th>
+                                                            </tr>
+                                                            <tr ng-repeat="item in data.factoryRawMaterialCertificates">
+                                                                <td>
+                                                                    <label class="select">
+                                                                        <select id="certificateType" ng-model="item.typeID" ng-options="certificateType.typeID as certificateType.typeNM for certificateType in certificateTypes" disabled>
+                                                                            <option value=""></option>
+                                                                        </select>
+                                                                        <i></i>
+                                                                    </label>
+                                                                </td>
+                                                                <td>
+                                                                    <input class="form-control" type="text" name="CertificateNM" ng-model="item.certificateNM" readonly>
+                                                                </td>
+                                                                <td>
+                                                                    <input class="form-control" type="text" name="CertificateNo" ng-model="item.certificateNo" readonly>
+                                                                </td>
+                                                                <td>
+                                                                    <input class="form-control" type="text" name="ValidUntil" ng-model="item.validUntil" readonly>
+                                                                </td>
+                                                                <td style="text-align:center;">
+                                                                    <a ng-if="item.certificateFileUrl" title="View file" class="btn btn-primary btn-xs" style="font-size: 11px;" ng-href="{{item.certificateFileUrl}}" target="_blank">
+                                                                        <i class="fa fa-folder-open-o"> View</i>
+                                                                    </a>
+                                                                </td>
+                                                            </tr>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </section>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+
+                    <div id="image-section-1" class="well-sm col-sm-12" style="background: #fff;">
+                        <div class="smart-form">
+                            <h1>Image</h1>
+                            <br />
+                            <hr>
+                            <fieldset>
+                                <div class="row">
+                                    <section class="col col-md-12">
+                                        <div class="row image-wrapper" style="width: auto">
+                                            <section ng-repeat="item in data.factoryRawMaterialImages | orderBy: '-updatedDate'" class="col-sm-3">
+                                                <div style="padding: 10px;">
+                                                    <a data-featherlight="image" href="{{item.fileLocation}}" class="input-group" style="display:block;">
+                                                        <div class="img m-bottom-15" style="background: url('{{item.thumbnailLocation}}') center center no-repeat;background-size:100%;"></div>
+                                                    </a>
+                                                </div>
+                                            </section>
+                                        </div>
+                                    </section>
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+    </div>
+</div>
+@section FormAction {
+<ul id="sparks">
+    @if (!string.IsNullOrEmpty(userManualUrl))
+    {
+        <li class="sparks-info">
+            <a target="_blank" href="@userManualUrl" class="btn btn-default" title="Help"><i class="fa fa-info"></i></a>
+        </li>
+    }
+</ul>
+}
+@section pagejs {
+    <script type="text/javascript">
+    var context = {
+            id: @ViewBag.ID,
+            serviceUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/factoryrawmaterialmng/',
+            token: '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]',
+            backUrl: '@Url.Action("Index", "FactoryRawMaterialMng")',
+            refreshUrl: '@Url.Action("Overview", "FactoryRawMaterialMng", new { id = UrlParameter.Optional })/',
+            CurrentSeason: '@CurrentSeason',
+            PrevSeason1: '@PrevSeason1',
+            PrevSeason2: '@PrevSeason2',
+            PrevSeason3: '@PrevSeason3',
+            NextSeason: '@NextSeason',
+        }
+    </script>
+    <script src="~/Angular/app/factoryRawMaterialMng/overview.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/jsonService2.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/factoryRawMaterialMng/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/support/service.js?c=@System.Guid.NewGuid().ToString().Replace("-","")"></script>
+}

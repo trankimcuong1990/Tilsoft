@@ -1,0 +1,382 @@
+﻿@{
+    Frontend.APIDTO.APIUserInformation userInfo = (Frontend.APIDTO.APIUserInformation)ViewBag.CurrentLoginUserInfo;
+    bool canViewAllSaleData = false;
+    if (userInfo.Data.ModuleSpecialPermissionAccesses.Count(o => o.ModuleSpecialPermissionUD == Frontend.Helper.ConstantIdentifier.SPECIAL_PERMISSION_VIEW_ALL_SALES_DATA) > 0)
+    {
+        canViewAllSaleData = true;
+    }
+    string currentSeason = Library.OMSHelper.Helper.GetCurrentSeason();
+    string nextSeason = Library.OMSHelper.Helper.GetNextSeason(currentSeason);
+    string prevSeason = Library.OMSHelper.Helper.GetPrevSeason(currentSeason);
+
+    if (DateTime.Now.Month == 8)
+    {
+        currentSeason = nextSeason;
+    }
+    prevSeason = Library.OMSHelper.Helper.GetPrevSeason(currentSeason);
+    nextSeason = Library.OMSHelper.Helper.GetNextSeason(currentSeason);
+}
+
+<style>
+    .tilsoft-table .tilsoft-table-body {
+        height: auto !important;
+        max-height: none
+    }
+
+    .border-left {
+        border-left: solid;
+        border-left-color: coral;
+    }
+
+    .border-top {
+        border-top: solid;
+        border-top-color: coral;
+    }
+
+    .border-right {
+        border-right: solid !important;
+        border-right-color: coral !important;
+    }
+
+    tbody.border-section-1 td:first-child {
+        border-left: solid 1px #959595;
+        border-bottom: solid 1px #959595 !important;
+    }
+
+    tbody.border-section-1 td:last-child {
+        border-right: solid 1px #959595;
+    }
+
+    tbody.border-section-1 tr:first-child td {
+        border-top: solid 1px #959595;
+    }
+
+    tbody.border-section-1 tr:last-child td {
+        border-bottom: solid 1px #959595;
+    }
+</style>
+
+<div class="col-sm-12" ng-controller="deltaByClientController">
+    <div class="well" style="padding: 10px;">
+        <h1 style="margin-top: 0px;">COMPARE DELTA BY CLIENT @currentSeason</h1>
+        <div class="avs-table-wrapper" avs-table grid-handler="deltaByClient.compareDeltaHandler" id="widget-deltaByClient-container" style="display: none; border: solid 1px #eee;">
+            <div class="avs-table-header">
+                <div class="avs-table-header-container">
+                    <table>
+                        <tr class="header-row" style="height: 75px;">
+                            <td style="width: 30px">#<br />{{deltaByClient.detalByClientCompare.length | number}}</td>
+                            <td style="width: 150px; text-align:center" class="sorting" data-colname="clientNM">Client</td>
+                            <td style="width: 40px; text-align:center" class="sorting" data-colname="saleUD">AC C.M</td>
+
+                            <td style="width: 50px;" class="sorting border-left border-top" data-colname="piConfirmedDelta5PercentLastYear">P/I Conf &delta;% (1)</td>
+                            <td style="width: 90px;" class="sorting border-top" data-colname="piConfirmedSaleAmountLastYear">P/I Conf in $</td>
+                            <td style="width: 60px;" class="sorting border-top" data-colname="piConfirmedContLastYear">Cont</td>
+
+                            <td colspan="4" style="width: 200px" class="sorting  border-left border-top" data-colname="deltaOfDelta">
+                                &delta; Of &delta; <br /><br />
+
+                                @if (userInfo.Data.ModuleSpecialPermissionAccesses.Count(o => o.ModuleSpecialPermissionUD == Frontend.Helper.ConstantIdentifier.SPECIAL_PERMISSION_DEV_FUNCTION) > 0)
+                                {
+                                    <input type="checkbox" ng-model="deltaByClient.deltaByClientCompareFilter.isDeltaOfDetalAll" />
+                                }
+                            </td>
+                            @*<td style="width: 50px" class="sorting  border-top" data-colname="deltaOfDelta">&delta; Of &delta;</td>
+                                <td style="width: 50px" class="sorting  border-top" data-colname="deltaOfDelta">&delta; Of &delta;</td>
+                                <td style="width: 50px" class="sorting  border-top" data-colname="deltaOfDelta">&delta; Of &delta;</td>*@
+
+                            <td style="width: 60px" class="sorting border-left border-top" data-colname="offerDelta5PercentThisYear">Offer To Client &delta;% (2)</td>
+                            <td style="width: 90px" class="sorting border-top" data-colname="offerSaleAmountThisYear">Offer To Client in $</td>
+                            <td style="width: 60px;" class="sorting border-top" data-colname="offerContThisYear">Cont</td>
+
+                            <td style="width: 60px" class="sorting border-left border-top" data-colname="piDelta5PercentThisYear">P/I &delta;% (3)</td>
+                            <td style="width: 90px" class="sorting border-top" data-colname="piSaleAmountThisYear">P/I in $</td>
+                            <td style="width: 60px;" class="sorting border-top" data-colname="piContThisYear">Cont</td>
+
+                            <td style="width: 60px" class="sorting border-left border-top" data-colname="piConfirmedDelta5PercentThisYear">P/I Conf &delta;% (4)</td>
+                            <td style="width: 90px" class="sorting border-top" data-colname="piConfirmedSaleAmountThisYear">P/I Conf in $</td>
+                            <td style="width: 60px;" class="sorting border-top border-right" data-colname="piConfirmedContThisYear">Cont</td>
+                        </tr>
+                        <tr class="header-row">
+                            <td>{{deltaByClient.detalByClientCompare_AfterFilter.length | number}}</td>
+                            <td>
+                                <input type="text" ng-model="deltaByClient.deltaByClientCompareFilter.client" />
+                            </td>
+                            <td>
+                                <input type="text" ng-model="deltaByClient.deltaByClientCompareFilter.saleUD" />
+                            </td>
+
+                            <td colspan="3" class="border-left">@prevSeason</td>
+
+                            <td class="border-left" style="text-align:center">
+                                (2) - (1)
+                            </td>
+
+                            <td style="text-align:center">
+                                (3) - (1)
+                            </td>
+
+                            <td style="text-align:center">
+                                (4) - (1)
+                            </td>
+
+                            <td style="text-align:center">
+                                (4) - (1)
+                                <a href="javascript:void(0)" data-toggle="modal" data-target="#Delta4"><i class="fa fa-question-circle"></i></a>
+                            </td>
+
+                            <td class="border-left" colspan="3">@currentSeason</td>
+
+                            <td class="border-left" colspan="3">@currentSeason</td>
+
+                            <td class="border-left border-right" colspan="3">@currentSeason</td>
+                        </tr>
+                        <tr class="total-row">
+                            <td>&nbsp;</td>
+                            <td style="text-align:left">Delta 6</td>
+                            <td style="text-align: center;"></td>
+
+                            <td class="border-left">{{deltaByClient.totalPiConfirmedDelta5PercentLastYear() | number : 1}}%</td>
+                            <td>{{deltaByClient.totalPIConfirmedAmountLastYear() | currency:'$':0}}</td>
+                            <td>{{deltaByClient.detalByClientCompare_AfterFilter | sumFunc:'piConfirmedContLastYear' | number : 1}}</td>
+
+                            <td class="border-left">
+                                <span title="Offer Approved">{{deltaByClient.totalOfferDelta5PercentThisYear()-deltaByClient.totalPiConfirmedDelta5PercentLastYear() | number : 1}}%</span>
+                            </td>
+                            <td>
+                                <span title="PI Total">{{deltaByClient.totalPiDelta5PercentThisYear()-deltaByClient.totalPiConfirmedDelta5PercentLastYear() | number : 1}}%</span>
+                            </td>
+                            <td>
+                                <span title="PI Confirmed" style="font-size: 14px; color: {{deltaByClient.totalPiConfirmedDelta5PercentThisYear()-deltaByClient.totalPiConfirmedDelta5PercentLastYear() < 0 ? '#ff0000' : '#0000ff'}};">
+                                    {{deltaByClient.totalPiConfirmedDelta5PercentThisYear()-deltaByClient.totalPiConfirmedDelta5PercentLastYear() | number : 1}}%
+                                </span>
+                            </td>
+                            <td>
+                                <span title="P/I Cconfirmed existing client till now" style="font-size: 14px; color: {{deltaByClient.deltaOfDelta5_PIConfirmed_Existing_Client(null) < 0 ? '#ff0000' : '#0000ff'}};">
+                                    {{deltaByClient.deltaOfDelta5_PIConfirmed_Existing_Client(null) | number : 1}}%
+                                </span>
+                            </td>
+
+                            <td class="border-left">{{deltaByClient.totalOfferDelta5PercentThisYear() | number : 1}}%</td>
+                            <td>{{deltaByClient.totalOfferAmountThisYear() | currency:'$':0}}</td>
+                            <td>{{deltaByClient.detalByClientCompare_AfterFilter | sumFunc:'offerContThisYear' | number : 1}}</td>
+
+                            <td class="border-left">{{deltaByClient.totalPiDelta5PercentThisYear() | number : 1}}%</td>
+                            <td>{{deltaByClient.totalPIAmountThisYear() | currency:'$':0}}</td>
+                            <td>{{deltaByClient.detalByClientCompare_AfterFilter | sumFunc:'piContThisYear' | number : 1}}</td>
+
+                            <td class="border-left">{{deltaByClient.totalPiConfirmedDelta5PercentThisYear() | number : 1}}%</td>
+                            <td>{{deltaByClient.totalPIConfirmedAmountThisYear() | currency:'$':0}}</td>
+                            <td class="border-right">{{deltaByClient.detalByClientCompare_AfterFilter | sumFunc:'piConfirmedContThisYear' | number : 1}}</td>
+                        </tr>
+                        <tr class="total-row">
+                            <td>&nbsp;</td>
+                            <td style="text-align:left">Delta 9</td>
+                            <td style="text-align: center;"></td>
+                            <td class="border-left">{{deltaByClient.totalPiConfirmedDelta7PercentLastYear() | number : 1}}%</td>
+                            <td>{{deltaByClient.totalPIConfirmedAmountLastYear() | currency:'$':0}}</td>
+                            <td>{{deltaByClient.detalByClientCompare_AfterFilter | sumFunc : 'piConfirmedContLastYear' | number : 1}}</td>
+
+                            <td class="border-left">
+                                <span title="Offer Approved">{{deltaByClient.totalOfferDelta7PercentThisYear()-deltaByClient.totalPiConfirmedDelta7PercentLastYear() | number : 1}}%</span>
+                            </td>
+                            <td>
+                                <span title="PI Total">{{deltaByClient.totalPiDelta7PercentThisYear()-deltaByClient.totalPiConfirmedDelta7PercentLastYear() | number : 1}}%</span>
+                            </td>
+                            <td>
+                                <span title="PI Confirmed" style="font-size: 14px; color: {{deltaByClient.totalPiConfirmedDelta7PercentThisYear()-deltaByClient.totalPiConfirmedDelta7PercentLastYear() < 0 ? '#ff0000' : '#0000ff'}};">
+                                    {{deltaByClient.totalPiConfirmedDelta7PercentThisYear()-deltaByClient.totalPiConfirmedDelta7PercentLastYear() | number : 1}}%
+                                </span>
+                            </td>
+                            <td>
+                                <span title="P/I Confirmed existing client till now" style="font-size: 14px; color: {{deltaByClient.deltaOfDelta7_PIConfirmed_Existing_Client(null) < 0 ? '#ff0000' : '#0000ff'}};">
+                                    {{deltaByClient.deltaOfDelta7_PIConfirmed_Existing_Client(null) | number : 1}}%
+                                </span>
+                            </td>
+
+                            <td class="border-left">{{deltaByClient.totalOfferDelta7PercentThisYear() | number : 1}}%</td>
+                            <td>{{deltaByClient.totalOfferAmountThisYear() | currency:'$':0}}</td>
+                            <td>{{deltaByClient.detalByClientCompare_AfterFilter | sumFunc:'offerContThisYear' | number : 1}}</td>
+
+                            <td class="border-left">{{deltaByClient.totalPiDelta7PercentThisYear() | number : 1}}%</td>
+                            <td>{{deltaByClient.totalPIAmountThisYear() | currency:'$':0}}</td>
+                            <td>{{deltaByClient.detalByClientCompare_AfterFilter | sumFunc:'piContThisYear' | number : 1}}</td>
+
+                            <td class="border-left">{{deltaByClient.totalPiConfirmedDelta7PercentThisYear() | number : 1}}%</td>
+                            <td>{{deltaByClient.totalPIConfirmedAmountThisYear() | currency:'$':0}}</td>
+                            <td class="border-right">{{deltaByClient.detalByClientCompare_AfterFilter | sumFunc:'piConfirmedContThisYear' | number : 1}}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div class="avs-table-body">
+                <table>
+                    @if (canViewAllSaleData)
+                    {
+                        <tbody ng-repeat="item in deltaByClient.deltaBySale | filter : {saleUD: deltaByClient.deltaByClientCompareFilter.saleUD}" class="border-section-1">
+                            <tr style="background-color: cornsilk;">
+                                <td rowspan="2">{{$index+1}}</td>
+                                <td>
+                                    <strong>{{item.name}}</strong>
+                                </td>
+                                <td style="text-align: center;">{{item.saleUD}}</td>
+
+                                <td class="border-left" style="text-align: right;{{item.piConfirmedDelta5PercentLastYear < 0 ? 'color: #ff0000;' : ''}}">{{item.piConfirmedDelta5PercentLastYear | number:1}}%</td>
+                                <td style="text-align: right; ">{{item.piConfirmedSaleAmountLastYear | currency:'$':0}}</td>
+                                <td style="text-align: right;">{{item.piConfirmedContLastYear | number : 1}}</td>
+
+                                <td class="border-left" style="text-align: right; ">
+                                    <span title="Offer Approved">{{item.deltaOfDelta | number : 1}}%</span>
+                                </td>
+                                <td style="text-align: right;">
+                                    <span title="PI Total">{{item.deltaOfDelta2 | number : 1}}%</span>
+                                </td>
+                                <td style="text-align: right; ">
+                                    <span title="PI Confirmed" style="font-weight: bold; color: {{item.deltaOfDelta3 < 0 ? '#ff0000' : '#0000ff'}};">
+                                        {{item.deltaOfDelta3 | number : 1}}%
+                                    </span>
+                                </td>
+                                <td style="text-align: right; ">
+                                    <span title="P/I Confirmed existing client till now" style="font-weight: bold; color: {{item.deltaOfDelta_ExistingClient < 0 ? '#ff0000' : '#0000ff'}};">
+                                        {{item.deltaOfDelta_ExistingClient | number : 1}}%
+                                    </span>
+                                </td>
+
+                                <td class="border-left" style="text-align: right;{{item.offerDelta5PercentThisYear < 0 ? 'color: #ff0000;' : ''}}">
+                                    {{item.offerDelta5PercentThisYear | number:1}}%
+                                </td>
+                                <td style="text-align: right; ">{{item.offerSaleAmountThisYear | currency:'$':0}}</td>
+                                <td style="text-align: right;">{{item.offerContThisYear | number : 1}}</td>
+
+                                <td class="border-left" style="text-align: right;{{item.piDelta5PercentThisYear < 0 ? 'color: #ff0000;' : ''}}">{{item.piDelta5PercentThisYear | number:1}}%</td>
+                                <td style="text-align: right">{{item.piSaleAmountThisYear | currency:'$':0}}</td>
+                                <td style="text-align: right;">{{item.piContThisYear | number : 1}}</td>
+
+                                <td class="border-left" style="text-align: right;{{item.piConfirmedDelta5PercentThisYear < 0 ? 'color: #ff0000;' : ''}}">{{item.piConfirmedDelta5PercentThisYear | number:1}}%</td>
+                                <td style="text-align: right;">{{item.piConfirmedSaleAmountThisYear | currency:'$':0}}</td>
+                                <td class="border-right" style="text-align: right;">{{item.piConfirmedContThisYear | number : 1}}</td>
+                            </tr>
+                            <tr ng-repeat="delta7Item in deltaByClient.delta7BySale | filter : {saleUD : item.saleUD}" style="background-color:cornsilk">
+                                <td>
+                                    <strong>{{delta7Item.name}}</strong>
+                                </td>
+                                <td style="text-align: center;">{{delta7Item.saleUD}}</td>
+
+                                <td class="border-left" style="text-align: right;{{delta7Item.piConfirmedDelta7PercentLastYear < 0 ? 'color: #ff0000;' : ''}}">{{delta7Item.piConfirmedDelta7PercentLastYear | number:1}}%</td>
+                                <td style="text-align: right;">{{delta7Item.piConfirmedSaleAmountLastYear | currency:'$':0}}</td>
+                                <td style="text-align: right;">{{delta7Item.piConfirmedContLastYear | number : 1}}</td>
+
+                                <td class="border-left" style="text-align: right;">
+                                    <span title="Offer Approved">{{delta7Item.deltaOfDelta | number : 1}}%</span>
+                                </td>
+                                <td style="text-align: right;">
+                                    <span title="PI Total">{{delta7Item.deltaOfDelta2 | number : 1}}%</span>
+                                </td>
+                                <td style="text-align: right;">
+                                    <span title="PI Confirmed" style="font-weight: bold; color: {{delta7Item.deltaOfDelta3 < 0 ? '#ff0000' : '#0000ff'}};">
+                                        {{delta7Item.deltaOfDelta3 | number : 1}}%
+                                    </span>
+                                </td>
+                                <td style="text-align: right;">
+                                    <span title=" P/I Confirmed existing client till now" style="font-weight: bold; color: {{delta7Item.deltaOfDelta_ExistingClient < 0 ? '#ff0000' : '#0000ff'}};">
+                                        {{delta7Item.deltaOfDelta_ExistingClient | number : 1}}%
+                                    </span>
+                                </td>
+
+                                <td class="border-left" style="text-align: right;{{delta7Item.offerDelta7PercentThisYear < 0 ? 'color: #ff0000;' : ''}}">
+                                    {{delta7Item.offerDelta7PercentThisYear | number:1}}%
+                                </td>
+                                <td style="text-align: right;">{{delta7Item.offerSaleAmountThisYear | currency:'$':0}}</td>
+                                <td style="text-align: right;">{{delta7Item.offerContThisYear | number : 1}}</td>
+
+                                <td class="border-left" style="text-align: right;{{delta7Item.piDelta7PercentThisYear < 0 ? 'color: #ff0000;' : ''}}">{{delta7Item.piDelta7PercentThisYear | number:1}}%</td>
+                                <td style="text-align: right;">{{delta7Item.piSaleAmountThisYear | currency:'$':0}}</td>
+                                <td style="text-align: right;">{{delta7Item.piContThisYear | number : 1}}</td>
+
+                                <td class="border-left" style="text-align: right;{{delta7Item.piConfirmedDelta7PercentThisYear < 0 ? 'color: #ff0000;' : ''}}">{{delta7Item.piConfirmedDelta7PercentThisYear | number:1}}%</td>
+                                <td style="text-align: right;">{{delta7Item.piConfirmedSaleAmountThisYear | currency:'$':0}}</td>
+                                <td class="border-right" style="text-align: right;">{{delta7Item.piConfirmedContThisYear | number : 1}}</td>
+                            </tr>
+                        </tbody>
+
+                    }
+                    <tr ng-repeat="item in deltaByClient.detalByClientCompare_AfterFilter = (deltaByClient.detalByClientCompare | deltaByClientCompareCustomFilter : deltaByClient.deltaByClientCompareFilter.client : deltaByClient.deltaByClientCompareFilter.saleUD : deltaByClient.deltaByClientCompareFilter.isDeltaOfDetalAll | orderBy : deltaByClient.compareDeltaHandler.orderByColumn)">
+                        <td>{{$index+1}}</td>
+                        <td>
+                            <strong>{{item.clientUD}}</strong>
+                            <br />
+                            {{item.clientNM}}
+                        </td>
+                        <td style="text-align: center;">{{item.saleUD}}</td>
+
+                        <td class="border-left" style="text-align: right;{{item.piConfirmedDelta5PercentLastYear < 0 ? 'color: #ff0000;' : ''}}">{{item.piConfirmedDelta5PercentLastYear | number:1}}%</td>
+                        <td style="text-align: right;">{{item.piConfirmedSaleAmountLastYear | currency:'$':0}}</td>
+                        <td style="text-align: right;">{{item.piConfirmedContLastYear | number : 1}}</td>
+
+                        <td class="border-left" style="text-align: right;">
+                            <span ng-if="item.deltaOfDelta">
+                                <font ng-if="item.deltaOfDelta">{{(item.deltaOfDelta ? item.deltaOfDelta : null) | number : 1}}%</font>
+                            </span>
+                        </td>
+                        <td style="text-align: right;">
+                            <span ng-if="item.deltaOfDelta2">
+                                <font ng-if="item.deltaOfDelta2">{{(item.deltaOfDelta2 ? item.deltaOfDelta2 : null) | number : 1}}%</font>
+                            </span>
+                        </td>
+                        <td style="text-align: right;">
+                            <span ng-if="item.deltaOfDelta3">
+                                <font ng-if="item.deltaOfDelta3">{{(item.deltaOfDelta3 ? item.deltaOfDelta3 : null) | number : 1}}%</font>
+                            </span>
+                        </td>
+                        <td style="text-align: right;"></td>
+
+                        <td class="border-left" style="text-align: right;{{item.offerDelta5PercentThisYear < 0 ? 'color: #ff0000;' : ''}}">
+                            {{item.offerDelta5PercentThisYear | number:1}}%
+                        </td>
+                        <td style="text-align: right;">{{item.offerSaleAmountThisYear | currency:'$':0}}</td>
+                        <td style="text-align: right;">{{item.offerContThisYear | number : 1}}</td>
+
+                        <td class="border-left" style="text-align: right;{{item.piDelta5PercentThisYear < 0 ? 'color: #ff0000;' : ''}}">{{item.piDelta5PercentThisYear | number:1}}%</td>
+                        <td style="text-align: right;">{{item.piSaleAmountThisYear | currency:'$':0}}</td>
+                        <td style="text-align: right;">{{item.piContThisYear | number : 1}}</td>
+
+                        <td class="border-left" style="text-align: right;{{item.piConfirmedDelta5PercentThisYear < 0 ? 'color: #ff0000;' : ''}}">{{item.piConfirmedDelta5PercentThisYear | number:1}}%</td>
+                        <td style="text-align: right;">{{item.piConfirmedSaleAmountThisYear | currency:'$':0}}</td>
+                        <td class="border-right" style="text-align: right;">{{item.piConfirmedContThisYear | number : 1}}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div class="smart-form" id="widget-deltaByClient-loading">
+            <fieldset>
+                <section>
+                    <i class="fa fa-spin fa-refresh"></i> LOADING ...
+                </section>
+            </fieldset>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="Delta4" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <p>
+                    Only apply for the same number of client of both seasons
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var contextDeltaByClientCompare = {
+        currentSeason: '@currentSeason',
+        prevSeason: '@prevSeason',
+        nextSeason: '@nextSeason'
+    }
+</script>

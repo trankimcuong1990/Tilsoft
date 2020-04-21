@@ -1,0 +1,1681 @@
+﻿@{
+    if (ViewBag.ID == 0)
+    {
+        ViewBag.Title = "Create New Import Receipt";
+    }
+    else
+    {
+        ViewBag.Title = "Edit Import Receipt";
+    }
+
+    ViewBag.Module = "Import Receipt";
+}
+
+<style>
+    .wex-item {
+        background-color:#71f544
+    }
+</style>
+
+
+
+
+<form class="row" name="editForm">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12" ng-show="currentScreen=='receipt'">
+        <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>General</h2>
+            </header>
+            <div>
+                <div class="widget-body">
+                    <div class="smart-form">
+                        <div class="row">
+                            <section class="col col-1">
+                                <label>Receipt No</label>
+                                <span class="form-control">{{data.receiptNo}}</span>
+                            </section>
+
+                            <section class="col col-1">
+                                <label>Season</label>
+                                <select ng-model="data.season" ng-options="item.seasonValue as item.seasonValue for item in seasons" class="form-control"></select>
+                            </section>
+
+                            <section class="col col-2">
+                                <label>Imported Date</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control datepicker" data-dateformat="dd/mm/yy" ng-model="data.importedDate">
+                                    <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                </div>
+                            </section>
+
+                            <section class="col col-2">
+                                <label>Import Type</label>
+                                <span class="form-control">{{data.importTypeNM}}</span>
+                            </section>
+
+                            <section class="col col-2">
+                                <label>Updated By</label>
+                                <span class="form-control">{{data.updatorName}}</span>
+                            </section>
+                            <section class="col col-1">
+                                <label>Updated Date</label>
+                                <span class="form-control">{{data.updatedDate}}</span>
+                            </section>
+                            <section class="col col-2">
+                                <label>Confirmed By</label>
+                                <span class="form-control">{{data.confirmerName}}</span>
+                            </section>
+                            <section class="col col-1">
+                                <label>Confirmed Date</label>
+                                <span class="form-control">{{data.confirmedDate}}</span>
+                            </section>
+                        </div>
+
+                        <div class="row">
+                            <section class="col col-2">
+                                <label>Ref#</label>
+                                <input class="form-control" type="text" ng-model="data.refNo">
+                            </section>
+
+                            <section class="col col-2">
+                                <label>Date Container Received</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control datepicker" data-dateformat="dd/mm/yy" ng-model="data.containerReceivedDate">
+                                    <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                </div>
+                            </section>
+
+                            <section class="col col-2">
+                                <label>Time Container Received</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control input-small" id="timeDelivery" ng-model="data.containerReceivedTime" data-minute-step="10" data-show-meridian="false">
+                                    <span class="input-group-addon"><i class="glyphicon glyphicon-time"></i></span>
+                                </div>
+                            </section>
+
+                            <section class="col col-5">
+                                <label>Remark</label>
+                                <input type="text" class="form-control" ng-model="data.remark" />
+                            </section>
+
+                            <section class="col col-1">
+                                <label>Source</label>
+                                <span class="form-control">{{data.isWexImported?'WEX':'TILSOFT'}}</span>
+                            </section>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </article>
+
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12" ng-show="currentScreen=='receipt'">
+        <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <ul class="nav nav-tabs pull-left in">
+                    <li class="active">
+                        <a data-toggle="tab" href="#hb3"> <i class="fa fa-database"></i> <span class="hidden-mobile hidden-tablet">Product</span> </a>
+                    </li>
+                    <li>
+                        <a data-toggle="tab" href="#hb4"> <i class="fa fa-database"></i> <span class="hidden-mobile hidden-tablet">Sparepart</span> </a>
+                    </li>
+                </ul>
+            </header>
+            <div>
+                <div class="jarviswidget-editbox"></div>
+
+                <div class="widget-body">
+                    <div class="tab-content">
+
+                        <div class="tab-pane active" id="hb3">
+                            <div class="smart-form">
+
+                                <fieldset>
+                                    <section>
+                                        <label class="input">
+                                            <input type="text" placeholder="press enter to search all product or type at least 3 chars to search product" autocomplete="off" ng-keyup="quicksearchproduct.event.searchBoxKeyUp($event)" id="quickSearchBoxProduct" />
+                                            <a ng-click="quicksearchproduct.event.searchClick()" href="javascript:void(0);"> <i class="icon-append fa fa-search"></i></a>
+                                        </label>
+
+                                        <div id="product-popup" class="popup-container-2" style="display: none; left: 0px; top: 32px;">
+                                            <div style="float: right; margin-bottom: 8px;">
+                                                <a ng-click="quicksearchproduct.event.close($event, true)" class="btn btn-danger btn-xs" href="javascript:void(0);"><i class="fa fa-remove"></i> Close</a>
+                                                <a ng-click="quicksearchproduct.event.ok($event, true)" class="btn btn-primary btn-xs" href="javascript:void(0);"><i class="fa fa-check"></i> OK</a>
+                                            </div>
+                                            <div class="clear"></div>
+                                            <div id="productSearchResultGrid" class="tilsoft-table-wrapper">
+                                                <div class="tilsoft-table">
+                                                    <div class="tilsoft-table-header" style="width: 650px;">
+                                                        <div style="width: 60px;"></div>
+                                                        <div style="width: 100px;">Image</div>
+                                                        <div style="width: 220px;">Art.Code</div>
+                                                        <div>Description</div>
+                                                    </div>
+
+                                                    <div class="tilsoft-table-body" style="width: 650px;">
+                                                        <table>
+                                                            <tr ng-repeat="product in quicksearchproduct.data">
+                                                                <td style="width: 60px; text-align: center;"><input type="checkbox" ng-model="product.isSelected" /></td>
+                                                                <td style="width: 100px; text-align: center; vertical-align: middle;"><img ng-src="{{model.thumbnailLocation}}" style="width: 70px; height: 70px;" /></td>
+                                                                <td style="width: 220px; ">{{product.articleCode}}</td>
+                                                                <td>{{product.description}}</td>
+                                                            </tr>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </section>
+                                </fieldset>
+
+                                <div id="productGrid" class="tilsoft-table-wrapper">
+                                    <div class="tilsoft-table">
+                                        <div class="tilsoft-table-header" style="width: 1600px;">
+                                            <div style="width: 140px;"></div>
+                                            <div style="width: 110px">Art.Code</div>
+                                            <div style="width: 200px">Description</div>
+                                            <div style="width: 100px;">Status</div>
+                                            <div style="width: 60px;" ng-show="!data.isWexImported">QNT</div>
+                                            <div style="width: 60px;" ng-show="data.isWexImported">REF QNT</div>
+                                            <div style="width: 60px;" ng-show="data.isWexImported">Wex Qnt</div>
+                                            <div style="width: 70px;">U.Price</div>
+                                            <div style="width: 120px">Conatainer</div>
+                                            <div style="width: 80px">PI No</div>
+                                            <div style="width: 85px">Client</div>
+                                            <div>EAN CODE INFO</div>
+                                        </div>
+                                        <div class="tilsoft-table-body" style="width: 1600px;">
+                                            <table>
+                                                <tbody ng-repeat="product in data.details">
+                                                    <tr>
+                                                        <td style="text-align: left; width: 140px;">
+
+                                                            @*<a class="btn btn-primary btn-xs font-11" href="javascript:void(0);" ng-click="warehouseArea.event.addProductToArea($event,product.warehouseImportProductDetailID)" style=" margin-bottom:10px;"><i class="fa fa-plus"></i> Add Location</a>*@
+                                                            <a class="btn btn-primary btn-xs font-11" href="javascript:void(0);" ng-click="event.addColliEANCode($event,product)" style=" margin-bottom:10px;"><i class="fa fa-plus"></i> Add Colli EAN Code</a>
+                                                            <a href="#" class="btn btn-primary btn-xs font-11" title="Location" ng-click="warehouseArea.event.viewArea($event,'product-' + product.warehouseImportProductDetailID)"><i id="icon-area-product-{{product.warehouseImportProductDetailID}}" class="fa fa-plus-square-o"></i> Location</a>
+                                                            <a href="#" title="Delete" ng-click="event.removeProduct($event, $index)" class="btn btn-danger btn-xs font-11"><i class="fa fa-times"></i>Del</a>
+                                                        </td>
+                                                        <td style="width: 110px"><a href="@Url.Action("Edit", "Product")/{{product.productID}}" target="_blank">{{product.articleCode}}</a></td>
+                                                        <td style="width: 200px"><a href="@Url.Action("Edit", "Product")/{{product.productID}}" target="_blank">{{product.description}}</a></td>
+                                                        <td style="width: 100px">
+                                                            <select ng-model="product.productStatusID" ng-options="status.productStatusID as status.productStatusNM for status in productStatuses" style="width: 100%;" class="form-control"></select>
+                                                        </td>
+                                                        <td style="width: 60px" ng-show="!data.isWexImported"><input type="text" ng-model="product.quantity" style="text-align:right;" ng-change="event.changeQuantity(product)" /></td>
+                                                        <td style="width: 60px" ng-show="data.isWexImported"><span class="form-control">{{product.refQnt}}</span></td>
+                                                        <td style="width: 60px" ng-show="data.isWexImported"><input type="text" ng-model="product.wexQnt" style="text-align:right"  class="form-control {{product.isWexImported?'wex-item':''}}"/></td>
+                                                        <td style="width: 70px;"><input type="text" ng-model="product.unitPrice" style="text-align:right" /></td>
+                                                        <td style="width: 120px;">
+                                                            <input type="text" ng-model="product.containerNo" style="text-align:center" ng-keyup="quicksearchLoadingPlan.event.searchBoxKeyUp($event,product,'PRODUCT') " />
+                                                            <div id="receipt_product_loadingplan{{product.warehouseImportProductDetailID}}"></div>
+                                                        </td>
+                                                        <td style="width: 80px;">
+                                                            <input type="text" ng-model="product.proformaInvoiceNo" style="text-align:center" ng-keyup="quicksearchSaleOrder.event.searchBoxKeyUp($event,product,'PRODUCT') " />
+                                                            <div id="receipt_product_saleorder{{product.warehouseImportProductDetailID}}"></div>
+                                                        </td>
+                                                        <td style="width: 85px;">
+                                                            <input type="text" ng-model="product.clientUD" style="text-align:center" ng-keyup="quicksearchClient.event.searchBoxKeyUp($event,product,'PRODUCT') " />
+                                                            <div id="receipt_products_client{{product.warehouseImportProductDetailID}}"></div>
+                                                        </td>
+                                                        <td>
+                                                            <div class="tilsoft-table">
+                                                                <div class="tilsoft-table-body" style="width: 100%; height:auto;margin-top:0px">
+                                                                    <table>
+                                                                        <tr>
+                                                                            <th style="width: 15px;">#</th>
+                                                                            <th style="width: 120px">Colli EAN Code</th>
+                                                                            <th style="width: 60px" ng-show="!data.isWexImported">Qnt</th>
+                                                                            <th style="width: 60px" ng-show="data.isWexImported">Qnt</th>
+                                                                            <th style="width: 60px" ng-show="data.isWexImported">W.Qnt</th>
+                                                                            <th>Colli Description</th>
+                                                                        </tr>
+                                                                        <tr ng-repeat="cItem in product.warehouseImportColliDetails">
+                                                                            <td style="text-align:center;vertical-align:top">
+                                                                                <a href="#" title="Delete" ng-click="event.removeColliEANCode($event,$index,product)" style="color: #ff0000;"><i class="fa fa-times"></i></a>
+                                                                            </td>
+                                                                            <td style="text-align:center;vertical-align:top">
+                                                                                {{cItem.colliEANCode}}
+                                                                            </td>
+                                                                            <td style="text-align:center;vertical-align:top" ng-show="!data.isWexImported">
+                                                                                <input type="text" ng-model="cItem.quantity" style="height:80%;text-align:right" />
+                                                                            </td>
+                                                                            <td style="text-align:right;vertical-align:top" ng-show="data.isWexImported">
+                                                                                <span class="form-control">{{cItem.refQnt}}</span>
+                                                                            </td>
+                                                                            <td style="text-align:center;vertical-align:top" ng-show="data.isWexImported">
+                                                                                <input type="text" ng-model="cItem.wexQnt" style="height:80%;text-align:right" class="form-control {{cItem.isWexImported?'wex-item':''}}"/>
+                                                                            </td>
+
+                                                                            <td style="text-align:left;vertical-align:top">
+                                                                                {{cItem.colliDescription}}
+                                                                            </td>
+                                                                        </tr>
+                                                                    </table>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        @*<td>
+                                                                <div class="tilsoft-table">
+                                                                    <div class="tilsoft-table-body" style="width: 100%; height:auto;margin-top:0px">
+                                                                        <table>
+                                                                            <tr>
+                                                                                <th style="width: 10px;"></th>
+                                                                                <th style="width: 80px">Location</th>
+                                                                                <th style="width: 50px">Qnt</th>
+                                                                                <th>Remark</th>
+                                                                            </tr>
+                                                                            <tr ng-repeat="item in product.warehouseImportAreaDetails">
+                                                                                <td style="text-align:center;vertical-align:middle">
+
+                                                                                    <a href="#" title="Delete" ng-click="warehouseArea.event.removeProductFromArea($event, product.warehouseImportProductDetailID, item.warehouseImportAreaDetailID)" style="color: #ff0000;"><i class="fa fa-times"></i></a>
+                                                                                </td>
+                                                                                <td>
+                                                                                    <select ng-model="item.warehouseAreaID" ng-options="item.wareHouseAreaID as item.areaCode for item in warehouseAreas" class="form-control" ></select>
+                                                                                </td>
+                                                                                <td>
+                                                                                    <input type="text" class="form-control" ng-model="item.quantity" style="text-align:right;" />
+                                                                                </td>
+                                                                                <td>
+                                                                                    <input type="text" class="form-control" ng-model="item.remark" style="" />
+                                                                                </td>
+                                                                            </tr>
+                                                                        </table>
+                                                                    </div>
+                                                                </div>
+                                                            </td>*@
+                                                    </tr>
+
+
+                                                    <tr style="display:none" id="product-{{product.warehouseImportProductDetailID}}">
+                                                        <td></td>
+                                                        <td colspan="2">
+                                                            <a class="btn btn-primary btn-xs font-11" href="javascript:void(0);" ng-click="warehouseArea.event.addProductToArea($event,product.warehouseImportProductDetailID)" style=" margin-bottom:10px;"><i class="fa fa-plus"></i> Add Location</a>
+                                                            <div class="tilsoft-table">
+                                                                <div class="tilsoft-table-body" style="width: 200px; height:auto;margin-top:0px">
+                                                                    <table>
+                                                                        <tr>
+                                                                            <th style="width: 30px;"></th>
+                                                                            <th>Location</th>
+                                                                            <th style="width: 60px">QNT</th>
+                                                                            @*<th>Remark</th>*@
+                                                                        </tr>
+                                                                        <tr ng-repeat="item in product.warehouseImportAreaDetails">
+                                                                            <td style="width: 30px; text-align:center;vertical-align:middle">
+                                                                                <a href="#" class="btn btn-danger btn-xs font-11" title="Remove" ng-click="warehouseArea.event.removeProductFromArea($event, product.warehouseImportProductDetailID, item.warehouseImportAreaDetailID)"><i class="fa fa-times"></i>Del</a>
+                                                                            </td>
+                                                                            <td>
+                                                                                <select ng-model="item.warehouseAreaID" ng-options="item.wareHouseAreaID as item.areaCode for item in warehouseAreas" class="form-control"></select>
+                                                                            </td>
+                                                                            <td style="width: 100px">
+                                                                                <input type="text" class="form-control" ng-model="item.quantity" />
+                                                                            </td>
+                                                                            @*<td>
+                                                                                <input type="text" class="form-control" ng-model="item.remark" />
+                                                                            </td>*@
+                                                                        </tr>
+                                                                    </table>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="tab-pane" id="hb4">
+
+                            <div class="smart-form">
+                                <fieldset>
+                                    <section>
+                                        <label class="input">
+                                            <input type="text" placeholder="press enter to search all sparepart or type at least 3 chars to search sparepart" autocomplete="off" ng-keyup="quicksearchsparepart.event.searchBoxKeyUp($event)" id="quickSearchBoxSparepart" />
+                                            <a ng-click="quicksearchsparepart.event.searchClick()" href="javascript:void(0);"> <i class="icon-append fa fa-search"></i></a>
+                                        </label>
+
+                                        <div id="sparepart-popup" class="popup-container-2" style="display: none; left: 0px; top: 32px;">
+                                            <div style="float: right; margin-bottom: 8px;">
+                                                <a ng-click="quicksearchsparepart.event.close($event, true)" class="btn btn-danger btn-xs" href="javascript:void(0);"><i class="fa fa-remove"></i> Close</a>
+                                                <a ng-click="quicksearchsparepart.event.ok($event, true)" class="btn btn-primary btn-xs" href="javascript:void(0);"><i class="fa fa-check"></i> OK</a>
+                                            </div>
+                                            <div class="clear"></div>
+                                            <div id="productSearchResultGrid" class="tilsoft-table-wrapper">
+                                                <div class="tilsoft-table">
+                                                    <div class="tilsoft-table-header" style="width: 650px;">
+                                                        <div style="width: 60px;"><input type="checkbox" /></div>
+                                                        <div style="width: 150px;">Art.Code</div>
+                                                        <div>Description</div>
+                                                    </div>
+
+                                                    <div class="tilsoft-table-body" style="width: 650px;">
+                                                        <table>
+                                                            <tr ng-repeat="sparepart in quicksearchsparepart.data">
+                                                                <td style="width: 60px; text-align: center;"><input type="checkbox" ng-model="sparepart.isSelected" /></td>
+                                                                <td style="width: 150px;">{{sparepart.articleCode}}</td>
+                                                                <td>{{sparepart.description}}</td>
+                                                            </tr>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </section>
+                                </fieldset>
+
+                                <div id="sparepartGrid" class="tilsoft-table-wrapper">
+                                    <div class="tilsoft-table">
+                                        <div class="tilsoft-table-header" style="width: 1000px;">
+                                            <div style="width: 130px; "></div>
+                                            <div style="width: 70px">Art.Code</div>
+                                            <div style="width: 130px;">Status</div>
+                                            <div style="width: 120px">Conatainer</div>
+                                            <div style="width: 80px">PI No</div>
+                                            <div style="width: 85px">Client</div>
+                                            <div style="width: 70px;" ng-show="!data.isWexImported">QNT</div>
+                                            <div style="width: 80px;" ng-show="data.isWexImported">REF QNT</div>
+                                            <div style="width: 80px;" ng-show="data.isWexImported">Wex Qnt</div>
+                                            <div style="width: 100px;">U.Price</div>
+                                            <div>Description</div>
+                                        </div>
+                                        <div class="tilsoft-table-body" style="width: 1000px;">
+                                            <table>
+                                                <tbody ng-repeat="sparepart in data.sparepartDetails">
+                                                    <tr>
+                                                        <td style="text-align: center; width: 130px;">
+                                                            <a href="#" class="btn btn-primary btn-xs font-11" title="Location" ng-click="warehouseArea.event.viewArea($event,'sparepart-' + sparepart.warehouseImportSparepartDetailID)"><i id="icon-area-sparepart-{{sparepart.warehouseImportSparepartDetailID}}" class="fa fa-plus-square-o"></i> Location</a>
+                                                            <a href="#" class="btn btn-danger btn-xs font-11" title="Delete" ng-click="event.removeSparepart($event, $index)"><i class="fa fa-times"></i>Del</a>
+                                                        </td>
+                                                        <td style="width: 70px">{{sparepart.articleCode}}</td>
+                                                        <td style="width: 130px">
+                                                            <select ng-model="sparepart.productStatusID" ng-options="status.productStatusID as status.productStatusNM for status in productStatuses" style="width: 100%;" class="form-control"></select>
+                                                        </td>
+
+                                                        <td style="width: 120px;">
+                                                            <input type="text" ng-model="sparepart.containerNo" style="text-align:center" ng-keyup="quicksearchLoadingPlan.event.searchBoxKeyUp($event,sparepart,'SPAREPART') " />
+                                                            <div id="receipt_sparepart_loadingplan{{sparepart.warehouseImportSparepartDetailID}}"></div>
+                                                        </td>
+                                                        <td style="width: 80px;">
+                                                            <input type="text" ng-model="sparepart.proformaInvoiceNo" style="text-align:center" ng-keyup="quicksearchSaleOrder.event.searchBoxKeyUp($event,sparepart,'SPAREPART') " />
+                                                            <div id="receipt_sparepart_saleorder{{sparepart.warehouseImportSparepartDetailID}}"></div>
+                                                        </td>
+                                                        <td style="width: 85px;">
+                                                            <input type="text" ng-model="sparepart.clientUD" style="text-align:center" ng-keyup="quicksearchClient.event.searchBoxKeyUp($event,sparepart,'SPAREPART') " />
+                                                            <div id="receipt_sparepart_client{{sparepart.warehouseImportSparepartDetailID}}"></div>
+                                                        </td>
+
+                                                        <td style="width: 70px" ng-show="!data.isWexImported"><input type="text" ng-model="sparepart.quantity" style="width: 100%;text-align:right" /></td>
+                                                        <td style="width: 80px;text-align:right" ng-show="data.isWexImported"><span style="text-align:right" class="form-control">{{sparepart.refQnt}}</span></td>
+                                                        <td style="width: 80px" ng-show="data.isWexImported">
+                                                            <input type="text" ng-model="sparepart.wexQnt"  class="form-control {{sparepart.isWexImported?'wex-item':''}}" style="text-align:right"/>
+                                                        </td>
+                                                        <td style="width: 100px;"><input type="text" ng-model="sparepart.unitPrice" style="width: 100%;text-align:right" /></td>
+                                                        <td>{{sparepart.description}}</td>
+                                                    </tr>
+                                                    <tr style="display:none" id="sparepart-{{sparepart.warehouseImportSparepartDetailID}}">
+                                                        <td></td>
+                                                        <td colspan="5">
+                                                            <a class="btn btn-primary btn-xs font-11" href="javascript:void(0);" ng-click="warehouseArea.event.addSparepartToArea($event,sparepart.warehouseImportSparepartDetailID)" style=" margin-bottom:10px;"><i class="fa fa-plus"></i> Add Location</a>
+                                                            <div class="tilsoft-table">
+                                                                <div class="tilsoft-table-body" style="width: 100%; height:auto; margin-top:0px">
+                                                                    <table>
+                                                                        <tr>
+                                                                            <th style="width: 60px;"></th>
+                                                                            <th style="width: 155px">Area</th>
+                                                                            <th style="width: 100px">Quantity</th>
+                                                                            <th>Remark</th>
+                                                                        </tr>
+                                                                        <tr ng-repeat="item in sparepart.warehouseImportAreaDetails">
+                                                                            <td style="width: 60px; text-align:center">
+                                                                                <a href="#" class="btn btn-danger btn-xs font-11" title="Remove" ng-click="warehouseArea.event.removeSparepartFromArea($event, sparepart.warehouseImportSparepartDetailID, item.warehouseImportAreaDetailID)"><i class="fa fa-times"></i>Del</a>
+                                                                            </td>
+                                                                            <td style="width: 155px">
+                                                                                <select ng-model="item.warehouseAreaID" ng-options="item.wareHouseAreaID as item.areaCode for item in warehouseAreas" class="form-control"></select>
+                                                                            </td>
+                                                                            <td style="width: 100px">
+                                                                                <input type="text" class="form-control" ng-model="item.quantity" />
+                                                                            </td>                                                                           
+                                                                            <td>
+                                                                                <input type="text" class="form-control" ng-model="item.remark" />
+                                                                            </td>
+                                                                        </tr>
+                                                                    </table>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12" ng-show="currentScreen=='export-wex'">
+        <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>Export to Wex</h2>
+            </header>
+            <div>
+                <div class="widget-body">
+                    <div class="smart-form">
+                        <div class="row">
+                            <section class="col col-6">
+                                <a class="btn btn-primary btn-xs" href="#" ng-click="exportToWexForm.exportWex($event)"><i class="fa fa-plus"></i> Export to CSV File</a>
+                                <a class="btn btn-danger btn-xs" href="#" ng-click="exportToWexForm.cancel($event)"><i class="fa fa-times"></i> Cancel</a>
+                            </section>
+                        </div>
+                        <div class="row">
+                            <section class="col col-12">
+                                <div class="tilsoft-table">
+                                    <div class="tilsoft-table-body" style="width: 100%; height:auto;margin-top:0px">
+                                        <table>
+                                            <tr>
+                                                <th style="width: 30px">No.</th>
+                                                <th style="width: 60px">Receipt No</th>
+                                                <th style="width: 30px">Order Type</th>
+                                                <th style="width: 110px">ArticleCode</th>
+                                                <th>Description</th>
+                                                <th style="width: 60px">Colli Qnt</th>
+                                                <th style="width: 90px">Contaier No</th>
+                                                <th style="width: 70px">Time Received</th>
+                                                <th style="width: 100px">Date Received</th>
+                                                <th style="width: 110px">Colli EAN Code</th>
+                                                <th style="width: 200px">Colli Description</th>
+                                                <th style="width: 60px">Client</th>
+                                                <th style="width: 60px">PI No</th>
+                                            </tr>
+                                            <tr ng-repeat="item in exportToWexForm.wexData">
+                                                <td style="text-align:center">{{$index+1}}</td>
+                                                <td style="text-align:center">{{item.receiptNo}}</td>
+                                                <td style="text-align:center">{{item.orderType}}</td>
+                                                <td>{{item.articleCode}}</td>
+                                                <td>{{item.description}}</td>
+                                                <td style="text-align:center">{{item.colliQnt}}</td>
+                                                <td style="text-align:center">{{item.containerNo}}</td>
+                                                <td style="text-align:center">{{item.containerReceivedTime}}</td>
+                                                <td style="text-align:center">{{item.containerReceivedDate}}</td>
+                                                <td style="text-align:center">{{item.colliEANCode}}</td>
+                                                <td style="text-align:left">{{item.colliDescription}}</td>
+                                                <td style="text-align:center">{{item.clientUD}}</td>
+                                                <td style="text-align:center">{{item.proformaInvoiceNo}}</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+
+    <div id="popup-saleorder" class="popup-container-2" style="width:100px">
+        <div style="float: right; margin-bottom: 2px;">
+            <a href="#" title="Close" ng-click="quicksearchSaleOrder.event.close($event, true)" style="color: #ff0000;"><i class="fa fa-times"></i></a>
+        </div>
+        <div class="clear"></div>
+        <div id="quickSearchResultGrid-saleorder" class="tilsoft-table-wrapper">
+            <div class="tilsoft-table">
+                <div class="tilsoft-table-body" style="width: 100%;height:auto; margin-top:0px">
+                    <table>
+                        <tr ng-repeat="item in quicksearchSaleOrder.data">
+                            <td style="text-align:center; vertical-align:middle">
+                                <a ng-click="quicksearchSaleOrder.event.itemSelected($event,item)" href="javascript:void(0);">{{item.proformaInvoiceNo}}</a>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="popup-client" class="popup-container-2" style="width:100px">
+        <div style="float: right; margin-bottom: 2px;">
+            <a href="#" title="Close" ng-click="quicksearchClient.event.close($event, true)" style="color: #ff0000;"><i class="fa fa-times"></i></a>
+        </div>
+        <div class="clear"></div>
+        <div id="quickSearchResultGrid-client" class="tilsoft-table-wrapper">
+            <div class="tilsoft-table">
+                <div class="tilsoft-table-body" style="width: 100%;height:auto; margin-top:0px">
+                    <table>
+                        <tr ng-repeat="item in quicksearchClient.data">
+                            <td style="text-align:center; vertical-align:middle">
+                                <a ng-click="quicksearchClient.event.itemSelected($event,item)" href="javascript:void(0);">{{item.clientUD}}</a>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="popup-loadingplan" class="popup-container-2" style="width:120px">
+        <div style="float: right; margin-bottom: 2px;">
+            <a href="#" title="Close" ng-click="quicksearchLoadingPlan.event.close($event, true)" style="color: #ff0000;"><i class="fa fa-times"></i></a>
+        </div>
+        <div class="clear"></div>
+        <div id="quickSearchResultGrid-client" class="tilsoft-table-wrapper">
+            <div class="tilsoft-table">
+                <div class="tilsoft-table-body" style="width: 100%;height:auto; margin-top:0px">
+                    <table>
+                        <tr ng-repeat="item in quicksearchLoadingPlan.data">
+                            <td style="text-align:center; vertical-align:middle">
+                                <a ng-click="quicksearchLoadingPlan.event.itemSelected($event,item)" href="javascript:void(0);">{{item.containerNo}}</a>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</form>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "WarehouseImport")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="#" ng-disabled="data.isConfirmed" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="event.update($event)"><i class="fa fa-save"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="#" ng-disabled="data.isConfirmed || data.warehouseImportID == 0" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="Delete" style="color: #ff0000;" ng-click="event.delete($event)"><i class="fa fa-times"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="#" class="btn btn-default" title="Print vesion 1" ng-click="event.print($event,1)"><i class="fa fa-print"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="#" class="btn btn-default" title="Print vesion 2" ng-click="event.print($event,2)"><i class="fa fa-print"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="#" ng-disabled="data.isConfirmed || data.warehouseImportID == 0" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Approve, HttpContext.Current))" title="Approve" ng-click="event.approve($event)"><i class="fa fa-thumbs-o-up"></i></a>
+        </li>
+        @*<li class="sparks-info">
+                <a href="#" ng-disabled="!data.isConfirmed || data.warehouseImportID == 0" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Reset, HttpContext.Current))" title="Reset Approval status" ng-click="event.reset($event)"><i class="fa fa-thumbs-o-down"></i></a>
+            </li>*@
+       
+        <li class="sparks-info" ng-if="data.warehouseImportID>0">
+            <a href="#" class="btn btn-default" title="Import to from Wex" ng-click="importFromWexForm.load()" style="color: #2fbf13"><i class="fa fa-file-excel-o"></i></a>
+        </li>
+
+        <li class="sparks-info" ng-if="data.warehouseImportID>0">
+            <a href="#" class="btn btn-default" title="Export to Wex" ng-click="exportToWexForm.load($event)" style="color: #ff6a00"><i class="fa fa-file-excel-o"></i></a>
+        </li>
+
+    </ul>
+}
+
+@section pagejs {
+    <script src="~/Angular/app/wareHouseImport/service.js?c=@System.Guid.NewGuid().ToString().Replace("-","")"></script>
+    <script src="~/Angular/app/support/service.js?c=@System.Guid.NewGuid().ToString().Replace("-","")"></script>
+    <script type="text/javascript">
+
+        $('#timeDelivery').timepicker();
+
+        var productSearchResultGrid = jQuery('#productSearchResultGrid').scrollableTable(
+            function(currentPage){
+                var scope = angular.element(jQuery('body')).scope();
+                scope.$apply(function(){
+                    scope.quicksearchproduct.filters.pageIndex = currentPage;
+                    scope.quicksearchproduct.method.searchProduct();
+                });
+            },
+            function(sortedBy, sortedDirection){
+                var scope = angular.element(jQuery('body')).scope();
+                scope.$apply(function(){
+                    scope.quicksearchproduct.filters.sortedDirection = sortedDirection;
+                    scope.quicksearchproduct.filters.pageIndex = 1;
+                    scope.quicksearchproduct.filters.sortedBy = sortedBy;
+                    scope.quicksearchproduct.method.search();
+                });
+            },
+            'quicksearchproduct.totalPage'
+        );
+
+
+        var sparepartSearchResultGrid = jQuery('#sparepartSearchResultGrid').scrollableTable(
+            function(currentPage){
+                var scope = angular.element(jQuery('body')).scope();
+                scope.$apply(function(){
+                    scope.quicksearchsparepart.filters.pageIndex = currentPage;
+                    scope.quicksearchsparepart.method.search();
+                });
+            },
+            function(sortedBy, sortedDirection){
+                var scope = angular.element(jQuery('body')).scope();
+                scope.$apply(function(){
+                    scope.quicksearchsparepart.filters.sortedDirection = sortedDirection;
+                    scope.quicksearchsparepart.filters.pageIndex = 1;
+                    scope.quicksearchsparepart.filters.sortedBy = sortedBy;
+                    scope.quicksearchsparepart.method.search();
+                });
+            },
+            'quicksearchsparepart.totalPage'
+        );
+
+        //warehouse import service
+        warehouseImportService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/warehouseimport/';
+        warehouseImportService.supportServiceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/support/';
+        warehouseImportService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+        //support service
+        supportService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/support/';
+        supportService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+        var warehouseImportApp = angular.module('tilsoftApp', []);
+        warehouseImportApp.controller('tilsoftController', ['$scope', function ($scope) {
+            //
+            // scope data
+            //
+            $scope.data = null;
+            $scope.productStatuses = null;
+            $scope.seasons = null;
+            $scope.warehouseAreas = null;
+            $scope.productCollis = null;
+            $scope.newID = 0;
+            var searchProductTimer = null;
+
+            //look and field
+            $scope.currentScreen = 'receipt';
+
+            //
+            // scope event
+            //
+            $scope.event = {
+                update: function($event){
+                    $event.preventDefault();
+                    if($scope.editForm.$valid)
+                    {
+                        if ($scope.data.isWexImported){
+                            warehouseImportService.approve(
+                                @ViewBag.ID,
+                                $scope.data,
+                                function (data) {
+                                    jsHelper.processMessage(data.message);
+                                    if(data.message.type == 0) {
+                                        window.location = '@Url.Action("Free", "WarehouseImport", new { id = UrlParameter.Optional })/' + data.data.warehouseImportID;
+                                    }
+                                },
+                                function (error) {
+                                    jsHelper.showMessage('warning', error);
+                                }
+                            );
+                        }
+                        else {
+                            warehouseImportService.update(
+                                @ViewBag.ID,
+                                $scope.data,
+                                function (data) {
+                                    jsHelper.processMessage(data.message);
+                                    if(data.message.type == 0) {
+                                        window.location = '@Url.Action("Free", "WarehouseImport", new { id = UrlParameter.Optional })/' + data.data.warehouseImportID;
+                                        $scope.$apply();
+                                    }
+                                },
+                                function (error) {
+                                    jsHelper.showMessage('warning', error);
+                                }
+                            );
+                        }
+                    }
+                    else
+                    {
+                        jsHelper.showMessage('warning', '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED');
+                    }
+                },
+                delete: function($event){
+                    $event.preventDefault();
+
+                    if (confirm('Are you sure ?')) {
+                        warehouseImportService.delete(
+                            @ViewBag.ID,
+                            function (data) {
+                                jsHelper.processMessage(data.message);
+                                if(data.message.type == 0) {
+                                    window.location = '@Url.Action("Index", "WarehouseImport")';
+                                }
+                            },
+                            function (error) {
+                                jsHelper.showMessage('warning', error);
+                            }
+                        );
+                    }
+                },
+                approve: function($event){
+                    $event.preventDefault();
+
+                    if (confirm('Approve the import receipt ?')) {
+                        warehouseImportService.approve(
+                            @ViewBag.ID,
+                            $scope.data,
+                            function (data) {
+                                jsHelper.processMessage(data.message);
+                                if(data.message.type == 0) {
+                                    $scope.data = data.data;
+                                    $scope.$apply();
+                                }
+                            },
+                            function (error) {
+                                jsHelper.showMessage('warning', error);
+                            }
+                        );
+                    }
+                },
+                reset: function($event){
+                    $event.preventDefault();
+
+                    if (confirm('Reset the approval status ?')) {
+                        warehouseImportService.reset(
+                            @ViewBag.ID,
+                                $scope.data,
+                                function (data) {
+                                    jsHelper.processMessage(data.message);
+                                    if(data.message.type == 0) {
+                                        $scope.data = data.data;
+                                        $scope.$apply();
+                                    }
+                                },
+                                function (error) {
+                                    jsHelper.showMessage('warning', error);
+                                }
+                            );
+                    }
+                },
+                removeProduct: function($event, index){
+                    if($event !== null) {
+                        $event.preventDefault();
+                    }
+                    console.log(index);
+                    $scope.data.details.splice(index, 1);
+                },
+                removeSparepart: function($event, index){
+                    if($event !== null) {
+                        $event.preventDefault();
+                    }
+                    $scope.data.sparepartDetails.splice(index, 1);
+                },
+
+                print: function($event,version){
+                    $event.preventDefault();
+                    warehouseImportService.getWarehouseImportPrintout(
+                    @ViewBag.ID, version,
+                        function (data) {
+                            jsHelper.processMessage(data.message);
+                            if(data.message.type == 0) {
+                                window.location = '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]' + data.data + '.xlsm';
+                            }
+                        },
+                        function (error) {
+                            jsHelper.showMessage('warning', error);
+                        }
+                    );
+                },
+
+                addColliEANCode: function($event,productItem){
+                    $event.preventDefault();
+
+                    var productID = productItem.productID;
+                    var productColliItems = $scope.productCollis.filter(function(o){return o.productID==productID});
+                    var importColliDetails=[];
+
+                    if (productColliItems!=null){
+                        angular.forEach(productColliItems,function(item){
+                            importColliDetails.push({
+                                warehouseImportColliDetailID : $scope.method.getNewID(),
+                                productColliID : item.productColliID,
+                                colliEANCode : item.colliEANCode,
+                                colliDescription : item.colliDescription,
+                                quantity : productItem.quantity,
+                            });
+                        });
+                    }
+                    productItem.warehouseImportColliDetails = importColliDetails;
+                },
+
+                removeColliEANCode: function($event,index,productItem){
+                    $event.preventDefault();
+                    productItem.warehouseImportColliDetails.splice(index, 1);
+                },
+
+                changeQuantity : function(item){
+                    angular.forEach(item.warehouseImportColliDetails,function(cItem){
+                        cItem.quantity = item.quantity;
+                    })
+                }
+
+
+            };
+
+            //
+            // scope function
+            //
+            $scope.method = {
+                load: function(){
+                    warehouseImportService.load(
+                        '@ViewBag.ID',
+                        function (data) {
+                            $scope.data = data.data.data;
+                            $scope.data.importTypeID = 1;
+                            $scope.data.importTypeNM = 'Free Import';
+                            $scope.productStatuses = data.data.productStatuses;
+                            $scope.seasons = data.data.season;
+                            $scope.warehouseAreas = data.data.wareHouseAreas;
+                            $scope.productCollis = data.data.productCollis;
+                            if ('@ViewBag.ID' == 0) {
+                                $scope.data.season = '@Frontend.Helper.Common.GetCurrentSeason()';
+                                $scope.data.importedDate = '@DateTime.Now.ToString("dd/MM/yyy")';
+                            }
+                            $scope.$apply();
+                            jQuery('#content').show();
+
+                            // monitor changes
+                            $scope.$watch('data', function() {
+                                jQuery('#changeNotification').html('<i class="fa fa-save blink_me"></i>');
+                            });
+                        },
+                        function (error) {
+                            jsHelper.showMessage('warning', error);
+
+                            $scope.data = null;
+                            $scope.$apply();
+                        }
+                    );
+                },
+                getNewID: function(){
+                    $scope.newID--;
+                    return $scope.newID;
+                },
+                checkProductExistance: function(id){
+                    var isExist = false;
+                    jQuery.each($scope.data.details, function(){
+                        if(this.productID == id){
+                            isExist = true;
+                        }
+                    });
+
+                    return isExist;
+                }
+            };
+
+            //
+            // search product form
+            //
+            $scope.quicksearchproduct = {
+                data: null,
+                filters : {
+                    filters: {
+                        searchQuery: ''
+                    },
+                    sortedBy: 'Description',
+                    sortedDirection: 'ASC',
+                    pageSize: 20,
+                    pageIndex: 1
+                },
+                totalPage : 0,
+                method: {
+                    searchProduct: function(){
+                        warehouseImportService.quicksearchconfirmedproduct(
+                            $scope.quicksearchproduct.filters,
+                            function (data) {
+                                if(data.message.type == 0) {
+                                    $scope.quicksearchproduct.data = data.data;
+                                    $scope.quicksearchproduct.totalPage = Math.ceil(data.totalRows / $scope.quicksearchproduct.filters.pageSize);
+                                    productSearchResultGrid.updateLayout();
+                                    $scope.$apply();
+
+                                    jQuery('#product-popup').show();
+                                }
+                            },
+                            function (error) {
+                                jsHelper.showMessage('warning', error);
+                            }
+                        );
+                    }
+                },
+                event: {
+                    searchBoxKeyUp: function($event){
+                        if($event.keyCode == 13)
+                        {
+                            $scope.quicksearchproduct.filters.filters.searchQuery = jQuery('#quickSearchBoxProduct').val();
+                            $scope.quicksearchproduct.filters.pageIndex = 1;
+                            $scope.quicksearchproduct.method.searchProduct();
+                        }
+                        else if (jQuery('#quickSearchBoxProduct').val().length >= 3)
+                        {
+                            clearTimeout(searchProductTimer);
+                            searchProductTimer = setTimeout(
+                                function () {
+                                    $scope.quicksearchproduct.filters.filters.searchQuery = jQuery('#quickSearchBoxProduct').val();
+                                    $scope.quicksearchproduct.filters.pageIndex = 1;
+                                    $scope.quicksearchproduct.method.searchProduct();
+                                },
+                                500);
+                        }
+                    },
+
+                    searchClick : function(){
+                        $scope.quicksearchproduct.filters.filters.searchQuery = jQuery('#quickSearchBoxProduct').val();
+                        $scope.quicksearchproduct.filters.pageIndex = 1;
+                        $scope.quicksearchproduct.method.searchProduct();
+                    },
+
+                    close: function($event){
+                        jQuery('#product-popup').hide();
+                        jQuery('#quickSearchBoxProduct').val('');
+                        $scope.quicksearchproduct.data = null;
+                        $event.preventDefault();
+                    },
+                    ok: function($event, id){
+                        jQuery.each($scope.quicksearchproduct.data, function(){
+                            if(this.isSelected){
+                                
+                                //get selected product
+                                var productID = this.productID;
+                                var productColliItems = $scope.productCollis.filter(function(o){return o.productID==productID});
+                                var importColliDetails=[];
+
+                                //create ean code list for this product
+                                if (productColliItems!=null){
+                                    angular.forEach(productColliItems,function(item){
+                                        importColliDetails.push({
+                                            warehouseImportColliDetailID : $scope.method.getNewID(),
+                                            productColliID : item.productColliID,
+                                            colliEANCode : item.colliEANCode,
+                                            quantity : 1
+                                        });
+                                    });
+                                }
+
+                                // add product to list
+                                $scope.data.details.push({
+                                    warehouseImportProductDetailID: $scope.method.getNewID(),
+                                    productID: this.productID,
+                                    productStatusID: 1, // default value for product status
+                                    articleCode: this.articleCode,
+                                    description: this.description,
+                                    unitPrice: 0,
+                                    quantity: this.quantity,
+                                    warehouseImportColliDetails : importColliDetails
+                                });
+                            }
+                        });
+                        //productGrid.updateLayout();
+                        $scope.quicksearchproduct.data = null;
+                        jQuery('#product-popup').hide();
+                        jQuery('#quickSearchBoxProduct').val('');
+                        $event.preventDefault();
+                    }
+                }
+            }
+
+            //
+            // search sparepart form
+            //
+            var searchSparepartTimer = null;
+            $scope.quicksearchsparepart = {
+                data: null,
+                filters : {
+                    filters: {
+                        searchQuery: ''
+                    },
+                    sortedBy: 'Description',
+                    sortedDirection: 'ASC',
+                    pageSize: 20,
+                    pageIndex: 1
+                },
+                totalPage : 0,
+
+                method: {
+                    searchSparepart: function(){
+                        warehouseImportService.quicksearchsparepart(
+                            $scope.quicksearchsparepart.filters,
+                            function (data) {
+                                if(data.message.type == 0) {
+                                    $scope.quicksearchsparepart.data = data.data;
+                                    $scope.quicksearchsparepart.totalPage = Math.ceil(data.totalRows / $scope.quicksearchsparepart.filters.pageSize);
+                                    sparepartSearchResultGrid.updateLayout();
+                                    $scope.$apply();
+
+                                    jQuery('#sparepart-popup').show();
+                                }
+                            },
+                            function (error) {
+                                jsHelper.showMessage('warning', error);
+                            }
+                        );
+                    }
+                },
+
+                event: {
+                    searchBoxKeyUp: function($event){
+
+                        if($event.keyCode == 13)
+                        {
+                            $scope.quicksearchsparepart.filters.filters.searchQuery = jQuery('#quickSearchBoxSparepart').val();
+                            $scope.quicksearchsparepart.filters.pageIndex = 1;
+                            $scope.quicksearchsparepart.method.searchSparepart();
+                        }
+                        else if (jQuery('#quickSearchBoxSparepart').val().length >= 3)
+                        {
+                            clearTimeout(searchProductTimer);
+                            searchProductTimer = setTimeout(
+                                function () {
+                                    $scope.quicksearchsparepart.filters.filters.searchQuery = jQuery('#quickSearchBoxSparepart').val();
+                                    $scope.quicksearchsparepart.filters.pageIndex = 1;
+                                    $scope.quicksearchsparepart.method.searchSparepart();
+                                },
+                                500);
+                        }
+                    },
+
+                    searchClick : function(){
+                        $scope.quicksearchsparepart.filters.filters.searchQuery = jQuery('#quickSearchBoxSparepart').val();
+                        $scope.quicksearchsparepart.filters.pageIndex = 1;
+                        $scope.quicksearchsparepart.method.searchSparepart();
+                    },
+
+                    close: function($event){
+                        jQuery('#sparepart-popup').hide();
+                        jQuery('#quickSearchBoxSparepart').val('');
+                        $scope.quicksearchsparepart.data = null;
+                        $event.preventDefault();
+                    },
+                    ok: function($event, id){
+                        jQuery.each($scope.quicksearchsparepart.data, function(){
+                            if(this.isSelected)
+                            {
+                                $scope.data.sparepartDetails.push({
+                                    warehouseImportSparepartDetailID: $scope.method.getNewID(),
+                                    sparepartID: this.sparepartID,
+                                    articleCode: this.articleCode,
+                                    description: this.description,
+                                    unitPrice: 0,
+                                    quantity: 1,
+                                    productStatusID: 1 // default value for product status
+                                });
+                            }
+                        });
+
+                        $scope.quicksearchsparepart.data = null;
+                        jQuery('#sparepart-popup').hide();
+                        jQuery('#quickSearchBoxSparepart').val('');
+                        $event.preventDefault();
+                    }
+                }
+            }
+
+            $scope.warehouseArea = {
+                event : {
+                    viewArea : function($event,id){
+                        $event.preventDefault();
+
+                        $("#" + id).toggle();
+                        if ($("#icon-area-" + id).hasClass('fa-plus-square-o'))
+                        {
+                            $("#icon-area-" + id).removeClass('fa-plus-square-o');
+                            $("#icon-area-" + id).addClass('fa-minus-square-o');
+                        }
+                        else  if ($("#icon-area-" + id).hasClass('fa-minus-square-o'))
+                        {
+                            $("#icon-area-" + id).removeClass('fa-minus-square-o');
+                            $("#icon-area-" + id).addClass('fa-plus-square-o');
+                        }
+                    },
+
+                    addProductToArea : function($event,warehouseImportProductDetailID) {
+                        $event.preventDefault();
+
+                        var arr = $scope.data.details.filter(function(o){ return o.warehouseImportProductDetailID == warehouseImportProductDetailID });
+                        if (arr[0].warehouseImportAreaDetails == null)
+                        {
+                            arr[0].warehouseImportAreaDetails = [];
+                        }
+                        var arr_area = arr[0].warehouseImportAreaDetails.filter(function(o){ return o.warehouseImportAreaDetailID < 0});
+
+                        max_id = -1;
+                        if (arr_area.length > 0)
+                        {
+                            arr_area.sort(function(a,b){return a.warehouseImportAreaDetailID - b.warehouseImportAreaDetailID});
+                            max_id = arr_area[0].warehouseImportAreaDetailID - 1;
+                        }
+                        arr[0].warehouseImportAreaDetails.push({
+                            warehouseImportAreaDetailID : max_id,
+                        });
+                    },
+
+                    removeProductFromArea : function($event,warehouseImportProductDetailID,warehouseImportAreaDetailID){
+                        var arr = $scope.data.details.filter(function(o){ return o.warehouseImportProductDetailID == warehouseImportProductDetailID });
+                        var arr_area = arr[0].warehouseImportAreaDetails;
+
+                        isExist = false;
+                        for(j=0; j< arr_area.length; j++) {
+                            if(arr_area[j].warehouseImportAreaDetailID == warehouseImportAreaDetailID) {
+                                isExist = true;
+                                break;
+                            }
+                        }
+                        if(isExist){
+                            arr_area.splice(j, 1);
+                        }
+                        $scope.$apply();
+                    },
+
+                    addSparepartToArea : function($event,warehouseImportSparepartDetailID) {
+                        $event.preventDefault();
+
+                        var arr = $scope.data.sparepartDetails.filter(function(o){ return o.warehouseImportSparepartDetailID == warehouseImportSparepartDetailID });
+                        if (arr[0].warehouseImportAreaDetails == null)
+                        {
+                            arr[0].warehouseImportAreaDetails = [];
+                        }
+                        var arr_area = arr[0].warehouseImportAreaDetails.filter(function(o){ return o.warehouseImportAreaDetailID < 0});
+
+                        max_id = -1;
+                        if (arr_area.length > 0)
+                        {
+                            arr_area.sort(function(a,b){return a.warehouseImportAreaDetailID - b.warehouseImportAreaDetailID});
+                            max_id = arr_area[0].warehouseImportAreaDetailID - 1;
+                        }
+                        arr[0].warehouseImportAreaDetails.push({
+                            warehouseImportAreaDetailID : max_id,
+                        });
+                    },
+
+                    removeSparepartFromArea : function($event,warehouseImportSparepartDetailID,warehouseImportAreaDetailID){
+                        var arr = $scope.data.sparepartDetails.filter(function(o){ return o.warehouseImportSparepartDetailID == warehouseImportSparepartDetailID });
+                        var arr_area = arr[0].warehouseImportAreaDetails;
+
+                        isExist = false;
+                        for(j=0; j< arr_area.length; j++) {
+                            if(arr_area[j].warehouseImportAreaDetailID == warehouseImportAreaDetailID) {
+                                isExist = true;
+                                break;
+                            }
+                        }
+                        if(isExist){
+                            arr_area.splice(j, 1);
+                        }
+                        $scope.$apply();
+                    },
+
+
+                }
+            }
+
+            $scope.exportToWexForm = {
+                wexData : [],
+
+                load : function($event){
+                    $event.preventDefault();
+                    warehouseImportService.getExportWexData($scope.data.warehouseImportID,
+                            function (data) {
+                                if(data.message.type == 0) {
+                                    $scope.exportToWexForm.wexData = data.data;
+                                    $scope.currentScreen = 'export-wex';
+                                    $scope.$apply();
+                                }
+                            },
+                            function (error) {
+                                jsHelper.showMessage('warning', error);
+                            }
+                        );
+                },
+
+                cancel : function($event){
+                    $event.preventDefault();
+                    $scope.currentScreen = 'receipt';
+                },
+
+                exportWex : function($event){
+                    $event.preventDefault();
+                    warehouseImportService.createWexCSVFile($scope.data.warehouseImportID,
+                            function (data) {
+                                if(data.message.type == 0) {
+                                    window.location = '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]' + data.data;
+                                }
+                            },
+                            function (error) {
+                                jsHelper.showMessage('warning', error);
+                            }
+                        );
+                }
+            }
+
+
+            //quick search sale order
+            var quicksearchSaleOrderTimer = null;
+            $scope.quicksearchSaleOrder = {
+                data: null,
+                filters: {
+                    filters: {
+                        searchQuery: ''
+                    },
+                    sortedBy: 'ProformaInvoiceNo',
+                    sortedDirection: 'ASC',
+                    pageSize: 50,
+                    pageIndex: 1
+                },
+                totalPage: 0,
+
+                popupformID: 'popup-saleorder',
+                editingItem : null,
+
+                event: {
+                    searchBoxKeyUp: function ($event, item,goodType) {
+                        $scope.quicksearchSaleOrder.editingItem = item;
+                        if (item.proformaInvoiceNo.length >= 3)
+                        {
+                            clearTimeout(quicksearchSaleOrderTimer);
+                            quicksearchSaleOrderTimer = setTimeout(function(){
+                                $scope.quicksearchSaleOrder.filters.filters.searchQuery = item.proformaInvoiceNo;
+                                warehouseImportService.quickSearchSaleOrder(
+                                            $scope.quicksearchSaleOrder.filters,
+                                            function (data) {
+                                                if (data.message.type == 0) {
+                                                    $scope.quicksearchSaleOrder.data = data.data;
+                                                    if (goodType=='PRODUCT'){
+                                                        jQuery("#receipt_product_saleorder" + item.warehouseImportProductDetailID).append(jQuery('#' + $scope.quicksearchSaleOrder.popupformID));
+                                                    }
+                                                    else if (goodType=='SPAREPART'){
+                                                        jQuery("#receipt_sparepart_saleorder" + item.warehouseImportSparepartDetailID).append(jQuery('#' + $scope.quicksearchSaleOrder.popupformID));
+                                                    }
+                                                    jQuery('#' + $scope.quicksearchSaleOrder.popupformID).show();
+                                                    $scope.$apply();
+                                                }
+                                            },
+                                            function (error) {
+                                                jsHelper.showMessage('warning', error);
+                                            }
+                                        );
+                            },500
+                            );
+                        }
+                    },
+                    close: function ($event) {
+                        jQuery('#' + $scope.quicksearchSaleOrder.popupformID).hide();
+                        $scope.quicksearchSaleOrder.data = null;
+                    },
+                    itemSelected: function ($event, selectedItem) {
+                        $scope.quicksearchSaleOrder.editingItem.saleOrderID = selectedItem.saleOrderID;
+                        $scope.quicksearchSaleOrder.editingItem.clientID = selectedItem.clientID;
+                        $scope.quicksearchSaleOrder.editingItem.proformaInvoiceNo = selectedItem.proformaInvoiceNo;
+                        $scope.quicksearchSaleOrder.editingItem.clientUD = selectedItem.clientUD;
+                        $scope.quicksearchSaleOrder.event.close($event);
+                    }
+                }
+            }
+
+            //quick search client
+            var quicksearchClientTimer = null;
+            $scope.quicksearchClient = {
+                data: null,
+                filters: {
+                    filters: {
+                        searchQuery: ''
+                    },
+                    sortedBy: 'ClientUD',
+                    sortedDirection: 'ASC',
+                    pageSize: 50,
+                    pageIndex: 1
+                },
+                totalPage: 0,
+
+                popupformID: 'popup-client',
+                editingItem : null,
+
+                event: {
+                    searchBoxKeyUp: function ($event, item,goodType) {
+                        $scope.quicksearchClient.editingItem = item;
+                        if (item.clientUD.length >= 3)
+                        {
+                            clearTimeout(quicksearchClientTimer);
+                            quicksearchClientTimer = setTimeout(function(){
+                                $scope.quicksearchClient.filters.filters.searchQuery = item.clientUD;
+                                supportService.quicksearchClient(
+                                            $scope.quicksearchClient.filters,
+                                            function (data) {
+                                                if (data.message.type == 0) {
+                                                    $scope.quicksearchClient.data = data.data;
+                                                    $scope.quicksearchLoadingPlan.data = data.data;
+                                                    if (goodType=='PRODUCT'){
+                                                        jQuery("#receipt_product_client" + item.warehouseImportProductDetailID).append(jQuery('#' + $scope.quicksearchClient.popupformID));
+                                                    }
+                                                    else if (goodType=='SPAREPART'){
+                                                        jQuery("#receipt_sparepart_client" + item.warehouseImportSparepartDetailID).append(jQuery('#' + $scope.quicksearchClient.popupformID));
+                                                    }
+                                                    jQuery('#' + $scope.quicksearchClient.popupformID).show();
+                                                    $scope.$apply();
+                                                }
+                                            },
+                                            function (error) {
+                                                jsHelper.showMessage('warning', error);
+                                            }
+                                        );
+                            },500
+                            );
+                        }
+                    },
+                    close: function ($event) {
+                        jQuery('#' + $scope.quicksearchClient.popupformID).hide();
+                        $scope.quicksearchClient.data = null;
+                    },
+                    itemSelected: function ($event, selectedItem) {
+                        $scope.quicksearchClient.editingItem.clientID = selectedItem.clientID;
+                        $scope.quicksearchClient.editingItem.clientUD = selectedItem.clientUD;
+
+                        $scope.quicksearchClient.editingItem.saleOrderID = null;
+                        $scope.quicksearchClient.editingItem.proformaInvoiceNo = '';
+                        $scope.quicksearchClient.event.close($event);
+                    }
+                }
+            }
+
+            //quick search loading plan
+            var quicksearchLoadingPlanTimer = null;
+            $scope.quicksearchLoadingPlan = {
+                data: null,
+                filters: {
+                    filters: {
+                        searchQuery: ''
+                    },
+                    sortedBy: 'ContainerNo',
+                    sortedDirection: 'ASC',
+                    pageSize: 50,
+                    pageIndex: 1
+                },
+                totalPage: 0,
+
+                popupformID: 'popup-loadingplan',
+                editingItem : null,
+
+                event: {
+                    searchBoxKeyUp: function ($event, item,goodType) {
+                        $scope.quicksearchLoadingPlan.editingItem = item;
+                        if (item.containerNo.length >= 3)
+                        {
+                            clearTimeout(quicksearchLoadingPlanTimer);
+                            quicksearchLoadingPlanTimer = setTimeout(function(){
+                                $scope.quicksearchLoadingPlan.filters.filters.searchQuery = item.containerNo;
+                                warehouseImportService.quickSearchLoadingPlan(
+                                            $scope.quicksearchLoadingPlan.filters,
+                                            function (data) {
+                                                if (data.message.type == 0) {
+                                                    $scope.quicksearchLoadingPlan.data = data.data;
+                                                    if (goodType=='PRODUCT'){
+                                                        jQuery("#receipt_product_loadingplan" + item.warehouseImportProductDetailID).append(jQuery('#' + $scope.quicksearchLoadingPlan.popupformID));
+                                                    }
+                                                    else if (goodType=='SPAREPART'){
+                                                        jQuery("#receipt_sparepart_loadingplan" + item.warehouseImportSparepartDetailID).append(jQuery('#' + $scope.quicksearchLoadingPlan.popupformID));
+                                                    }
+                                                    jQuery('#' + $scope.quicksearchLoadingPlan.popupformID).show();
+                                                    $scope.$apply();
+                                                }
+                                            },
+                                            function (error) {
+                                                jsHelper.showMessage('warning', error);
+                                            }
+                                        );
+                            },500
+                            );
+                        }
+                    },
+                    close: function ($event) {
+                        jQuery('#' + $scope.quicksearchLoadingPlan.popupformID).hide();
+                        $scope.quicksearchLoadingPlan.data = null;
+                    },
+                    itemSelected: function ($event, selectedItem) {
+                        $scope.quicksearchLoadingPlan.editingItem.loadingPlanID = selectedItem.loadingPlanID;
+                        $scope.quicksearchLoadingPlan.editingItem.containerNo = selectedItem.containerNo;
+                        $scope.quicksearchLoadingPlan.event.close($event);
+                    }
+                }
+            }
+
+            //import from wex
+            $scope.importFromWexForm={
+                load: function(){
+                    var input = document.createElement ("input");
+                    input.setAttribute ("type", "file");
+                    input.setAttribute ("accept", ".csv");
+                    input.addEventListener ("change", function (e) {
+                        //set receipt is imported from Wex and set ref quantity is real quantiy
+                        $scope.data.isWexImported = true;
+                        angular.forEach($scope.data.details,function(item){
+                            item.refQnt = item.quantity;
+                            angular.forEach(item.warehouseImportColliDetails,function(cItem){
+                                cItem.refQnt=cItem.quantity;
+                            })
+                        });
+                        angular.forEach($scope.data.sparepartDetails,function(item){
+                            item.refQnt = item.quantity;
+                        });
+
+                        //---BEGIN READ CSV CONTENT TO TILSOFT---
+
+                        //get file content
+                        var file = e.target.files[0];
+                        Papa.parse(file, {
+                            delimiter: "",
+                            //header: true,
+                            skipEmptyLines: true,
+                            complete: function(results) {
+                                //adjust source data (replace ' by string empty)
+                                var wexItems=[];
+                                var wexItem={};
+                                var hearder = results.data[0];
+                                for(var i=0;i<results.data.length;i++){
+                                    if (i>0){
+                                        var item=results.data[i];
+                                        wexItem={};
+                                        for(var j=0;j<hearder.length;j++){
+                                            wexItem[hearder[j].replace(/'/g , '')]=item[j].replace(/'/g , '');
+                                        }
+                                        wexItems.push(wexItem);
+                                    }
+                                }
+                                console.log(wexItems);
+                                //check receipt no.
+                                var isReceiptValid = false;
+                                var receiptNo;
+                                angular.forEach(wexItems,function(item){
+                                    if (item.RECEIPTNO!=$scope.data.receiptNo){
+                                        isReceiptValid = true;
+                                        receiptNo = item.RECEIPTNO;
+                                    }
+                                });
+                                if (isReceiptValid){
+                                    bootbox.alert('Can not import because CSV file containt the warehouse receipt no.('+ receiptNo +') difference with current receipt no.(' + $scope.data.receiptNo + ' )');
+                                    return;
+                                }
+                                //update back to import receipt
+                                var indexs=[];
+                                angular.forEach(wexItems,function(item){
+                                    //keyID = item.ARTICLECODE + '_' + item.CLIENTUD + '_' + item.PROFORMAINVOICENO + '_'+ item.CONTAINERNO;
+                                    keyID = item.ARTICLECODE
+                                    if (indexs.indexOf(keyID) < 0) {
+                                        indexs.push(keyID);
+                                        //get min qnt of every item in wex
+                                        var minQnt = parseInt(item.SUM);
+                                        angular.forEach(wexItems,function(wItem){
+                                            //if (wItem.ARTICLECODE==item.ARTICLECODE && wItem.CLIENTUD==item.CLIENTUD && wItem.PROFORMAINVOICENO==item.PROFORMAINVOICENO && wItem.CONTAINERNO==item.CONTAINERNO ){
+                                            if (wItem.ARTICLECODE==item.ARTICLECODE){
+                                                if (parseInt(wItem.SUM) < minQnt){
+                                                    minQnt=parseInt(wItem.SUM);
+                                                }
+                                            }
+                                        });
+                                        var minQnt_Constant = minQnt;
+                                        //appy data for Tilsoft
+                                        var tilsoftItems = $scope.data.details.filter(function(o){
+                                            //return o.articleCode==item.ARTICLECODE && o.clientUD==item.CLIENTUD && o.proformaInvoiceNo==item.PROFORMAINVOICENO && o.containerNo==item.CONTAINERNO
+                                            return o.articleCode==item.ARTICLECODE
+                                        });
+                                        var countTilsoftItem = tilsoftItems.length;
+                                        var i=1;
+                                        angular.forEach(tilsoftItems,function(tilsoftItem){
+                                            var takenQnt = 0;
+                                            if (i==countTilsoftItem){ // if this is end of row of list tilsoft item
+                                                takenQnt=minQnt;
+                                            }
+                                            else {
+                                                if (tilsoftItem.quantity < minQnt){
+                                                    takenQnt=tilsoftItem.quantity;
+                                                }
+                                                else{
+                                                    takenQnt=minQnt;
+                                                }
+                                            }
+                                            //update product quantity
+                                            tilsoftItem.wexQnt=takenQnt;
+                                            tilsoftItem.isWexImported=true;
+                                            //create area for product
+                                            tilsoftItem.warehouseImportAreaDetails=[];
+                                            tilsoftItem.warehouseImportAreaDetails.push({
+                                                warehouseImportAreaDetailID:$scope.method.getNewID(),
+                                                warehouseAreaID:703,
+                                                quantity:takenQnt
+                                            });
+                                            //update colliQnt
+                                            angular.forEach(tilsoftItem.warehouseImportColliDetails,function(colliItem){
+                                                if (i==countTilsoftItem){ // if this is end of row of list tilsoft item
+                                                    //get origin qnt in wex file
+                                                    var x = wexItems.filter(function(o){
+                                                        //return o.ARTICLECODE==colliItem.articleCode && o.CLIENTUD==colliItem.clientUD && o.PROFORMAINVOICENO==colliItem.proformaInvoiceNo && o.CONTAINERNO==colliItem.containerNo && o.COLLIEANCODE==colliItem.colliEANCode
+                                                        return o.ARTICLECODE==colliItem.articleCode && o.COLLIEANCODE==colliItem.colliEANCode
+                                                    });
+                                                    var originColliQnt = parseInt(x==null||x.length==0?0:x[0].SUM);
+                                                    //update colli qnt in tilsoft
+                                                    colliItem.wexQnt = takenQnt + (originColliQnt - minQnt_Constant);
+                                                }
+                                                else {
+                                                    colliItem.wexQnt = takenQnt;
+                                                }
+                                                colliItem.isWexImported=true;
+                                            });
+                                            //descrese minQnt
+                                            minQnt = minQnt - takenQnt;
+                                            //increase index
+                                            i++;
+                                        });
+
+                                    }
+                                });
+
+                                //sparepart
+                                angular.forEach(wexItems,function(wexItem){
+                                    if (wexItem.ORDERTYPE=='SP'){
+                                        var wexSparepartQnt=parseInt(wexItem.SUM);
+                                        var wexSparepartQnt_Constant=parseInt(wexItem.SUM);
+                                        var tilsoftSparepartItems = $scope.data.sparepartDetails.filter(function(o){
+                                            return o.articleCode==wexItem.ARTICLECODE
+                                        });
+                                        var countTilsoftSparepartItem = tilsoftSparepartItems.length;
+                                        var i=1;
+                                        angular.forEach(tilsoftSparepartItems,function(tilsoftItem){
+                                            var takenSparepartQnt = 0;
+                                            if (i==countTilsoftSparepartItem){ // if this is end of row of list tilsoft item
+                                                takenSparepartQnt=wexSparepartQnt;
+                                            }
+                                            else {
+                                                if (tilsoftItem.quantity < wexSparepartQnt){
+                                                    takenSparepartQnt=tilsoftItem.quantity;
+                                                }
+                                                else{
+                                                    takenSparepartQnt=wexSparepartQnt;
+                                                }
+                                            }
+                                            tilsoftItem.wexQnt=takenSparepartQnt;
+                                            tilsoftItem.isWexImported=true;
+                                            //create area for sparepart
+                                            tilsoftItem.warehouseImportAreaDetails=[];
+                                            tilsoftItem.warehouseImportAreaDetails.push({
+                                                warehouseImportAreaDetailID:$scope.method.getNewID(),
+                                                warehouseAreaID:703,
+                                                quantity:takenSparepartQnt
+                                            });
+
+                                            //descrese wexSparepartQnt
+                                            wexSparepartQnt = wexSparepartQnt - takenSparepartQnt;
+                                            //increase index
+                                            i++;
+                                        });
+                                    }
+                                })
+
+                                //---END READ CSV CONTENT TO TILSOFT---
+
+                                //set real quantity is quantity from wex
+                                //angular.forEach($scope.data.details,function(item){
+                                //    item.quantity = item.wexQnt;
+                                //    angular.forEach(item.warehouseImportColliDetails,function(cItem){
+                                //        cItem.quantity=cItem.wexQnt;
+                                //    })
+                                //});
+
+                                //set real quantity is quantity from wex
+                                angular.forEach($scope.data.details,function(item){
+                                    if (item.isWexImported){ //set real qnt is qnt from wex in case row was imported
+                                        item.quantity = item.wexQnt;
+                                        angular.forEach(item.warehouseImportColliDetails,function(cItem){
+                                            cItem.quantity=cItem.wexQnt;
+                                        })
+                                    }
+                                    else { //rows do not imported will set real qnt = 0
+                                        item.quantity = 0;
+                                        angular.forEach(item.warehouseImportAreaDetails,function(areaItem){
+                                            areaItem.quantity = 0;
+                                        })
+                                    }                                    
+                                });
+
+                                //sparepart
+                                angular.forEach($scope.data.sparepartDetails,function(item){
+                                    item.quantity = item.wexQnt;
+                                });
+                                //apply data
+                                $scope.$apply();
+                            }
+                        });
+                    }, false);
+                    input.click();
+                },
+
+
+            },
+
+
+
+            //
+            // init
+            //
+            $scope.method.load();
+        }]);
+    </script>
+}
+

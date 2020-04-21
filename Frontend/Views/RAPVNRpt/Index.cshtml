@@ -1,0 +1,645 @@
+﻿
+@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    var pageSize = System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"];
+    var cookieID = HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString();
+    var supportServiceRoot = (System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"]);
+
+    ViewBag.Title = "RAP VN Report";
+    ViewBag.Module = "RAP VN Report";
+}
+
+<article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+    <div class="jarviswidget jarviswidget-color-darken" id="wid-id-search-filter" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+        <header>
+            <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+            <h2>Filters</h2>
+        </header>
+
+        <div>
+            <div class="jarviswidget-editbox"></div>
+
+            <div class="widget-body widget-body no-padding">
+                <div class="smart-form">
+                    <fieldset>
+                        <div class="row">
+                            <section class="col col-sm-4">
+                                <label>Season</label>
+                                <select class="form-control" ng-model="filter.seasonText" ng-options="item.seasonValue as item.seasonText for item in seasons"></select>
+                            </section>
+
+                            <section class="col col-sm-8">
+                                <label>Factory</label>
+                                <select class="form-control" ng-model="filter.factoryID" ng-options="item.factoryID as item.factoryUD for item in factories | orderBy : factoryUD"></select>
+                            </section>
+                        </div>
+                        <div class="row">
+                            <section class="col col-sm-2">
+                                <label class="label">
+                                    Order No.
+                                </label>
+                                <label class="input">
+                                    <input type="text" class="form-control" ng-model="filter.proformaInvoiceNo" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label class="label">
+                                    Client Code
+                                </label>
+                                <label class="input">
+                                    <input type="text" class="form-control" ng-model="filter.clientUD" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-3">
+                                <label class="label">
+                                    Article Code
+                                </label>
+                                <label class="input">
+                                    <input type="text" class="form-control" ng-model="filter.articleCode" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-5">
+                                <label class="label">
+                                    Description
+                                </label>
+                                <label class="input">
+                                    <input type="text" class="form-control" ng-model="filter.description" />
+                                </label>
+                            </section>
+                        </div>
+                    </fieldset>
+                    <footer>
+                        <a href="javascript:void(0)" class="btn btn-primary" style="float: none;" ng-click="event.search()"><i class="fa fa-code"></i> HTML Version</a>
+                        <a href="javascript:void(0)" class="btn btn-primary" ng-click="event.generateExcel()" style="float: none;"><i class="fa fa-file-excel-o"></i> Excel Version</a>
+                    </footer>
+                </div>
+            </div>
+        </div>
+    </div>
+</article>
+
+<article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+    <div class="jarviswidget" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+        <header>
+            <ul class="nav nav-tabs pull-left in">
+                <li class="active">
+                    <a data-toggle="tab" href="#tabTotalOrder" name="gtab" ng-click="method.clickTab(1)"><span>Order</span></a>
+                </li>
+                <li>
+                    <a data-toggle="tab" href="#tabLoaded" ng-click="method.clickTab(2)"><span>Loaded</span></a>
+                </li>
+                <li>
+                    <a data-toggle="tab" href="#tabShipped" ng-click="method.clickTab(3)"><span>Shipped</span></a>
+                </li>
+            </ul>
+        </header>
+        <div>
+            <div class="jarviswidget-editbox"></div>
+            <div class="widget-body no-padding">
+                <div class="tab-content">
+                    <div class="tab-pane active" id="tabTotalOrder">
+                        <div avs-scroll grid-handler="gridHandler" class="tilsoft-table-wrapper">
+                            <div class="tilsoft-table">
+                                <div style="width:6405px" class="tilsoft-table-header">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th rowspan="2" style="width: 120px; background-color: yellow;"><div style="width: 120px; height: 59px; border-right:solid 1px #ccc">Order No</div></th>
+                                                <th rowspan="2" style="width: 125px; background-color: yellow;"><div style="width: 125px; height: 59px; border-right:solid 1px #ccc">Client Order Number</div></th>
+                                                <th rowspan="2" style="width: 120px; background-color: yellow;"><div style="width: 120px; height: 59px; border-right:solid 1px #ccc">Order Qnt</div></th>
+                                                <th rowspan="2" style="width: 120px; background-color: yellow;"><div style="width: 120px; height: 59px; border-right:solid 1px #ccc">Production Qnt</div></th>
+                                                <th rowspan="2" style="width: 120px; background-color: yellow;"><div style="width: 120px; height: 59px; border-right:solid 1px #ccc">Remain Qnt</div></th>
+                                                <th rowspan="2" style="width: 120px; background-color: yellow;"><div style="width: 120px; height: 59px; border-right:solid 1px #ccc">Work Order</div></th>
+                                                <th rowspan="2" style="width: 120px; background-color: yellow;"><div style="width: 120px; height: 59px; border-right:solid 1px #ccc">Order Date</div></th>
+                                                <th rowspan="2" style="width: 120px; background-color: yellow;"><div style="width: 120px; height: 59px; border-right:solid 1px #ccc">Client Code</div></th>
+                                                <th rowspan="2" style="width: 120px; background-color: yellow;"><div style="width: 120px; height: 59px; border-right:solid 1px #ccc">Company</div></th>
+                                                <th rowspan="2" style="width: 150px; background-color: yellow;"><div style="width: 150px; height: 59px; border-right:solid 1px #ccc">Sale</div></th>
+                                                <th rowspan="2" style="width: 150px; background-color: yellow;"><div style="width: 150px; height: 59px; border-right:solid 1px #ccc">Sale Assistant</div></th>
+                                                <th rowspan="2" style="width: 200px; background-color: yellow;"><div style="width: 200px; height: 59px; border-right:solid 1px #ccc">Code</div></th>
+                                                <th rowspan="2" style="width: 400px; background-color: yellow;"><div style="width: 400px; height: 59px; border-right:solid 1px #ccc">Description</div></th>
+                                                <th rowspan="2" style="width: 120px; background-color: yellow;"><div style="width: 120px; height: 59px; border-right:solid 1px #ccc">QNT/40FT</div></th>
+                                                <th rowspan="2" style="width: 120px; background-color: yellow;"><div style="width: 120px; height: 59px; border-right:solid 1px #ccc">Order In Cont.</div></th>
+                                                <th rowspan="2" style="width: 120px; background-color: yellow;"><div style="width: 120px; height: 59px; border-right:solid 1px #ccc">Shipped Qnt</div></th>
+                                                <th rowspan="2" style="width: 120px; background-color: yellow;"><div style="width: 120px; height: 59px; border-right:solid 1px #ccc">Shipped QNT/40HC</div></th>
+                                                <th rowspan="2" style="width: 120px; background-color: yellow;"><div style="width: 120px; height: 59px; border-right:solid 1px #ccc">ToBe Shipped Qnt</div></th>
+                                                <th rowspan="2" style="width: 130px; background-color: yellow;"><div style="width: 130px; height: 59px; border-right:solid 1px #ccc">ToBe Shipped QNT/40HC</div></th>
+                                                <th rowspan="2" style="width: 180px; background-color: yellow;"><div style="width: 180px; height: 59px; border-right:solid 1px #ccc">Location</div></th>
+                                                <th rowspan="2" style="width: 150px; background-color: yellow;"><div style="width: 150px; height: 59px; border-right:solid 1px #ccc">Supplier</div></th>
+                                                <th colspan="3" style="width: 210px; background-color: yellow;"><div style="width: 210px; height: 30px; border-right:solid 1px #ccc">#Containers</div></th>
+                                                <th rowspan="2" style="width: 150px; background-color: yellow;"><div style="width: 150px; height: 59px; border-right:solid 1px #ccc">Delivery Date Client</div></th>
+                                                <th rowspan="2" style="width: 120px; background-color: yellow;"><div style="width: 120px; height: 59px; border-right:solid 1px #ccc">LDS Factory</div></th>
+                                                <th rowspan="2" style="width: 250px; background-color: yellow;"><div style="width: 250px; height: 59px; border-right:solid 1px #ccc">Supply Chain Responsible</div></th>
+                                                <th rowspan="2" style="width: 120px; background-color: yellow;"><div style="width: 120px; height: 59px; border-right:solid 1px #ccc">Order Status No</div></th>
+                                                <th rowspan="2" style="width: 150px; background-color: yellow;"><div style="width: 150px; height: 59px; border-right:solid 1px #ccc">Order Type</div></th>
+                                                <th rowspan="2" style="width: 120px; background-color: yellow;"><div style="width: 120px; height: 59px; border-right:solid 1px #ccc">Order Priority</div></th>
+                                                <th rowspan="2" style="width: 200px; background-color: yellow;"><div style="width: 200px; height: 59px; border-right:solid 1px #ccc">Export Market/Item Standard</div></th>
+                                                <th rowspan="2" style="width: 150px; background-color: yellow;"><div style="width: 150px; height: 59px; border-right:solid 1px #ccc">Test Sampling</div></th>
+                                                <th rowspan="2" style="width: 150px; background-color: yellow;"><div style="width: 150px; height: 59px; border-right:solid 1px #ccc">Labelling</div></th>
+                                                <th rowspan="2" style="width: 150px; background-color: yellow;"><div style="width: 150px; height: 59px; border-right:solid 1px #ccc">Packaging</div></th>
+                                                <th rowspan="2" style="width: 150px; background-color: yellow;"><div style="width: 150px; height: 59px; border-right:solid 1px #ccc">Inspection</div></th>
+                                                <th rowspan="2" style="width: 200px; background-color: yellow;"><div style="width: 200px; height: 59px; border-right:solid 1px #ccc">Additional Remarks</div></th>
+                                                <th rowspan="2" style="width: 150px; background-color: yellow;"><div style="width: 150px; height: 59px; border-right:solid 1px #ccc">Delivery Type</div></th>
+                                                <th rowspan="2" style="width: 150px; background-color: yellow;"><div style="width: 150px; height: 59px; border-right:solid 1px #ccc">Shipment to</div></th>
+                                                <th rowspan="2" style="width: 150px; background-color: yellow;"><div style="width: 150px; height: 59px; border-right:solid 1px #ccc">Shipment type</div></th>
+                                                <th rowspan="2" style="width: 150px; background-color: yellow;"><div style="width: 150px; height: 59px; border-right:solid 1px #ccc">Range Name</div></th>
+                                                <th rowspan="2" style="width: 120px; background-color: yellow;"><div style="width: 120px; height: 59px; border-right:solid 1px #ccc">Frame Material</div></th>
+                                                <th rowspan="2" style="width: 160px; background-color: yellow;"><div style="width: 160px; height: 59px; border-right:solid 1px #ccc">Material Type</div></th>
+                                                <th rowspan="2" style="width: 160px; background-color: yellow;"><div style="width: 160px; height: 59px; border-right:solid 1px #ccc">Material Color</div></th>
+                                                <th style="background-color: yellow;" rowspan="2"><div style="width: 200px; height: 59px; border-right:solid 1px #ccc">Cushion Color</div></th>
+                                            </tr>
+                                            <tr>
+                                                <th style="width: 69px; background-color: yellow;"><div style="width: 69px; height: 30px; border-right:solid 1px #ccc">20</div></th>
+                                                <th style="width: 69px; background-color: yellow;"><div style="width: 69px; height: 30px; border-right:solid 1px #ccc">40</div></th>
+                                                <th style="width: 70px; background-color: yellow;"><div style="width: 70px; height: 30px; border-right:solid 1px #ccc">40'HC</div></th>
+                                            </tr>
+                                        </thead>
+                                    </table>
+                                </div>
+                                <div style="width: 6405px;" class="tilsoft-table-totalrow">
+                                    <table>
+                                        <tr>
+                                            <th style="width: 120px;"><div style="width: 120px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 125px;"><div style="width: 125px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 120px;"><div style="width: 120px; border-right:solid 1px #ccc; text-align: right">{{totalOrderQnt | number}}</div></th>
+                                            <th style="width: 120px;"><div style="width: 120px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 120px;"><div style="width: 120px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 120px;"><div style="width: 120px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 120px;"><div style="width: 120px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 120px;"><div style="width: 120px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 120px;"><div style="width: 120px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 150px;"><div style="width: 150px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 150px;"><div style="width: 150px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 200px;"><div style="width: 200px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 400px;"><div style="width: 400px; text-align: center; border-right:solid 1px #ccc">Total</div></th>
+                                            <th style="width: 120px;"><div style=" width: 120px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 120px;"><div style=" width: 120px; border-right:solid 1px #ccc; text-align: right">{{totalOrderInCont | number : 2}}</div></th>
+                                            <th style="width: 120px;"><div style=" width: 120px; border-right:solid 1px #ccc; text-align: right">{{totalOrderShippedQnt | number}}</div></th>
+                                            <th style="width: 120px;"><div style=" width: 120px; border-right:solid 1px #ccc; text-align: right">{{totalOrderShippedQnt40HC | number : 2}}</div></th>
+                                            <th style="width: 120px;"><div style=" width: 120px; border-right:solid 1px #ccc; text-align: right">{{totalOrderToBeShippedQnt | number}}</div></th>
+                                            <th style="width: 130px;"><div style="width: 130px; border-right:solid 1px #ccc; text-align: right">{{totalOrderToBeShippedQnt40HC | number : 2}}</div></th>
+                                            <th style="width: 180px;"><div style="width: 180px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 150px;"><div style=" width: 150px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 69px;"><div style="width: 69px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 69px;"><div style="width: 69px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 70px;"><div style="width: 70px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 150px;"><div style=" width: 150px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 120px;"><div style="width: 120px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 250px;"><div style="width: 250px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 120px;"><div style="width: 120px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 150px;"><div style="width: 150px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 120px;"><div style="width: 120px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 200px;"><div style="width: 200px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 150px;"><div style="width: 150px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 150px;"><div style="width: 150px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 150px;"><div style="width: 150px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 150px;"><div style="width: 150px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 200px;"><div style="width: 200px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 150px;"><div style="width: 150px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 150px;"><div style="width: 150px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 150px;"><div style="width: 150px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 150px;"><div style="width: 150px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 120px;"><div style="width: 120px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 160px;"><div style="width: 160px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 160px;"><div style="width: 160px; border-right:solid 1px #ccc"></div></th>
+                                            <th><div style="width: 200px;border-right:solid 1px #ccc"></div></th>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div style="width:6405px; margin-top: 89px" class="tilsoft-table-body">
+                                    <table>
+                                        <tbody>
+                                            <tr ng-repeat="item in dataOrder">
+                                                <td style="width: 120px">{{item.proformaInvoiceNo}}</td>
+                                                <td style="width: 125px">{{item.clientOrderNumber}}</td>
+                                                <td style="width: 120px; text-align: right">{{item.orderQnt | number}}</td>
+                                                <td style="width: 120px; text-align: right">
+                                                    <div style="width: 100px; display: none">
+                                                        {{method.totalQuantity(item)}}
+                                                    </div>
+                                                    {{item.productionQnt | number}}
+                                                </td>
+                                                <td style="width: 120px; text-align: right">
+                                                    {{item.remainQnt | number}}
+                                                </td>
+                                                <td style="width: 120px">
+                                                    <div style="width: 100px" ng-repeat="subItem in dataWorkOrder | filter: {'proformaInvoiceNo': item.proformaInvoiceNo ,'articleCode': item.articleCode , 'clientUD': item.clientUD}">
+                                                        <strong><a target="_blank" href="@Url.Action("Edit", "WorkOrder", new { id = UrlParameter.Optional })/{{subItem.workOrderID}}">{{subItem.workOrderUD}}</a></strong>
+                                                    </div>
+                                                </td>
+                                                <td style="width: 120px">{{item.factoryOrderDate}}</td>
+                                                <td style="width: 120px">{{item.clientUD}}</td>
+                                                <td style="width: 120px">{{item.company}}</td>
+                                                <td style="width: 150px">{{item.saleNM}}</td>
+                                                <td style="width: 150px">{{item.sale2NM}}</td>
+                                                <td style="width: 200px">{{item.articleCode}}</td>
+                                                <td style="width: 400px">{{item.description}}</td>
+                                                <td style="width: 120px; text-align: right">{{item.qnt40HC | number}}</td>
+                                                <td style="width: 120px; text-align: right">{{item.orderQntIn40HC | number : 2}}</td>
+                                                <td style="width: 120px; text-align: right">{{item.totalShippedQnt| number}}</td>
+                                                <td style="width: 120px; text-align: right">{{item.totalShippedQntIn40HC | number : 2}}</td>
+                                                <td style="width: 120px; text-align: right">{{item.toBeShippedQnt | number}}</td>
+                                                <td style="width: 130px; text-align: right">{{item.toBeShippedQntIn40HC | number : 2}}</td>
+                                                <td style="width: 181px">{{item.locationNM}}</td>
+                                                <td style="width: 150px">{{item.factoryUD}}</td>
+                                                <td style="width: 70px; text-align: center">{{item.quantity20DC}}</td>
+                                                <td style="width: 70px; text-align: center">{{item.quantity40DC}}</td>
+                                                <td style="width: 70px; text-align: center">{{item.quantity40HC}}</td>
+                                                <td style="width: 150px">{{item.deliveryDate}}</td>
+                                                <td style="width: 120px">{{item.ldsFacory}}</td>
+                                                <td style="width: 250px">{{item.supplyChainPersonNM}}</td>
+                                                <td style="width: 120px">{{item.productionStatus}}</td>
+                                                <td style="width: 150px">{{item.orderTypeNM}}</td>
+                                                <td style="width: 120px">{{item.rating}}</td>
+                                                <td style="width: 200px">{{item.itemStandardNM}}</td>
+                                                <td style="width: 150px">{{item.testSamplingOptionNM}}</td>
+                                                <td style="width: 150px">{{item.labelingOptionNM}}</td>
+                                                <td style="width: 150px">{{item.packagingOptionNM}}</td>
+                                                <td style="width: 150px">{{item.inspectionOptionNM}}</td>
+                                                <td style="width: 200px">{{item.additionalRemark}}</td>
+                                                <td style="width: 150px">{{item.deliveryTypeNM}}</td>
+                                                <td style="width: 150px">{{item.shipmentToOptionNM}}</td>
+                                                <td style="width: 150px">{{item.shipmentTypeOptionNM}}</td>
+                                                <td style="width: 150px">{{item.rangeName}}</td>
+                                                <td style="width: 120px">{{item.frameMaterialNM}}</td>
+                                                <td style="width: 160px">{{item.materialTypeNM}}</td>
+                                                <td style="width: 160px">{{item.materialColorNM}}</td>
+                                                <td>{{item.cushionColorNM}}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane" id="tabLoaded">
+                        <div avs-scroll grid-handler="gridHandler" class="tilsoft-table-wrapper">
+                            <div class="tilsoft-table">
+                                <div style="width:7025px" class="tilsoft-table-header">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th rowspan="2" style="width: 120px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Order No</div></th>
+                                                <th rowspan="2" style="width: 125px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Client Order Number</div></th>
+                                                <th rowspan="2" style="width: 120px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Order Date</div></th>
+                                                <th rowspan="2" style="width: 120px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Client Code</div></th>
+                                                <th rowspan="2" style="width: 120px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Company</div></th>
+                                                <th rowspan="2" style="width: 150px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Sale</div></th>
+                                                <th rowspan="2" style="width: 150px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Sale Assistant</div></th>
+                                                <th rowspan="2" style="width: 200px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Code</div></th>
+                                                <th rowspan="2" style="width: 400px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Description</div></th>
+                                                <th rowspan="2" style="width: 120px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">QNT/40FT</div></th>
+                                                <th rowspan="2" style="width: 120px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Loaded Qnt</div></th>
+                                                <th rowspan="2" style="width: 120px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Loaded In Cont.</div></th>
+                                                <th rowspan="2" style="width: 180px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Location</div></th>
+                                                <th rowspan="2" style="width: 150px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Supplier</div></th>
+                                                <th rowspan="2" style="width: 250px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Supply Chain Responsible</div></th>
+                                                <th rowspan="2" style="width: 120px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Order Status No</div></th>
+                                                <th rowspan="2" style="width: 150px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Order Type</div></th>
+                                                <th rowspan="2" style="width: 120px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Order Priority</div></th>
+                                                <th rowspan="2" style="width: 200px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Export Market/Item Standard</div></th>
+                                                <th rowspan="2" style="width: 150px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Test Sampling</div></th>
+                                                <th rowspan="2" style="width: 150px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Labelling Loading</div></th>
+                                                <th rowspan="2" style="width: 150px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Packaging</div></th>
+                                                <th rowspan="2" style="width: 150px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Inspection</div></th>
+                                                <th rowspan="2" style="width: 200px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Additional Remarks</div></th>
+                                                <th rowspan="2" style="width: 180px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Delivery Type</div></th>
+                                                <th rowspan="2" style="width: 150px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Shipment to</div></th>
+                                                <th rowspan="2" style="width: 150px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Shipment type</div></th>
+                                                <th colspan="3" style="width: 210px; background-color: yellow;"><div style="width: 100%; height: 30px; border-right:solid 1px #ccc">#Containers</div></th>
+                                                <th rowspan="2" style="width: 120px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Delivery Date</div></th>
+                                                <th rowspan="2" style="width: 120px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">LDS Factory</div></th>
+                                                <th rowspan="2" style="width: 120px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Loading Date</div></th>
+                                                <th rowspan="2" style="width: 120px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">ETD</div></th>
+                                                <th rowspan="2" style="width: 120px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">ETA1</div></th>
+                                                <th rowspan="2" style="width: 120px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">ETA2</div></th>
+                                                <th rowspan="2" style="width: 250px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Forwarder</div></th>
+                                                <th rowspan="2" style="width: 150px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Container No</div></th>
+                                                <th rowspan="2" style="width: 150px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Seal No</div></th>
+                                                <th rowspan="2" style="width: 150px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Container Type</div></th>
+                                                <th rowspan="2" style="width: 200px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">POD</div></th>
+                                                <th rowspan="2" style="width: 200px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Feeder</div></th>
+                                                <th rowspan="2" style="width: 200px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Vessel</div></th>
+                                                <th rowspan="2" style="width: 150px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">BL No</div></th>
+                                                <th rowspan="2" style="width: 150px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">PLC Updated Date</div></th>
+                                                <th rowspan="2"><div style="width: 180px; background-color: yellow; height: 59px; border-right:solid 1px #ccc">PLC Confirmed Date</div></th>
+                                            </tr>
+                                            <tr>
+                                                <th style="width: 70px; background-color: yellow;"><div style="width: 100%; height: 30px; border-right:solid 1px #ccc">20</div></th>
+                                                <th style="width: 70px; background-color: yellow;"><div style="width: 100%; height: 30px; border-right:solid 1px #ccc">40</div></th>
+                                                <th style="width: 70px; background-color: yellow;"><div style="width: 100%; height: 30px; border-right:solid 1px #ccc">40'HC</div></th>
+                                            </tr>
+                                        </thead>
+                                    </table>
+                                </div>
+                                <div style="width: 7025px; margin-top:59px" class="tilsoft-table-totalrow">
+                                    <table>
+                                        <tr>
+                                            <th style="width: 120px;"><div style="width: 120px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 125px;"><div style="width: 125px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 120px;"><div style="width: 120px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 120px;"><div style="width: 120px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 120px;"><div style="width: 120px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 150px;"><div style="width: 150px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 150px;"><div style="width: 150px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 200px;"><div style="width: 200px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 400px;"><div style="width: 400px; border-right:solid 1px #ccc; text-align: center">Total</div></th>
+                                            <th style="width: 120px;"><div style="width: 120px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 120px;"><div style="width: 120px; border-right:solid 1px #ccc; text-align: right">{{totalLoadedQnt | number}}</div></th>
+                                            <th style="width: 120px;"><div style="width: 120px; border-right:solid 1px #ccc; text-align: right">{{totalLoadedQnt40HC | number : 2}}</div></th>
+                                            <th style="width: 180px;"><div style="width: 180px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 150px;"><div style="width: 150px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 250px;"><div style="width: 250px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 120px;"><div style="width: 120px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 150px;"><div style="width: 150px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 120px;"><div style="width: 120px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 200px;"><div style="width: 200px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 150px;"><div style="width: 150px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 150px;"><div style="width: 150px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 150px;"><div style="width: 150px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 150px;"><div style="width: 150px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 200px;"><div style="width: 200px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 180px;"><div style="width: 180px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 150px;"><div style="width: 150px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 150px;"><div style="width: 150px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 70px;"><div style="width: 70px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 70px;"><div style="width: 70px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 70px;"><div style="width: 70px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 120px;"><div style="width: 120px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 120px;"><div style="width: 120px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 120px;"><div style="width: 120px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 120px;"><div style="width: 120px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 120px;"><div style="width: 120px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 120px;"><div style="width: 120px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 250px;"><div style="width: 250px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 150px;"><div style="width: 150px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 150px;"><div style="width: 150px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 150px;"><div style="width: 150px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 200px;"><div style="width: 200px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 200px;"><div style="width: 200px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 200px;"><div style="width: 200px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 150px; "><div style="width: 150px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 150px;"><div style="width: 150px; border-right:solid 1px #ccc"></div></th>
+                                            <th><div style="width: 180px; border-right:solid 1px #ccc"></div></th>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div style="width: 7025px; margin-top: 89px" class="tilsoft-table-body">
+                                    <table>
+                                        <tbody>
+                                            <tr ng-repeat="item in dataLoaded">
+                                                <td style="width: 120px">{{item.proformaInvoiceNo}}</td>
+                                                <td style="width: 125px">{{item.clientOrderNumber}}</td>
+                                                <td style="width: 120px">{{item.factoryOrderDate}}</td>
+                                                <td style="width: 120px">{{item.clientUD}}</td>
+                                                <td style="width: 120px">{{item.company}}</td>
+                                                <td style="width: 150px">{{item.saleNM}}</td>
+                                                <td style="width: 150px">{{item.sale2NM}}</td>
+                                                <td style="width: 200px">{{item.articleCode}}</td>
+                                                <td style="width: 400px">{{item.description}}</td>
+                                                <td style="width: 120px; text-align: right">{{item.qnt40HC | number}}</td>
+                                                <td style="width: 120px; text-align: right">{{item.loadedQnt | number}}</td>
+                                                <td style="width: 120px; text-align: right">{{item.loadedQntIn40HC | number : 2}}</td>
+                                                <td style="width: 180px">{{item.locationNM}}</td>
+                                                <td style="width: 150px">{{item.factoryUD}}</td>
+                                                <td style="width: 250px">{{item.supplyChainPersonNM}}</td>
+                                                <td style="width: 120px">{{item.productionStatus}}</td>
+                                                <td style="width: 150px">{{item.orderTypeNM}}</td>
+                                                <td style="width: 120px">{{item.rating}}</td>
+                                                <td style="width: 200px">{{item.itemStandardNM}}</td>
+                                                <td style="width: 150px">{{item.testSamplingOptionNM}}</td>
+                                                <td style="width: 150px">{{item.labelingOptionNM}}</td>
+                                                <td style="width: 150px">{{item.packagingOptionNM}}</td>
+                                                <td style="width: 150px">{{item.inspectionOptionNM}}</td>
+                                                <td style="width: 200px">{{item.additionalRemark}}</td>
+                                                <td style="width: 180px">{{item.deliveryTypeNM}}</td>
+                                                <td style="width: 150px">{{item.shipmentToOptionNM}}</td>
+                                                <td style="width: 150px">{{item.shipmentTypeOptionNM}}</td>
+                                                <td style="width: 70px; text-align: center">{{item.quantity20DC}}</td>
+                                                <td style="width: 70px; text-align: center">{{item.quantity40DC}}</td>
+                                                <td style="width: 70px; text-align: center">{{item.quantity40HC}}</td>
+                                                <td style="width: 120px">{{item.deliveryDate}}</td>
+                                                <td style="width: 120px">{{item.ldsFacory}}</td>
+                                                <td style="width: 120px">{{item.loadingDate}}</td>
+                                                <td style="width: 120px">{{item.eTD}}</td>
+                                                <td style="width: 120px">{{item.eTA}}</td>
+                                                <td style="width: 120px">{{item.eTA2}}</td>
+                                                <td style="width: 250px">{{item.forwarderNM}}</td>
+                                                <td style="width: 150px">{{item.containerNo}}</td>
+                                                <td style="width: 150px">{{item.sealNo}}</td>
+                                                <td style="width: 150px">{{item.containerTypeNM}}</td>
+                                                <td style="width: 200px">{{item.podName}}</td>
+                                                <td style="width: 200px">{{item.feeder}}</td>
+                                                <td style="width: 200px">{{item.veesel}}</td>
+                                                <td style="width: 150px">{{item.blNo}}</td>
+                                                <td style="width: 150px">{{item.plcUpdatedDate}}</td>
+                                                <td>{{item.plcConfirmedDate}}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane" id="tabShipped">
+                        <div avs-scroll grid-handler="gridHandler" class="tilsoft-table-wrapper">
+                            <div class="tilsoft-table">
+                                <div style="width:7245px" class="tilsoft-table-header">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th rowspan="2" style="width: 120px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Order No</div></th>
+                                                <th rowspan="2" style="width: 125px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Client Order Number</div></th>
+                                                <th rowspan="2" style="width: 120px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Order Date</div></th>
+                                                <th rowspan="2" style="width: 120px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Client Code</div></th>
+                                                <th rowspan="2" style="width: 120px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Company</div></th>
+                                                <th rowspan="2" style="width: 150px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Sale</div></th>
+                                                <th rowspan="2" style="width: 150px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Sale Assistant</div></th>
+                                                <th rowspan="2" style="width: 200px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Code</div></th>
+                                                <th rowspan="2" style="width: 400px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Description</div></th>
+                                                <th rowspan="2" style="width: 120px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">QNT/40FT</div></th>
+                                                <th rowspan="2" style="width: 120px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Loaded Qnt</div></th>
+                                                <th rowspan="2" style="width: 120px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Loaded In Cont.</div></th>
+                                                <th rowspan="2" style="width: 120px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Shipped Qnt</div></th>
+                                                <th rowspan="2" style="width: 120px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Shipped QNT/40HC</div></th>
+                                                <th rowspan="2" style="width: 180px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Location</div></th>
+                                                <th rowspan="2" style="width: 150px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Supplier</div></th>
+                                                <th rowspan="2" style="width: 250px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Supply Chain Responsible</div></th>
+                                                <th rowspan="2" style="width: 120px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Order Status No</div></th>
+                                                <th rowspan="2" style="width: 150px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Order Type</div></th>
+                                                <th rowspan="2" style="width: 120px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Order Priority</div></th>
+                                                <th rowspan="2" style="width: 200px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Export Market/Item Standard</div></th>
+                                                <th rowspan="2" style="width: 150px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Test Sampling</div></th>
+                                                <th rowspan="2" style="width: 150px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Labelling Loading</div></th>
+                                                <th rowspan="2" style="width: 150px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Packaging</div></th>
+                                                <th rowspan="2" style="width: 150px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Inspection</div></th>
+                                                <th rowspan="2" style="width: 200px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Additional Remarks</div></th>
+                                                <th rowspan="2" style="width: 180px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Delivery Type</div></th>
+                                                <th rowspan="2" style="width: 150px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Shipment to</div></th>
+                                                <th rowspan="2" style="width: 150px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Shipment type</div></th>
+                                                <th colspan="3" style="width: 210px; background-color: yellow;"><div style="width: 100%; height: 30px; border-right:solid 1px #ccc">#Containers</div></th>
+                                                <th rowspan="2" style="width: 120px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Delivery Date</div></th>
+                                                <th rowspan="2" style="width: 120px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">LDS Factory</div></th>
+                                                <th rowspan="2" style="width: 120px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Loading Date</div></th>
+                                                <th rowspan="2" style="width: 120px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">ETD</div></th>
+                                                <th rowspan="2" style="width: 120px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">ETA1</div></th>
+                                                <th rowspan="2" style="width: 120px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">ETA2</div></th>
+                                                <th rowspan="2" style="width: 250px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Forwarder</div></th>
+                                                <th rowspan="2" style="width: 150px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Container No</div></th>
+                                                <th rowspan="2" style="width: 150px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Seal No</div></th>
+                                                <th rowspan="2" style="width: 150px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Container Type</div></th>
+                                                <th rowspan="2" style="width: 200px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">POD</div></th>
+                                                <th rowspan="2" style="width: 200px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Feeder</div></th>
+                                                <th rowspan="2" style="width: 200px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">Vessel</div></th>
+                                                <th rowspan="2" style="width: 150px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">BL No</div></th>
+                                                <th rowspan="2" style="width: 150px; background-color: yellow;"><div style="width: 100%; height: 59px; border-right:solid 1px #ccc">PLC Updated Date</div></th>
+                                                <th rowspan="2"><div style="width: 160px; background-color: yellow; height: 59px; border-right:solid 1px #ccc">PLC Confirmed Date</div></th>
+                                            </tr>
+                                            <tr>
+                                                <th style="width: 70px; background-color: yellow;"><div style="width: 100%; height: 30px; border-right:solid 1px #ccc">20</div></th>
+                                                <th style="width: 70px; background-color: yellow;"><div style="width: 100%; height: 30px; border-right:solid 1px #ccc">40</div></th>
+                                                <th style="width: 70px; background-color: yellow;"><div style="width: 100%; height: 30px; border-right:solid 1px #ccc">40'HC</div></th>
+                                            </tr>
+                                        </thead>
+                                    </table>
+                                </div>
+                                <div style="width: 7245px; margin-top:59px" class="tilsoft-table-totalrow">
+                                    <table>
+                                        <tr>
+                                            <th style="width: 120px;"><div style="width: 120px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 125px;"><div style="width: 125px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 120px;"><div style="width: 120px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 120px;"><div style="width: 120px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 120px;"><div style="width: 120px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 150px;"><div style="width: 150px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 150px;"><div style="width: 150px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 200px;"><div style="width: 200px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 400px;"><div style="width: 400px; border-right:solid 1px #ccc; text-align: center">Total</div></th>
+                                            <th style="width: 120px;"><div style="width: 120px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 120px;"><div style="width: 120px; border-right:solid 1px #ccc; text-align: right">{{shippedQnt | number}}</div></th>
+                                            <th style="width: 120px;"><div style="width: 120px; border-right:solid 1px #ccc; text-align: right">{{shippedQnt40HC | number : 2}}</div></th>
+                                            <th style="width: 120px;"><div style="width: 120px; border-right:solid 1px #ccc; text-align: right">{{totalShippedLoadedQnt | number}}</div></th>
+                                            <th style="width: 120px;"><div style="width: 120px; border-right:solid 1px #ccc; text-align: right">{{totalShippedLoadedQnt40HC | number : 2}}</div></th>
+                                            <th style="width: 180px;"><div style="width: 180px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 150px;"><div style="width: 150px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 250px;"><div style="width: 250px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 120px;"><div style="width: 120px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 150px;"><div style="width: 150px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 120px;"><div style="width: 120px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 200px;"><div style="width: 200px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 150px;"><div style="width: 150px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 150px;"><div style="width: 150px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 150px;"><div style="width: 150px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 150px;"><div style="width: 150px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 200px;"><div style="width: 200px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 180px;"><div style="width: 180px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 150px;"><div style="width: 150px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 150px;"><div style="width: 150px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 70px;"><div style="width: 70px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 70px;"><div style="width: 70px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 70px;"><div style="width: 70px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 120px;"><div style="width: 120px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 120px;"><div style="width: 120px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 120px;"><div style="width: 120px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 120px;"><div style="width: 120px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 120px;"><div style="width: 120px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 120px;"><div style="width: 120px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 250px;"><div style="width: 250px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 150px;"><div style="width: 150px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 150px;"><div style="width: 150px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 150px;"><div style="width: 150px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 200px;"><div style="width: 200px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 200px;"><div style="width: 200px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 200px;"><div style="width: 200px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 150px; "><div style="width: 150px; border-right:solid 1px #ccc"></div></th>
+                                            <th style="width: 150px;"><div style="width: 150px; border-right:solid 1px #ccc"></div></th>
+                                            <th><div style="width: 160px; border-right:solid 1px #ccc"></div></th>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div style="width:7245px; margin-top: 89px" class="tilsoft-table-body">
+                                    <table>
+                                        <tbody>
+                                            <tr ng-repeat="item in dataShipped">
+                                                <td style="width: 120px">{{item.proformaInvoiceNo}}</td>
+                                                <td style="width: 125px">{{item.clientOrderNumber}}</td>
+                                                <td style="width: 120px">{{item.factoryOrderDate}}</td>
+                                                <td style="width: 120px">{{item.clientUD}}</td>
+                                                <td style="width: 120px">{{item.company}}</td>
+                                                <td style="width: 150px">{{item.saleNM}}</td>
+                                                <td style="width: 150px">{{item.sale2NM}}</td>
+                                                <td style="width: 200px">{{item.articleCode}}</td>
+                                                <td style="width: 400px">{{item.description}}</td>
+                                                <td style="width: 120px; text-align: right">{{item.qnt40HC | number}}</td>
+                                                <td style="width: 120px; text-align: right">{{item.loadedQnt | number}}</td>
+                                                <td style="width: 120px; text-align: right">{{item.loadedQntIn40HC | number : 2}}</td>
+                                                <td style="width: 120px; text-align: right">{{item.shippedQnt | number}}</td>
+                                                <td style="width: 120px; text-align: right">{{item.shippedQntIn40HC | number : 2}}</td>
+                                                <td style="width: 180px">{{item.locationNM}}</td>
+                                                <td style="width: 150px">{{item.factoryUD}}</td>
+                                                <td style="width: 250px">{{item.supplyChainPersonNM}}</td>
+                                                <td style="width: 120px">{{item.productionStatus}}</td>
+                                                <td style="width: 150px">{{item.orderTypeNM}}</td>
+                                                <td style="width: 120px">{{item.rating}}</td>
+                                                <td style="width: 200px">{{item.itemStandardNM}}</td>
+                                                <td style="width: 150px">{{item.testSamplingOptionNM}}</td>
+                                                <td style="width: 150px">{{item.labelingOptionNM}}</td>
+                                                <td style="width: 150px">{{item.packagingOptionNM}}</td>
+                                                <td style="width: 150px">{{item.inspectionOptionNM}}</td>
+                                                <td style="width: 200px">{{item.additionalRemark}}</td>
+                                                <td style="width: 180px">{{item.deliveryTypeNM}}</td>
+                                                <td style="width: 150px">{{item.shipmentToOptionNM}}</td>
+                                                <td style="width: 150px">{{item.shipmentTypeOptionNM}}</td>
+                                                <td style="width: 70px; text-align: center">{{item.quantity20DC}}</td>
+                                                <td style="width: 70px; text-align: center">{{item.quantity40DC}}</td>
+                                                <td style="width: 70px; text-align: center">{{item.quantity40HC}}</td>
+                                                <td style="width: 120px">{{item.deliveryDate}}</td>
+                                                <td style="width: 120px">{{item.ldsFacory}}</td>
+                                                <td style="width: 120px">{{item.loadingDate}}</td>
+                                                <td style="width: 120px">{{item.eTD}}</td>
+                                                <td style="width: 120px">{{item.eTA}}</td>
+                                                <td style="width: 120px">{{item.eTA2}}</td>
+                                                <td style="width: 250px">{{item.forwarderNM}}</td>
+                                                <td style="width: 150px">{{item.containerNo}}</td>
+                                                <td style="width: 150px">{{item.sealNo}}</td>
+                                                <td style="width: 150px">{{item.containerTypeNM}}</td>
+                                                <td style="width: 200px">{{item.podName}}</td>
+                                                <td style="width: 200px">{{item.feeder}}</td>
+                                                <td style="width: 200px">{{item.veesel}}</td>
+                                                <td style="width: 150px">{{item.blNo}}</td>
+                                                <td style="width: 150px">{{item.plcUpdatedDate}}</td>
+                                                <td>{{item.plcConfirmedDate}}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</article>
+
+@section pagejs {
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(serviceRoot)/api/rapvnrpt/',
+            token: '@token',
+            pageSize: '@pageSize',
+            supportServiceUrl: '@(supportServiceRoot)/api/support/',
+            cookieID: '@cookieID',
+            reportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]'
+        }
+    </script>
+    <script type="text/javascript" src="~/Views/RAPVNRpt/index.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Views/RAPVNRpt/service.js?v=@guid"></script>
+}
+
+

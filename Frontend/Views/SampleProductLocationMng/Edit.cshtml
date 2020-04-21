@@ -1,0 +1,225 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+
+    ViewBag.Title = "Edit Sample Product Location";
+    ViewBag.Module = "Sample Product Location";
+}
+
+<style>
+    .css-inline a {
+        display: inline;
+    }
+
+    .smart-form .inline-group .checkbox {
+        width: 30% !important;
+    }
+
+    .smart-form .input-group input {
+        padding: 0px 7px !important;
+    }
+
+    .inline-cus {
+        display: inline-block !important;
+    }
+</style>
+
+<form name="editForm" class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>General</h2>
+            </header>
+            <div>
+                <div class="widget-body">
+                    <div class="smart-form">
+                        <fieldset>
+                            <div class="row">
+                                <section class="col col-lg-4">
+                                    <label class="label">
+                                        <strong>Sample Product UD</strong>
+                                    </label>
+                                    <label class="input">
+                                        <span class="form-control">{{data.sampleProductUD}}</span>
+                                    </label>
+                                </section>
+                                <section class="col col-lg-8">
+                                    <label class="label">
+                                        <strong>Article Description</strong>
+                                    </label>
+                                    <label class="input">
+                                        <span class="form-control">{{data.articleDescription}}</span>
+                                    </label>
+                                </section>
+                            </div>
+                            <div class="row">
+                                <section class="col col-lg-4" style="position: relative">
+                                    <div style="text-align: center; vertical-align: middle">
+                                        <a href="{{data.fileLocation}}" data-featherlight="image" class="input-group css-inline" style="text-align: center; vertical-align: middle">
+                                            <img style="width: 80%" ng-src="{{data.thumbnailLocation}}" />
+                                        </a>
+                                    </div>
+                                </section>
+
+                                <!-- Factory Location -->
+                                <section class="col col-lg-2" ng-hide="data.otherLocationID != null" ng-show="!destroyed">
+                                    <label class="label">
+                                        <strong>Factory Location</strong>
+                                    </label>
+                                    <label class="select">
+                                        <select ng-model="data.factoryLocationID" ng-options="factoryLocation.factoryID as factoryLocation.factoryUD for factoryLocation in factoryLocations" ng-change="event.changeFactoryLocation()">
+                                            <option value=""></option>
+                                        </select>
+                                        <i></i>
+                                    </label>
+                                </section>
+
+                                <!-- Other Location -->
+                                <section class="col col-lg-2" ng-hide="data.factoryLocationID != null" ng-show="!destroyed">
+                                    <label class="label">
+                                        <strong>Other Location</strong>
+                                    </label>
+                                    <label class="select">
+                                        <select ng-model="data.otherLocationID" ng-options="otherLocation.sampleOtherLocationID as otherLocation.sampleOtherLocationNM for otherLocation in otherLocations" ng-change="event.changeOtherLocation()">
+                                            <option value=""></option>
+                                        </select>
+                                        <i></i>
+                                    </label>
+                                </section>
+                                <section class="col col-lg-2" ng-show="destroyed">
+                                    <label class="label">
+                                        <strong>Other Location</strong>
+                                    </label>
+                                    <label class="input">
+                                        <span class="form-control">{{data.otherLocationNM}}</span>
+                                    </label>
+                                </section>
+
+                                <!-- Location Date -->
+                                <section class="col col-lg-2" ng-show="!destroyed">
+                                    <label class="label">
+                                        <strong>Location Date</strong>
+                                    </label>
+                                    <label class="input">
+                                        <i class="icon-append fa fa-calendar"></i>
+                                        <input class="form-control datepicker" name="locationDate" type="text" data-dateformat="dd/mm/yy" ng-model="data.locationDate">
+                                    </label>
+                                </section>
+                                <section class="col col-lg-2" ng-show="destroyed">
+                                    <label class="label">
+                                        <strong>Location Date</strong>
+                                    </label>
+                                    <label class="input">
+                                        <i class="icon-append fa fa-calendar"></i>
+                                        <span class="form-control">{{data.locationDate}}</span>
+                                    </label>
+                                </section>
+                                <!-- Remark -->
+                                <section class="col col-lg-8" ng-show="!destroyed">
+                                    <label class="label">
+                                        <strong>Remark</strong>
+                                    </label>
+                                    <label class="textarea">
+                                        <textarea rows="5" ng-model="data.remark"></textarea>
+                                    </label>
+                                </section>
+                                <section class="col col-lg-8" ng-show="destroyed">
+                                    <label class="label">
+                                        <strong>Remark</strong>
+                                    </label>
+                                    <label class="textarea">
+                                        <textarea rows="5" ng-model="data.remark" readonly></textarea>
+                                    </label>
+                                </section>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>History</h2>
+            </header>
+            <div>
+                <div class="widget-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover custom-table dataTable">
+                            <thead>
+                                <tr>
+                                    <th style="width: 120px; text-align: center; vertical-align: middle">FACTORY<br>LOCATION</th>
+                                    <th style="width: 120px; text-align: center; vertical-align: middle">OTHER<br>LOCATION</th>
+                                    <th style="text-align: center; vertical-align: middle">REMARK</th>
+                                    <th style="width: 120px; text-align: center; vertical-align: middle">LOCATION<br>DATE</th>
+                                    <th style="width: 400px; text-align: center; vertical-align: middle">MORE<br>INFORMATION</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="sampleProductLocation in sampleProductLocations">
+                                    <td style="text-align: center; vertical-align: middle">{{sampleProductLocation.factoryLocationNM}}</td>
+                                    <td style="text-align: center; vertical-align: middle">{{sampleProductLocation.otherLocationNM}}</td>
+                                    <td style="text-align: center; vertical-align: middle">{{sampleProductLocation.remark}}</td>
+                                    <td style="text-align: center; vertical-align: middle">{{sampleProductLocation.locationDate}}</td>
+                                    <td style="text-align: center; vertical-align: middle">
+                                        <section class="box">
+                                            <div class="col col-sm-4" style="text-align: left!important">
+                                                <i class="fa fa-user"></i> Updated By:
+                                                <br>
+                                                <i class="fa fa-calendar"></i> Updated Date:
+                                            </div>
+                                            <div class="col col-sm-8" style="text-align: left!important">
+                                                <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{sampleProductLocation.updatedBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600" ng-show="sampleProductLocation.updatedBy != null && sampleProductLocation.updatorName2 != null">
+                                                    {{sampleProductLocation.updatorName2}}
+                                                </a>
+                                                <label ng-show="sampleProductLocation.updatedBy != null && sampleProductLocation.updatorName2 == null && sampleProductLocation.updatorName1 != null"> {{sampleProductLocation.updatorName1}}</label>
+                                                <br>
+                                                {{sampleProductLocation.updatedDate}}
+                                            </div>
+                                        </section>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+@section FormAction{
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "SampleProductLocationMng")" class="btn btn-default" title="Back">
+                <i class="fa fa-arrow-left"></i>
+            </a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default" title="Save" ng-click="event.updateData($event)" ng-class="{'disabled': destroyed}">
+                <i class="fa fa-floppy-o"></i>
+            </a>
+        </li>
+    </ul>
+}
+
+@section pagejs{
+    <script type="text/javascript">
+        var context = {
+            id: @ViewBag.ID,
+            refreshUrl: '@Url.Action("Edit", "SampleProductLocationMng", new { id = UrlParameter.Optional })/',
+            serviceUrl: '@(serviceRoot)/api/sampleProductLocation/',
+            token: '@token',
+            msgValid: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED'
+        };
+    </script>
+    <script type="text/javascript" src="~/Angular/app/sampleProductLocation/edit.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/sampleProductLocation/service.js?v=@guid"></script>
+}

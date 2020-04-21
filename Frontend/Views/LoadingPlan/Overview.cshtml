@@ -1,0 +1,923 @@
+﻿@{
+    string fID = "0";
+    string bID = "0";
+    string pID = "0";
+    if (Request.Params["fID"] != null)
+    {
+        fID = Request.Params["fID"];
+    }
+    if (Request.Params["bID"] != null)
+    {
+        bID = Request.Params["bID"];
+    }
+    if (Request.Params["pID"] != null)
+    {
+        pID = Request.Params["pID"];
+    }
+    string userManualUrl = string.Empty;
+    if (System.IO.File.Exists(Server.MapPath("~/UserManual/" + ViewBag.ModuleCode + ".pdf")))
+    {
+        userManualUrl = "/UserManual/" + ViewBag.ModuleCode + ".pdf";
+    }
+    ViewBag.Title = "Overview Loading Plan";
+
+
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    //var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var pageSize = System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"];
+    var cookieID = HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString();
+    var backendReportUrl = @System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"];
+
+
+}
+
+
+<form class="row" name="overviewForm" id="main-form">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <ul class="nav nav-tabs pull-left in">
+                    <li class="active">
+                        <a data-toggle="tab" href="#tabGeneral"> <span> General Information </span> </a>
+                    </li>
+                    <li>
+                        <a data-toggle="tab" href="#tabShipping"> <span> Shipping Information </span> </a>
+                    </li>
+                    <li>
+                        <a data-toggle="tab" href="#tabImages"> <span> Container checklist </span> </a>
+                    </li>
+                    <li>
+                        <a data-toggle="tab" href="#tabChildLoadingPlan"> <span> Sub loading plan </span> </a>
+                    </li>
+                    <li>
+                        <a data-toggle="tab" href="#tabTracking"> <i class="fa fa-history"></i> <span> Tracking </span> </a>
+                    </li>
+                </ul>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="tabGeneral">
+                            <div class="smart-form">
+                                <fieldset>
+                                    <div class="row">
+                                        <section class="col col-2">
+                                            <label class="label">Loading Ref#</label>
+                                            <label class="input">
+                                                <span class="form-control">{{ data.loadingPlanUD }}</span>
+                                            </label>
+                                        </section>
+
+                                        <section class="col col-2">
+                                            <label class="label">Container Ref#</label>
+                                            <label class="input">
+                                                <span class="form-control">{{ data.containerRefNo }}</span>
+                                            </label>
+                                        </section>
+
+                                        <section class="col col-2">
+                                            <label class="label">
+                                                Loading Date
+                                            </label>
+                                            <label class="input">
+                                                <span class="form-control">{{ data.loadingDate }}</span>
+                                            </label>
+                                            
+                                        </section>
+                                        <section class="col col-2">
+                                            <label class="label">Season</label>
+                                            <label class="select">
+                                                <span class="form-control">{{ data.season }}</span>
+                                            </label>
+                                        </section>
+
+                                        <section class="col col-2">
+                                            <label class="label">Factory</label>
+                                            <label class="input">
+                                                <span class="form-control">{{ data.factoryUD }}</span>
+                                            </label>
+                                        </section>
+
+                                        <section class="col col-2">
+                                            <label class="label">Status</label>
+                                            <label class="input">
+                                                <span class="form-control">{{ data.loadingStatus }}</span>
+                                            </label>
+                                        </section>
+                                    </div>
+                                    <div class="row">
+                                        <section class="col col-4">
+                                            <label class="label">Other Controller</label>
+                                            <label class="input">
+                                                <span class="form-control">
+                                                    <a ng-show="data.controllerID != null" href="@Url.Action("Detail", "EmployeeMng", new {id = UrlParameter.Optional })/ {{data.controllerID}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                        {{data.controllerName}}
+                                                    </a>
+                                                </span>
+                                                @*<input ng-readonly="data.controllerID" type="text" ng-model="data.controllerName" />*@
+                                            </label>
+                                        </section>
+                                        <section class="col col-2">
+                                            <label class="label">Shipment Date</label>
+                                            <label class="input">
+                                                <span class="form-control">{{ data.shipmentDate }}</span>
+                                            </label>
+                                            
+                                        </section>
+                                        <section class="col col-4">
+                                            <label class="label">Remark</label>
+                                            <label class="input">
+                                                <span class="form-control">{{ data.remark }}</span>
+                                            </label>
+                                        </section>
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="tabShipping">
+                            <div class="smart-form">
+                                <fieldset>
+                                    <div class="row">
+                                        <section class="col col-2">
+                                            <label class="label">Container No</label>
+                                            <label class="input">
+                                                <span class="form-control">{{ data.containerNo }}</span>
+                                            </label>
+                                        </section>
+                                        <section class="col col-2">
+                                            <label class="label">Container Type</label>
+                                            <label class="input">
+                                                <span class="form-control">{{ data.containerTypeNM }}</span>
+                                            </label>
+                                        </section>
+                                        <section class="col col-2">
+                                            <label class="label">Seal No</label>
+                                            <label class="input">
+                                                <span class="form-control">{{ data.sealNo }}</span>
+                                            </label>
+                                        </section>
+                                        <section class="col col-2">
+                                            <label class="label">data Ref#</label>
+                                            <label class="input">
+                                                <span class="form-control">{{ data.bookingUD }}</span>
+                                            </label>
+                                        </section>
+                                        <section class="col col-2">
+                                            <label class="label">B/L</label>
+                                            <label class="input">
+                                                <span class="form-control">{{ data.blNo }}</span>
+                                            </label>
+                                        </section>
+                                    </div>
+
+                                    <div class="row" ng-if="data.parentID > 0">
+                                        <section class="col col-2">
+                                            <label class="label">Container No</label>
+                                            <label class="input">
+                                                <span class="form-control">{{ data.parentContainerNo }}</span>
+                                            </label>
+                                        </section>
+                                        <section class="col col-2">
+                                            <label class="label">Container Type</label>
+                                            <label class="input">
+                                                <span class="form-control">{{ data.parentContainerTypeNM }}</span>
+                                            </label>
+                                        </section>
+                                        <section class="col col-2">
+                                            <label class="label">Seal No</label>
+                                            <label class="input">
+                                                <span class="form-control">{{ data.parentSealNo }}</span>
+                                            </label>
+                                        </section>
+                                    </div>
+
+                                    <div class="row">
+
+
+
+                                        <section class="col col-2">
+                                            <label class="label">ETD</label>
+                                            <label class="input">
+                                                <span class="form-control">{{ data.etd }}</span>
+                                            </label>
+                                        </section>
+                                        <section class="col col-2">
+                                            <label class="label">ETA</label>
+                                            <label class="input">
+                                                <span class="form-control">{{ data.eta }}</span>
+                                            </label>
+                                        </section>
+                                        <section class="col col-2">
+                                            <label class="label">Cut Off Date</label>
+                                            <label class="input">
+                                                <span class="form-control">{{ data.cutOffDate }}</span>
+                                            </label>
+                                        </section>
+                                        <section class="col col-2">
+                                            <label class="label">Forwarder</label>
+                                            <label class="input">
+                                                <span class="form-control">{{ data.forwarderNM }}</span>
+                                            </label>
+                                        </section>
+                                        <section class="col col-2">
+                                            <label class="label">Feeder</label>
+                                            <label class="input">
+                                                <span class="form-control">{{ data.feeder }}</span>
+                                            </label>
+                                        </section>
+                                        <section class="col col-2">
+                                            <label class="label">Vessel</label>
+                                            <label class="input">
+                                                <span class="form-control">{{ data.vessel }}</span>
+                                            </label>
+                                        </section>
+                                    </div>
+                                    <div class="row">
+
+                                        
+
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="tabImages">
+                            <div class="smart-form">
+                                <fieldset>
+                                    <div class="col col-3">
+                                        <section>
+                                            <label class="label">
+                                                <span>Product Image 1</span>
+                                            </label>
+                                            <div class="input-group" style="width: 100%;">
+                                                @Html.Partial("~/Views/Shared/_Controls/_ImageBox.cshtml", new Frontend.Models.ImageBoxViewModel() { URLBinding = "data.productPicture1_DisplayUrl", OrginalImageURLBinding = "data.productPicture1_OriginalUrl" })
+                                                <input ng-model="data.productPicture1_DisplayUrl" name="productPicture1_DisplayUrl" type="hidden" />
+                                            </div>
+                                        </section>
+                                    </div>
+                                    <div class="col col-3">
+                                        <section>
+                                            <label class="label">
+                                                <span>Product Image 2</span>
+                                            </label>
+                                            <div class="input-group" style="width: 100%;">
+                                                @Html.Partial("~/Views/Shared/_Controls/_ImageBox.cshtml", new Frontend.Models.ImageBoxViewModel() { URLBinding = "data.productPicture2_DisplayUrl", OrginalImageURLBinding = "data.productPicture2_OriginalUrl" })
+                                                <input ng-model="data.productPicture2_DisplayUrl" name="productPicture2_DisplayUrl" type="hidden" />
+                                            </div>
+                                        </section>
+                                    </div>
+                                    <div class="col col-3">
+                                        <section>
+                                            <label class="label">
+                                                <span>Moisture content of wood floor</span>
+                                            </label>
+                                            <div class="input-group" style="width: 100%;">
+                                                @Html.Partial("~/Views/Shared/_Controls/_ImageBox.cshtml", new Frontend.Models.ImageBoxViewModel() { URLBinding = "data.containerPicture1_DisplayUrl", OrginalImageURLBinding = "data.containerPicture1_OriginalUrl" })
+                                                <input ng-model="data.containerPicture1_DisplayUrl" name="containerPicture1_DisplayUrl" type="hidden" />
+                                            </div>
+                                        </section>
+                                    </div>
+                                    <div class="col col-3">
+                                        <section>
+                                            <label class="label">
+                                                <span>Checking for Leakage-Left side</span>
+                                            </label>
+                                            <div class="input-group" style="width: 100%;">
+                                                @Html.Partial("~/Views/Shared/_Controls/_ImageBox.cshtml", new Frontend.Models.ImageBoxViewModel() { URLBinding = "data.containerPicture2_DisplayUrl", OrginalImageURLBinding = "data.containerPicture2_OriginalUrl" })
+                                                <input ng-model="data.containerPicture2_DisplayUrl" name="containerPicture2_DisplayUrl" type="hidden" />
+                                            </div>
+                                        </section>
+                                    </div>
+                                    <div class="col col-3">
+                                        <section>
+                                            <label class="label">
+                                                <span>Checking for Leakage-Right side</span>
+                                            </label>
+                                            <div class="input-group" style="width: 100%;">
+                                                @Html.Partial("~/Views/Shared/_Controls/_ImageBox.cshtml", new Frontend.Models.ImageBoxViewModel() { URLBinding = "data.containerPicture3_DisplayUrl", OrginalImageURLBinding = "data.containerPicture3_OriginalUrl" })
+                                                <input ng-model="data.containerPicture3_DisplayUrl" name="containerPicture3_DisplayUrl" type="hidden" />
+                                            </div>
+                                        </section>
+                                    </div>
+
+                                    <div class="col col-3">
+                                        <section>
+                                            <label class="label">
+                                                <span>Checking for Leakage-Ceiling</span>
+                                            </label>
+                                            <div class="input-group" style="width: 100%;">
+                                                @Html.Partial("~/Views/Shared/_Controls/_ImageBox.cshtml", new Frontend.Models.ImageBoxViewModel() { URLBinding = "data.containerPicture4_DisplayUrl", OrginalImageURLBinding = "data.containerPicture4_OriginalUrl" })
+                                                <input ng-model="data.containerPicture4_DisplayUrl" name="containerPicture4_DisplayUrl" type="hidden" />
+                                            </div>
+                                        </section>
+                                    </div>
+
+                                    <div class="col col-3">
+                                        <section>
+                                            <label class="label">
+                                                <span>Checking for Leakage-Inside door</span>
+                                            </label>
+                                            <div class="input-group" style="width: 100%;">
+                                                @Html.Partial("~/Views/Shared/_Controls/_ImageBox.cshtml", new Frontend.Models.ImageBoxViewModel() { URLBinding = "data.containerPicture5_DisplayUrl", OrginalImageURLBinding = "data.containerPicture5_OriginalUrl" })
+                                                <input ng-model="data.containerPicture5_DisplayUrl" name="containerPicture5_DisplayUrl" type="hidden" />
+                                            </div>
+                                        </section>
+                                    </div>
+
+                                    <div class="col col-3">
+                                        <section>
+                                            <label class="label">
+                                                <span>Checking for Leakage-Corner</span>
+                                            </label>
+                                            <div class="input-group" style="width: 100%;">
+                                                @Html.Partial("~/Views/Shared/_Controls/_ImageBox.cshtml", new Frontend.Models.ImageBoxViewModel() { URLBinding = "data.containerPicture6_DisplayUrl", OrginalImageURLBinding = "data.containerPicture6_OriginalUrl" })
+                                                <input ng-model="data.containerPicture6_DisplayUrl" name="containerPicture6_DisplayUrl" type="hidden" />
+                                            </div>
+                                        </section>
+                                    </div>
+
+                                    <div class="col col-3">
+                                        <section>
+                                            <label class="label">
+                                                <span>Merchandises inside 1/3 container</span>
+                                            </label>
+                                            <div class="input-group" style="width: 100%;">
+                                                @Html.Partial("~/Views/Shared/_Controls/_ImageBox.cshtml", new Frontend.Models.ImageBoxViewModel() { URLBinding = "data.merchandisesInside1Per3ContImage_DisplayUrl", OrginalImageURLBinding = "data.merchandisesInside1Per3ContImage_OriginalUrl" })
+                                                <input ng-model="data.merchandisesInside1Per3ContImage_DisplayUrl" name="merchandisesInside1Per3ContImage_DisplayUrl" type="hidden" />
+                                            </div>
+                                        </section>
+                                    </div>
+
+                                    <div class="col col-3">
+                                        <section>
+                                            <label class="label">
+                                                <span>Merchandises inside 1/2 container</span>
+                                            </label>
+                                            <div class="input-group" style="width: 100%;">
+                                                @Html.Partial("~/Views/Shared/_Controls/_ImageBox.cshtml", new Frontend.Models.ImageBoxViewModel() { URLBinding = "data.merchandisesInside1Per2ContImage_DisplayUrl", OrginalImageURLBinding = "data.merchandisesInside1Per2ContImage_OriginalUrl" })
+                                                <input ng-model="data.merchandisesInside1Per2ContImage_DisplayUrl" name="merchandisesInside1Per2ContImage_DisplayUrl" type="hidden" />
+                                            </div>
+                                        </section>
+                                    </div>
+
+                                    <div class="col col-3">
+                                        <section>
+                                            <label class="label">
+                                                <span>Merchandises inside full container</span>
+                                            </label>
+                                            <div class="input-group" style="width: 100%;">
+                                                @Html.Partial("~/Views/Shared/_Controls/_ImageBox.cshtml", new Frontend.Models.ImageBoxViewModel() { URLBinding = "data.merchandisesInsideFullContImage_DisplayUrl", OrginalImageURLBinding = "data.merchandisesInsideFullContImage_OriginalUrl", JSOnChangeHandler = "event.changeMerchandisesInsideFullContImage" })
+                                                <input ng-model="data.merchandisesInsideFullContImage_DisplayUrl" name="merchandisesInsideFullContImage_DisplayUrl" type="hidden" />
+                                            </div>
+                                        </section>
+                                    </div>
+
+                                    <div class="col col-3">
+                                        <section>
+                                            <label class="label">
+                                                <span>Container door and lock</span>
+                                            </label>
+                                            <div class="input-group" style="width: 100%;">
+                                                @Html.Partial("~/Views/Shared/_Controls/_ImageBox.cshtml", new Frontend.Models.ImageBoxViewModel() { URLBinding = "data.containerDoorAndLockImage_DisplayUrl", OrginalImageURLBinding = "data.containerDoorAndLockImage_OriginalUrl", JSOnChangeHandler = "event.changeContainerDoorAndLockImage" })
+                                                <input ng-model="data.containerDoorAndLockImage_DisplayUrl" name="containerDoorAndLockImage_DisplayUrl" type="hidden" />
+                                            </div>
+                                        </section>
+                                    </div>
+
+                                    <div class="col col-3">
+                                        <section>
+                                            <label class="label">
+                                                <span>Container seal</span>
+                                            </label>
+                                            <div class="input-group" style="width: 100%;">
+                                                @Html.Partial("~/Views/Shared/_Controls/_ImageBox.cshtml", new Frontend.Models.ImageBoxViewModel() { URLBinding = "data.containerSealImage_DisplayUrl", OrginalImageURLBinding = "data.containerSealImage_OriginalUrl" })
+                                                <input ng-model="data.containerSealImage_DisplayUrl" name="containerSealImage_DisplayUrl" type="hidden" />
+                                            </div>
+                                        </section>
+                                    </div>
+
+                                    <div class="col col-3">
+                                        <section>
+                                            <label class="label">Dry pack</label>
+                                            <div class="input-group" style="width: 100%;">
+                                                @Html.Partial("~/Views/Shared/_Controls/_ImageBox.cshtml", new Frontend.Models.ImageBoxViewModel() { URLBinding = "data.dryPackImage_DisplayUrl", OrginalImageURLBinding = "data.dryPackImage_OriginalUrl" })
+                                            </div>
+                                        </section>
+                                    </div>
+
+                                    <div class="col col-6">
+                                        <section>
+                                            <label class="label">Approved cont picture</label>
+                                            <div class="input-group" style="width: 100%;">
+                                                @Html.Partial("~/Views/Shared/_Controls/_ImageBox.cshtml", new Frontend.Models.ImageBoxViewModel() { URLBinding = "data.approvedImage_DisplayUrl", OrginalImageURLBinding = "data.approvedImage_OriginalUrl" })
+                                            </div>
+                                        </section>
+                                    </div>
+
+                                </fieldset>
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="tabChildLoadingPlan">
+                            <div class="smart-form">
+                                <fieldset>
+                                    <div id="searchResult" class="tilsoft-table-wrapper">
+                                        <div class="tilsoft-table">
+                                            <div class="tilsoft-table-header" style="width: 2450px;">
+                                                <div style="width: 60px; "></div>
+                                                <div style="width: 60px;" class="sorting" data-colname="IsSent">Sent</div>
+                                                <div style="width: 60px;" class="sorting" data-colname="IsLoaded">Load ed</div>
+                                                <div style="width: 60px;" class="sorting" data-colname="IsShipped">Ship ped</div>
+                                                <div style="width: 60px;" class="sorting" data-colname="IsConfirmed">Confir med</div>
+                                                <div style="width: 150px;" class="sorting" data-colname="LoadingPlanUD">Loading Ref#</div>
+                                                <div style="width: 150px;" class="sorting" data-colname="ContainerRefNo">Container Ref#</div>
+                                                <div style="width: 70px;" class="sorting" data-colname="ClientUD">Client</div>
+                                                <div style="width: 100px;" class="sorting" data-colname="FactoryUD">Factory</div>
+                                                <div style="width: 150px;" class="sorting" data-colname="ControllerName">Controller</div>
+                                                <div style="width: 150px;" class="sorting" data-colname="dataUD">data Ref#</div>
+                                                <div style="width: 150px;" class="sorting" data-colname="BLNo">B/L</div>
+                                                <div style="width: 150px;" class="sorting" data-colname="ContainerNo">Container</div>
+                                                <div style="width: 60px;" class="sorting" data-colname="ContainerTypeNM">Type</div>
+                                                <div style="width: 80px;" class="sorting" data-colname="LoadingDate">Loading Date</div>
+                                                <div style="width: 80px; " class="sorting" data-colname="ShippedDate">Shipped Date</div>
+                                                <div style="width: 80px; " class="sorting" data-colname="ShipmentDate">Shipment Date</div>
+                                                <div style="width: 150px;" class="sorting" data-colname="SenderName">Sender</div>
+                                                <div style="width: 80px; " class="sorting" data-colname="SentDate">Send date</div>
+                                                <div style="width: 150px;" class="sorting" data-colname="ConfirmerName">Confirmed By</div>
+                                                <div style="width: 80px;" class="sorting" data-colname="ConfirmedDate">Confirmed Date</div>
+                                                <div style="width: 150px;" class="sorting" data-colname="UpdatorName">Updated By</div>
+                                                <div class="sorting_desc" data-colname="UpdatedDate">Updated Date</div>
+                                            </div>
+                                            <div class="tilsoft-table-body" style="width: 2450px;  height:auto">
+                                                <table>
+                                                    <tr ng-repeat="model in data.childLoadingPlans">
+                                                        <td style="text-align: center; width: 60px;">
+                                                            <a href="@Url.Action("Overview", "LoadingPlan", new {id = UrlParameter.Optional})/{{ model.loadingPlanID }}" title="Edit" class="btn btn-primary btn-xs font-11" target="_blank"><i class="fa fa-folder-open"></i> View</a>
+                                                        </td>
+                                                        <td style="width: 60px; text-align: center"><input type="checkbox" ng-model="model.isSent" disabled /></td>
+                                                        <td style="width: 60px; text-align: center"><input type="checkbox" ng-model="model.isLoaded" disabled /></td>
+                                                        <td style="width: 60px; text-align: center"><input type="checkbox" ng-model="model.isShipped" disabled /></td>
+                                                        <td style="width: 60px; text-align: center"><input type="checkbox" ng-model="model.isConfirmed" disabled /></td>
+                                                        <td style="width: 150px;">{{ model.loadingPlanUD }}</td>
+                                                        <td style="width: 150px;">{{ model.containerRefNo }}</td>
+                                                        <td style="width: 70px;">{{ model.clientUD }}</td>
+                                                        <td style="width: 100px;">{{ model.factoryUD }}</td>
+                                                        <td style="width: 150px;">{{ model.controllerName }}</td>
+                                                        <td style="width: 150px;">{{ model.dataUD }}</td>
+                                                        <td style="width: 150px;">{{ model.blNo }}</td>
+                                                        <td style="width: 150px;">{{ model.containerNo }}</td>
+                                                        <td style="width: 60px;">{{ model.containerTypeNM }}</td>
+                                                        <td style="width: 80px; ">{{ model.loadingDate }}</td>
+                                                        <td style="width: 80px; ">{{ model.shippedDate }}</td>
+                                                        <td style="width: 80px; ">{{ model.shipmentDate }}</td>
+                                                        <td style="width: 150px;">{{ model.senderName }}</td>
+                                                        <td style="width: 80px; ">{{ model.sentDate }}</td>
+                                                        <td style="width: 150px;">{{ model.confirmerName }}</td>
+                                                        <td style="width: 80px;">{{ model.confirmedDate }}</td>
+                                                        <td style="width: 150px;">{{ model.updatorName }}</td>
+                                                        <td>{{ model.updatedDate }}</td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="tabTracking">
+                            <div class="smart-form">
+                                <fieldset>
+                                    <div class="row">
+                                        <section class="col col-3">
+                                            <label class="label">Loaded Date</label>
+                                            <label class="input">
+                                                <span class="form-control">{{ data.loadingDate }}</span>
+                                            </label>
+                                        </section>
+                                        <section class="col col-3">
+                                            <label class="label">Shipped Date</label>
+                                            <label class="input">
+                                                <span class="form-control">{{ data.shippedDate }}</span>
+                                            </label>
+                                        </section>
+                                        <section class="col col-3">
+                                            <label class="label">Updated By</label>
+                                            <label class="input">
+                                                <span class="form-control">
+                                                    <a ng-show="(data.updatedBy!=null && data.updatorName2!=null)" href="@Url.Action("Detail", "EmployeeMng", new {id = UrlParameter.Optional})/{{data.updatedBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                        <i class="fa fa-user"></i> {{data.updatorName2}}
+                                                    </a>
+                                                    <span ng-show="(data.updatedBy!=null && data.updatorName2==null && data.updatorName!=null)">{{data.updatorName}}</span>
+                                                </span>
+                                            </label>
+                                        </section>
+                                        <section class="col col-3">
+                                            <label class="label">Updated Date</label>
+                                            <label class="input">
+                                                <span class="form-control">{{ data.updatedDate }}</span>
+                                            </label>
+                                        </section>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <section class="col col-3">
+                                            <label class="label">Confirmed By</label>
+                                            <label class="input">
+                                                <span class="form-control">
+                                                    <a ng-show="(data.confirmedBy!=null && data.confirmerName2!=null)" href="@Url.Action("Detail", "EmployeeMng", new {id = UrlParameter.Optional})/{{data.confirmedBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                        <i class="fa fa-user"></i> {{ data.confirmerName2 }}
+                                                    </a>
+                                                    <span ng-show="(data.confirmedBy!=null && data.confirmerName2==null && data.confirmerName!=null)">{{data.confirmerName}}</span>
+                                                </span>
+                                            </label>
+                                        </section>
+                                        <section class="col col-3">
+                                            <label class="label">Confirmed Date</label>
+                                            <label class="input">
+                                                <span class="form-control">{{ data.confirmedDate }}</span>
+                                            </label>
+                                        </section>
+                                    </div>
+                                    <div class="row">
+                                        
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <ul class="nav nav-tabs pull-left in">
+                    <li class="active">
+                        <a data-toggle="tab" href="#tabProduct"> <span>Product</span> </a>
+                    </li>
+                    <li>
+                        <a data-toggle="tab" href="#tabSparepart"> <span>Sparepart</span> </a>
+                    </li>
+                </ul>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="tabProduct">
+                            <div class="smart-form">
+                                <div style="padding: 0 14px 10px;">
+                                    <div id="grdProduct" class="tilsoft-table-wrapper">
+                                        <div class="tilsoft-table">
+                                            <div class="tilsoft-table-header" style="width: 1000px;">
+                                                <div style="width: 90px;">&nbsp;</div>
+                                                <div style="width: 70px;">PI</div>
+                                                <div style="width: 80px;">LDS</div>
+                                                <div style="width: 60px;">Client</div>
+                                                <div style="width: 90px;">Factory</div>
+                                                <div style="width: 300px;">Description</div>
+                                                <div style="width: 60px;">Qnt 40HC</div>
+                                                <div style="width: 60px;">Order Qnt</div>
+                                                <div style="width: 60px;">Loaded Qnt</div>
+                                                <div>Remark</div>
+                                            </div>
+                                            <div class="tilsoft-table-body" style="width: 1000px;">
+                                                <table>
+                                                    <tr style="background-color:#cee9ff">
+                                                        <td colspan="5"></td>
+                                                        <td style="text-align:right"><b>TOTAL ORDER IN CONTAINER:</b></td>
+                                                        <td colspan="2" style="font-weight:700;text-align:center">{{ method.getTotal( data.details, 'orderProductQnt40HC' ) | number : 2}}</td>
+                                                        <td colspan="2"></td>
+                                                    </tr>
+                                                    <tr ng-repeat="item in data.details">
+                                                        <td style="width: 89px; text-align: left;">
+                                                            <a ng-click="event.printPS($event,item.factoryOrderDetailID)" class="btn btn-primary btn-xs font-11" href="javascript:void(0);" style="margin-bottom:5px"><i class="fa fa-print"></i> Print PS&nbsp;&nbsp;&nbsp;&nbsp;</a>
+                                                        </td>
+                                                        <td style="width: 70px;">{{ item.proformaInvoiceNo }}</td>
+                                                        <td style="width: 80px;">{{ item.lds }}</td>
+                                                        <td style="width: 60px;">{{ item.clientUD }}</td>
+                                                        <td style="width: 90px;">{{ item.factoryUD }}</td>
+                                                        <td style="width:300px;text-align:left;"><span style="font-weight:bold;">{{ item.articleCode }}</span><br />{{ item.description }}</td>
+                                                        <td style="width: 60px; text-align: right; "><span class="form-control">{{ item.qnt40HC | number: 0}}</span></td>
+                                                        <td style="width: 60px; text-align:right"><span class="form-control">{{ item.orderQnt }}</span></td>
+                                                        <td style="width: 60px;"><span class="form-control">{{ item.quantity }}</span></td>
+                                                        <td><span class="form-control">{{item.remark}}</span></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td colspan="11"><b>Total Rows() : {{ data.details.length }}</b></td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane" id="tabSparepart">
+                            <div class="smart-form">
+                                <div style="padding: 0 14px 10px;">
+
+                                    <div id="grdSparepart" class="tilsoft-table-wrapper">
+                                        <div class="tilsoft-table">
+                                            <div class="tilsoft-table-header" style="width: 1000px;">
+                                                <div style="width: 90px;">&nbsp;</div>
+                                                <div style="width: 70px;">PI</div>
+                                                <div style="width: 80px;">LDS</div>
+                                                <div style="width: 60px;">Client</div>
+                                                <div style="width: 90px;">Factory</div>
+                                                <div style="width: 300px;">Description</div>
+                                                <div style="width: 80px;">Qnt In 40HC</div>
+                                                <div style="width: 60px;">Order Qnt</div>
+                                                <div style="width: 60px;">Loaded Qnt</div>
+                                                <div>Remark</div>
+                                            </div>
+                                            <div class="tilsoft-table-body" style="width: 1000px;">
+                                                <table>
+                                                    <tr style="background-color:#cee9ff">
+                                                        <td colspan="5"></td>
+                                                        <td style="text-align:right"><b>TOTAL ORDER IN CONTAINER:</b></td>
+                                                        <td colspan="2" style="font-weight:700;text-align:center">{{ method.getTotal( data.spareparts, 'orderSparepartQnt40HC' ) | number : 2}}</td>
+                                                        <td colspan="2"></td>
+                                                    </tr>
+                                                    <tr ng-repeat="item in data.spareparts">
+                                                        <td style="width: 89px; text-align: left"></td>
+                                                        <td style="width: 70px;">{{ item.proformaInvoiceNo }}</td>
+                                                        <td style="width: 80px;">{{ item.lds }}</td>
+                                                        <td style="width: 60px;">{{ item.clientUD }}</td>
+                                                        <td style="width: 90px;">{{ item.factoryUD }}</td>
+                                                        <td style="width:300px;text-align:left;"><span style="font-weight:bold;">{{ item.articleCode }}</span><br />{{ item.description }}</td>
+                                                        <td style="width: 80px; text-align: right; "><span class="form-control">{{ item.qnt40HC | number: 0}}</span></td>
+                                                        <td style="width: 60px; text-align:right"><span class="form-control">{{ item.orderQnt }}</span></td>
+                                                        <td style="width: 60px;"><span class="form-control">{{ item.orderQntitem.quantity }}</span></td>
+                                                        <td><span class="form-control">{{ item.remark }}</span></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td colspan="12"><b>Total Rows() : {{ data.spareparts.length }}</b></td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </article>
+</form>
+<div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="frmPrintOption" class="modal fade" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button aria-hidden="true" data-dismiss="modal" class="close" type="button">
+                    ×
+                </button>
+                <h4 id="myModalLabel" class="modal-title">Print Option</h4>
+            </div>
+            <div class="modal-body smart-form">
+                <fieldset>
+                    <div class="row">
+                        <section class="col col-12">
+
+                            <ul style="list-style-type:none">
+                                <li><input type="radio" name="print_type" ng-model="print_type" value="1" />&nbsp;&nbsp;&nbsp;Loading Plan</li>
+                                <li><input type="radio" name="print_type" ng-model="print_type" value="2" />&nbsp;&nbsp;&nbsp;Loading Plan with client name</li>
+                                <li><input type="radio" name="print_type" ng-model="print_type" value="3" />&nbsp;&nbsp;&nbsp;Loading Plan with Client Art Code</li>
+                                <li><input type="radio" name="print_type" ng-model="print_type" value="4" />&nbsp;&nbsp;&nbsp;Loading Plan with client name (PDF Form)</li>
+                            </ul>
+
+                        </section>
+                    </div>
+                </fieldset>
+            </div>
+            <div class="modal-footer">
+                <button data-dismiss="modal" class="btn btn-default" type="button">
+                    CANCEL
+                </button>
+                <button class="btn btn-primary" type="button" ng-click="event.print($event, print_type)">
+                    PRINT
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section FormAction {
+<ul id="sparks">
+    @*<li class="sparks-info">
+            <a href="@Url.Action(" Index", "LoadingPlan")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+        </li>*@
+    <li class="sparks-info">
+        <a href="@Url.Action("Edit", "LoadingPlan")/@ViewBag.ID" class="btn btn-default@(ViewBag.ID==0?" disabled":"") @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Edit"><i class="fa fa-pencil"></i></a>
+    </li>
+    @*<li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default@(ViewBag.ID==0?" disabled":"") @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Print, HttpContext.Current))" title="Print" ng-click="event.print($event)"><i class="fa fa-print"></i></a>
+    </li>*@
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Print, HttpContext.Current))" title="Print" ng-click="event.showPrintOption($event)"><i class="fa fa-print"></i></a>
+    </li>
+    @if (!string.IsNullOrEmpty(userManualUrl))
+    {
+        <li class="sparks-info">
+            <a target="_blank" href="@userManualUrl" class="btn btn-default" title="Help"><i class="fa fa-info"></i></a>
+        </li>
+    }
+</ul>
+}
+
+
+
+
+@section pagejs {
+    <script type="text/javascript" src="~/Angular/app/jsonService.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/LoadingPlan/service.js?v=@guid"></script>
+
+    <script type="text/javascript">
+        jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/loadingplan/';
+        jsonService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+        var context = {
+            id: @ViewBag.ID,
+            @*serviceUrl: '@(serviceRoot)/api/loadingplan/',*@
+            token: '@token',
+            pageSize: '@pageSize',
+            cookieID: '@cookieID',
+            backendReportUrl: '@backendReportUrl',
+        }
+
+
+
+        var tilsoftApp = angular.module( 'tilsoftApp', [] );
+        tilsoftApp.controller( 'tilsoftController', ['$scope', function ( $scope ) {
+
+            $scope.data = null;
+            $scope.containerTypes = null;
+            $scope.users = null;
+            $scope.parentLoadingPlans = null;
+
+            //
+            // event
+            //
+            $scope.event = {
+                init: function () {
+                    jsonService.getOverview(
+                        //context.id,
+                        //null,
+                        '@ViewBag.ID',
+                        '@fID',
+                        '@bID',
+                        '@pID',
+                        function ( data ) {
+                            $scope.data = data.data.data;
+                            //$scope.containerTypes = data.data.containerTypes;
+                            $scope.users = data.data.users;
+                            $scope.parentLoadingPlans = data.data.parentLoadingPlans;
+                            console.log( $scope.data );
+                            $scope.$apply();
+                            jQuery( '#content' ).show();
+
+                            // monitor changes
+                            $scope.$watch( 'data', function () {
+                                jQuery( '#changeNotification' ).html( '<i class="fa fa-save blink_me"></i>' );
+                            } );
+
+                            if ( data.message.type == 2 ) {
+                                jsHelper.processMessage( data.message );
+                            }
+                        },
+                        function ( error ) {
+                            jsHelper.showMessage( 'warning', error );
+
+                            $scope.data = null;
+                            //$scope.containerTypes = null;
+                            $scope.users = null;
+                            $scope.$apply();
+                        }
+                    );
+                },
+
+                print: function ( $event ) {
+                    $event.preventDefault();
+                    arr_ids = [];
+                    arr_ids.push( '@ViewBag.ID' );
+
+                    angular.forEach( $scope.data.childLoadingPlans, function ( item ) {
+                        arr_ids.push( item.loadingPlanID );
+                    } );
+
+                    jsonService.printLoadingPlan( arr_ids,
+                        function ( data ) {
+                            jsHelper.processMessage( data.message );
+                            if ( data.message.type != 2 ) {
+                                window.location = '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]' + data.data + '.xlsm';
+                            }
+                        },
+                        function ( error ) {
+                            jsHelper.showMessage( 'warning', error );
+                        }
+                    );
+                },
+
+                openChildLoadingPlan: function ( loadingPlanID ) {
+                    window.open( '@Url.Action("Edit", "LoadingPlan", new { id = UrlParameter.Optional })/' + loadingPlanID );
+                },
+
+                printPS: function ( $event, factoryOrderDetailID ) {
+                    $event.preventDefault();
+                    jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])';
+                    jsonService.printPS( factoryOrderDetailID,
+                        function ( data ) {
+                            jsHelper.processMessage( data.message );
+                            if ( data.message.type != 2 ) {
+                                window.location = '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]' + data.data;
+                            }
+                        },
+                        function ( error ) {
+                            jsHelper.showMessage( 'warning', error );
+                        }
+                    );
+                    jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/loadingplan/';
+                },
+
+                showPrintOption: function ($event) {
+                    $event.preventDefault();
+                    $('#frmPrintOption').modal('show');
+                },
+
+                print : function($event, print_type){
+                    $event.preventDefault();
+                    arr_ids = [];
+                    arr_ids.push('@ViewBag.ID');
+
+                    angular.forEach($scope.data.childLoadingPlans,function(item){
+                        arr_ids.push(item.loadingPlanID);
+                    });
+                    if (parseInt(print_type) === 4) {
+                        jsonService.printLoadingPlan(arr_ids, print_type,
+                            function (data) {
+                                jsHelper.processMessage(data.message);
+                                if (data.message.type != 2) {
+                                    window.open('@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]' + data.data);
+                                }
+                            },
+                            function (error) {
+                                jsHelper.showMessage('warning', error);
+                            }
+                        );
+                    }
+                    else {
+                        jsonService.printLoadingPlan(arr_ids, print_type,
+                            function (data) {
+                                jsHelper.processMessage(data.message);
+                                if (data.message.type != 2) {
+                                    window.location = '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]' + data.data + '.xlsm';
+                                }
+                            },
+                            function (error) {
+                                jsHelper.showMessage('warning', error);
+                            }
+                        );
+                    }
+                    $('#frmPrintOption').modal('hide');
+                    
+                },
+            };
+
+            $scope.method = {
+                refresh: function(id){
+                    jsHelper.loadingSwitch(true);
+                    window.location = '@Url.Action("Overview", "LoadingPlan", new { id = UrlParameter.Optional })/'+id+'?fID=0&bID=0';
+                },
+                getNewID: function(){
+                    $scope.newID--;
+                    return $scope.newID;
+                },
+                getTotal: function (data,val) {
+        console.log(data);
+        console.log(val);
+                    var result = 0;
+                    if (data != null) {
+                        for (i = 0; i < data.length; ++i) {
+                            if (data[i][val] <= 0 || data[i][val] == null){
+                                data[i][val] = 0;
+                            }
+                            result += parseFloat(data[i][val]);
+                        }
+                    }
+                    return result;
+                },
+            };
+            //
+            // init
+            //
+            $scope.event.init();
+        }] );
+
+    </script>
+
+
+
+}
+

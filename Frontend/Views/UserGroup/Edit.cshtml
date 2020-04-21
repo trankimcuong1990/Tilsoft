@@ -1,0 +1,116 @@
+﻿@{
+    if (ViewBag.ID == 0)
+    {
+        ViewBag.Title = "Create New User Group";
+    }
+    else
+    {
+        ViewBag.Title = "Edit User Group";
+    }
+
+    ViewBag.Module = "User Group";
+}
+
+<form class="row" name="editForm" id="main-form">
+    <article class="col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-0" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>General Information</h2>
+            </header>
+            <div>
+                <div class="widget-body">
+                    <div class="smart-form">
+                        <fieldset style="padding: 0px; border-top: none;">
+                            <section class="col col-4">
+                                <label class="label">Group Name</label>
+                                <label class="input">
+                                    <input type="text" ng-model="data.userGroupNM" required />
+                                </label>
+                            </section>
+                            <section class="col col-6">
+                                <label class="label">Description</label>
+                                <label class="input">
+                                    <input type="text" ng-model="data.description" />
+                                </label>
+                            </section>
+                        </fieldset>
+                        <fieldset style="padding: 0px; border-top: none;">
+                            <div avs-scroll grid-handler="gridHandler" class="tilsoft-table-wrapper">
+                                <div class="tilsoft-table">
+                                    <div class="tilsoft-table-header" style="width: 830px;">
+                                        <div style="width: 250px; height: 30px;">Module</div>
+                                        <div style="width: 80px; height: 30px;">Read</div>
+                                        <div style="width: 80px; height: 30px;">Create</div>
+                                        <div style="width: 80px; height: 30px;">Update</div>
+                                        <div style="width: 80px; height: 30px;">Delete</div>
+                                        <div style="width: 80px; height: 30px;">Print</div>
+                                        <div style="width: 80px; height: 30px;">Approve</div>
+                                        <div style="width: 80px; height: 30px;">Reset</div>
+                                        <div style="height: 30px;">&nbsp;</div>
+                                    </div>
+                                    <div class="tilsoft-table-body" style="width: 830px; margin-top: 30px; height: auto; max-height: 400px;">
+                                        <table>
+                                            <tr ng-repeat="item in data.permissions | orderBy:'displayOrder'" ng-class="{'parent-level':item.parentID == 0}">
+                                                <td style="width: 250px;">{{item.displayText}}</td>
+                                                <td style="width: 80px; text-align: center;" class="checkbox-cell"><label><input type="checkbox" ng-model="item.canRead" /></label></td>
+                                                <td style="width: 80px; text-align: center;" class="checkbox-cell"><label><input type="checkbox" ng-model="item.canCreate" ng-show="item.parentID > 0" /></label></td>
+                                                <td style="width: 80px; text-align: center;" class="checkbox-cell"><label><input type="checkbox" ng-model="item.canUpdate" ng-show="item.parentID > 0" /></label></td>
+                                                <td style="width: 80px; text-align: center;" class="checkbox-cell"><label><input type="checkbox" ng-model="item.canDelete" ng-show="item.parentID > 0" /></label></td>
+                                                <td style="width: 80px; text-align: center;" class="checkbox-cell"><label><input type="checkbox" ng-model="item.canPrint" ng-show="item.parentID > 0" /></label></td>
+                                                <td style="width: 80px; text-align: center;" class="checkbox-cell"><label><input type="checkbox" ng-model="item.canApprove" ng-show="item.parentID > 0" /></label></td>
+                                                <td style="width: 80px; text-align: center;" class="checkbox-cell"><label><input type="checkbox" ng-model="item.canReset" ng-show="item.parentID > 0" /></label></td>
+                                                <td>&nbsp;</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "UserGroup")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="event.update($event)"><i class="fa fa-save"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default@(ViewBag.ID==0?" disabled":"") @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="Delete" style="color: #ff0000;" ng-click="event.delete($event)"><i class="fa fa-times"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default disabled" title="Print"><i class="fa fa-print"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default disabled" title="Approve"><i class="fa fa-thumbs-o-up"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default disabled" title="Reset Approval status"><i class="fa fa-thumbs-o-down"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script src="~/Angular/app/jsonService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script type="text/javascript">
+        jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/usergroup/';
+        jsonService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+        var context = {
+            id: @ViewBag.ID,
+            backUrl: '@Url.Action("Index", "UserGroup")',
+            refreshUrl: '@Url.Action("Edit", "UserGroup", new { id = UrlParameter.Optional })/',
+            errorMsg: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED'
+        }
+    </script>
+    <script src="~/Angular/app/userGroup/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/userGroup/edit.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}

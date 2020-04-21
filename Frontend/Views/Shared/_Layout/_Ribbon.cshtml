@@ -1,0 +1,40 @@
+﻿@{ 
+    string mBreadCrumb = ViewBag.Module;
+    if (ViewBag.ModuleCode != null && Session[Frontend.Customize.Common.ProjectDefinition.USER_INFO_SESSION] != null)
+    {
+        Frontend.APIDTO.APIUserInformation userInfo = (Frontend.APIDTO.APIUserInformation)Session[Frontend.Customize.Common.ProjectDefinition.USER_INFO_SESSION];
+        Frontend.APIDTO.APIUserPermission mNode = userInfo.Data.Permissions.FirstOrDefault(o => o.ModuleUD == ViewBag.ModuleCode.ToString());
+        if (mNode != null)
+        {
+            Frontend.APIDTO.APIUserPermission pNode = userInfo.Data.Permissions.FirstOrDefault(o => o.ModuleID == mNode.ParentID);
+            if (pNode != null)
+            {
+                mBreadCrumb = pNode.DisplayText + @" \ ";
+                switch (mNode.NavType)
+                {
+                    case "R":
+                        mBreadCrumb += @"Report \ ";
+                        break;
+
+                    case "M":
+                        mBreadCrumb += @"Module \ ";
+                        break;
+
+                    case "C":
+                        mBreadCrumb += @"Category \ ";
+                        break;
+
+                    default:
+                        break;
+                }
+                mBreadCrumb += mNode.DisplayText;
+            }
+        }
+    }
+}
+
+<div id="ribbon">
+    <ol class="breadcrumb">
+        <li>@Html.Raw(mBreadCrumb)</li>
+    </ol>
+</div>

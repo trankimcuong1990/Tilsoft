@@ -1,0 +1,333 @@
+﻿@using Frontend.Helper;
+@{
+    ViewBag.Title = "Factory Performance";
+    //ViewBag.Module = "Factory Performance";
+    ViewBag.Icon = "fa-bar-chart-o";
+    var supportServiceRoot = (System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"]);
+}
+
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="smart-form" style="border: solid 1px #9cb4c5; background: #d6dde7; border-left-width: 5px;">
+            <fieldset style="background: #d6dde7;">
+                <div class="row">
+                    <section class="col col-4">
+                        <label class="label">Select season</label>
+                        <label class="select">
+                            <select ng-model="selection.season" ng-options="season.seasonValue as season.seasonText for season in seasons"></select>
+                            <i></i>
+                        </label>
+                    </section>
+                    <section class="col col-4">
+                        <label class="label">&nbsp;</label>
+                        <a href="javascript:void(0)" class="btn btn-success btn-sm" ng-click="event.generateHtml()">Report</a>
+                    </section>
+                </div>
+            </fieldset>
+        </div>
+
+        <br />
+
+        <div class="well padding-10">
+            <h2>SHIPPED CONTAINERS</h2>
+            <div id="highchartAnnualShipped" style="min-width: 310px; height: 500px; margin: 0 auto"></div>
+            <br />
+            <div class="no-padding">
+                <div style="padding-bottom: 0px;">
+                    <div avs-scroll grid-handler="gridHandler_1" class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header" style="width: 1000px">
+                                <div style="width: 250px; text-align: center">
+                                    Factory<br />
+                                    <i style="font-size: 10px">(click to view weekly report)</i>
+                                </div>
+                                <div class="no-padding" style="width: 450px">
+                                    <div class="no-padding" style="width: 100%; height: 24px; line-height: 5px; padding-top: 10px!important">SHIPPED CONTAINER</div>
+                                    <div class="no-padding" style="width: 100%; height: 24px; line-height: 15px;">
+                                        <div class="no-padding" style="width: 150px; text-align: center; height: 26px; line-height: 21px;">LAST SEASON</div>
+                                        <div class="no-padding" style="width: 150px; text-align: center; height: 26px; line-height: 21px;">CURRENT SEASON</div>
+                                        <div class="no-padding" style="text-align: center; height: 24px; line-height: 21px;">%</div>
+                                    </div>
+                                </div>
+                                <div style="width:200px">PRODUCED CONTAINER</div>
+                                <div></div>
+                            </div>
+                            <div class="tilsoft-table-totalrow" style="width: 1000px">
+                                <div style="width: 250px; text-align: center">TOTAL</div>
+                                <div style="width: 150px; text-align: right">{{shippedTotal.totalShippedQnt40HCLastSeason | currency:'':2}}</div>
+                                <div style="width: 150px; text-align: right">{{shippedTotal.totalShippedQnt40HC | currency:'':2}}</div>
+                                <div style="width: 150px; text-align: right">{{(shippedTotal.totalShippedQnt40HCLastSeason ? (shippedTotal.totalShippedQnt40HC * 100 / shippedTotal.totalShippedQnt40HCLastSeason) : '') | currency:'':2}} %</div>
+                                <div style="width: 200px; text-align: right">{{shippedTotal.totalProducedQnt40HC | currency:'':2}}</div>
+                                <div></div>
+                            </div>
+                            <div class="tilsoft-table-body" style="width: 1000px">
+                                <table>
+                                    <tbody>
+                                        <tr ng-repeat="item in data.annualShippedData">
+                                            <td style="width: 250px; text-align: center"><a href="javascript:void(0)" title="Weekly report for shipped container: {{$parent.method.getFactoryInfo(item.factoryID).factoryUD}}" ng-click="$parent.event.generateWeeklyShipped(item.factoryID)">{{$parent.method.getFactoryInfo(item.factoryID).factoryUD}}</a></td>
+                                            <td style="width: 150px; text-align: right">{{item.totalShippedQnt40HCLastSeason | currency:'':2}}</td>
+                                            <td style="width: 150px; text-align: right">{{item.totalShippedQnt40HC | currency:'':2}}/{{item.totalShippCont | currency:'':2}}</td>
+                                            <td style="width: 150px; text-align: right">{{(item.totalShippedQnt40HCLastSeason ? (item.totalShippedQnt40HC * 100 / item.totalShippedQnt40HCLastSeason) : '') | currency:'':2}} %</td>
+                                            <td style="width:200px; text-align: right">{{item.totalProducedQnt40HC | currency:'':2}}</td>
+                                            <td></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <br />
+
+            <div id="highchartWeeklyShipped" style="min-width: 310px; height: 500px; margin: 0 auto; display: none;"></div>
+            <br />
+            <div id="highchartWeeklyShipped2nd" style="min-width: 310px; height: 500px; margin: 0 auto; display: none;"></div>
+            <br />
+            <div id="highchartWeeklyShipped3rd" style="min-width: 310px; height: 500px; margin: 0 auto; display: none;"></div>
+            <br />
+            <div class="tilsoft-table" id="datatableWeeklyShipped" style="display: none;">
+                <div class="tilsoft-table-body" style="margin-top: 0px; height: auto;">
+                    <table style="width: 3790px;">
+                        <tr>
+                            <th style="width: 150px;">&nbsp;</th>
+                            <th ng-repeat="item in data.weekInfoData" style="text-align: center; width: 70px;">{{item.weekIndex}}</th>
+                        </tr>
+                        <tr>
+                            <td style="font-weight: bold;">Last Season</td>
+                            <td style="text-align: right;" ng-repeat="item in data.weeklyShippedData" ng-if="item.factoryID == $parent.selection.factory.factoryID">{{item.totalShippedQnt40HCLastSeason | currency:'':2}}</td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight: bold;">Current Season</td>
+                            <td style="text-align: right;" ng-repeat="item in data.weeklyShippedData" ng-if="item.factoryID == $parent.selection.factory.factoryID">{{item.totalShippedQnt40HC | currency:'':2}}</td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight: bold;">%</td>
+                            <td style="text-align: right;" ng-repeat="item in data.weeklyShippedData" ng-if="item.factoryID == $parent.selection.factory.factoryID">{{(item.totalShippedQnt40HCLastSeason ? item.totalShippedQnt40HC * 100 / item.totalShippedQnt40HCLastSeason : '') | currency:'':2}} %</td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight: bold;">Produced Current Season</td>
+                            <td style="text-align: right;" ng-repeat="item in data.weeklyShippedData" ng-if="item.factoryID == $parent.selection.factory.factoryID">{{item.totalProducedQnt40HC | currency:'':2}}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <br />
+
+        <style>
+            .capacity-monitoring .tilsoft-table-header, .capacity-monitoring .tilsoft-table-filter, .capacity-monitoring .tilsoft-table-body {
+                width: {{530 + 250 * capacityMonitoringHeaders.length}}px;
+            }
+
+                .capacity-monitoring .tilsoft-table-header > div {
+                    height: 90px !important;
+                    text-align: center !important;
+                }
+
+                .capacity-monitoring .tilsoft-table-filter > div {
+                    height: 30px !important;
+                    text-align: right !important;
+                }
+
+            .capacity-monitoring .tilsoft-table-body {
+                margin-top: 120px !important;
+            }
+
+                .capacity-monitoring .tilsoft-table-header > div:nth-child(1),
+                .capacity-monitoring .tilsoft-table-filter > div:nth-child(1),
+                .capacity-monitoring .tilsoft-table-body table > tbody > tr > td:nth-child(1) {
+                    width: 100px;
+                    text-align: center;
+                }
+
+                .capacity-monitoring .tilsoft-table-header > div:nth-child(2),
+                .capacity-monitoring .tilsoft-table-filter > div:nth-child(2),
+                .capacity-monitoring .tilsoft-table-body table > tbody > tr > td:nth-child(2) {
+                    width: 80px;
+                    text-align: right;
+                }
+
+                .capacity-monitoring .tilsoft-table-header > div:nth-child(3),
+                .capacity-monitoring .tilsoft-table-filter > div:nth-child(3),
+                .capacity-monitoring .tilsoft-table-body table > tbody > tr > td:nth-child(3) {
+                    width: 80px;
+                    text-align: right;
+                }
+
+                .capacity-monitoring .tilsoft-table-header > div:nth-child(4),
+                .capacity-monitoring .tilsoft-table-filter > div:nth-child(4),
+                .capacity-monitoring .tilsoft-table-body table > tbody > tr > td:nth-child(4) {
+                    width: 80px;
+                    text-align: right;
+                }
+
+                .capacity-monitoring .tilsoft-table-header > div:nth-child(5),
+                .capacity-monitoring .tilsoft-table-filter > div:nth-child(5),
+                .capacity-monitoring .tilsoft-table-body table > tbody > tr > td:nth-child(5) {
+                    width: 100px;
+                    text-align: right;
+                }
+
+                .capacity-monitoring .tilsoft-table-header > div:nth-child(6),
+                .capacity-monitoring .tilsoft-table-filter > div:nth-child(6),
+                .capacity-monitoring .tilsoft-table-body table > tbody > tr > td:nth-child(6) {
+                    width: 80px;
+                    text-align: right;
+                }
+        </style>
+
+        <div class="well padding-10">
+            <h2>CAPACITY MONITORING</h2>
+            <div class="no-padding">
+                <div class="widget-body capacity-monitoring" style="padding-bottom: 0px;">
+                    <div avs-scroll grid-handler="gridHandler" class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header" style="background: #eee;">
+                                <div>Factory</div>
+                                <div>Capacity<br />(1)</div>
+                                <div>Order<br />(2)</div>
+                                <div>Pre-Order<br />(3)</div>
+                                <div>Pre-Produced<br />(4)</div>
+                                <div>Delta<br />(5)</div>
+                                
+                                <div class="no-padding" style="width: 250px;" ng-repeat="wItem in capacityMonitoringHeaders">
+                                    <div class="no-padding" style="width: 100%; height: 30px; border-right: none; line-height: 30px;">{{wItem.weekIndex}}</div>                                    
+                                    <div class="no-padding" style="width: 100%; height: 30px; border-right: none; line-height: 30px;">{{wItem.weekStart}} - {{wItem.weekEnd}}</div>
+                                    
+                                    <div class="no-padding" style="width: 100%; height: 30px;">
+                                        <div class="no-padding" style="width: 50px; text-align: center; height: 30px; line-height: 30px;">1</div>
+                                        <div class="no-padding" style="width: 50px; text-align: center; height: 30px; line-height: 30px;">2</div>
+                                        <div class="no-padding" style="width: 50px; text-align: center; height: 30px; line-height: 30px;">3</div>
+                                        <div class="no-padding" style="width: 50px; text-align: center; height: 30px; line-height: 30px;">4</div>
+                                        <div class="no-padding" style="text-align: center; height: 30px; line-height: 30px;">5</div>
+                                    </div>
+                                </div>
+
+                                <div>&nbsp;</div>
+                            </div>
+                            <div class="tilsoft-table-filter" style="background: #eee;">
+                                <div>TOTAL</div>
+                                <div>{{capacityMonitoringTotalRow.totalCapacity | number:2}}</div>
+                                <div>{{capacityMonitoringTotalRow.totalOrder | number:2}}</div>
+                                <div>{{capacityMonitoringTotalRow.totalPreOrder | number:2}}</div>
+                                <div>{{capacityMonitoringTotalRow.totalPreProduced | number:2}}</div>
+                                <div>{{capacityMonitoringTotalRow.totalDelta | number:2}}</div>
+                                <div style="width: 50px; text-align: right; color: {{item.type === 5 ? (item.qnt < 0 ? '#ff0000' : '#0000ff') : '#000000'}};" ng-repeat="item in capacityMonitoringTotalRow.weeklyDetail">{{item.qnt | number:2}}</div>
+                                
+                                <div>&nbsp;</div>
+                            </div>
+                            <div class="tilsoft-table-body">
+                                <table>
+                                    <tbody>
+                                        <tr ng-repeat="item in data.totalCapacityAndOrderDatas">
+                                            <td>{{item.factoryUD}}</td>
+                                            <td>{{item.totalCapacity | number:2}}</td>
+                                            <td>{{item.totalOrderQnt | number:2}}</td>      
+                                            <td>{{item.totalPreOrderQnt | number:2}}</td>      
+                                            <td>{{item.totalPreProducedQnt | number:2}}</td>  
+                                            <td style="color: {{item.totalDeltaQnt < 0 ? '#ff0000':'#0000ff'}};">{{item.totalDeltaQnt | number:2}}</td>  
+                                            
+                                            <td style="width: 50px; text-align: right; color: {{sItem.type === 5 ? (sItem.qnt < 0 ? '#ff0000' : '#0000ff') : '#000000'}};" ng-repeat="sItem in item.detail">{{sItem.qnt | number:2}}</td>
+
+                                            <td></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <br />
+
+            <div class="well padding-10">
+                <h2>PRODUCED CONTAINERS</h2>
+                <div id="highchartAnnualProduced" style="min-width: 310px; height: 500px; margin: 0 auto"></div>
+                <br />
+
+                <div class="no-padding">
+                    <div style="padding-bottom: 0px;">
+                        <div avs-scroll grid-handler="gridHandler_2" class="tilsoft-table-wrapper">
+                            <div class="tilsoft-table">
+                                <div class="tilsoft-table-header" style="width: 1000px">
+                                    <div style="width: 250px; text-align: center">
+                                        Factory<br />
+                                        <i style="font-size: 10px">(click to view weekly report)</i>
+                                    </div>
+                                    <div class="no-padding" style="width: 400px">
+                                        <div class="no-padding" style="width: 100%; height: 24px; line-height: 5px; padding-top: 10px!important">PRODUCED CONTAINER</div>
+                                        <div class="no-padding" style="width: 100%; height: 24px; line-height: 15px;">
+                                            <div class="no-padding" style="width: 200px; text-align: center; height: 26px; line-height: 21px;">LAST SEASON</div>
+                                            <div class="no-padding" style="text-align: center; height: 24px; line-height: 21px;">CURRENT SEASON</div>
+                                        </div>
+                                    </div>
+                                    <div style="width:200px">%</div>
+                                    <div></div>
+                                </div>
+                                <div class="tilsoft-table-body" style="width: 1000px">
+                                    <table>
+                                        <tbody>
+                                            <tr ng-repeat="item in data.annualProducedData">
+                                                <td style="width: 250px; text-align: center"><a href="javascript:void(0)" title="Weekly report for shipped container: {{$parent.method.getFactoryInfo(item.factoryID).factoryUD}}" ng-click="$parent.event.generateWeeklyProduced(item.factoryID)">{{$parent.method.getFactoryInfo(item.factoryID).factoryUD}}</a></td>
+                                                <td style="width: 200px; text-align: right">{{item.totalProducedQnt40HCLastSeason | currency:'':2}}</td>
+                                                <td style="width: 200px; text-align: right">{{item.totalProducedQnt40HC | currency:'':2}}</td>
+                                                <td style="width:200px; text-align: right">{{(item.totalProducedQnt40HCLastSeason ? (item.totalProducedQnt40HC * 100 / item.totalProducedQnt40HCLastSeason) : '') | currency:'':2}} %</td>
+                                                <td></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <br />
+
+                <div id="highchartWeeklyProduced" style="min-width: 310px; height: 500px; margin: 0 auto; display: none;"></div>
+                <br />
+                <div class="tilsoft-table" id="datatableWeeklyProduced" style="display: none;">
+                    <div class="tilsoft-table-body" style="margin-top: 0px; height: auto;">
+                        <table style="width: 3790px;">
+                            <tr>
+                                <th style="width: 150px;">&nbsp;</th>
+                                <th ng-repeat="item in data.weekInfoData" style="text-align: center; width: 70px;">{{item.weekIndex}}</th>
+                            </tr>
+                            <tr>
+                                <td style="font-weight: bold;">Last Season</td>
+                                <td style="text-align: right;" ng-repeat="item in data.weeklyProducedData" ng-if="item.factoryID == $parent.selection.factoryProduced.factoryID">{{item.totalProducedQnt40HCLastSeason | currency:'':2}}</td>
+                            </tr>
+                            <tr>
+                                <td style="font-weight: bold;">Current Season</td>
+                                <td style="text-align: right;" ng-repeat="item in data.weeklyProducedData" ng-if="item.factoryID == $parent.selection.factoryProduced.factoryID">{{item.totalProducedQnt40HC | currency:'':2}}</td>
+                            </tr>
+                            <tr>
+                                <td style="font-weight: bold;">%</td>
+                                <td style="text-align: right;" ng-repeat="item in data.weeklyProducedData" ng-if="item.factoryID == $parent.selection.factoryProduced.factoryID">{{(item.totalProducedQnt40HCLastSeason ? item.totalProducedQnt40HC * 100 / item.totalProducedQnt40HCLastSeason : '') | currency:'':2}} %</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+@section pagejs {
+    <script type="text/javascript">
+        var context = {
+            serviceUrl : '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/factoryperformancerpt/',
+            token: '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]',
+            supportServiceUrl: '@(supportServiceRoot)/api/support/'
+
+        }
+    </script>
+    <script src="~/Views/FactoryPerformanceRpt/index.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/jsonService2.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/FactoryPerformanceRpt/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}

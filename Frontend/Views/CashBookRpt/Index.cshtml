@@ -1,0 +1,153 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    var backendReportUrl = @System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"];
+
+    ViewBag.Title = "CashBook Overview";
+    ViewBag.Module = "CashBook Overview";
+    ViewBag.Icon = "fa-bar-chart-o";
+}
+
+<div class="row" name="mainForm">
+    <article class="col col-sm-12">
+        <div class="jarviswidget" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-bar-chart-o"></i>
+                </span>
+                <h2>CashBook Overview</h2>
+            </header>
+            <div class="no-padding">
+                <div class="widget-body">
+                    <div class="smart-form" style="font-size: 12px">
+                        <fieldset>
+                            <section class="col col-sm-2">
+                                <label>Payment Type <em class="note note-error" ng-show="(filters.paymentType == null)">(Required)</em></label>
+                                <label class="input">
+                                    <select avs-select style="font-family: Arial; font-size: 12px" ng-data-source="filters.paymentType">
+                                        <option value=""></option>
+                                        <option value="{{item.paymentTypeID}}" ng-repeat="item in support.paymentTypeList">{{item.paymentTypeNM}}</option>
+                                    </select>
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label>Bank Account <em class="note note-error" ng-show="(filters.bankAccount == null && filters.paymentType == 2)">(Required)</em></label>
+                                <label class="input">
+                                    <select avs-select style="font-family: Arial; font-size: 12px" ng-data-source="filters.bankAccount">
+                                        <option value=""></option>
+                                        <option value="{{item.supplierBankID}}" ng-repeat="item in support.bankAccountList">{{item.infor}}</option>
+                                    </select>
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label><i class="fa fa-calendar"></i> Start Date <em class="note note-error" ng-show="(filters.startDate == null || filters.startDate == '')">(Required)</em></label>
+                                <label class="input">
+                                    <input id="startDate" class="form-control" style="font-family: Arial; font-size: 12px" avs-calendar ng-data-source="filters.startDate" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label><i class="fa fa-calendar"></i> End Date <em class="note note-error" ng-show="(filters.endDate == null || filters.endDate == '')">(Required)</em></label>
+                                <label class="input">
+                                    <input id="endDate" class="form-control" style="font-family: Arial; font-size: 12px" avs-calendar ng-data-source="filters.endDate" />
+                                </label>
+                            </section>
+                        </fieldset>
+                    </div>
+                    <div class="tilsoft-table-wrapper" avs-scrollable-table>
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header">
+                                <div style="width: 55px; height: 60px; font-size: 12px">Total<br /><b style="color: #0026ff">{{(data == null ? 0 : data.cashBookRpt_SearchResultDtos.length) | number: 0}}</b></div>
+                                <div style="width: 120px; height: 60px; font-size: 12px">Posting Date</div>
+                                <div style="width: 120px; height: 60px; font-size: 12px">Document Date</div>
+                                <div class="no-padding" style="width: 300px; height: 60px; font-size: 12px">
+                                    <div class="no-padding" style="width: 100%; height: 30px; font-size: 12px; border-right: none; line-height: 30px">Document No</div>
+                                    <div class="no-padding" style="width: 100%; height: 30px; font-size: 12px">
+                                        <div class="no-padding" style="width: 150px; height: 30px; font-size: 12px; line-height: 30px">Receipt Note No</div>
+                                        <div class="no-padding" style="width: 100%; height: 30px; font-size: 12px; line-height: 30px">Payment Note No</div>
+                                    </div>
+                                </div>
+                                <div style="width: 150px; height: 60px; font-size: 12px">Description</div>
+                                <div class="no-padding" style="width: 480px; height: 60px; font-size: 12px">
+                                    <div class="no-padding" style="width: 100%; height: 30px; font-size: 12px; border-right: none; line-height: 30px">Amount</div>
+                                    <div class="no-padding" style="width: 100%; height: 30px; font-size: 12px">
+                                        <div class="no-padding" style="width: 120px; height: 30px; font-size: 12px; line-height: 30px">Beginning</div>
+                                        <div class="no-padding" style="width: 120px; height: 30px; font-size: 12px; line-height: 30px">Receipt</div>
+                                        <div class="no-padding" style="width: 120px; height: 30px; font-size: 12px; line-height: 30px">Payment</div>
+                                        <div class="no-padding" style="width: 100%; height: 30px; font-size: 12px; line-height: 30px">Ending</div>
+                                    </div>
+                                </div>
+                                @*<div style="width: 70px; height: 60px; font-size: 12px">Remark</div>*@
+                                <div style="border-bottom: none"></div>
+                            </div>
+                            <div class="tilsoft-table-totalrow" style="margin-top: 60px">
+                                <div style="width: 745px">Total</div>
+                                <div style="width: 120px">{{method.getBegin() | number : 2}}</div>
+                                <div style="width: 120px">{{method.sumReceipt() | number : 2}}</div>
+                                <div style="width: 120px">{{method.sumPayment() | number : 2}}</div>
+                                <div style="width: 120px">{{method.sumEnding() | number : 2}}</div>
+                                @*<div style="width: 70px"></div>*@
+                                <div style="border-bottom: none;"></div>
+                            </div>
+                            <div class="tilsoft-table-body" style="margin-top: 90px">
+                                <table>
+                                    <tbody>
+                                        <tr ng-repeat="item in data.cashBookRpt_SearchResultDtos">
+
+                                            <td style="width: 55px; font-size: 12px; background: #ecffff">{{$index+1}}</td>
+                                            <td style="width: 120px; font-size: 12px; text-align: center; background: #ecffff">{{item.postingDate}}</td>
+                                            <td style="width: 120px; font-size: 12px; text-align: center; background: #ecffff">{{item.noteDate}}</td>
+                                            <td style="width: 150px; font-size: 12px; text-align: center; background: #ecffff">
+                                                <a href="@Url.Action("Edit", "ReceiptNoteMng")/{{item.receiptNoteID}}" target="_blank">{{item.receiptNoteNo}}</a>
+                                            </td>
+                                            <td style="width: 150px; font-size: 12px; text-align: center; background: #ecffff">
+                                                <a href="@Url.Action("Edit", "PaymentNoteMng")/{{item.paymentNoteID}}" target="_blank">{{item.paymentNoteNo}}</a>
+                                            </td>
+                                            <td style="width: 150px; font-size: 12px; text-align: center; background: #ecffff">{{item.remark}}</td>
+                                            <td style="width: 120px; font-size: 12px; text-align: right; background: #ecffff">{{0 | number : 2}}</td>
+                                            <td style="width: 120px; font-size: 12px; text-align: right; background: #ecffff">{{item.totalReceipt | number : 2}}</td>
+                                            <td style="width: 120px; font-size: 12px; text-align: right; background: #ecffff">{{item.totalPayment | number : 2}}</td>
+                                            <td style="width: 120px; font-size: 12px; text-align: right; background: #ecffff">{{item.totalEnd | number : 2}}</td>
+
+                                            @*<td style="width: 70px; background: #ecffff"></td>*@
+                                            <td style="border-bottom: none"></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction {
+    <ul id="sparks">
+        <li>
+            <a href="javascript:void(0)" class="btn btn-default btn-sm" ng-click="event.search(filters.paymentType, filters.bankAccount, filters.startDate, filters.endDate)" title="Show data on html">
+                <i class="fa fa-search"></i>
+            </a>
+        </li>
+        @*<li>
+            <a href="javascript:void(0)" class="btn btn-default btn-sm" ng-click="event.report(filters.paymentType, filters.bankAccount, filters.startDate, filters.endDate)" title="Show data on excel">
+                <i class="fa fa-file-excel-o"></i>
+            </a>
+        </li>*@
+    </ul>
+}
+
+@section pagejs{
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(serviceRoot)/api/cashBookRpt/',
+            token: '@token',
+            backendReportUrl: '@backendReportUrl',
+            errorValid: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED',
+        };
+    </script>
+    <script type="text/javascript" src="~/Views/CashBookRpt/index.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Views/CashBookRpt/service.js?v=@guid"></script>
+}

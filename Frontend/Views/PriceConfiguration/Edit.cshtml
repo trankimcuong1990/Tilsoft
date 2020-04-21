@@ -1,0 +1,415 @@
+﻿@{
+    ViewBag.Title = (ViewBag.ID == 0) ? "Create Price Configuration" : "Edit Price Configuration";
+    ViewBag.Module = "Price Configuration";
+
+    string season = string.Empty;
+    if (Request.Params["s"] != null)
+    {
+        season = Request.Params["s"].ToString();
+    }
+
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+}
+
+<form name="editForm" class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12" id="wid-id-0">
+        <div class="jarviswidget jarviswidget-color-darken" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-database"></i> </span>
+                <h2>General Setting</h2>
+            </header>
+            <div>
+                <div class="widget-body">
+                    <div class="smart-form">
+                        <section class="col col-sm-2" style="width: 150px!important" ng-show="(data.data.priceConfigurationID === 0)">
+                            <label class="label">
+                                <i class="fa fa-calendar"></i>
+                                <strong> Season </strong>
+                                <em class="note note-error" ng-show="editForm.season.$error.required">(Required)</em>
+                            </label>
+                            <label class="input" ng-class="{'state-error': editForm.season.$error.required}">
+                                <select class="form-control" style="height: 30px!important" name="season" ng-model="data.data.season" ng-options="season.seasonValue as season.seasonText for season in seasons" required ng-change="event.changed()">
+                                    <option value=""></option>
+                                </select>
+                            </label>
+                        </section>
+                        <section class="col col-sm-2" style="width: 150px!important" ng-show="(data.data.priceConfigurationID !== 0)">
+                            <label class="label">
+                                <i class="fa fa-calendar"></i>
+                                <strong> Season </strong>
+                            </label>
+                            <label class="input">
+                                <span class="form-control">{{data.data.season}}</span>
+                            </label>
+                        </section>
+                        <section class="col col-sm-2" style="width: 220px!important">
+                            <label class="label">
+                                <i class="fa fa-user"></i>
+                                <strong> Updated By </strong>
+                            </label>
+                            <label class="input">
+                                <span class="form-control"></span>
+                            </label>
+                        </section>
+                        <section class="col col-sm-2" style="width: 220px!important">
+                            <label class="label">
+                                <i class="fa fa-calendar"></i>
+                                <strong> Updated Date </strong>
+                            </label>
+                            <label class="input">
+                                <span class="form-control">{{data.data.updatedDate}}</span>
+                            </label>
+                        </section>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12" id="wid-id-0">
+        <div class="jarviswidget jarviswidget-color-darken" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-database"></i> </span>
+                <h2>Details Setting</h2>
+            </header>
+            <div>
+                <div class="widget-body">
+                    <div class="smart-form">
+                        <div class="row">
+                            <section class="col col-lg-6">
+                                <div class="tilsoft-table">
+                                    <div class="tilsoft-table-body" style="width: 100%; overflow-y: hidden; height: auto; max-height:none; margin-top: 0px;">
+                                        <table>
+                                            <thead>
+                                                <tr>
+                                                    <th colspan="5"><strong>FCS setting</strong></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td colspan="4" style="border-right: none;">
+                                                        <label for="s2id_autogen2" class="select2-offscreen"></label>
+                                                        <input class="select2-focusser select2-offscreen" type="text" aria-haspopup="true" role="button" aria-labelledby="select2-chosen-2" id="s2id_autogen2">
+                                                        <div class="select2-drop select2-display-none select2-with-searchbox">
+                                                            <div class="select2-search">
+                                                                <label for="s2id_autogen2_search" class="select2-offscreen"></label>
+                                                                <input type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" class="select2-input" role="combobox" aria-expanded="true" aria-autocomplete="list" aria-owns="select2-results-2" id="s2id_autogen2_search" placeholder="">
+                                                            </div>
+                                                            <ul class="select2-results" role="listbox" id="select2-results-2"></ul>
+                                                        </div>
+                                                        <select style="width:100%" class="select2 select2-offscreen" tabindex="-1" title="" ng-model="getFSCID" ng-options="fsc.fscTypeID as fsc.fscTypeNM for fsc in fscTypes" ng-disabled="data.data.season == null || data.data.season == ''">
+                                                            <option value=""></option>
+                                                        </select>
+                                                        <i></i>
+                                                    </td>
+                                                    <td style="text-align: center;"><a href="javascript:void(0)" class="btn btn-primary btn-sm" id="add_fsc" ng-click="event.addDetailFSC($event)" ng-disabled="data.data.season == null || data.data.season == ''"><i class="fa fa-plus"></i> Add</a></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>&nbsp;</td>
+                                                    <td style="display: none">&nbsp;</td>
+                                                    <td>&nbsp;</td>
+                                                    <td style="width: 100px; text-align: center;"><strong>%</strong></td>
+                                                    <td style="width: 100px; text-align: center;"><strong>USD Amount</strong></td>
+                                                    <td style="width: 100px; text-align: center;"><strong>EUR Amount</strong></td>
+                                                </tr>
+                                                <tr ng-repeat="fcs in data.data.priceConfigurationDetailOfFCS">
+                                                    <td style="width: 90px;text-align: center">
+                                                        <a href="javascript:void(0)" class="btn btn-danger btn-xs" ng-click="event.removeDetailFSC($event, $index)"><i class="fa fa-times"></i> Remove</a>
+                                                    </td>
+                                                    <td style="display: none">
+                                                        <span class="form-control">{{fcs.optionID}}</span>
+                                                    </td>
+                                                    <td>
+                                                        <span class="form-control">{{fcs.optionNM}}</span>
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" style="width: 100%; text-align:right" ng-model="fcs.percentValue" ng-disabled="fcs.usdAmount != 0 || fcs.eurAmount != 0" avs-number-2 ng-decimal="2" />
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" style="width: 100%; text-align:right" ng-model="fcs.usdAmount" ng-disabled="fcs.percentValue != 0" avs-number-2 ng-decimal="2">
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" style="width: 100%; text-align:right" ng-model="fcs.eurAmount" ng-disabled="fcs.percentValue != 0" avs-number-2 ng-decimal="2">
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <br>
+                                <div class="tilsoft-table">
+                                    <div class="tilsoft-table-body" style="width: 100%; overflow-y: hidden; height: auto; max-height:none; margin-top: 0px;">
+                                        <table>
+                                            <thead>
+                                                <tr>
+                                                    <th colspan="5"><strong>Frame Material</strong></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td colspan="4" style="border-right: none;">
+                                                        <label for="s2id_autogen2" class="select2-offscreen"></label>
+                                                        <input class="select2-focusser select2-offscreen" type="text" aria-haspopup="true" role="button" aria-labelledby="select2-chosen-2" id="s2id_autogen2">
+                                                        <div class="select2-drop select2-display-none select2-with-searchbox">
+                                                            <div class="select2-search">
+                                                                <label for="s2id_autogen2_search" class="select2-offscreen"></label>
+                                                                <input type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" class="select2-input" role="combobox" aria-expanded="true" aria-autocomplete="list" aria-owns="select2-results-2" id="s2id_autogen2_search" placeholder="">
+                                                            </div>
+                                                            <ul class="select2-results" role="listbox" id="select2-results-2"></ul>
+                                                        </div>
+                                                        <select style="width:100%" class="select2 select2-offscreen" tabindex="-1" title="" ng-model="getFrameMaterialID" ng-options="frameMaterial.frameMaterialID as frameMaterial.frameMaterialNM for frameMaterial in frameMaterials" ng-disabled="data.data.season == null || data.data.season == ''">
+                                                            <option value=""></option>
+                                                        </select>
+                                                        <i></i>
+                                                    </td>
+                                                    <td style="text-align: center;"><a href="javascript:void(0)" class="btn btn-primary btn-sm" ng-click="event.addDetailFrameMaterial($event)" ng-disabled="data.data.season == null || data.data.season == ''"><i class="fa fa-plus"></i> Add</a></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>&nbsp;</td>
+                                                    <td style="display: none">&nbsp;</td>
+                                                    <td>&nbsp;</td>
+                                                    <td style="width: 100px; text-align: center;"><strong>%</strong></td>
+                                                    <td style="width: 100px; text-align: center;"><strong>USD Amount</strong></td>
+                                                    <td style="width: 100px; text-align: center;"><strong>EUR Amount</strong></td>
+                                                </tr>
+                                                <tr ng-repeat="frameMaterial in data.data.priceConfigurationDetailOfFrameMaterial">
+                                                    <td style="width: 90px;text-align: center">
+                                                        <a href="javascript:void(0)" class="btn btn-danger btn-xs" ng-click="event.removeDetailFrameMaterial($event, $index)"><i class="fa fa-times"></i> Remove</a>
+                                                    </td>
+                                                    <td style="display: none">
+                                                        <span class="form-control">{{frameMaterial.optionID}}</span>
+                                                    </td>
+                                                    <td>
+                                                        <span class="form-control">{{frameMaterial.optionNM}}</span>
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" style="width: 100%; text-align:right" ng-model="frameMaterial.percentValue" ng-disabled="frameMaterial.usdAmount != 0 || frameMaterial.eurAmount != 0" avs-number-2 ng-decimal="2">
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" style="width: 100%; text-align:right" ng-model="frameMaterial.usdAmount" ng-disabled="frameMaterial.percentValue != 0" avs-number-2 ng-decimal="2">
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" style="width: 100%; text-align:right" ng-model="frameMaterial.eurAmount" ng-disabled="frameMaterial.percentValue != 0" avs-number-2 ng-decimal="2">
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <br>
+                                <div class="tilsoft-table">
+                                    <div class="tilsoft-table-body" style="width: 100%; overflow-y: hidden; height: auto; max-height:none; margin-top: 0px;">
+                                        <table>
+                                            <thead>
+                                                <tr>
+                                                    <th colspan="5"><strong>Packaging Method</strong></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td colspan="4" style="border-right: none;">
+                                                        <label for="s2id_autogen2" class="select2-offscreen"></label>
+                                                        <input class="select2-focusser select2-offscreen" type="text" aria-haspopup="true" role="button" aria-labelledby="select2-chosen-2" id="s2id_autogen2">
+                                                        <div class="select2-drop select2-display-none select2-with-searchbox">
+                                                            <div class="select2-search">
+                                                                <label for="s2id_autogen2_search" class="select2-offscreen"></label>
+                                                                <input type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" class="select2-input" role="combobox" aria-expanded="true" aria-autocomplete="list" aria-owns="select2-results-2" id="s2id_autogen2_search" placeholder="">
+                                                            </div>
+                                                            <ul class="select2-results" role="listbox" id="select2-results-2"></ul>
+                                                        </div>
+                                                        <select style="width:100%" class="select2 select2-offscreen" tabindex="-1" title="" ng-model="getPackagingMethodID" ng-options="packagingMethod.packagingMethodID as packagingMethod.packagingMethodNM for packagingMethod in packagingMethods" ng-disabled="data.data.season == null || data.data.season == ''">
+                                                            <option value=""></option>
+                                                        </select>
+                                                        <i></i>
+                                                    </td>
+                                                    <td style="text-align: center;"><a href="javascript:void(0)" class="btn btn-primary btn-sm" ng-click="event.addDetailPackagingMethod($event)" ng-disabled="data.data.season == null || data.data.season == ''"><i class="fa fa-plus"></i> Add</a></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>&nbsp;</td>
+                                                    <td style="display: none">&nbsp;</td>
+                                                    <td>&nbsp;</td>
+                                                    <td style="width: 100px; text-align: center;"><strong>%</strong></td>
+                                                    <td style="width: 100px; text-align: center;"><strong>USD Amount</strong></td>
+                                                    <td style="width: 100px; text-align: center;"><strong>EUR Amount</strong></td>
+                                                </tr>
+                                                <tr ng-repeat="packagingMethod in data.data.priceConfigurationDetailOfPackingMethod">
+                                                    <td style="width: 90px;text-align: center">
+                                                        <a href="javascript:void(0)" class="btn btn-danger btn-xs" ng-click="event.removeDetailPackagingMethod($event, $index)"><i class="fa fa-times"></i> Remove</a>
+                                                    </td>
+                                                    <td style="display: none">
+                                                        <span class="form-control">{{packagingMethod.optionID}}</span>
+                                                    </td>
+                                                    <td>
+                                                        <span class="form-control">{{packagingMethod.optionNM}}</span>
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" style="width: 100%; text-align:right" ng-model="packagingMethod.percentValue" ng-disabled="packagingMethod.usdAmount != 0 || packagingMethod.eurAmount != 0" avs-number-2 ng-decimal="2">
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" style="width: 100%; text-align:right" ng-model="packagingMethod.usdAmount" ng-disabled="packagingMethod.percentValue != 0" avs-number-2 ng-decimal="2">
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" style="width: 100%; text-align:right" ng-model="packagingMethod.eurAmount" ng-disabled="packagingMethod.percentValue != 0" avs-number-2 ng-decimal="2">
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </section>
+                            <section class="col col-lg-6">
+                                <div class="tilsoft-table">
+                                    <div class="tilsoft-table-body" style="width: 100%; overflow-y: hidden; height: auto; max-height:none; margin-top: 0px;">
+                                        <table>
+                                            <thead>
+                                                <tr>
+                                                    <th colspan="5"><strong>Material Color</strong></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td colspan="4" style="border-right: none;">
+                                                        <label for="s2id_autogen2" class="select2-offscreen"></label>
+                                                        <input class="select2-focusser select2-offscreen" type="text" aria-haspopup="true" role="button" aria-labelledby="select2-chosen-2" id="s2id_autogen2">
+                                                        <div class="select2-drop select2-display-none select2-with-searchbox">
+                                                            <div class="select2-search">
+                                                                <label for="s2id_autogen2_search" class="select2-offscreen"></label>
+                                                                <input type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" class="select2-input" role="combobox" aria-expanded="true" aria-autocomplete="list" aria-owns="select2-results-2" id="s2id_autogen2_search" placeholder="">
+                                                            </div>
+                                                            <ul class="select2-results" role="listbox" id="select2-results-2"></ul>
+                                                        </div>
+                                                        <select style="width:100%" class="select2 select2-offscreen" tabindex="-1" title="" ng-model="getMaterialColorID" ng-options="materialColor.materialColorID as materialColor.materialColorNM for materialColor in materialColors" ng-disabled="data.data.season == null || data.data.season == ''">
+                                                            <option value=""></option>
+                                                        </select>
+                                                        <i></i>
+                                                    </td>
+                                                    <td style="text-align: center;"><a href="javascript:void(0)" class="btn btn-primary btn-sm" ng-click="event.addDetailMaterialColor($event)" ng-disabled="data.data.season == null || data.data.season == ''"><i class="fa fa-plus"></i> Add</a></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>&nbsp;</td>
+                                                    <td style="display: none">&nbsp;</td>
+                                                    <td>&nbsp;</td>
+                                                    <td style="width: 100px; text-align: center;"><strong>%</strong></td>
+                                                    <td style="width: 100px; text-align: center;"><strong>USD Amount</strong></td>
+                                                    <td style="width: 100px; text-align: center;"><strong>EUR Amount</strong></td>
+                                                </tr>
+                                                <tr ng-repeat="materialColor in data.data.priceConfigurationDetailOfMaterialColor">
+                                                    <td style="width: 90px;text-align: center">
+                                                        <a href="javascript:void(0)" class="btn btn-danger btn-xs" ng-click="event.removeDetailMaterialColor($event, $index)"><i class="fa fa-times"></i> Remove</a>
+                                                    </td>
+                                                    <td style="display: none">
+                                                        <span class="form-control">{{materialColor.optionID}}</span>
+                                                    </td>
+                                                    <td>
+                                                        <span class="form-control">{{materialColor.optionNM}}</span>
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" style="width: 100%; text-align:right" ng-model="materialColor.percentValue" ng-disabled="materialColor.usdAmount != 0 || materialColor.eurAmount != 0" avs-number-2 ng-decimal="2">
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" style="width: 100%; text-align:right" ng-model="materialColor.usdAmount" ng-disabled="materialColor.percentValue != 0" avs-number-2 ng-decimal="2">
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" style="width: 100%; text-align:right" ng-model="materialColor.eurAmount" ng-disabled="materialColor.percentValue != 0" avs-number-2 ng-decimal="2">
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <br>
+                                <div class="tilsoft-table">
+                                    <div class="tilsoft-table-body" style="width: 100%; overflow-y: hidden; height: auto; max-height:none; margin-top: 0px;">
+                                        <table>
+                                            <thead>
+                                                <tr>
+                                                    <th colspan="5"><strong>Cushion Color</strong></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td colspan="4" style="border-right: none;">
+                                                        <label for="s2id_autogen2" class="select2-offscreen"></label>
+                                                        <input class="select2-focusser select2-offscreen" type="text" aria-haspopup="true" role="button" aria-labelledby="select2-chosen-2" id="s2id_autogen2">
+                                                        <div class="select2-drop select2-display-none select2-with-searchbox">
+                                                            <div class="select2-search">
+                                                                <label for="s2id_autogen2_search" class="select2-offscreen"></label>
+                                                                <input type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" class="select2-input" role="combobox" aria-expanded="true" aria-autocomplete="list" aria-owns="select2-results-2" id="s2id_autogen2_search" placeholder="">
+                                                            </div>
+                                                            <ul class="select2-results" role="listbox" id="select2-results-2"></ul>
+                                                        </div>
+                                                        <select style="width:100%" class="select2 select2-offscreen" tabindex="-1" title="" ng-model="getCushionColorID" ng-options="cushionColor.cushionColorID as cushionColor.cushionColorNM for cushionColor in cushionColors" ng-disabled="data.data.season == null || data.data.season == ''">
+                                                            <option value=""></option>
+                                                        </select>
+                                                        <i></i>
+                                                    </td>
+                                                    <td style="text-align: center;"><a href="javascript:void(0)" class="btn btn-primary btn-sm" ng-click="event.addDetailCushionColor($event)" ng-disabled="data.data.season == null || data.data.season == ''"><i class="fa fa-plus"></i> Add</a></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>&nbsp;</td>
+                                                    <td style="display: none">&nbsp;</td>
+                                                    <td>&nbsp;</td>
+                                                    <td style="width: 100px; text-align: center;"><strong>%</strong></td>
+                                                    <td style="width: 100px; text-align: center;"><strong>USD Amount</strong></td>
+                                                    <td style="width: 100px; text-align: center;"><strong>EUR Amount</strong></td>
+                                                </tr>
+                                                <tr ng-repeat="cushionColor in data.data.priceConfigurationDetailOfCushionColor">
+                                                    <td style="width: 90px;text-align: center">
+                                                        <a href="javascript:void(0)" class="btn btn-danger btn-xs" ng-click="event.removeDetailCushionColor($event, $index)"><i class="fa fa-times"></i> Remove</a>
+                                                    </td>
+                                                    <td style="display: none">
+                                                        <span class="form-control">{{cushionColor.optionID}}</span>
+                                                    </td>
+                                                    <td>
+                                                        <span class="form-control">{{cushionColor.optionNM}}</span>
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" style="width: 100%; text-align:right" ng-model="cushionColor.percentValue" ng-disabled="cushionColor.usdAmount != 0 || cushionColor.eurAmount != 0" avs-number-2 ng-decimal="2">
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" style="width: 100%; text-align:right" ng-model="cushionColor.usdAmount" ng-disabled="cushionColor.percentValue != 0" avs-number-2 ng-decimal="2">
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" style="width: 100%; text-align:right" ng-model="cushionColor.eurAmount" ng-disabled="cushionColor.percentValue != 0" avs-number-2 ng-decimal="2">
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+@section FormAction{
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "PriceConfiguration")" class="btn btn-default" title="Go Back" id="rprevious-step"><i class="fa fa-arrow-left"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="#" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" id="save-data" ng-click="event.updated($event)"><i class="fa fa-save"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs{
+    <script type="text/javascript">
+        var context = {
+            id: @ViewBag.ID,
+            season: '@season',
+            errMsg: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED',
+            refreshUrl: '@Url.Action("Edit", "PriceConfiguration", new { id = UrlParameter.Optional })/',
+            serviceUrl: '@(serviceRoot)/api/priceconfiguration/',
+            token: '@token'
+        };
+    </script>
+    <script src="~/Angular/app/priceConfiguration/edit.js?v=@guid" type="text/javascript"></script>
+    <script src="~/Angular/app/jsonService2.js?v=@guid" type="text/javascript"></script>
+    <script src="~/Angular/app/priceConfiguration/service.js?v=@guid" type="text/javascript"></script>
+}

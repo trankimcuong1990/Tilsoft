@@ -1,0 +1,361 @@
+﻿@{
+    if (ViewBag.ID == 0)
+    {
+        ViewBag.Title = "Create New Task";
+    }
+    else
+    {
+        ViewBag.Title = "Edit Task";
+    }
+    ViewBag.Icon = "fa-pencil-square-o";
+    ViewBag.Module = "To do list";
+    Frontend.APIDTO.APIUserInformation userInfo = (Frontend.APIDTO.APIUserInformation)Session[Frontend.Customize.Common.ProjectDefinition.USER_INFO_SESSION];
+}
+<style>
+    .custom-pagination {
+        display: none !important;
+    }
+</style>
+
+<form class="row" name="editForm" id="main-form">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-0" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <ul class="nav nav-tabs pull-left in">
+                    <li class="active">
+                        <a data-toggle="tab" href="#tabGeneral"> <span> General Information </span> </a>
+                    </li>
+                    <li>
+                        <a data-toggle="tab" href="#step"> <span> Steps and comments </span> </a>
+                    </li>
+                </ul>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="tabGeneral">
+                            <div class="smart-form">
+                                <fieldset>
+                                    <div class="row">
+                                        <section class="col col-2">
+                                            <label class="label">Code</label>
+                                            <label class="input">
+                                                <span class="form-control">{{data.taskUD}}</span>
+                                            </label>
+                                        </section>
+                                        <section class="col col-10">
+                                            <label class="label">Name</label>
+                                            <label class="input">
+                                                <input type="text" ng-model="data.taskNM" />
+                                            </label>
+                                        </section>
+                                    </div>
+                                    <div class="row">
+                                        <section class="col col-2">
+                                            <label class="label">Start Date</label>
+                                            <label class="input">
+                                                <input type="text" class="datepicker" ng-model="data.startDate" data-dateformat="dd/mm/yy" />
+                                                <i class="icon-append fa fa-calendar"></i>
+                                            </label>
+                                        </section>
+                                        <section class="col col-2">
+                                            <label class="label">Est End Date</label>
+                                            <label class="input">
+                                                <input type="text" class="datepicker" ng-model="data.estEndDate" data-dateformat="dd/mm/yy" />
+                                                <i class="icon-append fa fa-calendar"></i>
+                                            </label>
+                                        </section>
+                                        <section class="col col-2">
+                                            <label class="label">End Date</label>
+                                            <label class="input">
+                                                <input type="text" class="datepicker" ng-model="data.endDate" data-dateformat="dd/mm/yy" />
+                                                <i class="icon-append fa fa-calendar"></i>
+                                            </label>
+                                        </section>
+                                        <section class="col col-2">
+                                            <label class="label">% Completed</label>
+                                            <label class="input">
+                                                <span class="form-control">{{data.completedPercent}}</span>
+                                            </label>
+                                        </section>
+                                        <section class="col col-2">
+                                            <label class="label">Status</label>
+                                            <label class="select">
+                                                <select ng-model="data.taskStatusID" ng-options="taskStatus.taskStatusID as taskStatus.taskStatusNM for taskStatus in taskStatuses">
+                                                    <option value=""></option>
+                                                </select>
+                                                <i></i>
+                                            </label>
+                                        </section>
+                                    </div>
+                                    <section>
+                                        <label class="label">Description</label>
+                                        <label class="textarea">
+                                            <textarea rows="8" ng-model="data.description"></textarea>
+                                        </label>
+                                    </section>
+                                    <section>
+                                        <label class="label">Attached files <a href="javascript:void(0)" class="btn btn-primary btn-xs" ng-click="event.addFile()"><i class="fa fa-plus"></i> Add</a></label>
+                                        <div style="border: solid 1px #ddd; padding: 15px;">
+                                            <ul class="file-list">
+                                                <li ng-repeat="item in data.taskFiles">
+                                                    <strong>{{item.friendlyName}}</strong> <a href="javascript:void(0)" style="margin-left: 20px;" ng-click="event.editFile(item)"><i class="fa fa-edit"></i> Edit</a> | <a href="{{item.fileLocation}}" target="_blank"><i class="fa fa-download"></i> Download</a> | <a href="javascript:void(0)" style="color: #ff0000;" ng-click="event.removeFile(item)"><i class="fa fa-times"></i> Remove</a>
+                                                    <br/>
+                                                    {{item.description}}
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </section> 
+                                    <section>
+                                        <div class="note" ng-if="data.updatorName"><strong>Updated By</strong>: {{data.updatorName}} on {{data.updatedDate}}</div>
+                                    </section>
+                                </fieldset>
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="step">
+                            <div class="smart-form">
+                                <fieldset>
+                                    <section>
+                                        <a href="javascript:void(0)" class="btn btn-primary btn-xs" style="margin-bottom: 10px;" ng-click="event.addStep()"><i class="fa fa-plus"></i> Add step</a>
+                                        <div id="grdStep" class="tilsoft-table-wrapper">
+                                            <div class="tilsoft-table">
+                                                <div class="tilsoft-table-header" style="width: 1120px;">
+                                                    <div style="width: 100px;">&nbsp;</div>
+                                                    <div style="width: 80px;">Index</div>
+                                                    <div style="width: 400px;">Description</div>
+                                                    <div>User</div>
+                                                </div>
+                                                <div class="tilsoft-table-body" style="width: 1120px;">
+                                                    <table>
+                                                        <tr ng-repeat="item in data.taskSteps">
+                                                            <td style="width: 100px; text-align: center;">
+                                                                <a ng-click="event.editStep(item)" class="btn btn-primary btn-xs font-11" href="javascript:void(0);" style="margin-bottom: 5px; width: 80px;"><i class=" fa fa-edit"></i> Edit</a>
+                                                                <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Detail", "TaskMng", new { id = UrlParameter.Optional })/{{item.taskStepID}}" style="margin-bottom: 5px; width: 80px;" target="_blank"><i class=" fa fa-comment-o"></i> Comment</a>
+                                                                <a ng-click="event.removeStep(item)" class="btn btn-danger btn-xs font-11" href="javascript:void(0);" style="width: 80px;"><i class=" fa fa-times"></i> Remove</a>                                                                
+                                                            </td>
+                                                            <td style="width: 80px;">{{item.stepIndex}}</td>
+                                                            <td style="width: 400px;">
+                                                                <strong ng-if="item.taskStatusNM">{{item.taskStatusNM}}</strong>
+                                                                <strong ng-if="!item.taskStatusNM">PENDING</strong>
+                                                                <br />
+                                                                {{item.description}}
+                                                            </td>
+                                                            <td>
+                                                                <a href="javascript:void(0)" class="btn btn-primary btn-xs" style="margin-bottom: 10px;" ng-click="event.addUser(item)"><i class="fa fa-plus"></i> Add user</a>
+                                                                <ul style="margin-left: 15px;">
+                                                                    <li ng-repeat="user in item.taskStepUsers">
+                                                                        <strong>{{user.fullName}} ({{user.officeNM}})</strong>: {{user.taskRoleNM}} <a ng-click="event.editUser(user, item)" href="javascript:void(0);" style="margin-left: 20px;"><i class=" fa fa-edit"></i> Edit</a> | <a ng-click="event.removeUser(user, item)" href="javascript:void(0);"><i class=" fa fa-times"></i> Remove</a>
+                                                                        <br/>
+                                                                        {{user.description}}
+                                                                    </li>
+                                                                </ul>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+                                </fieldset>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+<div id="frmFile" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title">File: {{currentTaskFile.friendlyName}}</h4>
+            </div>
+            <div class="modal-body no-padding">
+                <div class="smart-form">
+                    <fieldset>
+                        <section>
+                            <label class="label">Uploaded File</label>
+                            <label class="input">
+                                <span class="form-control">
+                                    {{currentTaskFile.friendlyName}}
+                                    <div style="position: absolute; right: 5px; top: 5px;">
+                                        <a ng-disabled="!currentTaskFile.fileLocation || !currentTaskFile.friendlyName" href="{{currentTaskFile.fileLocation}}" class="btn btn-primary btn-xs" style="font-size: 11px;" target="_blank">Download</a>
+                                        <a href="javascript:void(0);" class="btn btn-primary btn-xs" style="font-size: 11px;" ng-click="event.uploadFile()">Change</a>
+                                        <a ng-disabled="!currentTaskFile.fileLocation" href="javascript:void(0);" class="btn btn-danger btn-xs" style="font-size: 11px;" ng-click="event.removeUploadFile()">Remove</a>
+                                    </div>
+                                </span>
+                            </label>
+                        </section>
+                        <section>
+                            <label class="label">Description</label>
+                            <label class="textarea">
+                                <textarea rows="8" ng-model="currentTaskFile.description"></textarea>
+                            </label>
+                        </section>
+                    </fieldset>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" ng-click="event.updateFile()">
+                    <font ng-if="!currentTaskFile.taskFileID">Add</font>
+                    <font ng-if="currentTaskFile.taskFileID">Update</font>
+                </button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="frmStep" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title">Step: {{currentTaskStep.stepIndex}}</h4>
+            </div>
+            <div class="modal-body no-padding">
+                <div class="smart-form">
+                    <fieldset>
+                        <div class="row">
+                            <section class="col col-6">
+                                <label class="label">Index</label>
+                                <label class="input">
+                                    <input type="text" ng-model="currentTaskStep.stepIndex" />
+                                </label>
+                            </section>
+                            <section class="col col-6">
+                                <label class="label">Status</label>
+                                <label class="select">
+                                    <select ng-model="currentTaskStep.stepStatusID" ng-options="taskStatus.taskStatusID as taskStatus.taskStatusNM for taskStatus in taskStatuses">
+                                        <option value=""></option>
+                                    </select>
+                                    <i></i>
+                                </label>
+                            </section>
+                        </div>
+                        <section>
+                            <label class="label">Description</label>
+                            <label class="textarea">
+                                <textarea rows="8" ng-model="currentTaskStep.description"></textarea>
+                            </label>
+                        </section>
+                    </fieldset>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" ng-click="event.updateStep()">
+                    <font ng-if="!currentTaskStep.taskStepID">Add</font>
+                    <font ng-if="currentTaskStep.taskStepID">Update</font>
+                </button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="frmUser" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title">User: {{currentTaskUser.fullName}} - {{currentTaskUser.officeNM}}</h4>
+            </div>
+            <div class="modal-body no-padding">
+                <div class="smart-form">
+                    <fieldset>
+                        <div class="row">
+                            <section class="col col-6">
+                                <label class="label">User</label>
+                                <label class="select">
+                                    <select ng-model="currentTaskUser.userID" ng-options="user.userId as user.fullName + ' (' + user.officeNM + ')' for user in users">
+                                        <option value=""></option>
+                                    </select>
+                                    <i></i>
+                                </label>
+                            </section>
+                            <section class="col col-6">
+                                <label class="label">Role</label>
+                                <label class="select">
+                                    <select ng-model="currentTaskUser.taskUserRoleID" ng-options="taskRole.taskRoleID as taskRole.taskRoleNM for taskRole in taskRoles">
+                                        <option value=""></option>
+                                    </select>
+                                    <i></i>
+                                </label>
+                            </section>
+                        </div>
+                        <section>
+                            <label class="label">Description</label>
+                            <label class="textarea">
+                                <textarea rows="8" ng-model="currentTaskUser.description"></textarea>
+                            </label>
+                        </section>
+                    </fieldset>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" ng-click="event.updateUser()">
+                    <font ng-if="!currentTaskUser.taskUserID">Add</font>
+                    <font ng-if="currentTaskUser.taskUserID">Update</font>
+                </button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "TaskMng")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="event.update()"><i class="fa fa-save"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current))" title="Delete" ng-click="event.delete()" style="color: #ff0000;"><i class="fa fa-times"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default disabled" title="Print"><i class="fa fa-print"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default disabled" title="Approve"><i class="fa fa-thumbs-o-up"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default disabled" title="Reset Approval status"><i class="fa fa-thumbs-o-down"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script src="~/Angular/app/jsonService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script type="text/javascript">
+        jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/task/';
+        jsonService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+        jsonService.supportServiceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/support/';
+        var context = {
+            id: @ViewBag.ID,
+            errMsg: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED',
+            backUrl: '@Url.Action("Index", "TaskMng")',
+            refreshUrl: '@Url.Action("Edit", "TaskMng", new { id = UrlParameter.Optional })/',
+            editTitle: '@ViewBag.Title'
+        }
+    </script>
+    <script src="~/Angular/app/taskMng/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/taskMng/edit.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}
+

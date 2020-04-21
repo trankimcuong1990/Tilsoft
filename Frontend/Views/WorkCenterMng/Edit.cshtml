@@ -1,0 +1,186 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+
+    ViewBag.Title = (ViewBag.ID == 0) ? "Create Work Center" : "Edit Work Center";
+    ViewBag.SubTitle = (ViewBag.ID == 0) ? "Create" : "Edit";
+    ViewBag.Module = "Work Center";
+}
+
+<form name="editForm" class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>@ViewBag.SubTitle General</h2>
+            </header>
+            <div>
+                <div class="jarviswidget-editbox"></div>
+                <div class="widget-body">
+                    <div class="smart-form">
+                        <div class="row">
+                            <section class="col col-lg-2">
+                                <label class="label">
+                                    <b>Code(UD)</b>
+                                    <em class="note note-error" ng-show="editForm.workCenterUD.$error.required"> (Required)</em>
+                                </label>
+                                <label class="input" ng-class="{'state-error': editForm.workCenterUD.$error.required}">
+                                    <input type="text" class="form-control" ng-model="data.workCenterUD" required name="workCenterUD" />
+                                </label>
+                            </section>
+                            <section class="col col-lg-10">
+                                <label class="label">
+                                    <b>Name</b>
+                                </label>
+                                <label class="input">
+                                    <input type="text" class="form-control" ng-model="data.workCenterNM" />
+                                </label>
+                            </section>
+                        </div>
+                        <div class="row">
+                            <section class="col col-lg-2">
+                                <label class="label">
+                                    <b>Operating Times(hour)</b>
+                                </label>
+                                <label class="input">
+                                    <input type="text" class="form-control" style="text-align: right" avs-number ng-data-source="data.operatingTime" ng-decimal="2" />
+                                </label>
+                            </section>
+                            <section class="col col-lg-2">
+                                <label class="label">
+                                    <b>Default Cost(USD)</b>
+                                </label>
+                                <label class="input">
+                                    <input type="text" class="form-control" style="text-align: right" avs-number ng-data-source="data.defaultCost" ng-decimal="2" />
+                                </label>
+                            </section>
+                            <section class="col col-lg-2">
+                                <label class="label">
+                                    <b>Capacity(Per day)</b>
+                                </label>
+                                <label class="input">
+                                    <input type="text" class="form-control" style="text-align: right" avs-number ng-data-source="data.capacity" ng-decimal="2" />
+                                </label>
+                            </section>
+                            <section class="col col-lg-3">
+                                <label class="label">
+                                    <b>Planning Time (for each Work Order)</b>
+                                </label>
+                                <label class="input">
+                                    <input type="text" class="form-control" style="text-align: right" avs-number ng-data-source="data.planningTime"/>
+                                </label>
+                            </section>
+                            <section class="col col-lg-3">
+                                <label class="label">
+                                    <b>Working Time (for each Work Order)</b>
+                                </label>
+                                <label class="input">
+                                    <input type="text" class="form-control" style="text-align: right" avs-number ng-data-source="data.workingTime"/>
+                                </label>
+                            </section>                           
+                        </div>
+                        <div class="row">
+                            <section class="col col-lg-4">
+                                <label class="label">
+                                    <b>Person Responsible</b>
+                                </label>
+                                <label class="input">
+                                    <select class="form-control" ng-model="data.responsibleBy" ng-options="employee.employeeID as employee.employeeNM for employee in supportEmployee">
+                                        <option value=""></option>
+                                    </select>
+                                </label>
+                            </section>
+                            <section class="col col-lg-3"  style="padding-top:4px">
+                                <label class="label">
+                                    <b>IsVirtual</b>
+                                </label>
+                                <label class="checkbox">
+                                    <input type="checkbox" ng-model="data.isVirtual">
+                                    <i></i>
+                                </label>
+                            </section>
+                            
+                        </div>
+                        <div class="row">
+                            <section class="col col-lg-12">
+                                <a class="btn btn-primary btn-xs font-11" href="javascript:void(0);" ng-click="event.addWarehouse($event)" style="margin-bottom: 10px;"><i class="fa fa-plus"></i> Add new </a>
+                                <div class="tilsoft-table-wrapper">
+                                    <div class="tilsoft-table">
+                                        <div class="tilsoft-table-body" style="width: 100%; overflow-y: hidden; height: auto; min-height: 100px; margin-top: 0px;">
+                                            <table>
+                                                <tr>
+                                                    <th style="width: 50px;">&nbsp;</th>
+                                                    <th style="width: 55px;">Default</th>
+                                                    <th style="width: 120px;">Branch</th>
+                                                    <th style="width: 150px;">Code</th>
+                                                    <th style="width: 300px;">Warehouse</th>
+                                                    <th></th>
+                                                </tr>
+                                                <tr ng-repeat="item in workCenterDetails">
+                                                    <td style="text-align: center;">
+                                                        <a href="javascript:void(0);" title="Remove" class="btn btn-danger btn-xs font-11" ng-click="event.removeWarehouse($event, item.workCenterDetailID)">Remove  </a>
+                                                    </td>
+                                                    <td style="text-align: center;"><input type="checkbox" ng-model="item.isDefault" @*ng-click="method.checkDefault($event,item)"*@/></td>
+                                                    <td style="width: 100px;" ng-class="{'state-error': editForm.branchID.$error.required}">
+                                                        <select class="form-control" name="branchID" id="branchID" ng-model="item.branchID" ng-options="branch.branchID as branch.branchUD for branch in branches" required">
+                                                            <option value=""></option>
+                                                        </select>
+                                                    </td>
+                                                    <td style="width: 150px;"><input type="text" class="form-control" style="text-align: left;" ng-model="item.factoryWarehouseUD" readonly /></td>
+                                                    <td style="width: 300px;" ng-class="{'state-error': editForm.factoryWarehouseID.$error.required}">
+                                                        <select class="form-control" name="factoryWarehouseID" id="factoryWarehouseID" ng-model="item.factoryWarehouseID" ng-options="factoryWarehouse.factoryWarehouseID as factoryWarehouse.factoryWarehouseNM for factoryWarehouse in factoryWarehouses | filter: { branchID: item.branchID} : true" required>
+                                                            <option value=""></option>
+                                                        </select>
+                                                    </td>
+                                                    <td></td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+@section FormAction{
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "WorkCenterMng")" class="btn btn-default">
+                <i class="fa fa-arrow-left"></i>
+            </a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default" ng-click="event.deleteWorkCenter()">
+                <i class="fa fa-times"></i>
+            </a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default" ng-click="event.saveWorkCenter()">
+                <i class="fa fa-floppy-o"></i>
+            </a>
+        </li>
+    </ul>
+}
+
+@section pagejs{
+    <script type="text/javascript">
+        var context = {
+            id: @ViewBag.ID,
+            backUrl: '@Url.Action("Index", "WorkCenterMng")',
+            refreshUrl: '@Url.Action("Edit", "WorkCenterMng", new { id = UrlParameter.Optional })/',
+            serviceUrl: '@(serviceRoot)/api/workCenterMng/',
+            token: '@token'
+        };
+    </script>
+    <script type="text/javascript" src="~/Angular/app/workCenter/edit.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/workCenter/service.js?v=@guid"></script>
+}

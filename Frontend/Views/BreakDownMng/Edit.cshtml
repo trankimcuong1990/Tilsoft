@@ -1,0 +1,919 @@
+﻿@{
+    ViewBag.Icon = "fa-pencil-square-o";
+    ViewBag.Title = "Edit Break Down";
+    ViewBag.Module = "Breakdown";
+    Frontend.APIDTO.APIUserInformation userInfo = (Frontend.APIDTO.APIUserInformation)Session[Frontend.Customize.Common.ProjectDefinition.USER_INFO_SESSION];
+    int companyId = userInfo.Data.CompanyID;
+    if (companyId != 1)
+    {
+        companyId = 3;
+    }
+}
+<style>
+    .dropdown-menu {
+        z-index: 10001;
+    }
+</style>
+
+<form class="row" name="editForm" id="main-form">
+    <article class="col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-0" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-info txt-color-darken"></i> </span>
+                <h2>Item Information</h2>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div class="smart-form">
+                        <fieldset>
+                            <div class="row">
+                                <section class="col col-4">
+                                    <a href="{{data.fileLocation}}" data-featherlight="image">
+                                        <img style="width: 100%; border: solid 1px #ddd;" ng-src="{{data.thumbnailLocation}}" />
+                                    </a>
+                                </section>
+                                <section class="col col-8">
+                                    <table class="table table-bordered">
+                                        <tr>
+                                            <th style="width: 150px;">Breakdown Code</th>
+                                            <td colspan="2">{{data.breakdownUD}} ({{data.modelID ? 'MODEL' : 'SAMPLE'}})</td>
+
+                                            <td ng-if="data.modelID" colspan="2">
+                                                <span type="text" class="form-control">{{currentArticleCode}}</span>
+                                                <a href="javascript:void(0)" style="margin-top: 5px; float: right" class="btn btn-success btn-xs" ng-click="event.openPopupArticleCode()">Select Article Code</a>
+                                            </td>
+                                            <th ng-if="data.sampleProductID">Client</th>
+                                            <td ng-if="data.sampleProductID">{{data.clientUD}}</td>
+                                        </tr>
+                                        <tr ng-if="data.modelID">
+                                            <th style="width: 150px;">
+                                                Item Description
+                                            </th>
+                                            <td colspan="4">
+                                                <strong>{{data.modelUD}}</strong>
+                                                <br />
+                                                {{data.modelNM}}
+                                            </td>
+                                        </tr>
+                                        <tr ng-if="data.sampleProductID">
+                                            <th style="width: 150px;">
+                                                Item Description
+                                                <br />
+                                                <a href="javascript:void(0)" class="btn btn-primary btn-xs font-11" ng-click="popupFactoryBreakdown.event.getFactoryBreakdown(data.sampleProductID)"><i class="fa fa-folder-open"></i>View Factory Breakdown</a>
+                                            </th>
+                                            <td colspan="4">
+                                                <strong>{{data.sampleProductUD}}</strong>
+                                                <br />
+                                                {{data.articleDescription}}
+                                                <ul style="list-style-position: inside;">
+                                                    <li>Material 1: {{(data.materialDescription ? data.materialDescription : '') + ' ' + (data.materialTypeDescription ? data.materialTypeDescription : '') + ' ' + (data.materialColorDescription ? data.materialColorDescription : '')}}</li>
+                                                    <li>Material 2: {{(data.material2Description ? data.material2Description : '') + ' ' + (data.material2TypeDescription ? data.material2TypeDescription : '') + ' ' + (data.material2ColorDescription ? data.material2ColorDescription : '')}}</li>
+                                                    <li>Material 3: {{(data.material3Description ? data.material3Description : '') + ' ' + (data.material3TypeDescription ? data.material3TypeDescription : '') + ' ' + (data.material3ColorDescription ? data.material3ColorDescription : '')}}</li>
+                                                    <li>Back Cushion: {{(data.backCushionDescription ? data.backCushionDescription : '')}}</li>
+                                                    <li>Seat Cushion: {{(data.seatCushionDescription ? data.seatCushionDescription : '')}}</li>
+                                                    <li>Cushion Color: {{(data.cushionColorDescription ? data.cushionColorDescription : '')}}</li>
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th style="width: 150px;">
+                                                C.M Services
+                                                <br />
+                                                <a href="javascript:void(0)" class="btn btn-success btn-xs" ng-click="event.openPopupSeasonSpec()">Update rate</a>
+                                            </th>
+                                            <td colspan="2">{{data.seasonSpecPercent | number:2}}%</td>
+
+                                            <th>Exchange Rate</th>
+                                            <td style="text-align: right;">{{exRate | number:0}}</td>
+                                        </tr>
+                                        <tr>
+                                            <th style="width: 150px;">
+                                                Shipped From
+                                            </th>
+                                            <td colspan="4">
+                                                <select style="padding: 5px; width: 100%; box-sizing: border-box;" ng-model="selectedOptions.shippedFromFactoryID" ng-options="item.factoryID as (item.factoryUD + ' (' + (item.exportCost40HC | number:0) + ')') for item in factories">
+                                                    <option></option>
+                                                </select>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>&nbsp;</th>
+                                            <th colspan="2" style="text-align: center;">AVF</th>
+
+                                            <th colspan="2" ng-if="companyId === 1"></th>
+                                            <th colspan="2" style="text-align: center;" ng-if="companyId === 3">AVT</th>
+                                        </tr>
+                                        <tr>
+                                            <th>Load Ability</th>
+                                            <td style="text-align: right;" colspan="2">{{method.getLoadAbility() | number:0}}</td>
+
+                                            <th colspan="2" ng-if="companyId === 1"></th>
+                                            <td style="text-align: right;" colspan="2" ng-if="companyId === 3">{{method.getLoadAbilityAVT() | number:0}}</td>
+                                        </tr>
+                                        <tr>
+                                            <th style="width: 150px;" rowspan="2">
+                                                Cost Price
+                                                <br />
+                                                <a href="javascript:void(0)" class="btn btn-success btn-xs" ng-click="frmEditPriceObj.event.open()"><i class="fa fa-dollar"></i> Price Detail</a>
+                                            </th>
+
+                                            <th style="text-align: center; width: 100px;">VND</th>
+                                            <th style="text-align: center; width: 70px;">USD</th>
+
+                                            <th colspan="2" ng-if="companyId === 1"></th>
+                                            <th style="text-align: center; width: 100px;" ng-if="companyId === 3">VND</th>
+                                            <th style="text-align: center; width: 70px;" ng-if="companyId === 3">USD</th>
+                                        </tr>
+                                        <tr>
+                                            <td style="text-align: right;">{{method.getTotalAmount() | number:0}}</td>
+                                            <td style="text-align: right;">{{method.getTotalAmount() / exRate | currency:'$':2}}</td>
+
+                                            <td colspan="2" ng-if="companyId === 1"></td>
+                                            <td style="text-align: right;" ng-if="companyId === 3">{{method.getTotalAmountAVT() | number:0}}</td>
+                                            <td style="text-align: right;" ng-if="companyId === 3">{{method.getTotalAmountAVT() / exRate | currency:'$':2}}</td>
+                                        </tr>
+                                        <tr>
+                                            <th style="width: 150px;">C.M Services Amount</th>
+                                            <td style="text-align: right;">{{method.getTotalAmount() * data.seasonSpecPercent / 100 | number:0}}</td>
+                                            <td style="text-align: right;">{{method.getTotalAmount() * data.seasonSpecPercent / (100 * exRate) | currency:'$':2}}</td>
+
+                                            <td colspan="2" ng-if="companyId === 1"></td>
+                                            <td style="text-align: right;" ng-if="companyId === 3">{{method.getTotalAmountAVT() * data.seasonSpecPercent / 100 | number:0}}</td>
+                                            <td style="text-align: right;" ng-if="companyId === 3">{{method.getTotalAmountAVT() * data.seasonSpecPercent / (100 * exRate) | currency:'$':2}}</td>
+                                        </tr>
+                                        <tr>
+                                            <th style="width: 150px;">Shipping Fee</th>
+                                            <td style="text-align: right;">{{method.getShippingFee() | number:0}}</td>
+                                            <td style="text-align: right;">{{method.getShippingFee() / exRate | currency:'$':2}}</td>
+
+                                            <td colspan="2" ng-if="companyId === 1"></td>
+                                            <td style="text-align: right;" ng-if="companyId === 3">{{method.getShippingFeeAVT() | number:0}}</td>
+                                            <td style="text-align: right;" ng-if="companyId === 3">{{method.getShippingFeeAVT() / exRate | currency:'$':2}}</td>
+                                        </tr>
+                                        <tr style="background-color: #eff4f6;" ng-if="companyId === 1">
+                                            <th style="width: 150px;">Total Cost Price</th>
+                                            <td ng-if="countConfirmed < 10" style="text-align: right;">{{method.getTotalAmount() * (1 + data.seasonSpecPercent / 100) + method.getShippingFee() | number:0}}</td>
+                                            <td ng-if="countConfirmed < 10" style="text-align: right;">{{(method.getTotalAmount() * (1 + data.seasonSpecPercent / 100) / exRate) + method.getShippingFeeUSD() | currency:'$':2}}</td>
+                                            <td ng-if="countConfirmed == 10" style="text-align: right; background-color:#739e73; color: white;">{{method.getTotalAmount() * (1 + data.seasonSpecPercent / 100) + method.getShippingFee() | number:0}}</td>
+                                            <td ng-if="countConfirmed == 10" style="text-align: right; background-color:#739e73; color: white;">{{(method.getTotalAmount() * (1 + data.seasonSpecPercent / 100) / exRate) + method.getShippingFeeUSD() | currency:'$':2}}</td>
+
+                                            <td colspan="2"></td>
+                                        </tr>
+                                        <tr style="background-color: #eff4f6;" ng-if="companyId === 3">
+                                            <th style="width: 150px;">Total Cost Price</th>
+                                            <td ng-if="countConfirmedOtherCompany < 10" style="text-align: right;">{{method.getTotalAmount() * (1 + data.seasonSpecPercent / 100) + method.getShippingFee() | number:0}}</td>
+                                            <td ng-if="countConfirmedOtherCompany < 10" style="text-align: right;">{{(method.getTotalAmount() * (1 + data.seasonSpecPercent / 100) / exRate) + method.getShippingFeeUSD() | currency:'$':2}}</td>
+                                            <td ng-if="countConfirmedOtherCompany == 10" style="text-align: right; background-color:#739e73; color: white;">{{method.getTotalAmount() * (1 + data.seasonSpecPercent / 100) + method.getShippingFee() | number:0}}</td>
+                                            <td ng-if="countConfirmedOtherCompany == 10" style="text-align: right; background-color:#739e73; color: white;">{{(method.getTotalAmount() * (1 + data.seasonSpecPercent / 100) / exRate) + method.getShippingFeeUSD() | currency:'$':2}}</td>
+
+                                            <td style="text-align: right;" ng-if="countConfirmed < 10">{{method.getTotalAmountAVT() * (1 + data.seasonSpecPercent / 100) + method.getShippingFeeAVT() | number:0}}</td>
+                                            <td style="text-align: right;" ng-if="countConfirmed < 10">{{(method.getTotalAmountAVT() * (1 + data.seasonSpecPercent / 100) / exRate) + method.getShippingFeeUSDAVT() | currency:'$':2}}</td>
+                                            <td style="text-align: right; background-color:#739e73; color: white;" ng-if="countConfirmed == 10">{{method.getTotalAmountAVT() * (1 + data.seasonSpecPercent / 100) + method.getShippingFeeAVT() | number:0}}</td>
+                                            <td style="text-align: right; background-color:#739e73; color: white;" ng-if="countConfirmed == 10">{{(method.getTotalAmountAVT() * (1 + data.seasonSpecPercent / 100) / exRate) + method.getShippingFeeUSDAVT() | currency:'$':2}}</td>
+                                        </tr>
+                                        <tr>
+                                            <th style="width: 150px;">Created By</th>
+                                            <td colspan="4">
+                                                <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{data.createdBy}}" data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                    {{data.creatorName}}
+                                                </a>
+                                                on {{data.createdDate}}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th style="width: 150px;">Updated By</th>
+                                            <td colspan="4">
+                                                <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{data.updatedBy}}" data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                    {{data.updatorName}}
+                                                </a>
+                                                on {{data.updatedDate}}
+                                            </td>
+                                        </tr>
+                                        <tr style="display: none;">
+                                            <th style="width: 150px;">Confirmed By</th>
+                                            <td colspan="4">
+                                                <div ng-if="data.isConfirmed">
+                                                    <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{data.confirmedBy}}" data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                        {{data.confirmerName}}
+                                                    </a>
+                                                    on {{data.confirmedDate}}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </section>
+                            </div>
+                            <table class="table table-bordered">
+                                <tr>
+                                    <th rowspan="3" style="width: 50px;"></th>
+                                    <th rowspan="3">Option Description</th>
+                                    <th colspan="4" style="text-align: center;">Amount</th>
+                                </tr>
+                                <tr>
+                                    <th colspan="2" style="text-align: center;">AVF</th>
+
+                                    <th ng-if="companyId === 1"></th>
+                                    <th colspan="2" style="text-align: center;" ng-if="companyId === 3">AVT</th>
+                                </tr>
+                                <tr>
+                                    <th style="width: 70px; text-align: center;">VND</th>
+                                    <th style="width: 70px; text-align: center;">USD</th>
+
+                                    <th ng-if="companyId === 1" colspan="2"></th>
+                                    <th style="width: 70px; text-align: center;" ng-if="companyId === 3">VND</th>
+                                    <th style="width: 70px; text-align: center;" ng-if="companyId === 3">USD</th>
+                                </tr>
+                                <tr style="background-color: #eff4f6;">
+                                    <th colspan="2" style="text-align: right;">TOTAL</th>
+                                    <td style="text-align: right;">{{method.getTotalAmount() | number:0}}</td>
+                                    <td style="text-align: right;">{{method.getTotalAmountUSD() | currency:'$':2}}</td>
+
+                                    <td ng-if="companyId === 2" colspan="2"></td>
+                                    <td ng-if="companyId === 3" style="text-align: right;">{{method.getTotalAmountAVT() | number:0}}</td>
+                                    <td ng-if="companyId === 3" style="text-align: right;">{{method.getTotalAmountUSDAVT() | currency:'$':2}}</td>
+                                </tr>
+
+
+                                <!-- MATERIAL COST -->
+                                <tr>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button style="padding: 5px 7px;" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                                                Action <span class="caret"></span>
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li>
+                                                    <a href="javascript:void(0);" ng-if="data.modelID" ng-click="event.addOption(1)"><i class="fa fa-plus"></i> Add new option</a>
+                                                </li>
+                                                <li class="divider"></li>
+                                                <li>
+                                                    <a ng-if="!method.getApproveStatus(selectedOptions.materialCostOptionID)" href="javascript:void(0);" ng-click="event.editOption(selectedOptions.materialCostOptionID)"><i class="fa fa-pencil"></i> Edit selected option</a>
+                                                    <a ng-if="method.getApproveStatus(selectedOptions.materialCostOptionID)" href="javascript:void(0);" ng-click="event.viewOption(selectedOptions.materialCostOptionID)"><i class="fa fa-eye"></i> View selected option</a>
+                                                </li>
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Approve, HttpContext.Current) != "disabled")
+                                                {
+                                                    <li>
+                                                        <a href="javascript:void(0);" ng-if="!method.getApproveStatus(selectedOptions.materialCostOptionID)" ng-click="event.approveOption(selectedOptions.materialCostOptionID)"><i class="fa fa-thumbs-o-up"></i> Approve selected option</a>
+                                                    </li>
+                                                }
+
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Reset, HttpContext.Current) != "disabled")
+                                                {
+                                                    <li>
+                                                        <a href="javascript:void(0);" ng-click="event.unApproveOption(selectedOptions.materialCostOptionID)"><i class="fa fa-thumbs-o-down"></i> Un-approve selected option</a>
+                                                    </li>
+                                                }
+
+                                                <li class="divider" ng-if="companyId === 3"></li>
+
+                                                <li ng-if="companyId === 3">
+                                                    <a href="javascript:void(0);" ng-click="event.viewOtherCompanyOption(selectedOptions.materialCostOptionID)"><i class="fa fa-eye"></i> View selected option breakdown from {{companyId === 1 ? 'AVT' : 'AVF'}}</a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        MATERIAL COST
+                                        <select style="padding: 5px;" ng-change="method.checkConfirmAll()" ng-if="data.modelID" ng-model="selectedOptions.materialCostOptionID" ng-options="option.breakdownCategoryOptionID as method.getOptionName(option) for option  in data.breakdownCategoryOptionDTOs | filter:{breakdownCategoryID:1, companyID: @companyId}:true"></select>
+                                        <div style="margin-top: 5px; display: none;">
+                                            <img src="~/img/demo/64x64.png" />
+                                            <img src="~/img/demo/64x64.png" />
+                                            <img src="~/img/demo/64x64.png" />
+                                        </div>
+                                    </td>
+                                    <td style="text-align: right;">{{method.getSubTotalAmount(selectedOptions.materialCostOptionID) | number:0}}</td>
+                                    <td style="text-align: right;">{{method.getSubTotalAmountUSD(selectedOptions.materialCostOptionID) | currency:'$':2}}</td>
+
+                                    <td ng-if="companyId === 1" colspan="2"></td>
+                                    <td ng-if="companyId === 3" style="text-align: right;">{{method.getSubTotalAmountAVT(selectedOptions.materialCostOptionID) | number:0}}</td>
+                                    <td ng-if="companyId === 3" style="text-align: right;">{{method.getSubTotalAmountUSDAVT(selectedOptions.materialCostOptionID) | currency:'$':2}}</td>
+                                </tr>
+
+                                <!-- FRAME COST -->
+                                <tr>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button style="padding: 5px 7px;" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                                                Action <span class="caret"></span>
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li>
+                                                    <a href="javascript:void(0);" ng-if="data.modelID" ng-click="event.addOption(2)"><i class="fa fa-plus"></i> Add new option</a>
+                                                </li>
+
+                                                <li class="divider"></li>
+
+                                                <li>
+                                                    <a ng-if="!method.getApproveStatus(selectedOptions.frameCostOptionID)" href="javascript:void(0);" ng-click="event.editOption(selectedOptions.frameCostOptionID)"><i class="fa fa-pencil"></i> Edit selected option</a>
+                                                    <a ng-if="method.getApproveStatus(selectedOptions.frameCostOptionID)" href="javascript:void(0);" ng-click="event.viewOption(selectedOptions.frameCostOptionID)"><i class="fa fa-eye"></i> View selected option</a>
+                                                </li>
+
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Approve, HttpContext.Current) != "disabled")
+                                                {
+                                                    <li>
+                                                        <a href="javascript:void(0);" ng-if="!method.getApproveStatus(selectedOptions.frameCostOptionID)" ng-click="event.approveOption(selectedOptions.frameCostOptionID)"><i class="fa fa-thumbs-o-up"></i> Approve selected option</a>
+                                                    </li>
+                                                }
+
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Reset, HttpContext.Current) != "disabled")
+                                                {
+                                                    <li>
+                                                        <a href="javascript:void(0);" ng-click="event.unApproveOption(selectedOptions.frameCostOptionID)"><i class="fa fa-thumbs-o-down"></i> Un-approve selected option</a>
+                                                    </li>
+                                                }
+
+                                                <li class="divider" ng-if="companyId === 3"></li>
+
+                                                <li ng-if="companyId === 3">
+                                                    <a href="javascript:void(0);" ng-click="event.viewOtherCompanyOption(selectedOptions.frameCostOptionID)"><i class="fa fa-eye"></i> View selected option breakdown from {{companyId === 1 ? 'AVT' : 'AVF'}}</a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        FRAME COST
+                                        <select style="padding: 5px;" ng-change="method.checkConfirmAll()" ng-if="data.modelID" ng-model="selectedOptions.frameCostOptionID" ng-options="option.breakdownCategoryOptionID as method.getOptionName(option) for option  in data.breakdownCategoryOptionDTOs | filter:{breakdownCategoryID:2, companyID: @companyId}:true"></select>
+                                    </td>
+                                    <td style="text-align: right;">{{method.getSubTotalAmount(selectedOptions.frameCostOptionID) | number:0}}</td>
+                                    <td style="text-align: right;">{{method.getSubTotalAmountUSD(selectedOptions.frameCostOptionID) | currency:'$':2}}</td>
+
+                                    <td ng-if="companyId === 1" colspan="2"></td>
+                                    <td ng-if="companyId === 3" style="text-align: right;">{{method.getSubTotalAmountAVT(selectedOptions.frameCostOptionID) | number:0}}</td>
+                                    <td ng-if="companyId === 3" style="text-align: right;">{{method.getSubTotalAmountUSDAVT(selectedOptions.frameCostOptionID) | currency:'$':2}}</td>
+                                </tr>
+
+                                <!-- SUB MATERIAL COST -->
+                                <tr>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button style="padding: 5px 7px;" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                                                Action <span class="caret"></span>
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li>
+                                                    <a href="javascript:void(0);" ng-if="data.modelID" ng-click="event.addOption(3)"><i class="fa fa-plus"></i> Add new option</a>
+                                                </li>
+
+                                                <li class="divider"></li>
+
+                                                <li>
+                                                    <a ng-if="!method.getApproveStatus(selectedOptions.subMaterialCostOptionID)" href="javascript:void(0);" ng-click="event.editOption(selectedOptions.subMaterialCostOptionID)"><i class="fa fa-pencil"></i> Edit selected option</a>
+                                                    <a ng-if="method.getApproveStatus(selectedOptions.subMaterialCostOptionID)" href="javascript:void(0);" ng-click="event.viewOption(selectedOptions.subMaterialCostOptionID)"><i class="fa fa-eye"></i> View selected option</a>
+                                                </li>
+
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Approve, HttpContext.Current) != "disabled")
+                                                {
+                                                    <li>
+                                                        <a href="javascript:void(0);" ng-if="!method.getApproveStatus(selectedOptions.subMaterialCostOptionID)" ng-click="event.approveOption(selectedOptions.subMaterialCostOptionID)"><i class="fa fa-thumbs-o-up"></i> Approve selected option</a>
+                                                    </li>
+                                                }
+
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Reset, HttpContext.Current) != "disabled")
+                                                {
+                                                    <li>
+                                                        <a href="javascript:void(0);" ng-click="event.unApproveOption(selectedOptions.subMaterialCostOptionID)"><i class="fa fa-thumbs-o-down"></i> Un-approve selected option</a>
+                                                    </li>
+                                                }
+
+                                                <li class="divider" ng-if="companyId === 3"></li>
+
+                                                <li ng-if="companyId === 3">
+                                                    <a href="javascript:void(0);" ng-click="event.viewOtherCompanyOption(selectedOptions.subMaterialCostOptionID)"><i class="fa fa-eye"></i> View selected option breakdown from {{companyId === 1 ? 'AVT' : 'AVF'}}</a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        SUB MATERIAL COST
+                                        <select style="padding: 5px;" ng-change="method.checkConfirmAll()" ng-if="data.modelID" ng-model="selectedOptions.subMaterialCostOptionID" ng-options="option.breakdownCategoryOptionID as method.getOptionName(option) for option  in data.breakdownCategoryOptionDTOs | filter:{breakdownCategoryID:3, companyID: @companyId}:true"></select>
+                                    </td>
+                                    <td style="text-align: right;">{{method.getSubTotalAmount(selectedOptions.subMaterialCostOptionID) | number:0}}</td>
+                                    <td style="text-align: right;">{{method.getSubTotalAmountUSD(selectedOptions.subMaterialCostOptionID) | currency:'$':2}}</td>
+
+                                    <td ng-if="companyId === 1" colspan="2"></td>
+                                    <td ng-if="companyId === 3" style="text-align: right;">{{method.getSubTotalAmountAVT(selectedOptions.subMaterialCostOptionID) | number:0}}</td>
+                                    <td ng-if="companyId === 3" style="text-align: right;">{{method.getSubTotalAmountUSDAVT(selectedOptions.subMaterialCostOptionID) | currency:'$':2}}</td>
+                                </tr>
+
+                                <!-- CUSHION COST -->
+                                <tr>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button style="padding: 5px 7px;" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                                                Action <span class="caret"></span>
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li>
+                                                    <a href="javascript:void(0);" ng-if="data.modelID" ng-click="event.addOption(4)"><i class="fa fa-plus"></i> Add new option</a>
+                                                </li>
+                                                <li class="divider"></li>
+
+                                                <li>
+                                                    <a ng-if="!method.getApproveStatus(selectedOptions.cushionCostOptionID)" href="javascript:void(0);" ng-click="event.editOption(selectedOptions.cushionCostOptionID)"><i class="fa fa-pencil"></i> Edit selected option</a>
+                                                    <a ng-if="method.getApproveStatus(selectedOptions.cushionCostOptionID)" href="javascript:void(0);" ng-click="event.viewOption(selectedOptions.cushionCostOptionID)"><i class="fa fa-eye"></i> View selected option</a>
+                                                </li>
+
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Approve, HttpContext.Current) != "disabled")
+                                                {
+                                                    <li>
+                                                        <a href="javascript:void(0);" ng-if="!method.getApproveStatus(selectedOptions.cushionCostOptionID)" ng-click="event.approveOption(selectedOptions.cushionCostOptionID)"><i class="fa fa-thumbs-o-up"></i> Approve selected option</a>
+                                                    </li>
+                                                }
+
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Reset, HttpContext.Current) != "disabled")
+                                                {
+                                                    <li>
+                                                        <a href="javascript:void(0);" ng-click="event.unApproveOption(selectedOptions.cushionCostOptionID)"><i class="fa fa-thumbs-o-down"></i> Un-approve selected option</a>
+                                                    </li>
+                                                }
+
+                                                <li class="divider" ng-if="companyId === 3"></li>
+
+                                                <li ng-if="companyId === 3">
+                                                    <a href="javascript:void(0);" ng-click="event.viewOtherCompanyOption(selectedOptions.cushionCostOptionID)"><i class="fa fa-eye"></i> View selected option breakdown from {{companyId === 1 ? 'AVT' : 'AVF'}}</a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        CUSHION COST
+                                        <select style="padding: 5px;" ng-change="method.checkConfirmAll()" ng-if="data.modelID" ng-model="selectedOptions.cushionCostOptionID" ng-options="option.breakdownCategoryOptionID as method.getOptionName(option) for option  in data.breakdownCategoryOptionDTOs | filter:{breakdownCategoryID:4, companyID: @companyId}:true"></select>
+                                    </td>
+                                    <td style="text-align: right;">{{method.getSubTotalAmount(selectedOptions.cushionCostOptionID) | number:0}}</td>
+                                    <td style="text-align: right;">{{method.getSubTotalAmountUSD(selectedOptions.cushionCostOptionID) | currency:'$':2}}</td>
+
+                                    <td ng-if="companyId === 1" colspan="2"></td>
+                                    <td ng-if="companyId === 3" style="text-align: right;">{{method.getSubTotalAmountAVT(selectedOptions.cushionCostOptionID) | number:0}}</td>
+                                    <td ng-if="companyId === 3" style="text-align: right;">{{method.getSubTotalAmountUSDAVT(selectedOptions.cushionCostOptionID) | currency:'$':2}}</td>
+                                </tr>
+
+                                <!-- PACKING COST -->
+                                <tr>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button style="padding: 5px 7px;" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                                                Action <span class="caret"></span>
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li>
+                                                    <a href="javascript:void(0);" ng-if="data.modelID" ng-click="event.addOption(5)"><i class="fa fa-plus"></i> Add new option</a>
+                                                </li>
+                                                <li class="divider"></li>
+
+                                                <li>
+                                                    <a ng-if="!method.getApproveStatus(selectedOptions.packingCostOptionID)" href="javascript:void(0);" ng-click="event.editOption(selectedOptions.packingCostOptionID)"><i class="fa fa-pencil"></i> Edit selected option</a>
+                                                    <a ng-if="method.getApproveStatus(selectedOptions.packingCostOptionID)" href="javascript:void(0);" ng-click="event.viewOption(selectedOptions.packingCostOptionID)"><i class="fa fa-eye"></i> View selected option</a>
+                                                </li>
+
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Approve, HttpContext.Current) != "disabled")
+                                                {
+                                                    <li>
+                                                        <a href="javascript:void(0);" ng-if="!method.getApproveStatus(selectedOptions.packingCostOptionID)" ng-click="event.approveOption(selectedOptions.packingCostOptionID)"><i class="fa fa-thumbs-o-up"></i> Approve selected option</a>
+                                                    </li>
+                                                }
+
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Reset, HttpContext.Current) != "disabled")
+                                                {
+                                                    <li>
+                                                        <a href="javascript:void(0);" ng-click="event.unApproveOption(selectedOptions.packingCostOptionID)"><i class="fa fa-thumbs-o-down"></i> Un-approve selected option</a>
+                                                    </li>
+                                                }
+
+                                                <li class="divider" ng-if="companyId === 3"></li>
+
+                                                <li ng-if="companyId === 3">
+                                                    <a href="javascript:void(0);" ng-click="event.viewOtherCompanyOption(selectedOptions.packingCostOptionID)"><i class="fa fa-eye"></i> View selected option breakdown from {{companyId === 1 ? 'AVT' : 'AVF'}}</a>
+                                                </li>
+
+                                            </ul>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        PACKING COST
+                                        <select style="padding: 5px;" ng-change="method.checkConfirmAll()" ng-if="data.modelID" ng-model="selectedOptions.packingCostOptionID" ng-options="option.breakdownCategoryOptionID as method.getOptionName(option) for option  in data.breakdownCategoryOptionDTOs | filter:{breakdownCategoryID:5, companyID: @companyId}:true"></select>
+                                    </td>
+                                    <td style="text-align: right;">{{method.getSubTotalAmount(selectedOptions.packingCostOptionID) | number:0}}</td>
+                                    <td style="text-align: right;">{{method.getSubTotalAmountUSD(selectedOptions.packingCostOptionID) | currency:'$':2}}</td>
+
+                                    <td ng-if="companyId === 1" colspan="2"></td>
+                                    <td ng-if="companyId === 3" style="text-align: right;">{{method.getSubTotalAmountAVT(selectedOptions.packingCostOptionID) | number:0}}</td>
+                                    <td ng-if="companyId === 3" style="text-align: right;">{{method.getSubTotalAmountUSDAVT(selectedOptions.packingCostOptionID) | currency:'$':2}}</td>
+                                </tr>
+
+                                <!-- HARDWARE COST -->
+                                <tr>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button style="padding: 5px 7px;" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                                                Action <span class="caret"></span>
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li>
+                                                    <a href="javascript:void(0);" ng-click="event.editOption(selectedOptions.hardwareCostOptionID)"><i class="fa fa-pencil"></i> {{method.getApproveStatus(selectedOptions.hardwareCostOptionID) ? 'View' : 'Edit'}}</a>
+                                                </li>
+
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Approve, HttpContext.Current) != "disabled")
+                                                {
+                                                    <li>
+                                                        <a href="javascript:void(0);" ng-if="!method.getApproveStatus(selectedOptions.hardwareCostOptionID)" ng-click="event.approveOption(selectedOptions.hardwareCostOptionID)"><i class="fa fa-thumbs-o-up"></i> Approve</a>
+                                                    </li>
+                                                }
+
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Reset, HttpContext.Current) != "disabled")
+                                                {
+                                                    <li>
+                                                        <a href="javascript:void(0);" ng-click="event.unApproveOption(selectedOptions.hardwareCostOptionID)"><i class="fa fa-thumbs-o-down"></i> Un-approve</a>
+                                                    </li>
+                                                }
+
+                                                <li class="divider" ng-if="companyId === 3"></li>
+
+                                                <li ng-if="companyId === 3">
+                                                    <a href="javascript:void(0);" ng-click="event.viewOtherCompanyOption(selectedOptions.hardwareCostOptionID)"><i class="fa fa-eye"></i> View selected option breakdown from {{companyId === 1 ? 'AVT' : 'AVF'}}</a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        HARDWARE COST
+                                    </td>
+                                    <td style="text-align: right;">{{method.getSubTotalAmount(selectedOptions.hardwareCostOptionID) | number:0}}</td>
+                                    <td style="text-align: right;">{{method.getSubTotalAmountUSD(selectedOptions.hardwareCostOptionID) | currency:'$':2}}</td>
+
+                                    <td ng-if="companyId === 1" colspan="2"></td>
+                                    <td ng-if="companyId === 3" style="text-align: right;">{{method.getSubTotalAmountAVT(selectedOptions.hardwareCostOptionID) | number:0}}</td>
+                                    <td ng-if="companyId === 3" style="text-align: right;">{{method.getSubTotalAmountUSDAVT(selectedOptions.hardwareCostOptionID) | currency:'$':2}}</td>
+                                </tr>
+
+                                <!-- OTHER MATERIAL COST -->
+                                <tr>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button style="padding: 5px 7px;" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                                                Action <span class="caret"></span>
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li>
+                                                    <a href="javascript:void(0);" ng-click="event.editOption(selectedOptions.otherMaterialCostOptionID)"><i class="fa fa-pencil"></i> {{method.getApproveStatus(selectedOptions.otherMaterialCostOptionID) ? 'View' : 'Edit'}}</a>
+                                                </li>
+
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Approve, HttpContext.Current) != "disabled")
+                                                {
+                                                    <li>
+                                                        <a href="javascript:void(0);" ng-if="!method.getApproveStatus(selectedOptions.otherMaterialCostOptionID)" ng-click="event.approveOption(selectedOptions.otherMaterialCostOptionID)"><i class="fa fa-thumbs-o-up"></i> Approve</a>
+                                                    </li>
+                                                }
+
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Reset, HttpContext.Current) != "disabled")
+                                                {
+                                                    <li>
+                                                        <a href="javascript:void(0);" ng-click="event.unApproveOption(selectedOptions.otherMaterialCostOptionID)"><i class="fa fa-thumbs-o-down"></i> Un-approve</a>
+                                                    </li>
+                                                }
+
+                                                <li class="divider" ng-if="companyId === 3"></li>
+
+                                                <li ng-if="companyId === 3">
+                                                    <a href="javascript:void(0);" ng-click="event.viewOtherCompanyOption(selectedOptions.otherMaterialCostOptionID)"><i class="fa fa-eye"></i> View selected option breakdown from {{companyId === 1 ? 'AVT' : 'AVF'}}</a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        OTHER MATERIAL COST
+                                    </td>
+                                    <td style="text-align: right;">{{method.getSubTotalAmount(selectedOptions.otherMaterialCostOptionID) | number:0}}</td>
+                                    <td style="text-align: right;">{{method.getSubTotalAmountUSD(selectedOptions.otherMaterialCostOptionID) | currency:'$':2}}</td>
+
+                                    <td ng-if="companyId === 1" colspan="2"></td>
+                                    <td ng-if="companyId === 3" style="text-align: right;">{{method.getSubTotalAmountAVT(selectedOptions.otherMaterialCostOptionID) | number:0}}</td>
+                                    <td ng-if="companyId === 3" style="text-align: right;">{{method.getSubTotalAmountUSDAVT(selectedOptions.otherMaterialCostOptionID) | currency:'$':2}}</td>
+                                </tr>
+
+                                <!-- FSC COST -->
+                                <tr>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button style="padding: 5px 7px;" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                                                Action <span class="caret"></span>
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li>
+                                                    <a href="javascript:void(0);" ng-if="data.modelID" ng-click="event.addOption(8)"><i class="fa fa-plus"></i> Add new option</a>
+                                                </li>
+                                                <li class="divider"></li>
+
+                                                <li>
+                                                    <a ng-if="!method.getApproveStatus(selectedOptions.fscCostOptionID)" href="javascript:void(0);" ng-click="event.editOption(selectedOptions.fscCostOptionID)"><i class="fa fa-pencil"></i> Edit selected option</a>
+                                                    <a ng-if="method.getApproveStatus(selectedOptions.fscCostOptionID)" href="javascript:void(0);" ng-click="event.viewOption(selectedOptions.fscCostOptionID)"><i class="fa fa-eye"></i> View selected option</a>
+                                                </li>
+
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Approve, HttpContext.Current) != "disabled")
+                                                {
+                                                    <li>
+                                                        <a href="javascript:void(0);" ng-if="!method.getApproveStatus(selectedOptions.fscCostOptionID)" ng-click="event.approveOption(selectedOptions.fscCostOptionID)"><i class="fa fa-thumbs-o-up"></i> Approve selected option</a>
+                                                    </li>
+                                                }
+
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Reset, HttpContext.Current) != "disabled")
+                                                {
+                                                    <li>
+                                                        <a href="javascript:void(0);" ng-click="event.unApproveOption(selectedOptions.fscCostOptionID)"><i class="fa fa-thumbs-o-down"></i> Un-approve selected option</a>
+                                                    </li>
+                                                }
+
+                                                <li class="divider" ng-if="companyId === 3"></li>
+
+                                                <li ng-if="companyId === 3">
+                                                    <a href="javascript:void(0);" ng-click="event.viewOtherCompanyOption(selectedOptions.fscCostOptionID)"><i class="fa fa-eye"></i> View selected option breakdown from {{companyId === 1 ? 'AVT' : 'AVF'}}</a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        FSC COST
+                                        <select style="padding: 5px;" ng-change="method.checkConfirmAll()" ng-if="data.modelID" ng-model="selectedOptions.fscCostOptionID" ng-options="option.breakdownCategoryOptionID as method.getOptionName(option) for option  in data.breakdownCategoryOptionDTOs | filter:{breakdownCategoryID:8, companyID: @companyId}:true"></select>
+                                    </td>
+                                    <td style="text-align: right;">{{method.getSubTotalAmount(selectedOptions.fscCostOptionID) | number:0}}</td>
+                                    <td style="text-align: right;">{{method.getSubTotalAmountUSD(selectedOptions.fscCostOptionID) | currency:'$':2}}</td>
+
+                                    <td ng-if="companyId === 1" colspan="2"></td>
+                                    <td ng-if="companyId === 3" style="text-align: right;">{{method.getSubTotalAmountAVT(selectedOptions.fscCostOptionID) | number:0}}</td>
+                                    <td ng-if="companyId === 3" style="text-align: right;">{{method.getSubTotalAmountUSDAVT(selectedOptions.fscCostOptionID) | currency:'$':2}}</td>
+                                </tr>
+
+                                <!-- SPECIAL REQUIREMENT COST -->
+                                <tr>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button style="padding: 5px 7px;" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                                                Action <span class="caret"></span>
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li>
+                                                    <a ng-if="!method.getApproveStatus(selectedOptions.specialRequirementCostOptionID)" href="javascript:void(0);" ng-click="event.editOption(selectedOptions.specialRequirementCostOptionID)"><i class="fa fa-pencil"></i> Edit selected option</a>
+                                                    <a ng-if="method.getApproveStatus(selectedOptions.specialRequirementCostOptionID)" href="javascript:void(0);" ng-click="event.viewOption(selectedOptions.specialRequirementCostOptionID)"><i class="fa fa-eye"></i> View selected option</a>
+                                                </li>
+
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Approve, HttpContext.Current) != "disabled")
+                                                {
+                                                    <li>
+                                                        <a href="javascript:void(0);" ng-if="!method.getApproveStatus(selectedOptions.specialRequirementCostOptionID)" ng-click="event.approveOption(selectedOptions.specialRequirementCostOptionID)"><i class="fa fa-thumbs-o-up"></i> Approve selected option</a>
+                                                    </li>
+                                                }
+
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Reset, HttpContext.Current) != "disabled")
+                                                {
+                                                    <li>
+                                                        <a href="javascript:void(0);" ng-click="event.unApproveOption(selectedOptions.specialRequirementCostOptionID)"><i class="fa fa-thumbs-o-down"></i> Un-approve selected option</a>
+                                                    </li>
+                                                }
+
+                                                <li class="divider" ng-if="companyId === 3"></li>
+
+                                                <li ng-if="companyId === 3">
+                                                    <a href="javascript:void(0);" ng-click="event.viewOtherCompanyOption(selectedOptions.specialRequirementCostOptionID)"><i class="fa fa-eye"></i> View selected option breakdown from {{companyId === 1 ? 'AVT' : 'AVF'}}</a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        SPECIAL REQUIREMENT COST
+                                        <select style="padding: 5px;" ng-change="method.checkConfirmAll()" ng-if="data.modelID" ng-model="selectedOptions.specialRequirementCostOptionID" ng-options="option.breakdownCategoryOptionID as method.getOptionName(option) for option  in data.breakdownCategoryOptionDTOs | filter:{breakdownCategoryID:9, companyID: @companyId}:true"></select>
+                                    </td>
+                                    <td style="text-align: right;">{{method.getSubTotalAmount(selectedOptions.specialRequirementCostOptionID) | number:0}}</td>
+                                    <td style="text-align: right;">{{method.getSubTotalAmountUSD(selectedOptions.specialRequirementCostOptionID) | currency:'$':2}}</td>
+
+                                    <td ng-if="companyId === 1" colspan="2"></td>
+                                    <td ng-if="companyId === 3" style="text-align: right;">{{method.getSubTotalAmountAVT(selectedOptions.specialRequirementCostOptionID) | number:0}}</td>
+                                    <td ng-if="companyId === 3" style="text-align: right;">{{method.getSubTotalAmountUSDAVT(selectedOptions.specialRequirementCostOptionID) | currency:'$':2}}</td>
+                                </tr>
+
+                                <!-- MANAGEMENT COST -->
+                                <tr>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button style="padding: 5px 7px;" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                                                Action <span class="caret"></span>
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li>
+                                                    <a href="javascript:void(0);" ng-click="event.editOption(selectedOptions.managementCostOptionID)"><i class="fa fa-pencil"></i> {{method.getApproveStatus(selectedOptions.managementCostOptionID) ? 'View' : 'Edit'}}</a>
+                                                </li>
+
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Approve, HttpContext.Current) != "disabled")
+                                                {
+                                                    <li>
+                                                        <a href="javascript:void(0);" ng-if="!method.getApproveStatus(selectedOptions.managementCostOptionID)" ng-click="event.approveOption(selectedOptions.managementCostOptionID)"><i class="fa fa-thumbs-o-up"></i> Approve</a>
+                                                    </li>
+                                                }
+
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Reset, HttpContext.Current) != "disabled")
+                                                {
+                                                    <li>
+                                                        <a href="javascript:void(0);" ng-click="event.unApproveOption(selectedOptions.managementCostOptionID)"><i class="fa fa-thumbs-o-down"></i> Un-approve</a>
+                                                    </li>
+                                                }
+
+                                                <li class="divider" ng-if="companyId === 3"></li>
+
+                                                <li ng-if="companyId === 3">
+                                                    <a href="javascript:void(0);" ng-click="event.viewOtherCompanyOption(selectedOptions.managementCostOptionID)"><i class="fa fa-eye"></i> View selected option breakdown from {{companyId === 1 ? 'AVT' : 'AVF'}}</a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        MANAGEMENT COST
+                                    </td>
+                                    <td style="text-align: right;">{{method.getSubTotalAmount(selectedOptions.managementCostOptionID) | number:0}}</td>
+                                    <td style="text-align: right;">{{method.getSubTotalAmountUSD(selectedOptions.managementCostOptionID) | currency:'$':2}}</td>
+
+                                    <td ng-if="companyId === 1" colspan="2"></td>
+                                    <td ng-if="companyId === 3" style="text-align: right;">{{method.getSubTotalAmountAVT(selectedOptions.managementCostOptionID) | number:0}}</td>
+                                    <td ng-if="companyId === 3" style="text-align: right;">{{method.getSubTotalAmountUSDAVT(selectedOptions.managementCostOptionID) | currency:'$':2}}</td>
+                                </tr>
+                            </table>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+<!--POPUP FORM-->
+@Html.Partial("~/Views/BreakDownMng/Edit/NewMaterialOption.cshtml")
+@Html.Partial("~/Views/BreakDownMng/Edit/NewFrameOption.cshtml")
+@Html.Partial("~/Views/BreakDownMng/Edit/NewSubMaterialOption.cshtml")
+@Html.Partial("~/Views/BreakDownMng/Edit/NewCushionOption.cshtml")
+@Html.Partial("~/Views/BreakDownMng/Edit/NewPackingOption.cshtml")
+@Html.Partial("~/Views/BreakDownMng/Edit/NewFSCOption.cshtml")
+@Html.Partial("~/Views/BreakDownMng/Edit/NewSpecialRequestOption.cshtml")
+@Html.Partial("~/Views/BreakDownMng/Edit/EditDetailOption.cshtml")
+@Html.Partial("~/Views/BreakDownMng/Edit/DetailOptionView.cshtml")
+@Html.Partial("~/Views/BreakDownMng/Edit/EditPrice.cshtml")
+@Html.Partial("~/Views/BreakDownMng/Edit/DetailFactoryBreakdown.cshtml")
+
+<div id="popupArticleCode" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title"><i class="fa fa-search"></i> Select Article Code</h4>
+            </div>
+            <div class="modal-body no-padding">
+                        <div class="tilsoft-table-wrapper" avs-scrollable-table>
+                            <div class="tilsoft-table">
+                                <div class="tilsoft-table-header" style="width: 800px">
+                                    <div style="width: 80px; height: 45px !important; text-align: center !important; background-color: #eee"></div>
+                                    <div style="width: 200px; height: 45px !important; text-align: center !important; background-color: #eee">Article Code</div>
+                                    <div style="width: 550px; height: 45px !important; text-align: center !important; background-color: #eee">Description</div>
+                                    <div style="height:45px !important"></div>
+                                </div>
+                                <div class="tilsoft-table-filter" style="margin-top:45px; width: 800px">
+                                    <div style="width:80px; height: 45px !important;"></div>
+                                    <div style="width:200px; height: 45px !important;">
+                                        <input type="text" class="form-control" ng-model="searchArticle" />
+                                    </div>
+                                    <div style="width:550px; height: 45px !important;"></div>
+                                    <div style="height: 45px !important"></div>
+                                </div>
+                                <div class="tilsoft-table-body" style="margin-top: 90px !important; width: 800px">
+                                    <table>
+                                        <tbody>
+                                            <tr ng-repeat="item in availableOptionByArticleCodeDTOs | filter : searchArticle">
+                                                <td style="width: 80px; text-align: center">
+                                                    <a class="btn btn-primary btn-xs font-11" href="javascript:void(0);" ng-click="event.selectArticleCode(item)" style="width: 65px" title="Select Article Code">
+                                                        <i class="fa fa-check-circle"></i> Select
+                                                    </a>
+                                                </td>
+                                                <td style="width: 200px; text-align: center">{{item.articleCode}}</td>
+                                                <td style="width: 550px; text-align: center">{{item.description}}</td>
+                                                <td></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="popupSeasonSpec" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title"><i class="fa fa-search"></i> Change Season Spec Rate</h4>
+            </div>
+            <div class="modal-body no-padding">
+                <div class="smart-form">
+                    <fieldset>
+                        <section class="col col-6">
+                            <label class="label">Season Spec Rate (%)</label>
+                            <label class="input">
+                                <input type="text" ng-model="seasonSpecObj.rate" style="text-align: right;" />
+                            </label>
+                        </section>
+                    </fieldset>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" ng-click="event.saveSeasonSpec()">
+                    OK
+                </button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="popupBreakdownCategory" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title"><i class="fa fa-search"></i> Select option category to get default materials</h4>
+            </div>
+            <div class="modal-body no-padding">
+                <div class="smart-form">
+                    <fieldset>
+                        <section class="col col-6">
+                            <label class="label">Category</label>
+                            <label class="select">
+                                <select ng-model="frmDetailObj.selectedBreakdownCategoryId" ng-options="item.breakdownCategoryID as item.breakdownCategoryNM for item in categories | filter : {breakdownCategoryID: '!10'} : false"></select>
+                                <i></i>
+                            </label>
+                        </section>
+                    </fieldset>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" ng-click="frmDetailObj.event.addDefaultByOptionCategory()">
+                    OK
+                </button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "BreakDownMng")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="#" class="btn btn-default @Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Print, HttpContext.Current))" title="Print" ng-click="event.exportExcel()"><i class="fa fa-print"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default" title="Approve All" ng-click="event.approveAllOption(selectedOptions)"><i class="fa fa-thumbs-o-up"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default" title="Reset Approval status" ng-click="event.unApproveAllOption(selectedOptions)"><i class="fa fa-thumbs-o-down"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script type="text/javascript">
+        var context = {
+            id: @ViewBag.ID,
+            modelId: @Request.Params["modelId"],
+            sampleProductId: @Request.Params["sampleProductId"],
+            offerSeasonDetailId: @Request.Params["offerSeasonDetailId"],
+            factoryId: @(!string.IsNullOrEmpty(Request.Params["factoryId"]) ? Request.Params["factoryId"] : "0"),
+            companyId: @companyId,
+            serviceUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/breakdown/',
+            redirectUrl: '@Url.Action("Edit", "BreakDownMng", new { id = UrlParameter.Optional })',
+            token : '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]',
+            userName: '@userInfo.Data.FullName',
+            userId: @userInfo.Data.UserId,
+            backendReportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]',
+            factoryBreakdownUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/factory-breakdown/'
+        }
+    </script>
+    <script src="~/Views/BreakDownMng/edit.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/jsonService2.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/BreakDownMng/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/BreakDownMng/Edit/popupDetailFactoryBreakdown.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}
+

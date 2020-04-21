@@ -1,0 +1,283 @@
+@{
+    /**/
+
+    ViewBag.Title = "Admin Dashboard";
+    ViewBag.Module = "Admin Dashboard";
+    ViewBag.Icon = "fa-bar-chart-o";
+    string currentSeason = Library.Helper.GetCurrentSeason();
+    string nextSeason = Library.Helper.GetNextSeason(currentSeason);
+    string prevSeason = Library.Helper.GetPreviousSeason(currentSeason);
+
+    string season = currentSeason;
+    if (DateTime.Now.Month == 8)
+    {
+        season = nextSeason;        
+    }
+    else
+    {
+        season = currentSeason;
+    }
+    prevSeason = Library.Helper.GetPreviousSeason(season);
+
+    Frontend.APIDTO.APIUserInformation userInfo = (Frontend.APIDTO.APIUserInformation)ViewBag.CurrentLoginUserInfo;
+}
+
+<style>
+    .tilsoft-table .tilsoft-table-body {
+        height: auto !important;
+        max-height: none
+    }
+</style>
+
+<div class="row" style="margin-top: 15px;">
+    @{
+        foreach (var widget in userInfo.Data.Permissions.Where(o => o.NavType == "W" && o.ParentID > 0 && o.CanRead == true).OrderBy(o => o.DisplayOrder))
+        {
+            Html.RenderPartial("~/Views/Dashboard/Widget/" + widget.ModuleUD + ".cshtml");
+        }
+    }
+
+    @*Sales Performance*@
+    @Html.Partial("~/Views/Dashboard/Widget/SalePerformance.cshtml", new ViewDataDictionary() { { "season", season } })
+
+    @*MI sale by client*@
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget well jarviswidget-color-darken" id="wid-id-0" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <div>
+                <div class="widget-body no-padding">
+                    <div class="padding-10">
+                        @Html.Partial("~/Views/MISaleByClientRpt/Widget/PiConfirmed.cshtml", new ViewDataDictionary() { { "season", season } })
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+
+    <!-- report from MI sale proforma -->
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget well jarviswidget-color-darken" id="wid-id-0" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <div>
+                <div class="widget-body no-padding">
+                    <div class="padding-10">
+                        <h1>SALES PROFORMA OVERVIEW</h1>
+                        <div id="pnlSalesOverview" style="display: none;">
+                            <div>
+                                Ex.Rate: {{MIdata.exchangeRate | number:2}} / Est Cont Value: {{MIdata.usdContainerValue | currency:'$':2}} or {{MIdata.eurContainerValue | currency:'&euro;':2}}
+                            </div>
+
+                            <h3 style="margin-bottom: 0px;">TOTAL CONTAINER OF PROFORMA INVOICE CONFIRMED BY MONTH</h3>
+                            <div class="row">
+                                <div class="col col-lg-12">
+                                    <div class="tilsoft-table">
+                                        <div style="width: 100%; overflow-y: hidden; height: auto;margin-top:0px" class="tilsoft-table-body">
+                                            <table style="width: 100%;">
+                                                <tbody>
+                                                    <tr>
+                                                        <th style="font-weight: bold;">Season</th>
+                                                        <th style="font-weight: bold;width:70px">Oct</th>
+                                                        <th style="font-weight: bold;width:70px">Nov</th>
+                                                        <th style="font-weight: bold;width:70px">Dec</th>
+                                                        <th style="font-weight: bold;width:70px">Jan</th>
+                                                        <th style="font-weight: bold;width:70px">Feb</th>
+                                                        <th style="font-weight: bold;width:70px">Mar</th>
+                                                        <th style="font-weight: bold;width:70px">Apr</th>
+                                                        <th style="font-weight: bold;width:70px">May</th>
+                                                        <th style="font-weight: bold;width:70px">Jun</th>
+                                                        <th style="font-weight: bold;width:70px">Jul</th>
+                                                        <th style="font-weight: bold;width:70px">Aug</th>
+                                                        <th style="font-weight: bold;width:70px">Sep</th>
+                                                        <th style="font-weight: bold;width:70px">TOTAL</th>
+                                                    </tr>
+                                                    <tr ng-repeat="item in MIdata.confirmedContainerPerMonths | orderBy : 'season' : 'reverse'">
+                                                        <td style="text-align: left;">{{item.season}}</td>
+                                                        <td style="text-align: right;">{{$parent.method.formatContainerNumber(item.october)}}</td>
+                                                        <td style="text-align: right;">{{$parent.method.formatContainerNumber(item.november)}}</td>
+                                                        <td style="text-align: right;">{{$parent.method.formatContainerNumber(item.december)}}</td>
+                                                        <td style="text-align: right;">{{$parent.method.formatContainerNumber(item.january)}}</td>
+                                                        <td style="text-align: right;">{{$parent.method.formatContainerNumber(item.febuary)}}</td>
+                                                        <td style="text-align: right;">{{$parent.method.formatContainerNumber(item.march)}}</td>
+                                                        <td style="text-align: right;">{{$parent.method.formatContainerNumber(item.april)}}</td>
+                                                        <td style="text-align: right;">{{$parent.method.formatContainerNumber(item.may)}}</td>
+                                                        <td style="text-align: right;">{{$parent.method.formatContainerNumber(item.june)}}</td>
+                                                        <td style="text-align: right;">{{$parent.method.formatContainerNumber(item.july)}}</td>
+                                                        <td style="text-align: right;">{{$parent.method.formatContainerNumber(item.august)}}</td>
+                                                        <td style="text-align: right;">{{$parent.method.formatContainerNumber(item.september)}}</td>
+                                                        <td style="text-align: right;">{{$parent.method.totalConfirmedContainer(item)}}</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col col-lg-6">
+                                    <div style="border: solid 1px #ddd; margin-top: 15px;">
+                                        <div id="chartConfirmedContainerBySeason"></div>
+                                    </div>
+                                </div>
+
+                                <div class="col col-lg-6">
+                                    <div style="border: solid 1px #ddd; margin-top: 15px;">
+                                        <div id="chartConfirmedContainerByMonth"></div>
+                                    </div>
+                                </div>
+
+                                <div class="col col-lg-6">
+                                    <div style="border: solid 1px #ddd; margin-top: 15px;">
+                                        <div id="chartAllProformaByMonth"></div>
+                                    </div>
+                                </div>
+
+                                <div class="col col-lg-6">
+                                    <div style="border: solid 1px #ddd; margin-top: 15px;">
+                                        <div id="chartCumulativeAllProforma"></div>
+                                    </div>
+                                </div>
+
+                                <div class="col col-lg-6">
+                                    <div style="border: solid 1px #ddd; margin-top: 15px;">
+                                        <div id="chartConfirmedProformaByMonth"></div>
+                                    </div>
+                                </div>
+
+                                <div class="col col-lg-6">
+                                    <div style="border: solid 1px #ddd; margin-top: 15px;">
+                                        <div id="chartCumulativeConfirmedProforma"></div>
+                                    </div>
+                                </div>
+
+                                <div class="col col-lg-6">
+                                    <div style="border: solid 1px #ddd; margin-top: 15px;">
+                                        <div id="chartEurofarInvoicedByMonth"></div>
+                                    </div>
+                                </div>
+
+                                <div class="col col-lg-6">
+                                    <div style="border: solid 1px #ddd; margin-top: 15px;">
+                                        <div id="chartCumulativeEurofarInvoiced"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="pnlSalesOverviewLoading">
+                            <i class="fa fa-spin fa-refresh"></i> LOADING ...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </article>
+
+    <!-- report from MI sale conclusion -->
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget well jarviswidget-color-darken" id="wid-id-0" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <div>
+                <div class="widget-body no-padding">
+                    <div class="padding-10">
+                        <h1>SALES CONCLUSION</h1>
+                        <div>
+                            <p class="alert alert-info no-margin" style="border-bottom: none;">
+                                <span style="padding: 5px; display: inline-block; margin-bottom: 5px; margin-right: 5px; background: rgba(255,255,255,0.7);"><strong>Exchange Rate</strong>: {{miConclusionData.exchangeRate | currency:'':2}}</span>
+                                <span style="padding: 5px; display: inline-block; margin-bottom: 5px; margin-right: 5px; background: rgba(255,255,255,0.7);"><strong>Est. Container Value</strong>: $ {{miConclusionData.usdContainerValue | currency:'':0}} or &euro; {{miConclusionData.eurContainerValue | currency:'':0}}</span>
+                            </p>
+
+                            @*proforma invoice confirmed by country compare with commecial invoice last season by country*@
+                            @Html.Partial("~/Views/MISaleConclusionRpt/Widget/PiConfirmedByCountry.cshtml", new ViewDataDictionary() { { "season", season } })
+
+                            @*commercial invoice by country*@
+                            @Html.Partial("~/Views/MISaleConclusionRpt/Widget/CiByCountry.cshtml", new ViewDataDictionary() { { "season", season } })
+
+                            @*GROWTH*@
+                            @Html.Partial("~/Views/MISaleConclusionRpt/Widget/GrowExpected.cshtml", new ViewDataDictionary() { { "season", season } })
+
+                            @*CLIENT & SALES*@
+                            @Html.Partial("~/Views/MISaleConclusionRpt/Widget/RangeExpected.cshtml", new ViewDataDictionary() { { "season", season } })
+
+                            @*Delta for top 20 and 10*@
+                            @Html.Partial("~/Views/MISaleConclusionRpt/Widget/Top20ClientByDelta.cshtml", new ViewDataDictionary() { { "season", season } })
+
+                        </div>                        
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </article>
+
+    <!-- show report for management level -->
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget well jarviswidget-color-darken" id="wid-id-0" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <div>
+                <div class="widget-body no-padding">
+                    <div class="padding-10">
+                        <h1>SYSTEM ACTIVITIES</h1>
+                        <div id="pnlSystemActivity" style="display: none;">
+                            <div>
+                                <div style="border: solid 1px #ddd; margin-top: 15px;">
+                                    <div id="chartTotalUser"></div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div style="border: solid 1px #ddd; margin-top: 15px;">
+                                    <div id="chartTotalHitCount"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="pnlSystemActivityLoading">
+                            <i class="fa fa-spin fa-refresh"></i> LOADING ...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section pagejs {
+    <script src="~/Angular/app/jsonService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script type="text/javascript">
+        // hide page title
+        $('.page-title').hide();
+
+        // show content
+        $('#content').show();
+
+        jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/dashboardmng/';
+        jsonService.serviceMISaleUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/misaleproforma/';
+        jsonService.serviceMISaleConclusionUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/misaleconclusion/';
+        jsonService.serviceMISaleByClient = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/misalebyclient/';
+        jsonService.supportServiceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/support/';
+        jsonService.serviceMiEurofarPriceOverview = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/mieurofarpriceoverview/'
+        jsonService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+        var context = {
+            season: '@season',
+            preSeason: '@prevSeason',
+            backendReportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]',
+            token: '@ViewBag.Token',
+            serviceUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/dashboardmng/',
+            tilsoftServiceUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/'
+        }
+    </script>
+    <script src="~/Views/Dashboard/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/Dashboard/admin.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/Dashboard/Widget/SalePerformance.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/MISaleByClientRpt/Widget/PiConfirmed.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    @{
+        foreach (var widget in userInfo.Data.Permissions.Where(o => o.NavType == "W" && o.ParentID > 0 && o.CanRead == true).OrderBy(o => o.DisplayOrder))
+        {
+            <script src="~/Views/Dashboard/Widget/@(widget.ModuleUD).js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+        }
+    }
+    <script src="~/Views/MISaleConclusionRpt/Widget/PiConfirmedByCountry.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/MISaleConclusionRpt/Widget/CiByCountry.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/MISaleConclusionRpt/Widget/GrowExpected.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/MISaleConclusionRpt/Widget/RangeExpected.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/MISaleConclusionRpt/Widget/Top20ClientByDelta.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}

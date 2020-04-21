@@ -1,0 +1,737 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var supportServiceRoot = (System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"]);
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    var backendReportUrl = @System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"];
+
+
+
+    var sampleProductID = ViewBag.SampleProductID;
+    var productID = ViewBag.ProductID;
+    var id = ViewBag.ID;
+
+    ViewBag.Title = (ViewBag.ID == 0) ? "Create Specification Of Product" : "Edit Specification Of Product";
+    ViewBag.SubTitle = (ViewBag.ID == 0) ? "Create" : "Edit";
+    ViewBag.Module = "Specification Of Product";
+    ViewBag.Icon = "fa fa-database";
+}
+
+<style>
+    .ui-autocomplete {
+        max-height: 150px;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .ui-menu-item > a.ui-corner-all {
+        display: block;
+        padding: 3px 15px;
+        clear: both;
+        /*font-weight: normal;*/
+        line-height: 18px;
+        /*color: #555555;*/
+        white-space: nowrap;
+        font-size: 11px;
+    }
+
+    .modal-dialog {
+        top: 100px !important
+    }
+</style>
+<form name="editForm" class="row">
+    <article class="col-xs-12 col-sm-12 col-lg-12 col-md-12">
+        <div class="jarviswidget" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <div>
+                <div class="well-sm col-sm-12 smart-form m-bottom-15" style=" border-top:solid 4px; padding:5px 0px 5px 0px ">
+                    <fieldset>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <h1 class="m-bottom-15">General</h1>
+                                <hr style="margin-top: 5px;margin-bottom: 5px;">
+                                <section class="col col-sm-3">
+                                    <label class="label">
+                                        <label>Product Code</label>
+                                        <em class="note note-error" ng-show="editForm.productTestUD.$error.required"> (Required)</em>
+                                    </label>
+                                    <label class="input">
+                                        <input type="text" class="form-control" ng-model="data.productUD" maxlength="10" readonly />
+                                    </label>
+                                </section>
+                                <section class="col col-sm-7">
+                                    <label class="label">Name Of Product</label>
+                                    <input style="font-size:12px" class="form-control" ng-model="data.articleDescription" readonly />
+                                </section>
+                                <section class="col col-sm-2">
+                                    <label class="label">Client</label>
+                                    <label class="input" ng-if="data.sampleProductID != null">
+                                        <input type="text" class="form-control" ng-model="data.clientUD" readonly />
+                                    </label>
+                                    <label class="select" ng-if="data.productID != null">
+                                        <select class="select2" ng-model="data.clientID" ng-options="client.clientID as client.clientUD for client in data.clientOfProductDTOs">
+                                            <option value=""></option>
+                                        </select>
+                                        <i></i>
+                                    </label>
+                                </section>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <section class="col col-sm-12">
+                                <label class="label">Remark</label>
+                                <label class="input">
+                                    <input type="text" class="form-control" ng-model="data.remark" />
+                                </label>
+                            </section>
+                        </div>
+
+
+
+                    </fieldset>
+                    <fieldset>
+                        <div class="row">
+                            <a class="btn btn-default custom-button" style="margin-top: 0px;" href="javascript:void(0);" ng-click="event.uploadSpecificationImage()"><i class="fa fa-upload"></i> Upload Image</a>
+                        </div>
+                        <div class="row" style="margin-top: 15px;">
+                            <div class="float-img-list" ng-repeat="item in data.specificationImageDTOs | orderBy:'displayOrder'">
+                                <div style="width: 203px;" class="img-item">
+                                    <img src="{{item.scanFileLocation}}">
+                                    <a class="btn btn-default btn-xs" href="{{item.scanFileLocation}}" target="_blank">View</a>
+                                    @*<a class="btn btn-success btn-xs" href="javascript:void(0)" ng-click="event.editImage(item)">Edit</a>*@
+                                    <a class="btn btn-danger btn-xs" href="javascript:void(0)" ng-click="event.removeSpecificationImage(item)">Delete</a>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <section>
+                        <div class="note">
+                            <strong>Updated By</strong>
+                            <a ng-show="(data.updatedBy != null && data.updatorName != null)" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{data.updatedBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                <i class="fa fa-user"></i> {{data.updatorName}}
+                            </a>
+                            <span ng-show="(data.updatedBy != null && data.updatorName == null)"> <i class="fa fa-user"></i> {{data.updatorName}}</span>
+                            on {{data.updatedDate}}
+                        </div>
+                    </section>
+                </div>
+
+                <div class="well-sm col-sm-12 smart-form m-bottom-15" style=" border-top:solid 4px; padding:5px 0px 5px 0px ">
+                    <fieldset>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <h1 class="m-bottom-15">Frame</h1>
+                                <hr style="margin-top: 5px;margin-bottom: 5px;">
+                                <section class="col col-2">
+                                    <label class="label">Code of drawing</label>
+                                    <label class="input">
+                                        <input class="form-control" type="text" ng-model="data.frameTDCode" maxlength="50" />
+                                    </label>
+                                </section>
+                                <section class="col col-3">
+                                    <label class="label">Dimension (L/W/H)</label>
+                                    <label class="input">
+                                        <input style="width: 30%; margin-right: 3%; float: left; text-align: right;" placeholder="Length" type="text" ng-model="data.frameDimensionL" maxlength="50" />
+                                        <input style="width: 30%; margin-right: 3%; float: left; text-align: right;" placeholder="Width" type="text" ng-model="data.frameDimensionW" maxlength="50" />
+                                        <input style="width: 30%; margin-right: 3%; float: left; text-align: right;" placeholder="Height" type="text" ng-model="data.frameDimensionH" maxlength="50" />
+                                    </label>
+                                </section>
+                                <section class="col col-3">
+                                    <label class="label">Material</label>
+                                    <label class="input">
+                                        <input class="form-control" type="text" ng-model="data.frameMaterial" maxlength="100" />
+                                    </label>
+                                </section>
+                                <section class="col col-3">
+                                    <label class="label">Coating color</label>
+                                    <label class="input">
+                                        <input class="form-control" type="text" ng-model="data.frameCoatingColor" />
+                                    </label>
+                                </section>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <section class="col col-2">
+                                    <label class="label">Code of color</label>
+                                    <label class="input">
+                                        <input class="form-control" type="text" ng-model="data.frameColorCode" maxlength="50" />
+                                    </label>
+                                </section>
+                                <section class="col col-3">
+                                    <label class="label">Color</label>
+                                    <label class="input">
+                                        <input class="form-control" type="text" ng-model="data.frameColor" maxlength="100" />
+                                    </label>
+                                </section>
+                                <section class="col col-3">
+                                    <label class="label">Welding(percentage)</label>
+                                    <label class="input">
+                                        <input class="form-control" type="text" ng-model="data.frameWelding" maxlength="100" />
+                                    </label>
+                                </section>
+                                <section class="col col-3">
+                                    <label class="label">Weight of frame (kg)</label>
+                                    <label class="input">
+                                        <input style="text-align:right" class="form-control" type="text" ng-model="data.frameWeight" maxlength="50" />
+                                    </label>
+                                </section>
+
+
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+
+                <div class="well-sm col-sm-12 smart-form m-bottom-15" style=" border-top:solid 4px;  padding:5px 0px 5px 0px ">
+                    <fieldset>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <h1 class="m-bottom-15">Wood Frame/Wood Leg/Table</h1>
+                                <hr style="margin-top: 5px;margin-bottom: 5px;">
+                                <section class="col col-2">
+                                    <label class="label">Code of draving</label>
+                                    <label class="input">
+                                        <input class="form-control" type="text" ng-model="data.woodenPartTDCode" maxlength="50" />
+                                    </label>
+                                </section>
+                                <section class="col col-2">
+                                    <label class="label">Species</label>
+                                    <label class="input">
+                                        <input class="form-control" type="text" ng-model="data.woodenPartSpecies" maxlength="50" />
+                                    </label>
+                                </section>
+                                <section class="col col-3">
+                                    <label class="label">Color</label>
+                                    <label class="input">
+                                        <input class="form-control" type="text" ng-model="data.woodenPartColor" maxlength="100" />
+                                    </label>
+                                </section>
+                                <section class="col col-2">
+                                    <label class="label">Kind of snail</label>
+                                    <label class="input">
+                                        <input class="form-control" type="text" ng-model="data.woodenPartSnail" maxlength="100" />
+                                    </label>
+                                </section>
+                                <section class="col col-3">
+                                    <label class="label">Dimension (L/W/H)</label>
+                                    <label class="input">
+                                        <input style="width: 30%; margin-right: 3%; float: left; text-align: right;" placeholder="Length" type="text" ng-model="data.woodenPartDimensionL" maxlength="50" />
+                                        <input style="width: 30%; margin-right: 3%; float: left; text-align: right;" placeholder="Width" type="text" ng-model="data.woodenPartDimensionW" maxlength="50" />
+                                        <input style="width: 30%; margin-right: 3%; float: left; text-align: right;" placeholder="Height" type="text" ng-model="data.woodenPartDimensionH" maxlength="50" />
+                                    </label>
+                                </section>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <section class="col col-sm-12">
+                                    <div class="tilsoft-table-wrapper">
+                                        <div class="tilsoft-table">
+                                            <div class="tilsoft-table-header" style="width: 800px">
+                                                <div style="width: 80px">RowIndex</div>
+                                                <div style="width: 250px"> </div>
+                                                <div style="width: 150px">Length</div>
+                                                <div style="width: 150px">Width</div>
+                                                <div style="width: 150px">Height</div>
+                                                <div style="">Weight</div>
+                                            </div>
+                                            <div class="tilsoft-table-body" style="width: 800px;">
+                                                <table>
+                                                    <tbody>
+                                                        <tr ng-repeat="item in data.specificationWoodenartDTOs">
+                                                            <td style="width: 79px; text-align: center; vertical-align: middle">
+                                                                <input type="text" class="form-control" ng-model="item.rowIndex" readonly style="text-align:center" />
+                                                            </td>
+                                                            <td style="width: 250px; vertical-align: middle">
+                                                                <span>LEG {{item.rowIndex}}</span>
+                                                            </td>
+                                                            <td style="width: 150px; text-align: center; vertical-align: middle">
+                                                                <input class="form-control" type="text" style="min-height: 32px; font-family: Arial; text-align:right" maxlength="50" ng-model="item.dimensionL" />
+                                                            </td>
+                                                            <td style="width: 150px; text-align: center; vertical-align: middle">
+                                                                <input class="form-control" type="text" style="min-height: 32px; font-family: Arial; text-align:right" maxlength="50" ng-model="item.dimensionW" />
+                                                            </td>
+                                                            <td style="width: 150px; text-align: center; vertical-align: middle">
+                                                                <input class="form-control" type="text" style="min-height: 32px; font-family: Arial; text-align:right" maxlength="50" ng-model="item.dimensionH" />
+                                                            </td>
+                                                            <td style=" text-align: center; vertical-align: middle">
+                                                                <input class="form-control" type="text" style="min-height: 32px; font-family: Arial; text-align:right" maxlength="50" ng-model="item.weight" />
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+
+                <div class="well-sm col-sm-12 smart-form m-bottom-15" style=" border-top:solid 4px;  padding:5px 0px 5px 0px ">
+                    <fieldset>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <h1 class="m-bottom-15">Wicker</h1>
+                                <hr style="margin-top: 5px;margin-bottom: 5px;">
+                                <section class="col col-2">
+                                    <label class="label">Code of wicker color</label>
+                                    <label class="input">
+                                        <input class="form-control" type="text" ng-model="data.wickerColorCode" maxlength="50" />
+                                    </label>
+                                </section>
+                                <section class="col col-2">
+                                    <label class="label">Kind of wicker</label>
+                                    <label class="input">
+                                        <input class="form-control" type="text" ng-model="data.wickerType" maxlength="100" />
+                                    </label>
+                                </section>
+                                <section class="col col-2">
+                                    <label class="label">Color of wicker </label>
+                                    <label class="input">
+                                        <input class="form-control" type="text" ng-model="data.wickerColor" maxlength="100" />
+                                    </label>
+                                </section>
+                                <section class="col col-2">
+                                    <label class="label">Weight after weighing (kg)</label>
+                                    <label class="input">
+                                        <input class="form-control" type="text" ng-model="data.wickerWeight" />
+                                    </label>
+                                </section>
+                                <section class="col col-2">
+                                    <label class="label">Weaving method</label>
+                                    <label class="input">
+                                        <input class="form-control" type="text" ng-model="data.weavingMethod" />
+                                    </label>
+                                </section>
+
+
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="smart-form">
+                                    <footer style="border-top:none; background:none; border-bottom: solid 1px #ddd">
+                                        <a href="javascrip:void(0)" class="btn btn-primary" ng-click="event.addWeavingFile()">Add File</a>
+                                    </footer>
+                                    <div class="widget-body">
+                                        <div id="searchResult" class="tilsoft-table-wrapper">
+                                            <div class="tilsoft-table">
+                                                <div class="tilsoft-table-body" style="width:100%; max-width:880px; overflow-y:auto; height:auto; min-height:100px; margin-top:0px">
+                                                    <table>
+                                                        <tbody>
+                                                            <tr>
+                                                                <th style="width:150px"></th>
+                                                                <th>File</th>
+                                                            </tr>
+                                                            <tr ng-repeat="item in data.specificationWeavingFileDTOs">
+                                                                <td style="text-align:center; width:200px">
+                                                                    <a href="javascrip:void(0)" class="btn btn-primary btn-xs font-11" ng-click="event.editWeavingFile(item)" style="width:80px"><i class="fa fa-pencil"></i>Edit</a>
+                                                                    <a href="javascrip:void(0)" class="btn btn-danger btn-xs font-11" ng-click="event.removedWeavingFile(item)" style="width:80px; margin-top:3px"><i class="fa fa-times">Delete</i></a>
+                                                                </td>
+                                                                <td>
+                                                                    <a href="{{item.scanFileLocation}}" target="_blank">{{item.friendlyName}}</a>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+
+                <div class="well-sm col-sm-12 smart-form m-bottom-15" style=" border-top:solid 4px;  padding:5px 0px 5px 0px ">
+                    <fieldset>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <h1 class="m-bottom-15">Textilen</h1>
+                                <hr style="margin-top: 5px;margin-bottom: 5px;">
+                                <section class="col col-3">
+                                    <label class="label">Dimension (L / W)</label>
+                                    <label class="input">
+                                        <input style="width: 40%; margin-right: 3%; float: left; text-align: right;" placeholder="Length" type="text" ng-model="data.textilenDimensionL" maxlength="50" />
+                                        <input style="width: 40%; margin-right: 3%; float: left; text-align: right;" placeholder="Width" type="text" ng-model="data.textilenDimensionW" maxlength="50" />
+                                    </label>
+                                </section>
+                                <section class="col col-3">
+                                    <label class="label">Color</label>
+                                    <label class="input">
+                                        <input class="form-control" type="text" ng-model="data.textilenColor" />
+                                    </label>
+                                </section>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+
+                <div class="well-sm col-sm-12 smart-form m-bottom-15" style=" border-top:solid 4px;  padding:5px 0px 5px 0px ">
+                    <fieldset>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <h1 class="m-bottom-15">General Product</h1>
+                                <hr style="margin-top: 5px;margin-bottom: 5px;">
+                                <section class="col col-3">
+                                    <label class="label">Dimension (L/W/H)</label>
+                                    <label class="input">
+                                        <input style="width: 30%; margin-right: 3%; float: left; text-align: right;" placeholder="Length" type="text" ng-model="data.productOverallDimL" ng-maxlength="50" />
+                                        <input style="width: 30%; margin-right: 3%; float: left; text-align: right;" placeholder="Width" type="text" ng-model="data.productOverallDimW" maxlength="50" />
+                                        <input style="width: 30%; margin-right: 3%; float: left; text-align: right;" placeholder="Height" type="text" ng-model="data.productOverallDimH" maxlength="50" />
+                                    </label>
+                                </section>
+                                <section class="col col-2">
+                                    <label class="label">Weight (kg)</label>
+                                    <label class="input">
+                                        <input style="text-align:right" class="form-control" type="text" ng-model="data.productOverallWeight" />
+                                    </label>
+                                </section>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+
+                <div class="well-sm col-sm-12 smart-form m-bottom-15" style=" border-top:solid 4px; padding:5px 0px 5px 0px ">
+                    <fieldset>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <h1 class="m-bottom-15">Cushion</h1>
+                                <hr style="margin-top: 5px;margin-bottom: 5px;">
+                                <section class="col col-2">
+                                    <label class="label">Color</label>
+                                    <label class="input">
+                                        <input class="form-control" type="text" ng-model="data.cushionColor" maxlength="100" />
+                                    </label>
+                                </section>
+                                <section class="col col-2">
+                                    <label class="label">Weight</label>
+                                    <label class="input">
+                                        <input class="form-control" type="text" ng-model="data.cushionWeight" maxlength="50" />
+                                    </label>
+                                </section>
+                                <section class="col col-3">
+                                    <label class="label">Dimension (L/W/H)</label>
+                                    <label class="input">
+                                        <input style="width: 30%; margin-right: 3%; float: left; text-align: right;" placeholder="Length" type="text" ng-model="data.cushionDimensionL" maxlength="50" />
+                                        <input style="width: 30%; margin-right: 3%; float: left; text-align: right;" placeholder="Width" type="text" ng-model="data.cushionDimensionW" maxlength="50" />
+                                        <input style="width: 30%; margin-right: 3%; float: left; text-align: right;" placeholder="Height" type="text" ng-model="data.cushionDimensionH" maxlength="50" />
+                                    </label>
+                                </section>
+                                <section class="col col-2">
+                                    <label class="label">Line</label>
+                                    <label class="input">
+                                        <input class="form-control" type="text" ng-model="data.cushionLine" maxlength="100" />
+                                    </label>
+                                </section>
+                                <section class="col col-3">
+                                    <label class="label">Washing label</label>
+                                    <label class="input">
+                                        <input style="width: 30%; margin-right: 3%; float: left; text-align: right;" placeholder="Length" type="text" ng-model="data.cushionWashingLabelDimL" />
+                                        <input style="width: 30%; margin-right: 3%; float: left; text-align: right;" placeholder="Width" type="text" ng-model="data.cushionWashingLabelDimW" />
+                                    </label>
+                                </section>
+
+
+                            </div>
+                        </div>
+                    </fieldset>
+                    <fieldset>
+                        <div class="row">
+                            <a class="btn btn-default custom-button" style="margin-top: 0px;" href="javascript:void(0);" ng-click="event.uploadSpecificationCushionImage()"><i class="fa fa-upload"></i> Upload Image</a>
+                        </div>
+                        <div class="row" style="margin-top: 15px;">
+                            <div class="float-img-list" ng-repeat="item in data.specificationCushionImageDTOs | orderBy:'displayOrder'">
+                                <div style="width: 203px;" class="img-item">
+                                    <img src="{{item.scanFileLocation}}">
+                                    <a class="btn btn-default btn-xs" href="{{item.scanFileLocation}}" target="_blank">View</a>
+                                    @*<a class="btn btn-success btn-xs" href="javascript:void(0)" ng-click="event.editImage(item)">Edit</a>*@
+                                    <a class="btn btn-danger btn-xs" href="javascript:void(0)" ng-click="event.removeSpecificationCushionImage(item)">Delete</a>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+
+                <div class="well-sm col-sm-12 smart-form m-bottom-15" style=" border-top:solid 4px;  padding:5px 0px 5px 0px ">
+                    <fieldset>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <h1 class="m-bottom-15">Carton</h1>
+                                <hr style="margin-top: 5px;margin-bottom: 5px;">
+                                <section class="col col-3">
+                                    <label class="label">Code of drawing</label>
+                                    <label class="input">
+                                        <input class="form-control" type="text" ng-model="data.cartonBoxTDCode" maxlength="50" />
+                                    </label>
+                                </section>
+                                <section class="col co-3">
+                                    <label class="label">Kind of carton</label>
+                                    <label class="input">
+                                        <input class="form-control" type="text" ng-model="data.cartonBoxType" maxlength="100" />
+                                    </label>
+                                </section>
+                                <section class="col col-3">
+                                    <label class="label">Dimension (L/W/H)</label>
+                                    <label class="input">
+                                        <input style="width: 30%; margin-right: 3%; float: left; text-align: right;" placeholder="Length" type="text" ng-model="data.cartonBoxDimensionL" maxlength="50" />
+                                        <input style="width: 30%; margin-right: 3%; float: left; text-align: right;" placeholder="Width" type="text" ng-model="data.cartonBoxDimensionW" maxlength="50" />
+                                        <input style="width: 30%; margin-right: 3%; float: left; text-align: right;" placeholder="Height" type="text" ng-model="data.cartonBoxDimensionH" maxlength="50" />
+                                    </label>
+                                </section>
+
+
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+
+                <div class="well-sm col-sm-12 smart-form m-bottom-15" style=" border-top:solid 4px; padding:5px 0px 5px 0px ">
+                    <fieldset>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <h1 class="m-bottom-15">Hardware</h1>
+                                <hr style="margin-top: 5px;margin-bottom: 5px;">
+                                <section class="col col-3">
+                                    <label class="label">Bolt - Dimention (cm)/ Quantity (pcs)</label>
+                                    <label class="input">
+                                        <input style="width: 47%; margin-right: 3%; float: left; text-align: right;" placeholder="Dimention" type="text" ng-model="data.hardwareBoltDimension" maxlength="50" />
+                                        <input style="width: 47%; margin-right: 3%; float: left; text-align: right;" placeholder="Quantity" type="text" ng-model="data.hardwareBoltQuantity" maxlength="20" />
+                                    </label>
+                                </section>
+                                <section class="col col-3">
+                                    <label class="label">Key - L/ W/ Thickness</label>
+                                    <label class="input">
+                                        <input style="width: 30%; margin-right: 3%; float: left; text-align: right;" placeholder="L" type="text" ng-model="data.hardwareKeyDimensionL" maxlength="50" />
+                                        <input style="width: 30%; margin-right: 3%; float: left; text-align: right;" placeholder="W" type="text" ng-model="data.hardwareKeyDimensionW" maxlength="50" />
+                                        <input style="width: 30%; margin-right: 3%; float: left; text-align: right;" placeholder="Thickness" type="text" ng-model="data.hardwareKeyThickness" maxlength="50" />
+                                    </label>
+                                </section>
+                                <section class="col col-3">
+                                    <label class="label">Ring</label>
+                                    <label class="input">
+                                        <input class="form-control" type="text" ng-model="data.hardwareRing" maxlength="100" />
+                                    </label>
+                                </section>
+                                <section class="col col-3">
+                                    <label class="label">Spring</label>
+                                    <label class="input">
+                                        <input class="form-control" type="text" ng-model="data.hardwareSpring" maxlength="100" />
+                                    </label>
+                                </section>
+
+
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <section class="col col-3">
+                                    <label class="label">Conector</label>
+                                    <label class="input">
+                                        <input class="form-control" type="text" ng-model="data.hardwareConnector" maxlength="100" />
+                                    </label>
+                                </section>
+                                <section class="col col-3">
+                                    <label class="label">Leveller</label>
+                                    <label class="input">
+                                        <input class="form-control" type="text" ng-model="data.hardwareLeveller" maxlength="100" />
+                                    </label>
+                                </section>
+                                <section class="col col-3">
+                                    <label class="label">Code of AI</label>
+                                    <label class="input">
+                                        <input class="form-control" type="text" ng-model="data.assemblyInstructionCode" maxlength="50" />
+                                    </label>
+                                </section>
+                                <section class="col col-3">
+                                    <label class="label">Other</label>
+                                    <label class="input">
+                                        <input class="form-control" type="text" ng-model="data.otherDescription" maxlength="255" />
+                                    </label>
+                                </section>
+
+
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+
+                <div class="well-sm col-sm-12 smart-form m-bottom-15" style=" border-top:solid 4px; padding:5px 0px 5px 0px ">
+                    <fieldset>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <h1 class="m-bottom-15">Packing</h1>
+                                <hr style="margin-top: 5px;margin-bottom: 5px;">
+                                <div class="smart-form">
+                                    <div class="col col-6" ng-repeat="itemPacking in data.specificationPackingDTOs">
+                                        <div>
+                                            <label class="checkbox">
+                                                <input class="search-filter" type="checkbox" ng-model="itemPacking.isSelected">
+                                                <i></i>{{itemPacking.packingSpecificationNM}}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+
+            </div>
+        </div>
+    </article>
+</form>
+
+<div id="weavingFileForm" class="modal fade" role="dialog" aria-labelledby="myModalLable" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title" id="myModalLable">Weaving File</h4>
+            </div>
+            <div class="modal-body no-padding">
+                <div class="smart-form">
+                    <fieldset>
+                        <div class="row">
+                            <section class="col col-10">
+                                <label class="label">Scan File</label>
+                                <label class="input">
+                                    <span class="form-control">
+                                        <div style="position:absolute; right:5px; top:5px;">
+                                            <span style="text-align:left">{{currenweavingfile.friendlyName}}</span>
+                                            <a ng-click="event.addWeavingScanFile()" class="btn btn-primary btn-xs font-11" href="javascrip:void(0)"><i class="fa fa-pencil">Change</i></a>
+                                            <a target="_blank" ng-if="currenweavingfile.scanFileLocation != null" class="btn btn-default btn-xs font-11" href="{{currenweavingfile.scanFileLocation}}"><i class="fa fa-download"></i>DownLoad</a>
+                                        </div>
+                                    </span>
+                                </label>
+                            </section>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" ng-click="event.updatedWeavingFile(currenweavingfile)">
+                    OK
+                </button>
+
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="moreSpec" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+    <form name="editForm" class="row">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title" id="">More Spec</h4>
+                </div>
+                <div class="modal-body no-padding">
+                    <div class="smart-form">
+                        <fieldset>
+                            <div class="row">
+                                <section class="col col-sm-12">
+                                    <div class="jarviswidget-editbox"></div>
+                                    <div class="widget-body">
+                                        <div style="height: 252px" class="table-responsive">
+                                            <table class="table table-bordered table-hover custom-table dataTable">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="text-align:center"></th>
+                                                        <th style="text-align:center">PRODUCT CODE</th>
+                                                        <th style="text-align:center">PRODUCT NAME</th>
+                                                        <th style="text-align: center">REMARK</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="sItem in specOfProductList ">
+                                                        <td style="text-align: center">
+                                                            <a href="javascript:void(0)" class="btn btn-primary btn-xs" ng-click="event.copySpec(sItem.productSpecificationID)"> <i class="fa fa-copy"></i>Copy</a>
+                                                        </td>
+                                                        <td style="text-align:center">{{sItem.productUD}}</td>
+                                                        <td style="text-align:left">{{sItem.articleDescription}}</td>
+                                                        <td style="text-align:left">{{sItem.remark}}</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </section>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <a href="javascript:void(0)" class="btn btn-danger" ng-click="event.cancel()"> <i class="fa fa-times"></i> Cancel </a>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "SpecificationOfProductMng")" class="btn btn-default" title="Back">
+                <i class="fa fa-arrow-left"></i>
+            </a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default" title="Delete" ng-class="{'disabled': data.productSpecificationID == 0}" ng-click="event.remove(data.productSpecificationID)">
+                <i class="fa fa-times"></i>
+            </a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default" title="Copy" ng-click="event.getListSpec()">
+                <i class="fa fa-copy"></i>
+            </a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default" title="Save" ng-click="event.update()">
+                <i class="fa fa-floppy-o"></i>
+            </a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Export Excel" style="color: #31B404" ng-click="event.exportExcel()"><i class="fa fa-file-excel-o"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs{
+
+    <script type="text/javascript">
+        var context = {
+            id: '@id',
+            sampleProductID: '@sampleProductID',
+            productID:'@productID',
+            token: '@token',
+            backUrl: '@Url.Action("Index", "SpecificationOfProductMng")',
+            refreshUrl: '@Url.Action("Edit", "SpecificationOfProductMng", new { id = UrlParameter.Optional })/',
+            serviceUrl: '@(serviceRoot)/api/SpecificationOfProductMng/',
+            servicePath: '@(serviceRoot)/Reports/',
+            supportServiceUrl: '@(serviceRoot)/api/support/',
+            backendReportUrl: '@backendReportUrl',
+        }
+    </script>
+
+    <script type="text/javascript" src="~/Views/SpecificationOfProductMng/edit.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Views/SpecificationOfProductMng/service.js?v=@guid"></script>
+
+}
+

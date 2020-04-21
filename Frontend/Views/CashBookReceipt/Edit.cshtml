@@ -1,0 +1,469 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+
+    var canUpdate = Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current);
+    var canDelete = Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current);
+
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    var id = ViewBag.ID;
+
+    ViewBag.Title = (ViewBag.ID == 0) ? "Create Cash Book Receipt" : "Edit Cash Book Receipt";
+}
+
+<style>
+    .append1 {
+        right: 35px !important;
+    }
+
+    .append2 {
+        right: 5px !important;
+    }
+    /*.ui-datepicker-prev{
+        display: none;
+    }
+    .ui-datepicker-next{
+        display: none;
+    }*/
+</style>
+
+<form name="editForm" class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-database"></i> </span>
+                <h2>General</h2>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div class="smart-form">
+                        <fieldset>
+                            <div class="row">
+                                <section class="col col-sm-2">
+                                    <label>
+                                        Code
+                                        <em class="note note-error" ng-if="editForm.cashBookUD.$error.required"> (Required)</em>
+                                    </label>
+                                    <label class="input" ng-class="{ 'state-error': editForm.cashBookUD.$error.required }">
+                                        <input name="cashBookUD" type="text" class="form-control" required ng-model="data.cashBookUD" ng-if="!data.isPastTime && !isEdit" maxlength="15" />
+                                        <span class="form-control" ng-if="data.isPastTime || isEdit">{{data.cashBookUD}}</span>
+                                    </label>
+                                </section>
+                                <section class="col col-sm-2">
+                                    <label>
+                                        Book Date
+                                        <em class="note note-error" ng-if="editForm.bookDate.$error.required"> (Required)</em>
+                                    </label>
+                                    <label class="input" ng-class="{ 'state-error': editForm.bookDate.$error.required }">
+                                        <i class="icon-append fa fa-calendar" ng-if="!data.isPastTime"></i>
+                                        <input name="bookDate" type="text" class="form-control datepicker" data-dateformat="dd/mm/yy" required ng-model="data.bookDate" ng-if="!data.isPastTime && !isEdit" />
+                                        <span class="form-control" ng-if="data.isPastTime || isEdit">{{data.bookDate}}</span>
+                                    </label>
+                                </section>
+                            </div>
+
+                            <div class="row">
+                                <section class="col col-sm-2">
+                                    <label>
+                                        Type <em class="note note-error" ng-show="editForm.cashType.$error.required">(Required)</em>
+                                    </label>
+                                    <label class="input" ng-class="{'state-error': editForm.cashType.$error.required}">
+                                        <select class="form-control" name="cashType" required ng-model="data.cashBookTypeID" ng-options="type.cashBookTypeID as type.cashBookTypeNM for type in supportType" ng-if="!data.isPastTime && !isEdit" ng-change="event.changeCashBookType(data.cashBookTypeID)">
+                                            <option value=""></option>
+                                        </select>
+                                        <span class="form-control" ng-if="data.isPastTime || isEdit">{{data.cashBookTypeNM}}</span>
+                                    </label>
+                                </section>
+                                <section class="col col-sm-2">
+                                    <label>Source Of Flow</label>
+                                    <label class="input">
+                                        <select class="form-control" ng-model="data.cashBookSourceOfFlowID" ng-options="sourceFlow.cashBookSourceOfFlowID as sourceFlow.cashBookSourceOfFlowNM for sourceFlow in supportSourceOfFlow" ng-if="!data.isPastTime && !isEdit">
+                                            <option value=""></option>
+                                        </select>
+                                        <span class="form-control" ng-if="data.isPastTime || isEdit">{{data.cashBookSourceOfFlowNM}}</span>
+                                    </label>
+                                </section>
+                                <section class="col col-sm-2">
+                                    <label>Location</label>
+                                    <label class="input">
+                                        <select class="form-control" ng-model="data.cashBookLocationID" ng-options="location.cashBookLocationID as location.cashBookLocationNM for location in supportLocation" ng-if="!data.isPastTime && !isEdit">
+                                            <option value=""></option>
+                                        </select>
+                                        <span class="form-control" ng-if="data.isPastTime || isEdit">{{data.cashBookLocationNM}}</span>
+                                    </label>
+                                </section>
+                                <section class="col col-sm-2">
+                                    <label>
+                                        Paid By
+                                        <em class="note note-error" ng-if="(data.cashBookTypeID != 1 && data.cashBookTypeID != 4 && data.cashBookTypeID != null) && editForm.paidBy.$error.required"> (Required)</em>
+                                    </label>
+                                    <label class="input" ng-class="{ 'state-error': (data.cashBookTypeID != 1 && data.cashBookTypeID != 4 && data.cashBookTypeID != null) && editForm.paidBy.$error.required }">
+                                        <select name="paidBy" class="form-control" ng-required="data.cashBookTypeID != 1 && data.cashBookTypeID != 4 && data.cashBookTypeID != null" ng-disabled="data.cashBookTypeID == 1 || data.cashBookTypeID == 4" ng-model="data.cashBookPaidByID" ng-options="paidBy.cashBookPaidByID as paidBy.displayName for paidBy in supportPaidBy" ng-if="!data.isPastTime && !isEdit">
+                                            <option value=""></option>
+                                        </select>
+                                        <span class="form-control" ng-if="data.isPastTime || isEdit">{{data.displayName}}</span>
+                                    </label>
+                                </section>
+                            </div>
+
+                            <div class="row">
+                                <section class="col col-sm-2"></section>
+                                <section class="col col-sm-2">
+                                    <label>Receiver Name</label>
+                                    <label class="input">
+                                        <input type="text" class="form-control" ng-model="data.cashBookReceiverName" ng-if="!data.isPastTime" />
+                                        <span class="form-control" ng-if="data.isPastTime">{{data.cashBookReceiverName}}</span>
+                                    </label>
+                                </section>
+                                <section class="col col-sm-2">
+                                    <label>Amount(VND)</label>
+                                    <label class="input">
+                                        <input avs-number type="text" style="text-align:right" class="form-control" ng-data-source="data.vndAmount" ng-if="!data.isPastTime" />
+                                        <span style="text-align:right" class="form-control" ng-if="data.isPastTime">{{data.vndAmount | number}}</span>
+                                    </label>
+                                </section>
+                                <section class="col col-sm-2">
+                                    <label>
+                                        Ex. Rate(VND) <em class="note note-error" ng-if="editForm.VNDExRate.$error.required || data.vndusdExRate == null || data.vndusdExRate == ''"> (Required)</em>
+                                    </label>
+                                    <label class="input" ng-class="{ 'state-error': editForm.VNDExRate.$error.required || data.vndusdExRate == null || data.vndusdExRate == ''}">
+                                        <input avs-number name="VNDExRate" type="text" style="text-align:right" class="form-control" ng-data-source="data.vndusdExRate" ng-if="!data.isPastTime" />
+                                        <span style="text-align:right" class="form-control" ng-if="data.isPastTime">{{data.vndusdExRate | number}}</span>
+                                    </label>
+                                </section>
+                            </div>
+
+                            <div class="row">
+                                <section class="col col-sm-2">
+                                    <label>Post Cost</label>
+                                    <label class="input">
+                                        <select class="form-control" style="-webkit-appearance: none; -moz-appearance: none;" ng-model="data.cashBookPostCostID" ng-options="postCost.cashBookPostCostID as postCost.postCostNM for postCost in supportPostCost" ng-if="!data.isPastTime">
+                                            <option value=""></option>
+                                        </select>
+                                        <i class="icon-append append2" ng-if="!data.isPastTime">
+                                            <a href="javascript:void(0)" class="btn btn-primary btn-xs" ng-click="event.openPostCost()"><i class="fa fa-plus"></i></a>
+                                        </i>
+                                        <span class="form-control" ng-if="data.isPastTime">{{data.postCostNM}}</span>
+                                    </label>
+                                </section>
+                                <section class="col col-sm-2">
+                                    <label>Cost Item</label>
+                                    <label class="input">
+                                        <select class="form-control" style="-webkit-appearance: none; -moz-appearance: none;" ng-model="data.cashBookCostItemID" ng-options="costItem.cashBookCostItemID as costItem.costItemNM for costItem in supportCostItem | filter : { cashBookPostCostID : data.cashBookPostCostID } : true" ng-if="!data.isPastTime">
+                                            <option value=""></option>
+                                        </select>
+                                        <i class="icon-append append2" ng-if="!data.isPastTime">
+                                            <a href="javascript:void(0)" class="btn btn-primary btn-xs" ng-click="event.openCostItem(data.cashBookPostCostID)"><i class="fa fa-plus"></i></a>
+                                        </i>
+                                        <span class="form-control" ng-if="data.isPastTime">{{data.costItemNM}}</span>
+                                    </label>
+                                </section>
+                                <section class="col col-sm-2" ng-if="!data.isPastTime">
+                                    <label>Cost Item Detail</label>
+                                    <label class="input">
+                                        <select class="form-control" style="-webkit-appearance: none; -moz-appearance: none;" ng-if="data.cashBookOtherCostItemDetail == null || data.cashBookOtherCostItemDetail == ''" ng-model="data.cashBookCostItemDetailID" ng-options="costItemDetail.cashBookCostItemDetailID as costItemDetail.costItemDetailNM for costItemDetail in supportCostItemDetail | filter : { cashBookCostItemID : data.cashBookCostItemID } : true">
+                                            <option value=""></option>
+                                        </select>
+                                        <span class="form-control" ng-if="data.cashBookOtherCostItemDetail != null && data.cashBookOtherCostItemDetail != ''"></span>
+                                        <i class="icon-append append2">
+                                            <a href="javascript:void(0)" class="btn btn-primary btn-xs" ng-click="event.openCostItemDetail(data.cashBookCostItemID)" ng-disabled="data.cashBookOtherCostItemDetail != null && data.cashBookOtherCostItemDetail != ''"><i class="fa fa-plus"></i></a>
+                                        </i>
+                                    </label>
+                                </section>
+                                <section class="col col-sm-6" ng-if="!data.isPastTime">
+                                    <label>Other Cost Item Detail</label>
+                                    <label class="input">
+                                        <input type="text" class="form-control" ng-model="data.cashBookOtherCostItemDetail" ng-readonly="data.cashBookCostItemDetailID != null" />
+                                    </label>
+                                </section>
+                                <section class="col col-sm-8" ng-if="data.isPastTime">
+                                    <label>Cost Item Detail(Other)</label>
+                                    <label class="input">
+                                        <span class="form-control">{{(data.cashBookCostItemDetailID == null) ? data.cashBookOtherCostItemDetail : data.costItemDetailNM}}</span>
+                                    </label>
+                                </section>
+                            </div>
+
+                            <div class="row">
+                                <section class="col col-sm-12">
+                                    <label>Document(s)</label>
+                                    <div style="height:112px" class="furnindo-image-editor">
+                                        <a href="javascript:void(0);" class="btn btn-primary" ng-click="event.addCashBookDocument()" ng-if="!data.isPastTime">+</a>
+                                        <div class="img-item" ng-repeat="item in data.cashBookDocuments">
+                                            <a data-featherlight="image" href="{{item.fileLocation}}">
+                                                <img style="width: 100%;" ng-src="{{item.thumbnailLocation}}">
+                                            </a>
+                                            <span title="Remove image" class="action" ng-click="event.removeCashBookDocument(item.cashBookDocumentID ,$index)" ng-if="!data.isPastTime">x</span>
+                                        </div>
+                                        <div class="clear"></div>
+                                    </div>
+                                </section>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+<div id="frmPostCost" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+    <form name="postCostForm" class="row">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <a class="close" data-dismiss="modal" aria-hidden="true"> &times; </a>
+                    <h4 class="modal-title">Post Cost</h4>
+                </div>
+                <div class="modal-body">
+                    <div>
+                        <div class="widget-body no-padding">
+                            <div class="tilsoft-table-wrapper">
+                                <div class="tilsoft-table">
+                                    <div class="tilsoft-table-header">
+                                        <div style="width:86px"></div>
+                                        <div style="width:300px">Name</div>
+                                        <div>More<br />Information</div>
+                                    </div>
+                                    <div class="tilsoft-table-body">
+                                        <table>
+                                            <tbody>
+                                                <tr ng-repeat="item in supportPostCost">
+                                                    <td style="width:85px; text-align:center">
+                                                        <a href="javascript:void(0)" class="btn btn-success btn-xs font-11" ng-click="event.selectPostCost(item, $index)"><i class="fa fa-check"></i></a>
+                                                        <a href="javascript:void(0)" class="btn btn-primary btn-xs font-11" ng-click="event.editPostCost(item, $index)"><i class="fa fa-pencil"></i></a>
+                                                        <a href="javascript:void(0)" class="btn btn-danger btn-xs font-11" ng-click="event.deletePostCost(item.cashBookPostCostID, item)"><i class="fa fa-times"></i></a>
+                                                    </td>
+                                                    <td style="width:300px">{{item.postCostNM}}</td>
+                                                    <td>
+                                                        <div class="box">
+                                                            <div style="padding-left:0px" class="col col-sm-3">
+                                                                <label><i class="fa fa-user"></i> Updated By</label>
+                                                                <label><i class="fa fa-calendar"></i> Updated Date</label>
+                                                            </div>
+                                                            <div style="padding-right:0px" class="col col-sm-9">
+                                                                <label>
+                                                                    <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.updatedBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600" ng-if="item.updatedBy != null">
+                                                                        {{item.updatorName}}
+                                                                    </a>
+                                                                </label>
+                                                                <label>{{item.updatedDate}}</label>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div style="margin-top:5px"></div>
+                            <div style="padding-left:0px" class="col col-sm-10">
+                                Name
+                                <input type="text" class="form-control" maxlength="150" ng-model="editPostCost.postCostNM" />
+                            </div>
+                            <div style="padding-left:0px" class="col col-sm-2">
+                                Display Index
+                                <input avs-number id="postCostIndex" type="text" style="text-align:right" class="form-control" ng-data-source="editPostCost.displayIndex" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <a href="javascript:void(0)" class="btn btn-primary btn-xs" ng-click="event.savePostCost()"><i class="fa fa-save"></i> Save</a>
+                    <a href="javascript:void(0)" class="btn btn-danger btn-xs" ng-click="event.closePostCost()"><i class="fa fa-times"></i> Cancel</a>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div id="frmCostItem" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+    <form name="costItemForm" class="row">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <a class="close" data-dismiss="modal" aria-hidden="true"> &times; </a>
+                    <h4 class="modal-title">Cost Item</h4>
+                </div>
+                <div class="modal-body">
+                    <div>
+                        <div class="widget-body no-padding">
+                            <div class="tilsoft-table-wrapper">
+                                <div class="tilsoft-table">
+                                    <div class="tilsoft-table-header">
+                                        <div style="width:86px"></div>
+                                        <div style="width:120px">Post Cost</div>
+                                        <div style="width:300px">Name</div>
+                                        <div>More<br />Information</div>
+                                    </div>
+                                    <div class="tilsoft-table-body">
+                                        <table>
+                                            <tr ng-repeat="item in supportCostItem | filter : { cashBookPostCostID : data.cashBookPostCostID } : true">
+                                                <td style="width:85px">
+                                                    <a href="javascript:void(0)" class="btn btn-success btn-xs font-11" ng-click="event.selectCostItem(item, $index)"><i class="fa fa-check"></i></a>
+                                                    <a href="javascript:void(0)" class="btn btn-primary btn-xs font-11" ng-click="event.editCostItem(item, $index)"><i class="fa fa-pencil"></i></a>
+                                                    <a href="javascript:void(0)" class="btn btn-danger btn-xs font-11" ng-click="event.deleteCostItem(item.cashBookCostItemID, item)"><i class="fa fa-times"></i></a>
+                                                </td>
+                                                <td style="width:120px">{{item.postCostNM}}</td>
+                                                <td style="width:300px">{{item.costItemNM}}</td>
+                                                <td>
+                                                    <div class="box">
+                                                        <div style="padding-left:0px" class="col col-sm-4">
+                                                            <label><i class="fa fa-user"></i> Updated By</label>
+                                                            <label><i class="fa fa-calendar"></i> Updated Date</label>
+                                                        </div>
+                                                        <div style="padding-right:0px" class="col col-sm-8">
+                                                            <label>
+                                                                <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.updatedBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600" ng-if="item.updatedBy != null">
+                                                                    {{item.updatorName}}
+                                                                </a>
+                                                            </label>
+                                                            <label>{{item.updatedDate}}</label>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div style="margin-top:5px"></div>
+                            <div style="padding-left:0px" class="col col-sm-2">
+                                Post Cost
+                                <select class="form-control" ng-model="editCostItem.cashBookPostCostID" ng-options="postCost.cashBookPostCostID as postCost.postCostNM for postCost in supportPostCost | filter : { cashBookPostCostID : data.cashBookPostCostID } : true">
+                                    <option value=""></option>
+                                </select>
+                            </div>
+                            <div class="col col-sm-8">
+                                Name
+                                <input type="text" class="form-control" maxlength="150" ng-model="editCostItem.costItemNM" />
+                            </div>
+                            <div style="padding-right:0px" class="col col-sm-2">
+                                Display Index
+                                <input avs-number id="costItemIndex" type="text" style="text-align:right" class="form-control" ng-data-source="editCostItem.displayIndex" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <a href="javascript:void(0)" class="btn btn-primary btn-xs" ng-click="event.saveCostItem()"><i class="fa fa-save"></i> Save</a>
+                    <a href="javascript:void(0)" class="btn btn-danger btn-xs" ng-click="event.closeCostItem()"><i class="fa fa-times"></i> Cancel</a>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div id="frmCostItemDetail" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+    <form name="costItemDetailForm" class="row">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <a class="close" data-dismiss="modal" aria-hidden="true"> &times; </a>
+                    <h4 class="modal-title">Cost Item Detail</h4>
+                </div>
+                <div class="modal-body">
+                    <div>
+                        <div class="widget-body no-padding">
+                            <div class="tilsoft-table-wrapper">
+                                <div class="tilsoft-table">
+                                    <div class="tilsoft-table-header">
+                                        <div style="width:86px"></div>
+                                        <div style="width:120px">Cost Item</div>
+                                        <div style="width:300px">Name</div>
+                                        <div>More<br />Information</div>
+                                    </div>
+                                    <div class="tilsoft-table-body">
+                                        <table>
+                                            <tr ng-repeat="item in supportCostItemDetail | filter : { cashBookCostItemID : data.cashBookCostItemID } : true">
+                                                <td style="width:85px">
+                                                    <a href="javascript:void(0)" class="btn btn-success btn-xs font-11" ng-click="event.selectCostItemDetail(item)"><i class="fa fa-check"></i></a>
+                                                    <a href="javascript:void(0)" class="btn btn-primary btn-xs font-11" ng-click="event.editCostItemDetail(item)"><i class="fa fa-pencil"></i></a>
+                                                    <a href="javascript:void(0)" class="btn btn-danger btn-xs font-11" ng-click="event.deleteCostItemDetail(item.cashBookCostItemDetailID, item)"><i class="fa fa-times"></i></a>
+                                                </td>
+                                                <td style="width:120px">{{item.costItemNM}}</td>
+                                                <td style="width:300px">{{item.costItemDetailNM}}</td>
+                                                <td>
+                                                    <div class="box">
+                                                        <div style="padding-left:0px" class="col col-sm-4">
+                                                            <label><i class="fa fa-user"></i> Updated By</label>
+                                                            <label><i class="fa fa-calendar"></i> Updated Date</label>
+                                                        </div>
+                                                        <div style="padding-right:0px" class="col col-sm-8">
+                                                            <label>
+                                                                <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.updatedBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600" ng-if="item.updatedBy != null">
+                                                                    {{item.updatorName}}
+                                                                </a>
+                                                            </label>
+                                                            <label>{{item.updatedDate}}</label>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div style="margin-top:5px"></div>
+                            <div style="padding-left:0px" class="col col-sm-2">
+                                Cost Item
+                                <select class="form-control" ng-model="editCostItemDetail.cashBookCostItemID" ng-options="costItem.cashBookCostItemID as costItem.costItemNM for costItem in supportCostItem | filter : { cashBookCostItemID : data.cashBookCostItemID } : true">
+                                    <option value=""></option>
+                                </select>
+                            </div>
+                            <div class="col col-sm-8">
+                                Detail Name
+                                <input type="text" class="form-control" maxlength="150" ng-model="editCostItemDetail.costItemDetailNM" />
+                            </div>
+                            <div style="padding-right:0px" class="col col-sm-2">
+                                Display Index
+                                <input avs-number id="costItemDetailIndex" type="text" style="text-align:right" class="form-control" ng-data-source="editCostItemDetail.displayIndex" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <a href="javascript:void(0)" class="btn btn-primary btn-xs" ng-click="event.saveCostItemDetail()"><i class="fa fa-save"></i> Save</a>
+                    <a href="javascript:void(0)" class="btn btn-danger btn-xs" ng-click="event.closeCostItemDetail()"><i class="fa fa-times"></i> Cancel</a>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section FormAction{
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @canUpdate" title="Save" ng-click="event.saveCashBookReceipt()" ng-disabled="data.isPastTime"><i class="fa fa-save"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "CashBookReceipt")" class="btn btn-default" title="Back"><i class="fa fa-arrow-left"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @canDelete" title="Delete" ng-click="event.removeCashBook()" ng-disabled="data.isPastTime || @id  == 0"><i class="fa fa-times"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs{
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@serviceRoot/api/CashBookReceipt/',
+            token: '@token',
+            id: @id,
+            refreshUrl: '@Url.Action("Edit", "CashBookReceipt", new { id = UrlParameter.Optional })/',
+            backUrl: '@Url.Action("Index", "CashBookReceipt")',
+            moveBalanceUrl: '@Url.Action("Index", "CashBookBalanceMng")'
+        }
+    </script>
+    <script type="text/javascript" src="~/Angular/app/cashBookReceiptMng/edit.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/cashBookReceiptMng/service.js?v=@guid"></script>
+}

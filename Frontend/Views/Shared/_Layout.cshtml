@@ -1,0 +1,1083 @@
+﻿@{
+    if (Session[Frontend.Customize.Common.ProjectDefinition.USER_INFO_SESSION] == null)
+    {
+        Response.Redirect(Url.Action("Login", "Account"));
+        return;
+    }
+    Frontend.APIDTO.APIUserInformation userInfo = (Frontend.APIDTO.APIUserInformation)Session[Frontend.Customize.Common.ProjectDefinition.USER_INFO_SESSION];
+}
+
+<!DOCTYPE html>
+<html lang="en-us">
+@Html.Partial("~/Views/Shared/_Layout/_Head.cshtml")
+<body ng-app="tilsoftApp" ng-controller="tilsoftController">
+    @Html.Partial("~/Views/Shared/_Layout/_Header.cshtml")
+    @Html.Partial("~/Views/Shared/_Layout/_LeftNav.cshtml")
+    <div id="main" role="main">
+        @Html.Partial("~/Views/Shared/_Layout/_Ribbon.cshtml")
+        <div id="content" style="display: none;">
+            <div class="row">
+                <div class="col-xs-12 col-sm-7 col-md-7 col-lg-6">
+                    <h1 class="page-title txt-color-blueDark">
+                        <i class="fa fa-fw @ViewBag.Icon"></i>
+                        <font id="page-title">@ViewBag.Title</font>
+                        <span id="changeNotification"></span>
+                    </h1>
+                </div>
+                <div class="col-xs-12 col-sm-5 col-md-5 col-lg-6">
+                    @RenderSection("FormAction", false)
+                </div>
+            </div>
+
+            <section id="widget-grid">
+                <div id="notificationMessage" class="row" style="display:none ;">
+                    <article class="col-sm-12"></article>
+                </div>
+                @RenderBody()
+                @RenderSection("pagepopup2", required: false)
+
+                <a href="#" onclick="userFileMng.open();" class="btn btn-danger" style="display: none;">FILE MANAGER</a>
+                <script>
+                    function openFileManager() {
+                        $('#fileManager').modal('show');
+                        $('#fileManager').on('shown.bs.modal', function () {
+                            if (!imageMultipleUploader.isLoaded) {
+                                document.getElementById('fileManagerURL').contentWindow.location = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])/FileUploader.aspx?t=@userInfo.Data.UserId';
+                                imageMultipleUploader.isLoaded = true;
+                            }
+                        });
+                    }
+
+                    function openFileManager2() {
+                        $('#frmUserFileManager').show();
+                        $('.superbox').SuperBox();
+                    }
+                </script>
+
+                <div class="row">&nbsp;</div>
+            </section>
+            @RenderSection("pagemodel", required: false)
+        </div>
+
+        <div id="frmUserFileMng" style="padding: 0px 3px 3px 3px; position: relative; display: none;">
+            <section>
+                <div class="row">
+                    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                        <div class="jarviswidget" id="wid-id-frmUserFileMng" data-widget-colorbutton="false" data-widget-togglebutton="false" data-widget-editbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false" role="widget">
+                            <header role="heading">
+                                <h2>User File Manager</h2>
+                            </header>
+                            <div>
+                                <div class="widget-body">
+                                    <div class="widget-body-toolbar">
+                                        <div id="userFileMng-multiselect" style="display: none;">
+                                            <a href="javascript:void(0)" class="btn btn-primary" onclick="userFileMng.load()"><i class="fa fa-refresh"></i> Refresh</a>
+                                            <a href="javascript:void(0)" class="btn btn-primary" onclick="userFileMng.insert()"><i class="fa fa-check"></i> Insert selected files</a>
+                                            <a href="javascript:void(0)" class="btn btn-default" onclick="userFileMng.uploadImage()"><i class="fa fa-upload"></i> Upload Image</a>
+                                            <a href="javascript:void(0)" class="btn btn-default" onclick="userFileMng.uploadNoneImage()"><i class="fa fa-upload"></i> Upload None Image</a>
+                                            <a href="javascript:void(0)" class="btn btn-success" onclick="userFileMng.switchMode()"><i class="fa fa-check"></i> Single-Select mode</a>
+                                            <a href="javascript:void(0)" class="btn btn-default" onclick="userFileMng.close()"><i class="fa fa-sign-out"></i> Close</a>
+
+                                            <a href="javascript:void(0)" class="btn btn-danger" style="float:right;" onclick="userFileMng.deletes()"><i class="fa fa-times"></i> Delete selected files</a>
+                                            <a href="javascript:void(0)" class="btn btn-danger" style="float:right;" onclick="userFileMng.deleteAll()"><i class="fa fa-times"></i> Clear all files</a>
+                                        </div>
+                                        <div id="userFileMng-singleselect" style="display: none;">
+                                            <a href="javascript:void(0)" class="btn btn-primary" onclick="userFileMng.load()"><i class="fa fa-refresh"></i> Refresh</a>
+                                            <a href="javascript:void(0)" class="btn btn-default" onclick="userFileMng.uploadImage()"><i class="fa fa-upload"></i> Upload Image</a>
+                                            <a href="javascript:void(0)" class="btn btn-default" onclick="userFileMng.uploadNoneImage()"><i class="fa fa-upload"></i> Upload None Image</a>
+                                            <a href="javascript:void(0)" class="btn btn-success" onclick="userFileMng.switchMode()"><i class="fa fa-check"></i> Multi-Select mode</a>
+                                            <a href="javascript:void(0)" class="btn btn-default" onclick="userFileMng.close()"><i class="fa fa-sign-out"></i> Close</a>
+
+
+                                            <a href="javascript:void(0)" class="btn btn-danger" style="float:right;" onclick="userFileMng.deleteAll()"><i class="fa fa-times"></i> Clear all files</a>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div id="superbox-content" class="superbox col-sm-12" style="font-size: 14px!important"></div>
+                                        <div class="superbox-show" style="height:300px; display: none"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </section>
+        </div>
+        <div id="fileMultipleUploader2" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                            &times;
+                        </button>
+                        <h4 class="modal-title">Upload multiple file</h4>
+                    </div>
+                    <div class="modal-body no-padding">
+                        <div class="smart-form">
+                            <fieldset>
+                                <section>
+                                    <iframe id="fileMultipleUploaderUrl2" style="border: none; width: 100%; min-height: 350px;"></iframe>
+                                </section>
+                            </fieldset>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="imageMultipleUploader2" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                            &times;
+                        </button>
+                        <h4 class="modal-title">Upload multiple image (images will be resized to 1027x768)</h4>
+                    </div>
+                    <div class="modal-body no-padding">
+                        <div class="smart-form">
+                            <fieldset>
+                                <section>
+                                    <iframe id="imageMultipleUploaderUrl2" style="border: none; width: 100%; min-height: 350px;"></iframe>
+                                </section>
+                            </fieldset>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="fileUploader2" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                            &times;
+                        </button>
+                        <h4 class="modal-title">Upload file</h4>
+                    </div>
+                    <div class="modal-body no-padding">
+                        <div class="smart-form">
+                            <fieldset>
+                                <section>
+                                    <iframe id="fileUploader2Url" style="border: none; width: 100%; height: 100px;"></iframe>
+                                </section>
+                            </fieldset>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="fileMultipleUploader" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                            &times;
+                        </button>
+                        <h4 class="modal-title">Upload multiple file</h4>
+                    </div>
+                    <div class="modal-body no-padding">
+                        <div class="smart-form">
+                            <fieldset>
+                                <section>
+                                    <iframe id="fileMultipleUploaderUrl" style="border: none; width: 100%; min-height: 350px;"></iframe>
+                                </section>
+                            </fieldset>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="imageMultipleUploader" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                            &times;
+                        </button>
+                        <h4 class="modal-title">Upload multiple image (images will be resized to 1027x768)</h4>
+                    </div>
+                    <div class="modal-body no-padding">
+                        <div class="smart-form">
+                            <fieldset>
+                                <section>
+                                    <iframe id="imageMultipleUploaderUrl" style="border: none; width: 100%; min-height: 350px;"></iframe>
+                                </section>
+                            </fieldset>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="fileManager" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                            &times;
+                        </button>
+                        <h4 class="modal-title">File Manager</h4>
+                    </div>
+                    <div class="modal-body no-padding">
+                        <div class="smart-form">
+                            <fieldset>
+                                <section>
+                                    <iframe id="fileManagerURL" style="border: none; width: 100%; min-height: 350px;"></iframe>
+                                </section>
+                            </fieldset>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="masterUploader" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">File upload</h4>
+                </div>
+                <div class="modal-body no-padding">
+                    <div class="smart-form">
+                        <fieldset>
+                            <section>
+                                <iframe id="masterUploaderUrl" style="border: none; width: 100%; min-height: 350px;"></iframe>
+                            </section>
+                        </fieldset>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @Html.Partial("~/Views/Shared/_Layout/_FileManager.cshtml")
+    @Html.Partial("~/Views/Shared/_Layout/_Footer.cshtml")
+
+    <!-- PACE LOADER - turn this on if you want ajax loading to show (caution: uses lots of memory on iDevices)-->
+    <!--
+    <script data-pace-options='{ "restartOnRequestAfter": true }' src="~/TemplateResource/js/plugin/pace/pace.min.js"></script>
+        -->
+    @Scripts.Render("~/bundles/templatejs")
+    <script src="~/Angular/js/helper.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/js/furnindo-directive.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/js/avs-directives.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+
+    <!--[if IE 8]>
+
+    <h1>Your browser is out of date, please update your browser by going to www.microsoft.com/download</h1>
+
+    <![endif]-->
+    <script src="~/Angular/app/userFileMng/service.js"></script>
+    <script src="~/Angular/app/tmpFileManager/service.js"></script>
+    <script type="text/javascript">
+        Highcharts.setOptions({
+            lang: {
+                decimalPoint: ',',
+                thousandsSep: '.'
+            },
+            credits: {
+                enabled: false
+            },
+            plotOptions: {
+                series: {
+                    states: {
+                        inactive: {
+                            opacity: 1
+                        }
+                    }
+                }
+            }
+        });
+
+    $(document).ready(function () {
+        pageSetUp();
+
+        // base 64 encoder
+        $.base64.utf8encode = true;
+
+        // declare time picker
+        $('.timepicker').timepicker();
+
+        scope = angular.element(document.body).scope();
+
+        // setup scrollable table
+        $('.scrollable-table2-wrapper').scrollableTable3();
+
+        // init dropzone
+        Dropzone.autoDiscover = false;
+        $("#mydropzone").dropzone({
+            addRemoveLinks: true,
+            //maxFilesize: 0.5,
+            dictDefaultMessage: '<span class="text-center"><span class="font-lg visible-xs-block visible-sm-block visible-lg-block"><span class="font-lg"><i class="fa fa-caret-right text-danger"></i> Drop files <span class="font-xs">to upload</span></span><span>&nbsp&nbsp<h4 class="display-inline"> (Or Click)</h4></span>',
+            dictResponseError: 'Error uploading file!',
+            headers: {
+                'Authorization': 'bearer @Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]'
+            },
+            init: function () {
+                var mydropzon = this;
+                this.on("complete", function () {
+                    if (mydropzon.getQueuedFiles().length == 0) {
+                        mydropzon.removeAllFiles();
+                        tmpFileManager.refresh();
+                    }
+                });
+            }
+        });
+
+        // init sticky content
+        if ($('#sticky-content').length > 0) {
+            var sticky_navigation_offset_top = $('#sticky-content').offset().top;
+            var sticky_navigation = function () {
+                var scroll_top = $(window).scrollTop(); // our current vertical position from the top
+
+                // if we've scrolled more than the navigation, change its position to fixed to stick to top, otherwise change it back to relative
+                if (scroll_top > sticky_navigation_offset_top) {
+                    $('#sticky-content').css({ 'position': 'fixed', 'top': 0, 'left': 0 });
+                } else {
+                    $('#sticky-content').css({ 'position': 'relative' });
+                }
+            };
+
+            // run our function on load
+            sticky_navigation();
+            $(window).scroll(function () {
+                sticky_navigation();
+            });
+        }
+    });
+
+    //
+    // FILE FUNCTIONS
+    //
+    tmpFileService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/file/';
+    tmpFileService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+    var tmpFileManager = {
+        selectedFileName: '',
+        selectedFileUrl: '',
+        clear: function () {
+            if (confirm("Clear all temp file ?")) {
+                tmpFileService.clear(
+                    function (data) {
+                        tmpFileManager.refresh();
+                    },
+                    function (error) {
+                        // show error
+                        $('.file-browser').html('<span style="color: #ff0000; font-size: 14px;">Error when get files from server !</span>');
+                    }
+                );
+            }
+        },
+        refresh: function () {
+            tmpFileService.load(
+                function (data) {
+                    // show data
+                    $('.file-browser').html('');
+
+                    var _html = '';
+                    var _root = '@Request.Url.GetLeftPart(UriPartial.Authority)/TemplateResource/img/filetype/';
+                    _html += '<div class="img-list">';
+
+                    $.each(data.data, function (i, e) {
+                        var displayImage = '';
+                        if (e['fileExtension'].toLowerCase() == '.jpg' || e['fileExtension'].toLowerCase() == '.png' || e['fileExtension'].toLowerCase() == '.gif' || e['fileExtension'].toLowerCase() == '.bmp') {
+                            displayImage = e['url'];
+                        }
+                        else {
+                            switch (e['fileExtension'].toLowerCase()) {
+                                case '.pdf':
+                                    displayImage = _root + "pdf.png";
+                                    break;
+
+                                case '.xls':
+                                    displayImage = _root + "excel.png";
+                                    break;
+
+                                case '.xlsx':
+                                    displayImage = _root + "excel.png";
+                                    break;
+
+                                case '.xlsm':
+                                    displayImage = _root + "excel.png";
+                                    break;
+
+                                case '.doc':
+                                    displayImage = _root + "word.png";
+                                    break;
+
+                                case '.docx':
+                                    displayImage = _root + "word.png";
+                                    break;
+
+                                case '.ppt':
+                                    displayImage = _root + "power-point.png";
+                                    break;
+
+                                case '.pptx':
+                                    displayImage = _root + "power-point.png";
+                                    break;
+
+                                case '.xml':
+                                    displayImage = _root + "xml.png";
+                                    break;
+
+                                case '.avi':
+                                    displayImage = _root + "avi.png";
+                                    break
+
+                                case '.mp4':
+                                    displayImage = _root + "avi.png";
+                                    break;
+
+                                default:
+                                    displayImage = _root + "unknow.png";
+                                    break;
+                            }
+                        }
+                        _html += '<div data-filename="' + e['friendlyName'] + '" data-url="' + e['url'] + '" class="img-item"><img src="' + displayImage + '" /><br/>' + e['friendlyName'] + '</div>';
+                    });
+                    _html += '</div>';
+                    $('.file-browser').html(_html);
+
+                    // reassign click event
+                    $('.img-list').find('.img-item').dblclick(function () {
+                        tmpFileManager.selectedFileName = $(this).data('filename');
+                        tmpFileManager.selectedFileUrl = $(this).data('url');
+                        tmpFileManager.close(true);
+                    });
+
+                    // init masonry
+                    var loadedIndex = 0;
+                    $('.img-list img').load(function () {
+                        loadedIndex++;
+
+                        if (loadedIndex >= data.data.length) {
+                            if ($('.img-list').find('.img-item').length > 0) {
+                                $('.img-list').masonry({
+                                    // options
+                                    itemSelector: '.img-item',
+                                    columnWidth: 182,
+                                    gutter: 10
+                                });
+                            }
+                        }
+                    });
+                },
+                function (error) {
+                    // show error
+                    $('.file-browser').html('<span style="color: #ff0000; font-size: 14px;">Error when get files from server !</span>');
+                }
+            );
+        },
+        open: function () {
+            $('#file-manager').show();
+            tmpFileManager.refresh();
+        },
+        close: function (executeCallBack) {
+            $('#file-manager').hide();
+            if (executeCallBack) {
+                this.callback();
+            }
+        },
+        callback: function () {
+            // do nothing
+        }
+    }
+
+    //
+    // User Files Mng
+    //
+    userFileMngService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/userfilemng/';
+    userFileMngService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+        var userFileMng = {
+            isMultiSelectActivated: false,
+            autoResizeImage: true,
+            selectedFiles: [],
+            data: [],
+            callback: function () {
+                alert('do something');
+                console.log(userFileMng.selectedFiles);
+            },
+            load: function () {
+                userFileMngService.search(
+                    function (data) {
+                        userFileMng.data = data.data.data;
+                        userFileMng.refresh();
+                    },
+                    function (error) {
+                        // show error
+                        alert('Error when get files from server !');
+                    }
+                );
+            },
+            switchMode: function () {
+                if (userFileMng.isMultiSelectActivated) {
+                    userFileMng.isMultiSelectActivated = false;
+                }
+                else {
+                    userFileMng.isMultiSelectActivated = true;
+                }
+                userFileMng.load();
+            },
+            refresh: function () {
+                $('#superbox-content').html('');
+                $.each(userFileMng.data, function (index, item) {
+                    $('#superbox-content').append('<div class="superbox-list" style="text-align: center;"><img src="' + item.thumbnailPath + '" data-url="' + item.absoluteURL + '" data-file="' + item.fileName + '" data-thumb="' + item.thumbnailPath + '" data-img="' + item.filePath + '" class="superbox-img"><p style="word-wrap: break-word">' + item.fileName + '</p><i class="fa fa-check fa-2x selected-mark"></i></div>');
+                });
+                $('#superbox-content').append('<div class="superbox-float"></div>');
+                if (!userFileMng.isMultiSelectActivated) {
+                    $('#userFileMng-multiselect').hide();
+                    $('#userFileMng-singleselect').show();
+
+                    //
+                    // initialize superbox
+                    //
+                    $('.superbox').SuperBox({
+                        buttons: [
+                            {
+                                label: '<i class="fa fa-check"></i> Insert file',
+                                class: 'primary',
+                                callback: function (e) { userFileMng.insertSingle(e); }
+                            },
+                            {
+                                label: '<i class="fa fa-rotate-left"></i> Rotate CCW',
+                                class: 'success',
+                                callback: function (e) { userFileMng.rotate(e, -1); }
+                            },
+                            {
+                                label: '<i class="fa fa-rotate-right"></i> Rotate CW',
+                                class: 'success',
+                                callback: function (e) { userFileMng.rotate(e, 1); }
+                            },
+                            {
+                                label: '<i class="fa fa-times"></i> Delete',
+                                class: 'danger',
+                                callback: function (e) { userFileMng.delete(e); }
+                            }
+                        ]
+                    });
+                }
+                else {
+                    $('#userFileMng-multiselect').show();
+                    $('#userFileMng-singleselect').hide();
+
+                    $('.superbox-list').each(function (index, item) {
+                        $(this).click(function () {
+                            var currentimg = $(this).find('.superbox-img');
+
+                            if ($(this).hasClass('selected')) {
+                                $(this).removeClass('selected');
+                                var imgItem = null;
+                                var fileName = currentimg.data('file');
+                                $.each(userFileMng.selectedFiles, function (index, currentItem) {
+                                    if (currentItem.fileName === fileName) {
+                                        imgItem = currentItem;
+                                    }
+                                });
+
+                                userFileMng.selectedFiles.splice(userFileMng.selectedFiles.indexOf(imgItem), 1);
+                            }
+                            else {
+                                $(this).addClass('selected');
+                                userFileMng.selectedFiles.push({
+                                    fileName: currentimg.data('file'),
+                                    thumbnailPath: currentimg.data('thumb'),
+                                    filePath: currentimg.data('img')
+                                });
+                            }
+                        });
+                    });
+                }
+            },
+            uploadImage: function () {
+                imageMultipleUploader2.autoResize = userFileMng.autoResizeImage;
+                imageMultipleUploader2.open();
+            },
+            uploadNoneImage: function () {
+                fileMultipleUploader2.open();
+            },
+            getRefreshUrl: function (url) {
+                var d = new Date();
+                var n = d.getMilliseconds();
+                if (url.indexOf('?') < 0) {
+                    return url + '?' + n;
+                }
+                else {
+                    return url + n;
+                }
+            },
+            rotate: function (file, direction, elem) {
+                userFileMngService.rorateFile(
+                    file,
+                    direction,
+                    function (data) {
+                        // refresh cache for the rotated image
+                        $('.superbox-img').each(function (index, item) {
+                            if ($(item).data('file') == file) {
+                                $(item).attr('src', userFileMng.getRefreshUrl($(item).attr('src')));
+                                $(item).data('img', userFileMng.getRefreshUrl($(item).data('img')));
+                            }
+                        });
+                        $('.superbox-current-img').attr('src', userFileMng.getRefreshUrl($('.superbox-current-img').attr('src')));
+                    },
+                    function (error) {
+                    }
+                );
+            },
+            delete: function (file) {
+                if (confirm('Delete file: ' + file + '?')) {
+                    userFileMngService.deleteFile(
+                        file,
+                        function (data) {
+                            // remove the image
+                            $('.superbox-show').hide();
+                            $('.superbox-list.active').remove();
+                        },
+                        function (error) {
+                        }
+                    );
+                }
+            },
+            deletes: function () {
+                if (confirm('Delete the selected file(s) ?')) {
+                    $.each(userFileMng.selectedFiles, function (index, item) {
+                        userFileMngService.deleteFile(
+                            item.fileName,
+                            function (data) {
+                                // remove the image
+                                $('.superbox-show').hide();
+                                $('.superbox-list').each(function () {
+                                    var currentimg = $(this).find('.superbox-img');
+                                    if (currentimg.data('file') === item.fileName) {
+                                        $(this).remove();
+                                    }
+                                });
+                            },
+                            function (error) {
+                            }
+                        );
+                    });
+                    userFileMng.selectedFiles = [];
+                }
+            },
+            deleteAll: function () {
+                if (confirm('Delete all files ?')) {
+                    userFileMngService.deleteFiles(
+                        function (data) {
+                            userFileMng.data = [];
+                            userFileMng.refresh();
+                        },
+                        function (error) {
+
+                        }
+                    );
+                }
+            },
+            open: function () {
+                // reset setting
+                // userFileMng.isMultiSelectActivated = false;
+                userFileMng.selectedFiles = [];
+
+                $('#content').hide();
+                $('#frmUserFileMng').show();
+                userFileMng.load();
+            },
+            close: function () {
+                $('#frmUserFileMng').hide();
+                $('#content').show();
+            },
+            insertSingle: function (e) {
+                userFileMng.selectedFiles = [];
+                $('.superbox-list').each(function () {
+                    var currentimg = $(this).find('.superbox-img');
+                    if (currentimg.data('file') === e) {
+                        userFileMng.selectedFiles.push({
+                            fileName: currentimg.data('file'),
+                            thumbnailPath: currentimg.data('thumb'),
+                            filePath: currentimg.data('img')
+                        });
+                    }
+                });
+
+                userFileMng.close();
+                userFileMng.callback();
+            },
+            insert: function () {
+                userFileMng.close();
+                userFileMng.callback();
+            }
+        }
+
+        var imageMultipleUploader2 = {
+            isLoaded: false,
+            autoResize: true,
+            open: function () {
+                $('#imageMultipleUploader2').modal('show');
+                $('#imageMultipleUploader2').on('shown.bs.modal', function () {
+                    if (!imageMultipleUploader.isLoaded) {
+                        document.getElementById('imageMultipleUploaderUrl2').contentWindow.location = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])/MultiUploadImage2.aspx?t=@userInfo.Data.UserId&a=' + (imageMultipleUploader2.autoResize ? 1 : 0);
+                        imageMultipleUploader.isLoaded = true;
+                    }
+                    if (imageMultipleUploader2.autoResize) {
+                        $('#imageMultipleUploader2 h4.modal-title').html('Upload multiple image (images will be resized to 1027x768)');
+                    }
+                    else {
+                        $('#imageMultipleUploader2 h4.modal-title').html('Upload multiple image');
+                    }
+                });
+            },
+            close: function () {
+                $('#imageMultipleUploader2').modal('hide');
+                userFileMng.load();
+            }
+        };
+
+        var fileMultipleUploader2 = {
+            isLoaded: false,
+            open: function () {
+                $('#fileMultipleUploader2').modal('show');
+                $('#fileMultipleUploader2').on('shown.bs.modal', function () {
+                    if (!fileMultipleUploader2.isLoaded) {
+                        document.getElementById('fileMultipleUploaderUrl2').contentWindow.location = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])/MultiUploadFile2.aspx?t=@userInfo.Data.UserId';
+                        fileMultipleUploader.isLoaded = true;
+                    }
+                });
+            },
+            close: function () {
+                $('#fileMultipleUploader2').modal('hide');
+                userFileMng.load();
+            }
+        };
+
+
+        var fileUploader2 = {
+            selectedFileName: '',
+            selectedFileUrl: '',
+            selectedFriendlyName: '',
+            isLoaded: false,
+            isOK: false,
+            open: function () {
+                fileUploader2.isOK = false;
+                fileUploader2.selectedFileName = '';
+                fileUploader2.selectedFileUrl = '';
+                fileUploader2.selectedFriendlyName = '';
+                $('#fileUploader2').modal('show');
+                $('#fileUploader2').on('shown.bs.modal', function () {
+                    if (!fileUploader2.isLoaded) {
+                        document.getElementById('fileUploader2Url').contentWindow.location = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])/Upload.aspx?t=@userInfo.Data.UserId';
+                    fileUploader2.isLoaded = true;
+                }
+            });
+            $('#fileUploader2').on('hidden.bs.modal', function () {
+                //if (fileUploader2.isOK) {
+                //    fileUploader2.callback();
+                //}
+                fileUploader2.onhide();
+            });
+        },
+        close: function () {
+            fileUploader2.callback();
+            $('#fileUploader2').modal('hide');
+            //fileUploader2.isOK = true;
+        },
+        callback: function () {
+            // do nothing
+        },
+        onhide: function () {
+            // do nothing
+        }
+    };
+
+    var imageMultipleUploader = {
+        selectedFiles: null,
+        isLoaded: false,
+        isOK: false,
+        open: function () {
+            fileUploader2.isOK = false;
+            selectedFiles: null,
+            $('#imageMultipleUploader').modal('show');
+            $('#imageMultipleUploader').on('shown.bs.modal', function () {
+                if (!imageMultipleUploader.isLoaded) {
+                    document.getElementById('imageMultipleUploaderUrl').contentWindow.location = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])/MultiUploadImage.aspx?t=@userInfo.Data.UserId';
+                    imageMultipleUploader.isLoaded = true;
+                }
+            });
+            $('#imageMultipleUploader').on('hidden.bs.modal', function () {
+                imageMultipleUploader.onhide();
+            });
+        },
+        close: function () {
+            imageMultipleUploader.callback();
+            $('#imageMultipleUploader').modal('hide');
+            //fileUploader2.isOK = true;
+        },
+        callback: function () {
+            // do nothing
+        },
+        onhide: function () {
+            // do nothing
+        }
+    };
+
+    var fileMultipleUploader = {
+        selectedFiles: null,
+        isLoaded: false,
+        isOK: false,
+        open: function () {
+            fileUploader2.isOK = false;
+            selectedFiles: null,
+            $('#fileMultipleUploader').modal('show');
+            $('#fileMultipleUploader').on('shown.bs.modal', function () {
+                if (!fileMultipleUploader.isLoaded) {
+                    document.getElementById('fileMultipleUploaderUrl').contentWindow.location = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])/MultiUploadFile.aspx?t=@userInfo.Data.UserId';
+                    fileMultipleUploader.isLoaded = true;
+                }
+            });
+            $('#fileMultipleUploader').on('hidden.bs.modal', function () {
+                fileMultipleUploader.onhide();
+            });
+        },
+        close: function () {
+            fileMultipleUploader.callback();
+            $('#fileMultipleUploader').modal('hide');
+            //fileUploader2.isOK = true;
+        },
+        callback: function () {
+            // do nothing
+        },
+        onhide: function () {
+            // do nothing
+        }
+        };
+
+    //
+    // Master Uploader
+    //
+    var masterUploader = {
+        selectedFiles: null,
+        isLoaded: false,
+        imageOnly: true,
+        multiSelect: true,
+        open: function () {
+            masterUploader.selectedFiles = null;
+            if (masterUploader.multiSelect) {
+                $('#masterUploader .modal-title').html('File upload (multi select)');
+            }
+            else {
+                $('#masterUploader .modal-title').html('File upload');
+            }            
+
+            $('#masterUploader').modal('show');
+            $('#masterUploader').on('shown.bs.modal', function () {
+                if (!imageMultipleUploader.isLoaded) {
+                    document.getElementById('masterUploaderUrl').contentWindow.location = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])/MasterUploader.aspx?t=@userInfo.Data.UserId&i=' + (masterUploader.imageOnly ? 1 : 0) + '&m=' + (masterUploader.multiSelect ? 1 : 0);
+                    masterUploader.isLoaded = true;
+                }
+            });
+        },
+        close: function () {
+            $('#masterUploader').modal('hide');
+            if (masterUploader.callback) {
+                masterUploader.callback();
+            }
+        },
+        callback: null
+    };
+
+    // listen to on message event
+    window.onmessage = function (e) {
+        if (e.data.isError) {
+            alert(e.data.message);
+        }
+        else {
+            if (e.data.info) {
+                fileMultipleUploader.selectedFiles = e.data.info;
+                fileMultipleUploader.close();
+                imageMultipleUploader.selectedFiles = e.data.info;
+
+                masterUploader.selectedFiles = e.data.info;
+                masterUploader.close();
+            }
+            else {
+                fileUploader2.selectedFileName = e.data.filename;
+                fileUploader2.selectedFileUrl = e.data.fileURL;
+                fileUploader2.selectedFriendlyName = e.data.friendlyName;
+                fileUploader2.close();
+            }
+
+            fileMultipleUploader2.close();
+            imageMultipleUploader2.close();
+        }
+    };
+
+    // static functions
+    String.prototype.splice = function (idx, rem, s) {
+        return (this.slice(0, idx) + s + this.slice(idx + Math.abs(rem)));
+    };
+
+    function formatCurrency(price, decimal) {
+        if (decimal == undefined) {
+            decimal = 2;
+        }
+
+        var format = {
+            decimalSymbol: ',',
+            groupLength: 3,
+            groupSymbol: '.',
+            integerRequired: 1,
+            pattern: '%s',
+            precision: decimal,
+            requiredPrecision: decimal
+        };
+
+        var precision = isNaN(format.precision = Math.abs(format.precision)) ? 2 : format.precision;
+        var requiredPrecision = isNaN(format.requiredPrecision = Math.abs(format.requiredPrecision)) ? 2 : format.requiredPrecision;
+
+        precision = requiredPrecision;
+
+        var integerRequired = isNaN(format.integerRequired = Math.abs(format.integerRequired)) ? 1 : format.integerRequired;
+
+        var decimalSymbol = format.decimalSymbol == undefined ? "," : format.decimalSymbol;
+        var groupSymbol = format.groupSymbol == undefined ? "." : format.groupSymbol;
+        var groupLength = format.groupLength == undefined ? 3 : format.groupLength;
+
+        var s = '';
+
+        var i = parseInt(price = Math.abs(+price || 0).toFixed(precision)) + "";
+        var pad = (i.length < integerRequired) ? (integerRequired - i.length) : 0;
+        while (pad) { i = '0' + i; pad--; }
+        var j = (j = i.length) > groupLength ? j % groupLength : 0;
+        re = new RegExp("(\\d{" + groupLength + "})(?=\\d)", "g");
+
+        /**
+         * replace(/-/, 0) is only for fixing Safari bug which appears
+         * when Math.abs(0).toFixed() executed on "0" number.
+         * Result is "0.-0" :(
+         */
+        var r = (j ? i.substr(0, j) + groupSymbol : "") + i.substr(j).replace(re, "$1" + groupSymbol) + (precision ? decimalSymbol + Math.abs(price - i).toFixed(precision).replace(/-/, 0).slice(2) : "")
+        var pattern = '';
+        if (format.pattern.indexOf('{sign}') == -1) {
+            pattern = s + format.pattern;
+        } else {
+            pattern = format.pattern.replace('{sign}', s);
+        }
+
+        return pattern.replace('%s', r).replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+    }
+    </script>
+
+    <!-- ONLINE SUPPORT BAGDE -->
+    <div class="ui-widget ui-chatbox" outline="0" style="width: 228px; right: 0px;">
+        <div id="supportBadgeHeader" onclick="showSupportBagde()" class="ui-widget-header ui-chatbox-titlebar online ui-dialog-header">
+            <span><i title="online"></i>Skype with us</span>
+            <a href="javascript:void(0)" rel="tooltip" data-placement="top" data-original-title="Minimize" class="ui-chatbox-icon" role="button"><i id="supportBadgeIcon" class="fa fa-minus"></i></a>
+        </div>
+        <div id="supportBadge" class="false ui-widget-content ui-chatbox-content" style="display: none; padding: 2px; font-size: 14px;">
+            <ul>
+                <li>
+                    <a href="skype:live:51011bbe035023e6?chat">
+                        <img src="~/img/avatars/supporter.png" />
+                        Nguyen Ngoc Thuy (Ms)
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        var showSupportBagde = function () {
+            $('#supportBadge').toggle();
+            if ($('#supportBadge').css('display') == 'block') {
+                $('#supportBadgeHeader').find('#supportBadgeIcon').removeClass('fa-plus').addClass('fa-minus');
+                //$.cookie("support-badge-status", 1, { path: '/' });
+            }
+            else {
+                $('#supportBadgeHeader').find('#supportBadgeIcon').removeClass('fa-minus').addClass('fa-plus');
+                //$.cookie("support-badge-status", 0, { path: '/' });
+            }
+        }
+
+        $(document).ready(function () {
+            //if (!$.cookie("support-badge-status")) {
+            //    $.cookie("support-badge-status", 1, { path: '/' });
+            //}
+
+            //var status = $.cookie("support-badge-status");
+            //if (status == 1) {
+            //    $('#supportBadgeHeader').find('#supportBadgeIcon').removeClass('fa-plus').addClass('fa-minus');
+            //    $('#supportBadge').show();
+            //}
+            //else {
+            //    $('#supportBadgeHeader').find('#supportBadgeIcon').removeClass('fa-minus').addClass('fa-plus');
+            //    $('#supportBadge').hide();
+            //}
+
+            // search module box
+            var dataUiItems = [];
+            @foreach (Frontend.APIDTO.APIUserPermission dtoPermission in userInfo.Data.Permissions.Where(o => o.ParentID > 0 && o.CanRead && o.NavType != "W"))
+            {
+                <text>
+                dataUiItems.push({label: '@dtoPermission.DisplayText', url: '@Url.Action("Index", dtoPermission.URLLink)'});
+                </text>
+            }
+            $('#search-fld').autocomplete({
+                source: dataUiItems,
+                minLength: 3,
+                select: function(event, ui){
+                    if(ui.item) {
+                        window.location = ui.item.url;
+                    }
+                }
+            })
+			.data("ui-autocomplete")._renderItem = function (ul, item) {
+                    return $("<li>")
+                        .data('item.autocomplete', item)
+                        .append('<a href="' + item.url + '">' + item.label + '</a>')
+                        .appendTo(ul);
+                };
+            });
+    </script>
+
+
+    <div id="pnlCacheImg" style="display: none;"></div>
+    @RenderSection("pagepopup", required: false)
+    @RenderSection("pagejs", required: false)
+</body>
+</html>

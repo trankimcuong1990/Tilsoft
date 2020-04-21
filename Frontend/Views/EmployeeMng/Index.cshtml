@@ -1,0 +1,315 @@
+﻿
+@{
+    ViewBag.Title = "Employee";
+    ViewBag.Module = "Employee";
+}
+<style>
+    .scrollbar-wrapper{
+        overflow-y: scroll;
+        height: 120px;
+    }
+    .AvgUsage {
+        word-break: normal !important;
+    }
+    .AvgUsage span {
+        padding: 5px;
+        display: block;
+        color: #fff;
+        border-radius: 5px;
+        text-align: center;
+        font-size: 11px;
+    }
+    .ts-icon{
+        font-size:20px;
+    }
+    .Usage-bg-0{
+        background-color:#999;
+        font-size: 9px !important;
+        padding-top: 7px !important;
+        padding-bottom: 7px !important;
+    }
+    
+    .Usage-bg-1{
+        background-color:#ac2925;
+    }
+    .Usage-bg-2{
+        background-color:#FF9000;
+    }
+    .Usage-bg-3{
+        background-color:#FD9A69;
+    }
+    .Usage-bg-4{
+        background-color:#8b65e8;
+    }
+    .Usage-bg-5{
+        background-color:#3699FE;
+    }
+    .Usage-bg-6{
+        background-color:#50c4b3;
+    }
+    .Usage-bg-7{
+        background-color:#5cb85c;
+    }
+    .action-btn a{
+        width:55px !important;
+    }
+</style>
+<div class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">    
+        <div class="jarviswidget" id="wid-id-search-filter" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Search Result</h2>
+                <div class="widget-toolbar">
+                    <div class="smart-form">
+                        <div class="inline-group">
+                            <label class="radio">
+                                <input name="hasleft" type="radio" ng-model="filters.HasLeft" value="false" ng-change="event.reload()">
+                                <i></i>Active
+                            </label>
+                            <label class="radio">
+                                <input name="hasleft" type="radio" ng-model="filters.HasLeft" value="true" ng-change="event.reload()">
+                                <i></i>Not active
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div avs-scroll grid-handler="gridHandler" class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header" style="width: 1860px;">
+                                <div style="width: 100px; font-size: 11px;">
+                                    <b>Total: </b><b style="color:#a90329;">{{totalRows | number:0}}</b>
+                                    <br />
+                                    <b>Acc: </b><b style="color:#a90329;">{{totalAccount | number:0}}</b>
+                                </div>
+                                <div style="width: 100px;"></div>
+                                <div style="width: 100px;" class="sorting" data-colname="employeeNM">Full Name</div>
+                                <div style="width: 60px;" class="sorting" data-colname="employeeFirstNM"><i class="ts-icon fa fa-user" aria-hidden="true"></i></div>
+                                <div style="width: 180px;">Contact Info</div>
+                                <div style="width: 100px;" class="sorting" data-colname="companyNM">Company</div>
+                                <div style="width: 100px;" class="sorting" data-colname="branchNM">Branch</div>
+                                <div style="width: 90px;" class="sorting" data-colname="locationNM"><i class="ts-icon fa fa-map-marker" aria-hidden="true"></i></div>
+                                <div style="width: 100px;" class="sorting" data-colname="internalDepartmentNM">Dept</div>
+                                <div style="width: 80px;" class="sorting" data-colname="tilsoftUsageID">Tilsoft</div>
+                                <div style="width: 100px;" class="sorting" data-colname="jobTitle">Job Title</div>
+                                <div style="width: 80px;" class="sorting" data-colname="jobLevelNM"><i class="ts-icon fa fa-briefcase" aria-hidden="true"></i></div>
+                                <div style="width: 80px;" class="sorting" data-colname="numOfDays">Period joining</div>
+                                <div style="width: 50px;" class="sorting" data-colname="age">Age</div>
+                                <div style="width: 200px;">Job Description</div>
+                                <!--<div style="width: 450px;">Daily Task</div>-->
+                                <div style="width: 80px;">English</div>
+                                <div style="width: 80px;" class="sorting" data-colname="dateStart">Date Joined</div>
+                                <div style="width: 100px;" class="sorting" data-colname="reporterName">Report to</div>
+                                <div class="sorting" data-colname="dateOfBirth">DOB</div>
+                            </div>
+
+                            <div class="tilsoft-table-filter" style="width: 1860px; top:50px">
+                                <div style="width:100px">
+                                    <a href="javascript:void(0)" class="btn btn-{{isDefaultFilter?'default' : 'primary'}} btn-xs" title="Apply Filter" ng-click="event.reload()"><i class="fa fa-filter"></i></a>
+                                    <a href="javascript:void(0)" class="btn btn-default btn-xs" title="Clear Filter" ng-click="event.clearFilter()"><i class="fa fa-ban"></i></a>
+                                </div>
+                                <div style="width:100px"></div>
+                                <div style="width:100px"><input class="form-control search-filter" type="text" ng-model="filters.EmployeeNM" /></div>
+                                <div style="width:60px"><input class="form-control search-filter" type="text" ng-model="filters.EmployeeFirstNM" /></div>
+                                <div style="width:180px"></div>
+                                <div style="width:100px">
+                                    <select class="form-control search-filter" ng-model="filters.CompanyID" ng-options="company.companyID as company.companyNM for company in companies">
+                                        <option value=""></option>
+                                    </select>
+                                </div>
+                                <div style="width:100px" ng-if="filters.CompanyID!=null && filters.CompanyID!=''">
+                                    <select class="form-control search-filter" ng-model="filters.BranchID" ng-options="branch.branchID as branch.branchNM for branch in branches | filter : { companyID : filters.CompanyID} : true">
+                                        <option value=""></option>
+                                    </select>
+                                </div>
+                                <div style="width:100px" ng-if="filters.CompanyID==null || filters.CompanyID==''">
+                                    <select class="form-control search-filter" ng-model="filters.BranchID" ng-options="branch.branchID as branch.branchNM for branch in branches">
+                                        <option value=""></option>
+                                    </select>
+                                </div>
+                                <div style="width: 90px;">
+                                    <select class="form-control search-filter" ng-model="filters.LocationID" ng-options="location.locationID as location.locationNM for location in locations">
+                                        <option value=""></option>
+                                    </select>
+                                </div>
+                                <div style="width: 100px;">
+                                    <select class="form-control search-filter" ng-model="filters.DepartmentID" ng-options="department.internalDepartmentID as department.internalDepartmentNM for department in departments">
+                                        <option value=""></option>
+                                    </select>
+                                </div>
+                                <div style="width: 80px;">
+                                    <select class="form-control search-filter" ng-model="filters.TilsoftUsageID">
+                                        <option value=""></option>
+                                        <option value="7">High</option>
+                                        <option value="6">Intense</option>
+                                        <option value="5">Above Average</option>
+                                        <option value="4">Average</option>
+                                        <option value="3">Low</option>
+                                        <option value="2">Very Low</option>
+                                        <option value="1">None</option>
+                                        <option value="0">No Account</option>
+                                    </select>
+                                </div>
+                                <div style="width: 100px;">
+                                    <input class="form-control search-filter" type="text" ng-model="filters.JobTitle" />
+                                </div>
+                                <div style="width: 80px;">
+                                    <select class="form-control search-filter" ng-model="filters.JobLevelID" ng-options="jobLevel.jobLevelID as jobLevel.jobLevelNM for jobLevel in jobLevels">
+                                        <option value=""></option>
+                                    </select>
+                                </div>
+                                <div style="width: 80px;"></div>
+                                <div style="width: 50px;"></div>
+                                <div style="width: 200px;"></div>
+                                <div style="width: 80px;"></div>
+                                <div style="width: 80px;"></div>
+                                <div style="width: 100px;"></div>
+                                <div></div>
+                            </div>
+
+                            <div class="tilsoft-table-body" style="width: 1860px; margin-top:95px">
+                                <table>
+                                    <tr ng-repeat="model in data">
+                                        <td style="text-align: center; width: 100px;line-height:25px;">
+                                            <a ng-if="!model.hasLeft" class="btn btn-default btn-xs font-11" target="_blank" href="@Url.Action("Overview", "EmployeeMng")/{{model.employeeID}}" title="Overview" style="width: 80px;"><i class="fa fa-eye"></i>&nbsp;Overview</a><br />
+                                            @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current) != "disabled")
+                                            {
+                                                <a ng-if="!model.hasLeft" class="btn btn-primary btn-xs font-11" target="_blank" href="@Url.Action("Edit", "EmployeeMng")/{{model.employeeID}}" title="Edit" style="width: 80px;"><i class="fa fa-pencil"></i>&nbsp;Edit</a><br />
+                                                <a ng-if="model.hasLeft" class="btn btn-success btn-xs font-11" href="javascript:void(0)" ng-click="event.restore(model.employeeID)" title="Active This Account" style="margin-top: -90px; width: 80px;"><i class="glyphicon glyphicon-briefcase"></i>&nbsp;Active</a>
+                                            }
+                                            @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current) != "disabled")
+                                            {
+                                                <a ng-if="!model.hasLeft" href="javascript:void(0)" ng-click="event.deactiveEmployee(model)" title="Deactive" class="btn btn-danger btn-xs font-11" style="width: 80px;"><i class=" glyphicon glyphicon-lock"></i>&nbsp;Deactivate</a>
+                                            }
+                                        </td>
+                                        <td style="width: 100px; text-align: center;">
+                                            <a href="{{model.personalPhoto_DisplayURL}}" data-featherlight="image">
+                                                <img style="width: 95%;" ng-src="{{model.personalPhoto_DisplayURL}}" />
+                                            </a>
+                                        </td>
+                                        <td style=" width: 100px; line-height:20px;word-break: normal;">
+                                            {{model.employeeNM}}<br />
+                                            <b ng-if="model.isSuperUser" class="icon-prepend fa fa-user" style="color:#3276b1"> Super User</b>
+                                        </td>
+                                        <td style=" width: 60px">
+                                            {{model.employeeFirstNM}}<br />
+                                            <i ng-if="model.phonetic" style="color:#9B711A; font-weight:700;">{{model.phonetic}}</i>
+                                        </td>
+                                        <td style=" width: 180px;line-height:20px;">
+                                            <i class="icon-prepend fa fa-envelope-o"></i>  <a href="mailto:{{model.email1}}" target="_top">{{model.email1}}</a><br />
+                                            <i class="icon-prepend fa fa-phone"></i>  <a href="javascript:void(0);" ng-click="event.openCall(model.telephone1)">{{model.telephone1}}</a><br />
+                                            <i class="icon-prepend fa fa-skype"></i>  <a href="javascript:void(0);" ng-click="event.skypeChat(model.skypeID)">{{model.skypeID}}</a><br />
+                                        </td>
+                                        <td style=" width: 100px;">{{model.companyNM}}</td>
+                                        <td style=" width: 100px;">{{model.branchNM}}</td>
+                                        <td style=" width: 90px;">{{model.locationNM}}</td>
+                                        <td style=" width: 100px;">{{model.internalDepartmentNM}}</td>
+                                        <td class="AvgUsage" style=" width: 80px;">
+                                            <span class="Usage-bg-{{model.tilsoftUsageID}}">{{model.tilsoftUsage}}</span>
+                                        </td>
+                                        <td style=" width: 100px;">{{model.jobTitle}}</td>
+                                        <td style=" width: 80px;">{{model.jobLevelNM}}</td>
+                                        <td style=" width: 80px; text-align: center;">{{event.getDiffDate(model.dateStart)}}</td>
+                                        <td style=" width: 50px; text-align: center;">{{model.age}}</td>
+                                        <td style=" width: 200px;word-break: normal;white-space: pre-line"><div class="scrollbar-wrapper">{{model.jobDescription}}</div></td>
+                                        <!--<td style=" width: 450px; white-space: pre-line"><div class="scrollbar-wrapper">{{model.dailyTask}}</div></td>-->
+                                        <td style=" width: 80px;">{{model.english}}</td>
+                                        <td style=" width: 80px;">{{model.dateStart}}</td>
+                                        <td style=" width: 100px;word-break: normal;">
+                                            <a ng-if="model.managerID"  href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{model.managerID}}" data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                {{model.reporterName}}
+                                            </a>
+                                        </td>
+                                        <td>{{model.dateOfBirth}}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+<div id="deactiveForm" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static" >
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <span class="modal-title" id="myModalLable">Deactive Employee</span>
+            </div>
+            <div class="modal-body no-padding">
+                <div class="smart-form">                 
+                    <fieldset>
+                        <div class="row">
+                            <section class="col col-3">
+                                <label class="label">Select Date To Deactive:</label>
+                                <label class="input">
+                                    <input type="text" class="datepicker" data-dateformat="dd/mm/yy" ng-model="data.leftDate" />
+                                    <i class="icon-append fa fa-calendar"></i>
+                                </label>
+                            </section>
+                            <section class="col col-7">
+                                <label class="label">&nbsp;</label>
+                                <a href="@Url.Action("Overview", "EmployeeMng", new { id = UrlParameter.Optional })/{{selectedItem.employeeID}}" target="_blank">
+                                    <i class="fa fa-user"></i> {{selectedItem.employeeNM}}
+                                </a>
+                                <span class="alert">will be deactivated, are you sure about this ?</span>
+                            </section>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" ng-click="event.delete(selectedItem.employeeID)">
+                    OK
+                </button>
+
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section FormAction {
+<ul id="sparks">
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default" title="Search" ng-click="event.reload()"><i class="fa fa-search"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default" title="Refresh" ng-click="event.reload()"><i class="fa fa-refresh"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="@Url.Action("Edit", "EmployeeMng")/0" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="New" target="_blank"><i class="fa fa-file-o"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default disabled" title="Print"><i class="fa fa-print"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default" title="Export Excel" style="color: #31B404" ng-click="event.exportExcelEmployee($event)"><i class="fa fa-file-excel-o"></i></a>
+    </li>
+</ul>
+}
+
+@section pagejs {
+    <script src="~/Angular/app/jsonService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script type="text/javascript">
+    jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/employeemng/';
+    jsonService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+    jsonService.searchFilter.pageSize = @System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"];
+    var context = {
+        backendReportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]',
+        cookieId: '@HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString()'
+        }
+    </script>
+    <script src="~/Angular/app/employeeMng/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/employeeMng/index.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}

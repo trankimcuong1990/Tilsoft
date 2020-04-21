@@ -1,0 +1,148 @@
+﻿@{
+    ViewBag.Icon = "fa-pencil-square-o";
+    ViewBag.Title = "Factory DP Balance";
+}
+<style>
+    .custom-pagination {
+        display: none !important;
+    }
+</style>
+
+<form class="row" name="editForm" id="main-form">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-0" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <h2>General Information</h2>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div class="smart-form">
+                        <fieldset>
+                            <div class="row">
+                                <section class="col col-3">
+                                    <label class="label">Season</label>
+                                    <label class="input">
+                                        <span class="form-control">{{data.season}}</span>
+                                    </label>
+                                </section>                                
+                                <section class="col col-3">
+                                    <label class="label">Status</label>
+                                    <label class="input">
+                                        <span class="form-control" ng-if="data.isClosed">CLOSED</span>
+                                        <span class="form-control" ng-if="!data.isClosed">PENDING</span>
+                                    </label>
+                                </section>
+                                <section class="col col-3">
+                                    <label class="label">Begin Balance</label>
+                                    <label class="input">
+                                        <span class="form-control" style="text-align: right;">{{data.beginBalance | currency:'$':2}}</span>
+                                    </label>
+                                </section>
+                                <section class="col col-3">
+                                    <label class="label">End Balance</label>
+                                    <label class="input">
+                                        <span class="form-control" style="text-align: right;">{{data.endBalance | currency:'$':2}}</span>
+                                    </label>
+                                </section>
+                            </div>
+                            <section>
+                                <label class="label">Supplier</label>
+                                <label class="input">
+                                    <span class="form-control">{{data.supplierNM}}</span>
+                                </label>
+                            </section>
+                            <section ng-if="data.updatorName">
+                                <div class="note">
+                                    Updated by: {{data.updatorName}} on {{data.updatedDate}}
+                                </div>
+                            </section>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="jarviswidget" id="wid-id-1" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <h2>Detail Mutation</h2>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div id="searchResult" class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header" style="width: 1000px;">
+                                <div style="width: 100px;">Season</div>
+                                <div style="width: 150px;">Receipt No</div>
+                                <div style="width: 150px;">Credit Note No</div>
+                                <div style="width: 120px;">Issued Date</div>
+                                <div style="width: 120px;">Increasing</div>
+                                <div>Decreasing</div>
+                            </div>
+                            <div class="tilsoft-table-body" style="width: 1000px;">
+                                <table>
+                                    <tr ng-repeat="item in details">
+                                        <td style="width: 100px; text-align: center;">{{item.season}}</td>
+                                        <td style="width: 150px; text-align: center;">{{item.receiptNo}}</td>
+                                        <td style="width: 150px; text-align: center;">{{item.creditNoteNo}}</td>
+                                        <td style="width: 120px; text-align: center;">{{item.issuedDate}}</td>
+                                        <td style="width: 120px; text-align: right;">{{item.increasingMutation | currency:'$':2}}</td>
+                                        <td style="text-align: right;">{{item.decreasingMutation | currency:'$':2}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 100px;"></td>
+                                        <td style="width: 150px;"></td>
+                                        <td style="width: 150px;"></td>
+                                        <td style="width: 120px; text-align: right;"><strong>TOTAL</strong></td>
+                                        <td style="width: 120px; text-align: right;">{{method.getTotalIncreasing() | currency:'$':2}}</td>
+                                        <td style="text-align: right;">{{method.getTotalDecreasing() | currency:'$':2}}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "FactoryPayment2BalanceMng")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default disabled" title="Save"><i class="fa fa-save"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default disabled" title="Delete" style="color: #ff0000;"><i class="fa fa-times"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default disabled" title="Print"><i class="fa fa-print"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Approve, HttpContext.Current))" title="Approve" ng-click="event.approve()" ng-disabled="data.isClosed"><i class="fa fa-thumbs-o-up"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default" @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Reset, HttpContext.Current)) title="Reset Approval status" ng-click="event.reset()" ng-disabled="!data.isClosed"><i class="fa fa-thumbs-o-down"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script src="~/Angular/app/jsonService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script type="text/javascript">
+        jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/factorypayment2balance/';
+        jsonService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+        jsonService.supportServiceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/support/';
+        var context = {
+            id: @ViewBag.ID,
+            errMsg: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED',
+            backUrl: '@Url.Action("Index", "FactoryPayment2BalanceMng")',
+            refreshUrl: '@Url.Action("Edit", "FactoryPayment2BalanceMng", new { id = UrlParameter.Optional })/',
+            editTitle: '@ViewBag.Title'
+        }
+    </script>
+    <script src="~/Angular/app/factoryPayment2BalanceMng/edit.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}
+

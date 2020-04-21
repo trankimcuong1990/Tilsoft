@@ -1,0 +1,239 @@
+﻿@{
+    if (ViewBag.ID == 0)
+    {
+        ViewBag.Title = "Create New City";
+    }
+    else
+    {
+        ViewBag.Title = "Edit City";
+    }
+
+    ViewBag.Module = "ClientCity";
+   
+}
+
+<form class="row" name="editForm" id="main-form">
+    <article class="col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-0" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>Cities</h2>
+            </header>
+            <div>
+                <div class="widget-body">
+                    <div class="smart-form">
+                        <fieldset>
+                            <section class="col col-3">
+                                <label class="label">Country</label>
+                                <label class="select">
+                                    @*<select class="form-control search-filter" ng-change="event.onOptionChange()"  ng-model="filters.ClientCountryID" ng-options="clientCountry.clientCountryID as clientCountry.clientCountryNM for clientCountry in clientCountrys | orderBy: 'clientCountryNM'">*@
+                                    <label class="select" ng-class="{'state-error': editForm.clientCountryID.$error.required}">
+                                        <select ng-model="data.clientCountryID" name="clientCountryID" ng-options="clientCountry.clientCountryID as clientCountry.clientCountryNM for clientCountry in clientCountrys" required>
+
+                                            <option value=""></option>
+                                        </select>
+                                        <i></i>
+                                    </label>
+                            </section>
+                            <section class="col col-3">
+                                <label class="label">City Code</label>
+                                <label class="input">
+                                    <input type="text" ng-model="data.clientCityUD" required />
+                                </label>
+                            </section>
+                            <section class="col col-6">
+                                <label class="label">City Name</label>
+                                <label class="input">
+                                    <input type="text" ng-model="data.clientCityNM" required />
+                                </label>
+                            </section>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "ClientCity")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="event.update($event)"><i class="fa fa-save"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default@(ViewBag.ID==0?" disabled":"") @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="Delete" style="color: #ff0000;" ng-click="event.delete($event)"><i class="fa fa-times"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default disabled" title="Print"><i class="fa fa-print"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default disabled" title="Approve"><i class="fa fa-thumbs-o-up"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default disabled" title="Reset Approval status"><i class="fa fa-thumbs-o-down"></i></a>
+        </li>
+    </ul>
+}
+@*section pagejs {
+    <script src="~/Angular/app/jsonService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script type="text/javascript">
+        jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/clientcity/';
+        jsonService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+        var context = {
+            id: @ViewBag.ID,
+            backUrl: '@Url.Action("Index", "ClientCity")',
+            refreshUrl: '@Url.Action("Edit", "ClientCity", new { id = UrlParameter.Optional })/',
+            errorMsg: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED'
+        }
+    </script>
+    <script src="~/Angular/app/clientCity/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/clientCity/edit.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}*@
+@section pagejs {
+    <script src="~/Angular/app/jsonService.js"></script>
+    <script src="~/Angular/app/clientCity/service.js"></script>
+    <script type="text/javascript">
+        jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/clientcity/';
+            jsonService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+            var tilsoftApp = angular.module('tilsoftApp', []);
+            tilsoftApp.controller('tilsoftController', ['$scope', function ($scope) {
+                //
+                // property
+                //
+                $scope.data = null;
+                $scope.clientCountrys = null;
+              //  $scope.startListener = false;
+
+                //
+                // event
+                //
+                $scope.event = {
+                    init:function(){
+                        jsonService.load(
+                            @ViewBag.ID,
+                            function (data) {
+                                $scope.data = data.data.data;
+                                $scope.clientCountrys = data.data.clientCountrys;
+                                $scope.$apply();
+                                jQuery('#content').show();
+
+                                // monitor changes
+                                $scope.$watch('data', function() {
+                                    jQuery('#changeNotification').html('<i class="fa fa-save blink_me"></i>');
+                                });
+
+                                $scope.$watch('clientCountrys', function() {
+                                    jQuery('#changeNotification').html('<i class="fa fa-save blink_me"></i>');
+                                    
+                                });
+                              //  $scope.startListener = true;
+                            },
+                            function (error) {
+                                jsHelper.showMessage('warning', error);
+                                $scope.data = null;
+                                $scope.clientCountrys = null;
+                                $scope.$apply();
+                            }
+                        );
+                    },
+                    update: function($event){
+                        $event.preventDefault();
+
+                        if($scope.editForm.$valid)
+                        {
+                            jsonService.update(
+                                @ViewBag.ID,
+                                $scope.data,
+                                                                
+
+                                function (data) {
+                                    jsHelper.processMessage(data.message);
+                                    if(data.message.type == 0) {
+                                        $scope.method.refresh(data.data.clientCityID);
+                                    }
+                                },
+                                function (error) {
+                                    jsHelper.showMessage('warning', error);
+                                }
+                            );
+                        }
+                        else
+                        {
+                            jsHelper.showMessage('warning', '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED');
+                        }
+                    },
+                    delete: function($event){
+                        $event.preventDefault();
+
+                        if (confirm('Are you sure ?')) {
+                            jsonService.delete(
+                                @ViewBag.ID,
+                                function (data) {
+                                    jsHelper.processMessage(data.message);
+                                    if(data.message.type == 0) {
+                                        window.location = '@Url.Action("Index", "ClientCity")';
+                                    }
+                                },
+                                    function (error) {
+                                        jsHelper.showMessage('warning', error);
+                                    }
+                                );
+                        }
+                    }
+                    
+                    //,  onOptionChange: function(){
+                    //    if(!$scope.startListener){
+                    //        return;
+                    //    }
+
+                        
+                       
+
+                      
+
+                        //if($scope.filters.clientCountryID > 0){
+                        //    $scope.filters..clientCountryID = $scope.data.clientCountryID}    
+                            //for(j=0; j< $scope.filters.clientCountrys.length; j++) {
+                                  //    if($scope.clientCountrys[j].clientCountryID == $scope.data.clientCountryID) {
+                                   
+                                  //  optionName += ' ' + $scope.clientCountrys[j].clientCountryNM;
+
+                                   // break;
+                                //}
+                            //}
+                       // }
+
+                       
+
+                       
+                             
+                    //},
+
+                                    };
+
+                //
+                // method
+                //
+                $scope.method = {
+                    refresh: function(id){
+                        jsHelper.loadingSwitch(true);
+                        window.location = '@Url.Action("Edit", "ClientCity", new { id = UrlParameter.Optional })/'+id;
+                    }
+                };
+
+                //
+                // init
+                //
+                $scope.event.init();
+            }]);
+    </script>
+}
+
+
+

@@ -1,0 +1,81 @@
+﻿@{
+    ViewBag.Title = "Report Order Quantity Checking";
+}
+
+<form class="row" name="editForm" id="main-form">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget well jarviswidget-color-darken" id="wid-id-0" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <div>
+                <div class="widget-body no-padding">
+                    <div class="padding-10">
+                        <div class="tilsoft-table-wrapper">
+                            <div class="tilsoft-table">
+                                <div class="tilsoft-table-body" style="width: 100%; height: auto; overflow-y: hidden;">
+                                    <table>
+                                        <tr>
+                                            <th style="width: 80px;">P/I</th>
+                                            <th style="width: 80px;">Client</th>
+                                            <th style="width: 80px;">Season</th>
+                                            <th style="width: 300px;">Item</th>
+                                            <th style="width: 80px;">Order Qnt</th>
+                                            <th>Factory Order</th>
+                                        </tr>
+                                        <tr ng-repeat="order in data">
+                                            <td style="text-align: center;">{{order.proformaInvoiceNo}}</td>
+                                            <td style="text-align: center;">{{order.clientUD}}</td>
+                                            <td style="text-align: center;">{{order.season}}</td>
+                                            <td>
+                                                <strong>{{order.articleCode}}</strong>
+                                                <br/>
+                                                {{order.description}}
+                                            </td>
+                                            <td style="text-align: right;">{{order.orderQnt}}</td>
+                                            <td>
+                                                <table style="border-top: solid 1px #ddd;border-right: solid 1px #ddd;border-left: solid 1px #ddd;">
+                                                    <tr>
+                                                        <th>Order No</th>
+                                                        <th>Factory</th>
+                                                        <th>Order Qnt</th>
+                                                    </tr>
+                                                    <tr>
+                                                        <td colspan="2" style="text-align: right; font-weight: bold;">Total</td>
+                                                        <td style="text-align: right; font-weight: bold;">{{$parent.method.getTotal(order)}}</td>
+                                                    </tr>
+                                                    <tr ng-repeat="item in order.factoryOrderDetails | orderBy: 'factoryOrderUD'">
+                                                        <td style="text-align: center;">{{item.factoryOrderUD}}</td>
+                                                        <td style="text-align: center;">{{item.factoryUD}}</td>
+                                                        <td style="text-align: right;">{{item.orderQnt}}</td>
+                                                    </tr>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Refresh" ng-click="event.init()"><i class="fa fa-refresh"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script src="~/Angular/app/jsonService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script type="text/javascript">
+        jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/orderquantitycheckingrpt/';
+        jsonService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+        jsonService.supportServiceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/support/';
+    </script>
+    <script src="~/Angular/app/orderQuantityCheckingRpt/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/orderQuantityCheckingRpt/index.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}
+

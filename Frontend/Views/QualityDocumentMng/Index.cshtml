@@ -1,0 +1,132 @@
+﻿
+@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var pageSize = System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"];
+    var cookieID = HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString();
+
+
+    ViewBag.Title = "Quality Document";
+    ViewBag.Module = "Quality Document";
+    ViewBag.Icon = "fa-bar-chart-o";
+}
+
+<div class="row">
+    <article class="col-xs-12 col-sm-12 col-lg-12 col-md-12">
+        <div class="jarviswidget" id="wid-id-1" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Search Result</h2>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div avs-scroll grid-handler="gridHandler" class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header" style="width:1000px">
+                                <div style="width:70px; font-weight:bold">Found {{totalRows}} <font style="color:deeppink; text-transform:none">row(s)</font></div>
+                                <div style="width:170px;">Doc Type</div>
+                                <div style="width:150px;">Doc Code</div>
+                                <div style="width:400px;">File Name</div>
+                                <div>Issue Date</div>
+                            </div>
+                            <div class="tilsoft-table-filter" style="width:1000px">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>
+                                                <div style="width:70px; border-right:1px solid #ccc">
+                                                    <a href="javascript:void(0)" class="btn btn-default btn-xs" title="Apply Filter" ng-click="event.refresh()"><i class="fa fa-filter"></i></a>
+                                                    <a href="javascript:void(0)" class="btn btn-default btn-xs" title="Clear Filter" ng-click="event.clear()"><i class="fa fa-ban"></i></a>
+                                                </div>
+                                            </th>
+                                            <th>
+                                                <div style="width:170px; border-right:1px solid #ccc">
+                                                    <input type="text" class="form-control search-filter" ng-model="filters.QualityDocumentTypeNM" />
+                                                </div>
+                                            </th>
+                                            <th>
+                                                <div style="width:150px; border-right:1px solid #ccc">
+                                                    <input type="text" class="form-control search-filter" ng-model="filters.QualityDocumentUD" />
+                                                </div>
+                                            </th>
+                                            <th>
+                                                <div style="width:400px; border-right:1px solid #ccc">
+                                                    <input type="text" class="form-control search-filter" ng-model="filters.FriendlyName" />
+                                                </div>
+                                            </th>
+                                            <th>
+                                                <div class="input-group">
+                                                    <input type="text" class="form-control search-filter" avs-calendar ng-data-source="filters.IssuedDate" />
+                                                    <span class="input-group-addon">
+                                                        <i class="fa fa-calendar"></i>
+                                                    </span>
+                                                </div>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                            <div class="tilsoft-table-body" style="width:1000px">
+                                <table>
+                                    <tbody>
+                                        <tr ng-repeat="item in data">
+                                            <td style="width:69px">
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current) == "disabled")
+                                                {
+                                                    <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "QualityDocumentMng")/{{item.qualityDocumentID}}" style="width: 59px"> title="View (Read Only)" target="_blank"><i class="fa fa-folder-open"></i> View</a>
+                                                }
+                                                else
+                                                {
+                                                    <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "QualityDocumentMng")/{{item.qualityDocumentID}}" title="Edit" target="_blank" style="width: 59px"><i class="fa fa-pencil-square-o"></i> Edit</a>
+                                                }
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current) != "disabled")
+                                                {
+                                                    <a class="btn btn-danger btn-xs font-11" href="#" title="Delete" style="width: 59px; margin-top: 3px" ng-click="event.remove(item)"><i class="fa fa-times"></i> Del</a>
+                                                }
+                                            </td>
+                                            <td style="width:170px">{{item.qualityDocumentTypeNM}}</td>
+                                            <td style="width:150px">{{item.qualityDocumentUD}}</td>
+                                            <td style="width:400px">
+                                                <a href="{{item.fileLocation}}" target="_blank">{{item.friendlyName}}</a>
+                                            </td>
+                                            <td>{{item.issuedDate}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" ng-click="event.refresh()" title="Search"><i class="fa fa-search"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" ng-click="event.clear()" title="Refresh Page"><i class="fa fa-refresh"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="@Url.Action("Edit", "QualityDocumentMng", new { id = UrlParameter.Optional })/0" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="Create new " target="_blank"><i class="fa fa-file-o"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(serviceRoot)/api/qualitydocumentmng/',
+            token: '@token',
+            pageSize: '@pageSize',
+            cookieID: '@cookieID'
+        }
+    </script>
+    <script type="text/javascript" src="~/Views/QualityDocumentMng/index.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Views/QualityDocumentMng/service.js?v=@guid"></script>
+}

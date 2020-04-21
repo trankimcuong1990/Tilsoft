@@ -1,0 +1,376 @@
+﻿@{
+    ViewBag.Icon = "fa fa-user";
+    ViewBag.Module = "Employee Overview";
+    ViewBag.Title = "Employee Overview";
+
+    Frontend.APIDTO.APIUserInformation userInfo = (Frontend.APIDTO.APIUserInformation)Session[Frontend.Customize.Common.ProjectDefinition.USER_INFO_SESSION];
+}
+<style>
+    .usage {
+        padding: 6px;
+        border-radius: 4px;
+        color: #fff;
+        font-size: 12px;
+        font-weight: bold;
+    }
+
+    .Usage-bg-0 {
+        background-color: #999;
+    }
+
+    .Usage-bg-1 {
+        background-color: #ac2925;
+    }
+
+    .Usage-bg-2 {
+        background-color: #FF9000;
+    }
+
+    .Usage-bg-3 {
+        background-color: #FD9A69;
+    }
+
+    .Usage-bg-4 {
+        background-color: #8b65e8;
+    }
+
+    .Usage-bg-5 {
+        background-color: #3699FE;
+    }
+
+    .Usage-bg-6 {
+        background-color: #50c4b3;
+    }
+
+    .Usage-bg-7 {
+        background-color: #5cb85c;
+    }
+
+    .action-btn a {
+        width: 55px !important;
+    }
+</style>
+
+<div class="row">
+    <div class="col-sm-12">
+        <div class="well well-sm" style="background: #fff;">
+            <div class="row">
+                <div class="col-sm-12">
+                    <div style="background: url('@System.Web.VirtualPathUtility.ToAbsolute("~/img/demo/s1.jpg")') top left no-repeat; height: 150px; background-size: cover;"></div>
+                    <div style="position: relative;">
+                        <div ng-if="!data.branchNM" class="air air-bottom-right" style="margin: 10px; background: rgba(0,0,0,0.5); color: #fff; font-size: 25px; padding: 10px 20px;">
+                            <i class="fa fa-briefcase"></i> {{data.companyNM}}
+                        </div>
+                        <div ng-if="data.branchNM" class="air air-bottom-right" style="margin: 10px; background: rgba(0,0,0,0.5); color: #fff; font-size: 25px; padding: 10px 20px;">
+                            <i class="fa fa-briefcase"></i> {{data.companyNM}} - {{data.branchNM}}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12">
+                    <div class="row">
+                        <div class="col-sm-2">
+                            <div class="profile-image">
+                                <a href="{{data.fileLocation}}" data-featherlight="image">
+                                    <img style="width: 95%;" ng-src="{{data.thumbnailLocation}}" />
+                                </a>
+                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current) != "disabled")
+                                {
+                                    <a href="@Url.Action("Edit", "EmployeeMng")/{{data.employeeID}}" title="Edit" class="btn btn-success" target="_blank" style="margin-top: 10px; width: 100%;"><i class="fa fa-pencil"></i> Edit</a>
+                                }
+                            </div>
+                        </div>
+                        <div class="col-sm-10">
+                            <h1>
+                                {{data.employeeNM}} (Calling name: {{data.employeeFirstNM}} - <span class="small">{{data.phonetic}}</span>)
+                                <br />
+                                <span class="small">{{data.jobTitle}} (Level: {{data.jobLevelNM}})</span>
+                            </h1>
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <ul class="list-unstyled">
+                                        <li>
+                                            <p class="text-muted">
+                                                <i class="fa fa-phone"></i>
+                                                <a href="#">{{data.telephone1}}</a>
+                                                <br />
+                                                <a href="#">{{data.telephone2}}</a>
+                                                &nbsp;
+                                            </p>
+                                        </li>
+                                        <li>
+                                            <p class="text-muted">
+                                                <i class="fa fa-envelope"></i>
+                                                <a href="mailto:{{data.email1}}">{{data.email1}}</a>
+                                                <br />
+                                                <a href="mailto:{{data.email2}}">{{data.email2}}</a>
+                                                &nbsp;
+                                            </p>
+                                        </li>
+                                        <li>
+                                            <p class="text-muted">
+                                                <i class="fa fa-skype"></i>
+                                                <a href="skype:{{data.skypeID}}:chat">{{data.skypeID}}</a>
+                                                &nbsp;
+                                            </p>
+                                        </li>
+                                        <li>
+                                            <p class="text-muted">
+                                                <i class="fa fa-calendar-o"></i>
+                                                <span class="txt-color-darken">DOB: {{data.dateOfBirth}} - {{data.age}} years old</span>
+                                                &nbsp;
+                                            </p>
+                                        </li>
+                                        <li>
+                                            <p class="text-muted">
+                                                <i class="fa fa-map-marker"></i>
+                                                <span class="txt-color-darken">{{data.locationNM}}</span>
+                                                &nbsp;
+                                            </p>
+                                        </li>
+                                        <li ng-if="@userInfo.Data.ModuleSpecialPermissionAccesses.Count(o=>o.ModuleSpecialPermissionUD == Frontend.Helper.ConstantIdentifier.SPECIAL_PERMISSION_EMPLOYEE_RESUME) > 0 && (data.companyID == null || @userInfo.Data.CompanyID == 4 || @userInfo.Data.UserGroupID == 1 || @userInfo.Data.CompanyID == data.companyID)">
+                                            <p class="text-muted">
+                                                <i class="fa fa-file-word-o"></i>
+                                                <span class="txt-color-darken">Resume: </span> <a target="_blank" href="{{data.resumeFileLocation}}">{{data.resumeFileFriendlyName}}</a>
+                                            </p>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="col-sm-8">
+                                    <table class="table table-bordered table-striped">
+                                        <tbody>
+                                            <tr>
+                                                <th><i class="fa fa-calendar-o"></i> Joined Date</th>
+                                                <td>
+                                                    {{data.dateStart}}
+                                                    -
+                                                    {{data.totalWorkingYear}} year(s), {{data.totalWorkingMonth}} month(s)
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th><i class="fa fa-paper-plane-o"></i> Report To</th>
+                                                <td>
+                                                    <a ng-if="data.managerID" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{data.managerID}}" data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                        {{data.managerName}}
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th><i class="fa fa-briefcase"></i> Department</th>
+                                                <td>{{data.internalDepartmentNM}}</td>
+                                            </tr>
+                                            <tr>
+                                                <th><i class="fa fa-building"></i> Factory</th>
+                                                <td>
+                                                    <div class="bootstrap-tagsinput" style="border: none; padding: 0px; min-height: auto;">
+                                                        <span class="tag label label-info" ng-repeat="item in data.employeeFactoryDTOs">
+                                                            {{item.factoryUD}}
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th><i class="fa fa-language"></i> English</th>
+                                                <td>{{data.english}}</td>
+                                            </tr>
+                                            <tr>
+                                                <th><i class="fa fa-tachometer"></i> TILSOFT Usage</th>
+                                                <td><span class="usage Usage-bg-{{method.getUsageClass(data.tilsoftUsage)}}">{{data.tilsoftUsage}}</span></td>
+                                            </tr>
+                                            <tr>
+                                                <th><i class="fa fa-calendar-o"></i> TILSOFT Licensed From</th>
+                                                <td>{{data.licensedDate}}</td>
+                                            </tr>
+                                            <tr>
+                                                <th><i class="fa fa-bolt"></i> TILSOFT Super User</th>
+                                                <td>
+                                                    <font ng-if="data.isSuperUser">YES</font>
+                                                    <font ng-if="!data.isSuperUser">NO</font>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th><i class="fa fa-random"></i> Other contact method</th>
+                                                <td>{{data.otherContactInfo}}</td>
+                                            </tr>
+                                            <tr>
+                                                <th><i class="fa fa-history"></i> Tracking</th>
+                                                <td>
+                                                    Updated by
+                                                    <a ng-if="data.updatedBy" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{data.updatedBy}}" dat data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                        {{data.updatorName}}
+                                                    </a>
+                                                    on
+                                                    {{data.updatedDate}}
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <p class="font-md">
+                                        <i class="fa fa-suitcase"></i> Job Description
+                                    </p>
+                                    <p ng-bind-html="method.formatRemark(data.jobDescription)"></p>
+                                </div>
+                                <div class="col-sm-6">
+                                    <p class="font-md">
+                                        <i class="fa fa-tasks"></i> Daily Task
+                                    </p>
+                                    <p ng-bind-html="method.formatRemark(data.dailyTask)"></p>
+                                </div>
+                            </div>
+
+                            @if (userInfo.Data.ModuleSpecialPermissionAccesses.Count(o => o.ModuleSpecialPermissionUD == Frontend.Helper.ConstantIdentifier.SPECIAL_PERMISSION_EMPLOYEE_MANAGER_NOTE) > 0)
+                            {
+                                <div class="row" ng-if="!sData">
+                                    <a href="javascript:void(0)" class="btn btn-success btn-lg" ng-click="event.verifyAccount()">Employee Detail Info</a>
+                                </div>
+
+                                <div class="row" ng-if="sData">
+                                    <h2>Contract</h2>
+                                    <table class="table table-bordered table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Valid From</th>
+                                                <th>Contract</th>
+                                                <th>Description</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="item in sData.employeeContractDTOs">
+                                                <td>{{item.validFrom}}</td>
+                                                <td><a ng-if="item.fileLocation" href="{{item.fileLocation}}" target="_blank">{{item.friendlyName}}</a></td>
+                                                <td>{{item.description}}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+
+                                    <h2>Files</h2>
+                                    <table class="table table-bordered table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>File</th>
+                                                <th>Description</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="item in sData.employeeFileDTOs">
+                                                <td><a ng-if="item.fileLocation" href="{{item.fileLocation}}" target="_blank">{{item.friendlyName}}</a></td>
+                                                <td>{{item.description}}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+
+                                    <h2>Note <a class="btn btn-success btn-xs" href="javascript:void(0)" ng-click="event.printNote()" ng-if="sData && sData.managerNote"><i class="fa fa-printer"></i> Send to printer</a></h2>
+                                    <p ng-bind-html="method.formatRemark(sData.managerNote)"></p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-12">
+        <div class="well well-sm" style="background: #fff;">
+            <div class="smart-form">
+                <h2>WEEKLY OVERVIEW (latest 26 weeks)</h2>
+                <fieldset>
+                    <div class="row">
+                        <div id="weeklyChart"></div>
+                    </div>
+                </fieldset>
+
+                <h2>ACTION OVERVIEW</h2>
+                <fieldset>
+                    <div class="row">
+                        <table class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th style="width: 100px;"></th>
+                                    <th>Module</th>
+                                    <th style="width: 100px;">Total Hit(s)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="item in data.userDetailDTOs | orderBy: '-totalHit'">
+                                    <td>{{$index+1}}</td>
+                                    <td>{{item.displayText}}</td>
+                                    <td class="text-right">{{item.totalHit | number:0}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- POPUP FORM AREA-->
+<div id="frmVerifyAccount" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title"><i class="fa fa-fa-file-picture-o"></i> Verify your account by provide your username and password again</h4>
+            </div>
+            <div class="modal-body no-padding">
+                <div class="smart-form">
+                    <fieldset>
+                        <section>
+                            <label class="label">Username</label>
+                            <label class="input">
+                                <input type="text" ng-model="verifyInfo.username" autocomplete="off" />
+                            </label>
+                        </section>
+                        <section>
+                            <label class="label">Password</label>
+                            <label class="input">
+                                <input type="text" ng-model="verifyInfo.password" class="c-password" autocomplete="off" />
+                            </label>
+                        </section>
+                    </fieldset>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" ng-click="event.verifyAccountPost()">
+                    Verify
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "EmployeeMng")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+        </li>
+        @if (Frontend.Helper.AuthHelper.GetActionButtonStatus("UsageTrackingRpt", Frontend.Helper.ActionEnum.Read, HttpContext.Current) != "disabled")
+        {
+            <li class="sparks-info">
+                <a href="@Url.Action("Index", "UsageTrackingRpt", new {employeeID = ViewBag.ID})" class="btn btn-default" title="Go to Usage Tracking" target="_blank"><i class="fa fa-bar-chart-o"></i></a>
+            </li>
+        }
+    </ul>
+}
+@section pagejs {
+    <script src="~/Angular/app/jsonService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/employeeMng/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/support/service.js?c=@System.Guid.NewGuid().ToString().Replace("-","")"></script>
+    <script type="text/javascript">
+        employeeMngService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/employeemng/';
+        employeeMngService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+        var context = {
+            id: @ViewBag.ID,
+            pageTitle: '@ViewBag.Title'
+        }
+    </script>
+    <script src="~/Angular/app/employeeMng/overview.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}

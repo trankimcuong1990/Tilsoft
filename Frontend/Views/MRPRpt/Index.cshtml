@@ -1,0 +1,219 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var pageSize = System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"];
+    var cookieID = HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString();
+    var supportServiceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+
+
+    ViewBag.Title = "MRP OverView";
+    ViewBag.Module = "MRP OverView";
+    ViewBag.Icon = "fa-bar-chart-o";
+}
+
+@*<style>
+        .tilsoft-table .tilsoft-table-header div, .tilsoft-table .tilsoft-table-filter div, .tilsoft-table .tilsoft-table-totalrow div, .tilsoft-table .tilsoft-table-subtotalrow div {
+            height: 32px;
+        }
+    </style>*@
+
+<style>
+    .missing-project-on-hand {
+        background-color:#ffd800
+    }
+
+    .tilsoft-table-header, .tilsoft-table-filter, .tilsoft-table-body {
+        width:{{1030 + dateRanges.length*80 + 20}}px;
+    }
+
+    .tilsoft-table-header > div {
+        height: 70px !important;
+    }
+
+    .tilsoft-table-body {
+        margin-top: 70px !important;
+    }
+
+        .tilsoft-table-header > div:nth-child(1),
+        .tilsoft-table-filter > div:nth-child(1),
+        .tilsoft-table-body table > tbody > tr > td:nth-child(1) {
+            width: 110px;
+            text-align: left;
+        }
+
+        .tilsoft-table-header > div:nth-child(2),
+        .tilsoft-table-filter > div:nth-child(2),
+        .tilsoft-table-body table > tbody > tr > td:nth-child(2) {
+            width: 70px;
+            text-align: center;
+        }
+
+        .tilsoft-table-header > div:nth-child(3),
+        .tilsoft-table-filter > div:nth-child(3),
+        .tilsoft-table-body table > tbody > tr > td:nth-child(3) {
+            width: 70px;
+            text-align: center;
+        }
+
+        .tilsoft-table-header > div:nth-child(4),
+        .tilsoft-table-filter > div:nth-child(4),
+        .tilsoft-table-body table > tbody > tr > td:nth-child(4) {
+            width: 50px;
+            text-align: right;
+        }
+
+        .tilsoft-table-header > div:nth-child(5),
+        .tilsoft-table-filter > div:nth-child(5),
+        .tilsoft-table-body table > tbody > tr > td:nth-child(5) {
+            width: 80px;
+            text-align: center;
+        }
+
+        .tilsoft-table-header > div:nth-child(6),
+        .tilsoft-table-filter > div:nth-child(6),
+        .tilsoft-table-body table > tbody > tr > td:nth-child(6) {
+            width: 80px;
+            text-align: center;
+        }
+
+        .tilsoft-table-header > div:nth-child(7),
+        .tilsoft-table-filter > div:nth-child(7),
+        .tilsoft-table-body table > tbody > tr > td:nth-child(7) {
+            width: 120px;
+            text-align: left;
+        }
+
+</style>
+
+<script type="text/javascript">
+
+</script>
+<form class="row" name="index">
+    <article class="col-xs-12 col-sm-12 col-lg-12 col-md-12">
+        <div div class="jarviswidget" id="wid-id-search-filter" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <div>
+                <div class="widget-body">
+                    <div class="smart-form">
+                        <div class="row">
+                            <section class="col col-sm-4">
+                                <label class="label">Production Item </label>
+                                <label class="input">
+                                    <input type="text" class="form-control" style="font-family:Arial" ng-model="ngInitProductionItem" avs-remote-auto-complete ng-request-param="ngRequestProductionItem" ng-init-param="ngInitProductionItem" ng-item-value="ngItemProductionItem" ng-item-selected="event.select(ngItemProductionItem)" data-method="POST" data-format-function="formatData" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label class="label">Production Group</label>
+                                <label class="select">
+                                    <select class="select" ng-model="filters.ProductionItemGroupID" ng-options="xxx.productionItemGroupID as xxx.productionItemGroupNM for xxx in supportItemGroup">
+                                        <option value=""></option>
+                                    </select>
+                                    <i></i>
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label class="label">Condition</label>
+                                <label class="select">
+                                    <select class="select" ng-model="filters.statusID" @*filters.statusID*@ ng-options="xxx.statusID as xxx.name for xxx in filtersStatus" ng-disabled="dateRanges == 0">
+                                        <option value=""></option>
+                                    </select>
+                                    <i></i>
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label class="label">
+                                    <span>From Date</span>
+                                    <em ng-show="index.fromDate.$error.required" class="note note-error">(Required)</em>
+                                </label>
+                                <label class="input" ng-class="{'state-error': index.fromDate.$error.required}">
+                                    <input type="text" class="form-control" style="font-family:Arial; text-align:left" name="fromDate" avs-calendar ng-data-source="filters.fromDate" required />
+                                    <i class="icon-append fa fa-calendar"></i>
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label class="label">
+                                    <span>To Date</span>
+                                    <em ng-show="index.toDate.$error.required" class="note note-error">(Required)</em>
+                                </label>
+                                <label class="input" ng-class="{'state-error': index.toDate.$error.required}">
+                                    <input type="text" class="form-control" style="font-family:Arial; text-align:left" name="toDate" avs-calendar ng-data-source="filters.toDate" required />
+                                    <i class="icon-append fa fa-calendar"></i>
+                                </label>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="widget-body no-padding">
+                    <div avs-scroll grid-handler="gridHandler" class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table" style="height:700px">
+                            <div class="tilsoft-table-header" style="font-size:12px;">
+                                <div style="width:80px; font-weight:bold">Action</div>
+                                <div style="width:200px;">Product Code</div>
+                                <div style="width:350px;">Product Name</div>
+                                <div style="width:80px;">Min Qnt</div>
+                                <div style="width:80px;">Max Qnt</div>
+                                <div style="width:90px;">Lead time</div>
+                                <div style="width:150px;">Project on Hand</div>
+                                <div style="width:80px;" ng-repeat="item in dateRanges">
+                                    {{item.date}}
+                                </div>
+                                <div></div>
+                            </div>
+                            <div class="tilsoft-table-body" style="">
+                                <table>
+                                    <tbody>
+                                        <tr ng-repeat="item in data | projectOnHandFilter : productItemDate : filters.statusID">
+                                            <td style="width:79px">
+                                                <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "MRPRpt")/{{item.productionItemID}}?&fromDate={{filters.fromDate}}&toDate={{filters.toDate}}" title="View" target="_blank"><i class="fa fa-folder-open"></i> View</a>
+                                            </td>
+                                            <td style="width:200px;  text-align:left">{{item.productionItemUD}}</td>
+                                            <td style="width:350px;text-align:left">{{item.productionItemNM}}</td>
+                                            <td style="width:80px; text-align:right">{{item.minQnt}}</td>
+                                            <td style="width:80px; text-align:right">{{item.maxQnt}}</td>
+                                            <td style="width:90px; text-align:center">{{item.leadTime}}</td>
+                                            <td style="width:150px; text-align:right">{{item.projectOnHand | number : 2}}</td>
+                                            <td style="width:80px;text-align:right" ng-repeat="wItem in productItemDate | filter: {productionItemID: item.productionItemID}" ng-class="wItem.projectOnHandItem<0?'missing-project-on-hand':''">
+                                                {{wItem.projectOnHandItem | number: 2}}
+                                            </td>
+                                            <td></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+@section FormAction {
+    <ul id="sparks">
+
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" ng-click="event.filterData(filters.fromDate,filters.toDate,statusID)" title="Filters"><i class="fa fa-database"></i> Filters Data</a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default disabled" title="Export"><i class="fa fa-file-excel-o" > Export File</i></a>
+        </li> 
+    </ul>
+}
+
+@section pagejs {
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(serviceRoot)/api/MRPRpt/',
+            token: '@token',
+            pageSize: 300,
+            cookieID: '@cookieID',
+            supportServiceUrl: '@(supportServiceRoot)/api/support/'
+        };
+    </script>
+    <script type="text/javascript" src="~/Views/MRPRpt/Index.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Views/MRPRpt/Service.js?=@guid"></script>
+
+}

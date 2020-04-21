@@ -1,0 +1,1503 @@
+﻿@{
+    if (ViewBag.ID == 0)
+    {
+        ViewBag.Title = "Create Sub Supplier";
+    }
+    else
+    {
+        ViewBag.Title = "Edit Sub Supplier";
+    }
+
+    ViewBag.Module = "FactoryRawMaterialMng";
+    string CurrentSeason = Library.OMSHelper.Helper.GetCurrentSeason();
+
+    string NextSeason = Library.OMSHelper.Helper.GetNextSeason(CurrentSeason);
+    string prevSeason = Library.OMSHelper.Helper.GetPrevSeason(CurrentSeason);
+
+    //if (DateTime.Now.Month == 8 || DateTime.Now.Month == 9)
+    //{
+    //    CurrentSeason = NextSeason;
+    //    //Season = currentSeason;
+    //}
+    Frontend.APIDTO.APIUserInformation userInfo = (Frontend.APIDTO.APIUserInformation)Session[Frontend.Customize.Common.ProjectDefinition.USER_INFO_SESSION];
+
+    string canViewAllSaleData = "false";
+    if (userInfo.Data.ModuleSpecialPermissionAccesses.Count(o => o.ModuleSpecialPermissionUD == Frontend.Helper.ConstantIdentifier.SPECIAL_PERMISSION_CLIENTSPECIAL) > 0)
+    {
+        canViewAllSaleData = "true";
+    }
+
+    string PrevSeason1 = Library.OMSHelper.Helper.GetPrevSeason(CurrentSeason);
+    string PrevSeason2 = Library.OMSHelper.Helper.GetPrevSeason(PrevSeason1);
+    string PrevSeason3 = Library.OMSHelper.Helper.GetPrevSeason(PrevSeason2);
+
+    string userManualUrl = string.Empty;
+    if (System.IO.File.Exists(Server.MapPath("~/UserManual/" + ViewBag.ModuleCode + ".pdf")))
+    {
+        userManualUrl = "/UserManual/" + ViewBag.ModuleCode + ".pdf";
+    }
+
+}
+<style>
+    .css-inline a {
+        display: inline;
+    }
+
+    .smart-form .inline-group .checkbox {
+        width: 30% !important;
+    }
+
+    .smart-form .input-group input {
+        padding: 0px 7px !important;
+    }
+
+    .inline-cus {
+        display: inline-block !important;
+    }
+
+    .smart-form .inline-group .radio {
+        width: 14% !important;
+    }
+
+    .MaterialForm .tilsoft-table-body table tr {
+        float: left;
+        /* display: inline-block; */
+        width: 25%;
+        border: none;
+    }
+
+    .smart-form .label {
+        display: block;
+        margin-bottom: 6px;
+        line-height: 19px;
+        font-weight: 400;
+        font-size: 13px;
+        color: #333;
+        text-align: left;
+        white-space: normal;
+    }
+</style>
+<form class="row" name="editForm" id="main-form">
+    <article>
+        <div class="jarviswidget" id="wid-id-product-information" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <ul class="nav nav-tabs pull-left in">
+                    <li class="active">
+                        <a data-toggle="tab" href="#tabGeneral"> <i class="fa fa-list"></i> <span> Main Information</span> </a>
+                    </li>
+                    <li>
+                        <a data-toggle="tab" href="#tabMeeting"> <i class="fa fa-image"></i> <span> Meeting</span> </a>
+                    </li>
+                    <li>
+                        <a data-toggle="tab" href="#tabImage"> <i class="fa fa-image"></i> <span> Sup Supplier Image </span> </a>
+                    </li>
+                    <li>
+                        <a data-toggle="tab" href="#tabDocument"> <i class="fa fa-file-text-o"></i> <span class="hidden-mobile hidden-tablet">Documents</span> </a>
+                    </li>
+                    <li>
+                        <a data-toggle="tab" href="#tabCard"> <i class="fa fa-file-text"></i> <span class="hidden-mobile hidden-tablet">Business Card</span> </a>
+                    </li>
+                    <li>
+                        <a data-toggle="tab" href="#tabVideo" ng-click="event.loadTurnover()"> <i class="fa fa-video-camera"></i><span class="hidden-mobile hidden-tablet">Supplier Video</span> </a>
+                    </li>
+                    <li>
+                        <a data-toggle="tab" href="#tracking"> <i class="fa fa-history"></i> <span> Tracking Info</span> </a>
+                    </li>
+
+                    @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Approve, HttpContext.Current) != "disabled")
+                    {
+                        <li>
+                            <a data-toggle="tab" href="#listofmaterial"> <i class="fa fa-list"></i> <span> List Of Material</span> </a>
+                        </li>
+                    }
+
+                </ul>
+            </header>
+            <div class="widget-body">
+                <div class="tab-content">
+                    <div class="col-col-12 tab-pane active" id="tabGeneral">
+                        <div id="general-section" class="well-sm" style="background: #fff;">
+                            <div class="smart-form">
+                                <h1>General Information</h1>
+                                <br />
+                                <hr>
+                                <fieldset>
+                                    <div class="row">
+                                        <div class="col col-2" style="position:relative;">
+                                            <div>
+                                                <label class="label">Logo</label>
+                                                <div class="input-group css-inline" style="width: 100%;">
+                                                    @Html.Partial("~/Views/Shared/_Controls/_ImageBox.cshtml", new Frontend.Models.ImageBoxViewModel() { URLBinding = "data.logoThumbnailLocation", JSOnChangeHandler = "event.changeLogo", JSONRemoveHandler = "event.removeLogo" })
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col col-10 m-bottom-15">
+                                            <div class="row">
+                                                <div class="col col-8 m-bottom-15">
+                                                    <label class="label">
+                                                        <span>Official Name</span>
+                                                        <em ng-show="editForm.factoryRawMaterialOfficialNM.$error.required" class="note note-error">(Required)</em>
+                                                    </label>
+                                                    <label class="input" ng-class="{'state-error': editForm.factoryRawMaterialOfficialNM.$error.required}">
+                                                        <input name="factoryOfficialName" type="text" id="employeeFirstNM" ng-model="data.factoryRawMaterialOfficialNM" required autocomplete="off" />
+                                                    </label>
+                                                </div>
+
+                                                <div class="col col-2 m-bottom-15">
+                                                    <label class="label">
+                                                        <span>Code</span>
+                                                        <em ng-show="editForm.factoryRawMaterialUD.$error.required" class="note note-error">(Required)</em>
+                                                    </label>
+                                                    <label class="input" ng-class="{'state-error': editForm.factoryRawMaterialUD.$error.required}">
+                                                        <input name="factoryUD" type="text" id="employeeNM" ng-model="data.factoryRawMaterialUD" required />
+                                                    </label>
+                                                </div>
+
+                                                <div class="col col-1 m-bottom-15">
+                                                    <label class="label">Active</label>
+                                                    <span class="onoffswitch">
+                                                        <input name="onoffswitch" class="onoffswitch-checkbox" id="myonoffswitch" type="checkbox" ng-model="data.isActive" />
+                                                        <label class="onoffswitch-label" for="myonoffswitch"> <span class="onoffswitch-inner" data-swchon-text="YES" data-swchoff-text="NO"></span> <span class="onoffswitch-switch"></span> </label>
+                                                    </span>
+                                                </div>
+                                                <div class="col col-1 m-bottom-15">
+                                                    <label class="label">Potential</label>
+                                                    <span class="onoffswitch">
+                                                        <input class="onoffswitch-checkbox" id="isPotential" type="checkbox" ng-model="data.isPotential" />
+                                                        <label class="onoffswitch-label" for="isPotential"> <span class="onoffswitch-inner" data-swchon-text="YES" data-swchoff-text="NO"></span> <span class="onoffswitch-switch"></span> </label>
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col col-2 m-bottom-15">
+                                                    <label class="label">
+                                                        <span>Short Name</span>
+                                                        <em ng-show="editForm.factoryRawMaterialShortNM.$error.required" class="note note-error">(Required)</em>
+                                                    </label>
+                                                    <label class="input" ng-class="{'state-error': editForm.factoryRawMaterialShortNM.$error.required}">
+                                                        <input name="factoryName" type="text" id="employeeFirstNM" ng-model="data.factoryRawMaterialShortNM" required />
+                                                    </label>
+                                                </div>
+
+                                                <div class="col col-10 m-bottom-15">
+                                                    <label class="label">Address</label>
+                                                    <label class="input">
+                                                        <input type="text" id="address" ng-model="data.address" maxlength="255" />
+                                                    </label>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col col-2 m-bottom-15">
+                                                    <label class="label">Phone</label>
+                                                    <label class="input">
+                                                        <i class="icon-prepend fa fa-phone"></i>
+                                                        <input type="text" id="employeeNM" ng-model="data.phone" />
+                                                    </label>
+                                                </div>
+
+                                                <div class="col col-10 m-bottom-15">
+                                                    <label class="label">Supplier Address</label>
+                                                    <label class="input">
+                                                        <input type="text" id="address" ng-model="data.address" maxlength="500" />
+                                                    </label>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col col-3 m-bottom-15">
+                                                    <label class="label">Location</label>
+                                                    <label class="select">
+                                                        <select ng-model="data.locationID" ng-options="location.locationID as location.locationNM for location in locations">
+                                                            <option value=""></option>
+                                                        </select>
+                                                        <i></i>
+                                                    </label>
+                                                </div>
+
+                                                <div class="col col-2 m-bottom-15">
+                                                    <label class="label">Fax</label>
+                                                    <label class="input">
+                                                        <input type="text" id="fax" ng-model="data.fax" />
+                                                    </label>
+                                                </div>
+
+                                                <div class="col col-3 m-bottom-15">
+                                                    <label class="label">E-mail</label>
+                                                    <label class="input">
+                                                        <i class="icon-append fa fa-envelope-o"></i>
+                                                        <input type="text" id="email" ng-model="data.email" />
+                                                    </label>
+                                                </div>
+                                                @*<div class="col col-2 m-bottom-15">
+                                        <label class="label">Contact Person Name</label>
+                                        <label class="input">
+                                            <i class="icon-prepend fa fa-user"></i>
+                                            <input type="text" id="contactPerson" ng-model="data.contactPerson" />
+                                        </label>
+                                    </div>*@
+                                                <div class="col col-2 m-bottom-15">
+                                                    <label class="label">Website</label>
+                                                    <label class="input">
+                                                        <input type="text" ng-model="data.webAddress" />
+                                                    </label>
+                                                </div>
+                                                <div class="col col-1 m-bottom-15" ng-if="data.webAddress">
+                                                    <label class="label">&nbsp;</label>
+                                                    <a class="btn btn-primary" href="https://{{data.webAddress}}" style="padding: 6px 12px;" target="_blank">Open website</a>
+                                                </div>
+
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col col-10 m-bottom-15">
+                                                    <label class="label">Google Map URL</label>
+                                                    <label class="input">
+                                                        <input type="text" ng-model="data.googleMapURL" />
+                                                    </label>
+                                                </div>
+                                                <div class="col col-2 m-bottom-15" ng-if="data.googleMapURL">
+                                                    <label class="label">&nbsp;</label>
+                                                    <a class="btn btn-primary" href="{{data.googleMapURL}}" style="padding: 6px 12px;" target="_blank">View in Google Map</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+
+                        <div id="quick-contact-section-" class="well-sm col-sm-12" style="background: #fff;">
+                            <div class="col-sm-12">
+                                <h1>Quick Contact Info <a href="javascript:void(0)" class="btn btn-primary btn-xs" ng-click="event.addContactQuickInfoSupplier()"><i class="fa fa-plus"></i> Add</a></h1>
+
+                                <div class="tilsoft-table-wrapper">
+                                    <div class="tilsoft-table">
+                                        <div class="tilsoft-table-body" style="margin-top:0px">
+                                            <table>
+                                                <tr>
+                                                    <th style="width:40px"></th>
+                                                    <th style="text-align:center;"><b>FullName</b></th>
+                                                    <th style="width:200px;text-align:center;"><b>Short Name</b></th>
+                                                    <th style="width:150px;text-align:center;"><b>Position</b></th>
+
+                                                    <th style="width:150px;text-align:center;"><b>Email</b></th>
+                                                    <th style="width:150px;text-align:center;"><b>Phone</b></th>
+                                                    <th style="width:150px;text-align:center;"><b>Skype</b></th>
+                                                </tr>
+                                                <tbody>
+                                                    <tr ng-repeat="item in data.supplierContactQuickInfos">
+                                                        <td style="vertical-align:middle"><a ng-click="event.removeContactQuickInfo(item)" class="btn btn-danger btn-xs" href="javascript:void(0);"><i class=" fa fa-times"></i>Del</a></td>
+                                                        <td>
+                                                            <input type="text" class="form-control" ng-model="item.fullName" />
+                                                        </td>
+                                                        <td>
+                                                            <input type="text" class="form-control" ng-model="item.nickName" />
+                                                        </td>
+                                                        <td>
+                                                            <input type="text" class="form-control" ng-model="item.position" />
+                                                        </td>
+                                                        <td>
+                                                            <input type="text" class="form-control" ng-model="item.email" />
+                                                        </td>
+                                                        <td>
+                                                            <input type="text" class="form-control" ng-model="item.phone" />
+                                                        </td>
+                                                        <td>
+                                                            <input type="text" class="form-control" ng-model="item.skype" />
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <div id="contact-section-1" class="well-sm col-sm-12" style="background: #fff;">
+                            <div class="smart-form">
+
+                                <br />
+                                <hr>
+                                <fieldset>
+
+                                    <div id="contact-section-1" class="well-sm col-sm-12" style="background: #fff;">
+                                        <div class="col-sm-2" style="padding-right:20px;">
+                                            <h1>Directors <a href="javascript:void(0)" class="btn btn-primary btn-xs" ng-click="event.addDirector()"><i class="fa fa-plus"></i> Add</a></h1>
+
+                                            <div class="table-responsive" style="min-height:165px;margin-top:10px;">
+                                                <table class="table table-bordered table-striped">
+                                                    <tbody>
+                                                        <tr ng-repeat="item in data.supplierDirectors">
+                                                            <td>
+                                                                <i class="fa fa-user"></i>
+                                                                <a ng-if="item.employeeID" href="@Url.Action("EmpDetail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.employeeID}}" da dat data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                                    {{item.employeeNM}}
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2" style="padding-right:20px;">
+                                            <h1>Managers <a href="javascript:void(0)" class="btn btn-primary btn-xs" ng-click="event.addManager()"><i class="fa fa-plus"></i> Add</a></h1>
+
+                                            <div class="table-responsive" style="min-height:165px;margin-top:10px;">
+                                                <table class="table table-bordered table-striped">
+                                                    <tbody>
+                                                        <tr ng-repeat="item in data.supplierManagers">
+                                                            <td>
+                                                                <i class="fa fa-user"></i>
+                                                                <a ng-if="item.employeeID" href="@Url.Action("EmpDetail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.employeeID}}" da dat data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                                    {{item.employeeNM}}
+                                                                </a>
+                                                                <span style="display: block;float: right;">
+                                                                    <input type="checkbox" ng-model="item.isReceivePriceRequest">
+                                                                    <i class="fa fa-bullhorn"></i>
+                                                                </span>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2">
+                                            <h1>Pricing <a href="javascript:void(0)" class="btn btn-primary btn-xs" ng-click="event.addPricing()"><i class="fa fa-plus"></i> Add</a></h1>
+
+                                            <div class="table-responsive" style="min-height:165px;margin-top:10px;">
+                                                <table class="table table-bordered table-striped">
+                                                    <tbody>
+                                                        <tr ng-repeat="item in data.factoryRawMaterialPricingPersons">
+                                                            <td>
+                                                                <i class="fa fa-user"></i>
+                                                                <a ng-if="item.employeeID" href="@Url.Action("EmpDetail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.employeeID}}" da dat data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                                    {{item.employeeNM}}
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+
+                                        <div class="col col-3 m-bottom-15">
+                                            <h1>Quality <a href="javascript:void(0)" class="btn btn-primary btn-xs" ng-click="event.addQuality()"><i class="fa fa-plus"></i> Add</a></h1>
+                                            <div class="table-responsive" style="min-height:165px;margin-top:10px;">
+                                                <table class="table table-bordered table-striped">
+                                                    <tbody>
+                                                        <tr ng-repeat="item in data.factoryRawMaterialQualityPersons">
+                                                            <td>
+                                                                <i class="fa fa-user"></i>
+                                                                <a ng-if="item.employeeID" href="@Url.Action("EmpDetail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.employeeID}}" da dat data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                                    {{item.employeeNM}}
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-sm-2">
+                                            <h1>Sample/Technical <a href="javascript:void(0)" class="btn btn-primary btn-xs" ng-click="event.addSample()"><i class="fa fa-plus"></i> Add</a></h1>
+
+                                            <div class="table-responsive" style="min-height:165px;margin-top:10px;">
+                                                <table class="table table-bordered table-striped">
+                                                    <tbody>
+                                                        <tr ng-repeat="item in data.supplierSampleTechnicals">
+                                                            <td>
+                                                                <i class="fa fa-user"></i>
+                                                                <a ng-if="item.employeeID" href="@Url.Action("EmpDetail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.employeeID}}" da dat data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                                    {{item.employeeNM}}
+                                                                </a>
+
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                </fieldset>
+                            </div>
+                        </div>
+                        <div id="company-section" class="well-sm col-sm-12" style="background: #fff;">
+                            <div class="smart-form">
+                                <h1>Detail Information</h1>
+                                <br />
+                                <hr>
+                                <fieldset>
+                                    <div class="row">
+                                        <div class="col col-6 m-bottom-15">
+                                            <div class="col col-10 m-bottom-15">
+                                                <label class="label">Type of Supplier</label>
+                                                <div class="inline-group" style="display:flex">
+                                                    <label class="checkbox">
+                                                        <input type="checkbox" ng-model="data.isProducer">
+                                                        <i></i>Producer
+                                                    </label>
+                                                    <label class="checkbox">
+                                                        <input type="checkbox" ng-model="data.isTrader">
+                                                        <i></i>Trader
+                                                    </label>
+                                                    <label class="checkbox">
+                                                        <input type="checkbox" ng-model="data.isPacking">
+                                                        <i></i>Packing
+                                                    </label>
+                                                    <label class="checkbox">
+                                                        <input type="checkbox" ng-model="data.isAssembler">
+                                                        <i></i>Assembler
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="col col-10 m-bottom-15">
+                                                <label class="label">Ownership</label>
+                                                <div class="inline-group" style="display:flex">
+                                                    <label class="checkbox">
+                                                        <input type="checkbox" ng-model="data.isPrivate">
+                                                        <i></i>Private
+                                                    </label>
+                                                    <label class="checkbox">
+                                                        <input type="checkbox" ng-model="data.isJointVenture">
+                                                        <i></i>Joint Venture
+                                                    </label>
+                                                    <label class="checkbox">
+                                                        <input type="checkbox" ng-model="data.isState">
+                                                        <i></i>State
+                                                    </label>
+                                                    <label class="checkbox">
+                                                        <input type="checkbox" ng-model="data.isStockCompany">
+                                                        <i></i>Stock Company
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col col-6 m-bottom-15">
+                                            <label class="label">Turnover</label>
+                                            <div class="tilsoft-table-body">
+                                                <table class="table table-bordered">
+                                                    <thead>
+                                                        <tr>
+                                                            <td style="width:25%;text-align:center;"><b>@CurrentSeason</b></td>
+                                                            <td style="width:25%;text-align:center;"><b>@PrevSeason1</b></td>
+                                                            <td style="width:25%;text-align:center;"><b>@PrevSeason2</b></td>
+                                                            <td style="width:25%;text-align:center;"><b>@PrevSeason3</b></td>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td ng-repeat="item in data.factoryRawMaterialTurnovers | orderBy: '-season' | limitTo:4" style="width:25%;text-align:right;">
+                                                                <div class="input-group">
+                                                                    <span class="input-group-addon">$</span>
+                                                                    <input type="text" class="form-control furnindo-currency" ng-model="item.amount" style="text-align:right" ng-currency fraction="2" currency-symbol="" readonly />
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                        <div class="col col-10 m-bottom-15">
+                                            <label class="label">Key Material:</label><label class="label inline-cus"><a href="javascript:void(0)" class="btn btn-primary btn-xs" ng-click="event.ChangeRawList()"><i class="fa fa-pencil"></i> Edit list</a></label>
+                                            <div class="inline-group">
+                                                <label class="radio" ng-repeat="item in keyRawMaterials | orderBy: '-keyRawMaterialNM': true">
+                                                    <input type="radio" name="radio-inline3" ng-model="data.keyRawMaterialID" ng-value="item.keyRawMaterialID">
+                                                    <i></i>{{item.keyRawMaterialNM}}
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col col-6 m-bottom-15">
+                                            <label class="label">Product description</label>
+                                            <label class="textarea">
+                                                <i class="icon-append fa fa-comment"></i>
+                                                <textarea class="form-control" ng-model="data.productDescription" rows="6" style="padding:5px"></textarea>
+                                            </label>
+                                        </div>
+                                        <div class="col col-6 m-bottom-15">
+                                            <label class="label">Manufacturing process description</label>
+                                            <label class="textarea">
+                                                <i class="icon-append fa fa-comment"></i>
+                                                <textarea class="form-control" ng-model="data.manufacturingProcessDescription" rows="6" style="padding:5px"></textarea>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col col-2 m-bottom-15">
+                                            <label class="label">Total plant square meters</label>
+                                            <label class="input">
+                                                <input type="text" id="totalPlantSquareMeters" ng-model="data.totalPlantSquareMeters" />
+                                            </label>
+                                        </div>
+                                        <div class="col col-2 m-bottom-15">
+                                            <label class="label">Number of buildings</label>
+                                            <label class="input">
+                                                <input type="text" id="numberOfBuildings" ng-model="data.numberOfBuildings" />
+                                            </label>
+                                        </div>
+                                        <div class="col col-2 m-bottom-15">
+                                            <label class="label">Year established</label>
+                                            <label class="input">
+                                                <input type="text" id="yearEstablished" ng-model="data.yearEstablished" />
+                                            </label>
+                                        </div>
+                                        <div class="col col-2 m-bottom-15">
+                                            <label class="label">Number of workers</label>
+                                            <label class="input">
+                                                <input type="text" id="numberOfWorkers" ng-model="data.numberOfWorkers" />
+                                            </label>
+                                        </div>
+                                        <div class="col col-2 m-bottom-15">
+                                            <label class="label">Operating hours</label>
+                                            <label class="input">
+                                                <input type="text" id="operatingHours" ng-model="data.operatingHours" />
+                                            </label>
+                                        </div>
+                                        <div class="col col-2 m-bottom-15">
+                                            <label class="label">Operating days</label>
+                                            <label class="input">
+                                                <input type="text" id="operatingDays" ng-model="data.operatingDays" />
+                                            </label>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+
+                        <div id="testing-section" class="well-sm col-sm-12" style="background: #fff;">
+                            <div class="smart-form">
+                                <h1>Testing and Certificates</h1>
+                                <br />
+                                <hr>
+                                <fieldset>
+                                    <div class="row">
+                                        <div class="col col-4 m-bottom-15">
+                                            <label class="label">Available in-house tests</label>
+                                            <section class="col col-lg-12">
+                                                <div id="grdMaterial" class="tilsoft-table-wrapper">
+                                                    <div class="tilsoft-table">
+                                                        <div class="tilsoft-table-body" style="width: auto; margin-top:0px;height:auto;">
+                                                            <table>
+                                                                <tr>
+                                                                    <th style="width:40px"></th>
+                                                                    <th>Description</th>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td colspan="8">
+                                                                        <a class="btn btn-primary btn-xs" ng-click="event.addTest($event)"><i class=" fa fa-plus"></i> Add</a>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr ng-repeat="item in data.factoryRawMaterialTests">
+                                                                    <td style="text-align:center; vertical-align:middle;width:40px;">
+                                                                        <a ng-click="event.removeTest($event,$index)" class="btn btn-danger btn-xs font-11" href="javascript:void(0);"><i class=" fa fa-times"></i>Del</a>
+                                                                    </td>
+                                                                    <td>
+                                                                        <input class="form-control" type="text" name="description" ng-model="item.description">
+                                                                    </td>
+                                                                </tr>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </section>
+                                        </div>
+                                        <div class="col col-8 m-bottom-15">
+                                            <label class="label">Available certificates</label>
+                                            <section class="col col-lg-12">
+                                                <div id="grdMaterial" class="tilsoft-table-wrapper">
+                                                    <div class="tilsoft-table">
+                                                        <div class="tilsoft-table-body" style="width: 480px; margin-top:0px;height:auto;">
+                                                            <table>
+                                                                <tr>
+                                                                    <th style="width:40px"></th>
+                                                                    <th style="width:60px">Type</th>
+                                                                    <th style="width:60px">Certificate</th>
+                                                                    <th style="width:150px">Certificate number</th>
+                                                                    <th style="width:80px">Valid until</th>
+                                                                    <th style="width:80px">PDF File</th>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td colspan="8">
+                                                                        <a class="btn btn-primary btn-xs" ng-click="event.addCertificate($event)"><i class=" fa fa-plus"></i> Add</a>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr ng-repeat="item in data.factoryRawMaterialCertificates">
+                                                                    <td style="text-align:center; vertical-align:middle">
+                                                                        <a ng-click="event.removeCertificate($event,$index)" class="btn btn-danger btn-xs font-11" href="javascript:void(0);"><i class=" fa fa-times"></i>Del</a>
+                                                                    </td>
+                                                                    <td>
+                                                                        <label class="select">
+                                                                            <select id="certificateType" ng-model="item.typeID" ng-options="certificateType.typeID as certificateType.typeNM for certificateType in certificateTypes">
+                                                                                <option value=""></option>
+                                                                            </select>
+                                                                            <i></i>
+                                                                        </label>
+                                                                    </td>
+                                                                    <td>
+                                                                        <input class="form-control" type="text" name="CertificateNM" ng-model="item.certificateNM">
+                                                                    </td>
+                                                                    <td>
+                                                                        <input class="form-control" type="text" name="CertificateNo" ng-model="item.certificateNo">
+                                                                    </td>
+                                                                    <td>
+                                                                        <input class="form-control" type="text" name="ValidUntil" ng-model="item.validUntil">
+                                                                    </td>
+                                                                    <td style="text-align:center;">
+                                                                        @Html.Partial("~/Views/Shared/_Controls/_FileUploadBox2.cshtml", new Frontend.Models.FileUploadViewModel2() { ControlID = "item.factoryRawMaterialCertificateID", TypeID = 0, URLBinding = "item.certificateFileUrl", FileName = "item.certificateFileFriendlyName", JSOnChangeHandler = "changeCertificateFile", JSONRemoveHandler = "removeCertificateFile" })
+                                                                    </td>
+                                                                </tr>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </section>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+
+                        <div id="payment-term-section" class="well-sm col-sm-12" style="background: #fff;">
+                            <div class="smart-form">
+                                <h1>Payment Term</h1>
+                                <br />
+                                <hr>
+                                <fieldset>
+                                    <div class="row">
+                                        <div class="col col-6 m-bottom-15">
+                                            <section class="col col-lg-12">
+                                                <div class="tilsoft-table-wrapper">
+                                                    <div class="tilsoft-table">
+                                                        <div class="tilsoft-table-body" style="width: auto; margin-top:0px;height:auto;">
+                                                            <table>
+                                                                <tr>
+                                                                    <th style="width:60px"></th>
+                                                                    <th>Supplier Payment Term</th>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td colspan="8">
+                                                                        <a class="btn btn-primary btn-xs" ng-click="event.addPaymentTerm($event)"><i class=" fa fa-plus"></i> Add</a>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr ng-repeat="item in data.factoryRawPaymentTerms">
+                                                                    <td style="vertical-align:middle;width:60px;">
+                                                                        <a ng-click="event.removePaymentTerm($event,$index)" class="btn btn-danger btn-xs font-11" href="javascript:void(0);" style="width:47px"><i class=" fa fa-times"></i>Del</a>
+                                                                    </td>
+                                                                    <td>
+                                                                        <label class="select">
+                                                                            <select ng-model="item.supplierPaymentTermID" ng-options="supplierPaymentTerm.supplierPaymentTermID as supplierPaymentTerm.supplierPaymentTermNM for supplierPaymentTerm in supplierPaymentTerms" ng-change="event.existSupplier(item)">
+                                                                                <option value=""></option>
+                                                                            </select>
+                                                                            <i></i>
+                                                                        </label>
+                                                                    </td>
+                                                                </tr>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </section>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-col-12 tab-pane" id="tabMeeting">
+                        <table class="table table-striped table-bordered table-hover" style="width: 100%;">
+                            <thead>
+                                <tr>
+                                    <th>SUBJECT</th>
+                                    <th>OWNER</th>
+                                    <th>LOCATION</th>
+                                    <th>FACTORY</th>
+                                    <th>START</th>
+                                    <th>END</th>
+                                    <th>ATTACHMENT</th>
+                                    <th>DESCRIPTION</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="item in appointmentDTO">
+                                    @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Read, HttpContext.Current) != "disabled")
+                                    {
+                                        
+                                        <td >
+                                            <a href="@Url.Action("Index", "PurchasingCalendarMng")#/event/view/{{item.purchasingCalendarAppointmentID}}" target="_blank">{{item.subject}}</a>
+                                        </td>
+                                    }
+                                    else
+                                    {
+                                        <td>{{item.subject}}</td>
+                                    }
+
+                                    <td style="text-align: center;">
+                                        <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.userID}}" data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                            {{item.ownerNM}}
+                                        </a>
+                                    </td>
+                                    <td style="text-align: center;">{{item.meetingLocationNM}}</td>
+                                    <td style="text-align: center;">{{item.factoryRawMaterialOfficialNM}}</td>
+                                    <td>{{item.startTime}}</td>
+                                    <td>{{item.endTime}}</td>
+                                    <td style="text-align: center;">{{item.totalAttachedFile}}</td>
+                                    <td>{{item.description}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-col-12 tab-pane" id="tabCard">
+                        <div id="card-section" class="well-sm col-sm-12" style="background: #fff;">
+                            <div>
+                                <div class="widget-body">
+                                    <a href="javascript:void(0)" class="btn btn-primary" ng-click="event.addCard()"><i class="fa fa-plus"></i> Add New Business Card</a>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="widget-body">
+                                    <div id="searchResult" class="tilsoft-table-wrapper">
+                                        <div class="row image-wrapper" style="width: auto;border:1px solid #ddd;">
+                                            <section ng-repeat="item in data.factoryRawMaterialBusinessCardDTO | orderBy: '-updatedDate'" class="col-sm-6">
+                                                <div class="row">
+                                                    <p style="margin: 15px 0px 0px 0px;height:100px;padding:10px;color:#000;text-align:left;font-size:12px;overflow:hidden;">
+                                                        <strong>Info: </strong>{{item.description}}
+                                                        <br />
+                                                        <span>
+                                                            <strong>Remark: </strong>{{item.remark}}
+                                                        </span>
+                                                        <br />
+                                                        <strong>Name: </strong>
+                                                        <a ng-if="item.controllerID > 0" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.controllerID}}" dat data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                            <i class="fa fa-user"></i>  {{item.controllerName}}
+                                                        </a>
+                                                        <a ng-if="item.otherName != null && item.controllerID == null">
+                                                            <i class="fa fa-user"></i>  {{item.otherName}}
+                                                        </a>
+                                                    </p>
+                                                </div>
+                                                <div class="row">
+                                                    <div style="padding: 10px;" class="col-sm-6">
+                                                        <a data-featherlight="image" href="{{item.frontFileLocation}}" class="input-group" style="display:block;">
+                                                            <div class="img m-bottom-15" style="background: url('{{item.frontThumbnailLocation}}') center center no-repeat;background-size:100%;"></div>
+                                                        </a>
+                                                    </div>
+                                                    <div style="padding: 10px;" class="col-sm-6">
+                                                        <a data-featherlight="image" href="{{item.behindFileLocation}}" class="input-group" style="display:block;">
+                                                            <div class="img m-bottom-15" style="background: url('{{item.behindThumbnailLocation}}') center center no-repeat;background-size:100%;"></div>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                                <div class="row" style="padding:10px">
+                                                    <a title="Change" ng-click="event.editCard(item)" class="btn btn-default btn-sm"><i class="fa fa-folder-open-o"></i> Change</a>
+                                                    <a title="Remove" ng-click="event.removeCard(item)" class="btn btn-default btn-sm"><i class="fa fa-times danger"></i> <span class="text-danger">Remove</span></a>
+                                                </div>
+                                            </section>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane" id="tabVideo">
+                        <div class="smart-form">
+                            <fieldset>
+                                <div class="row">
+                                    <a class="btn btn-default custom-button" style="margin-top: 0px;" href="javascript:void(0);" ng-click="event.uploadVideo()"><i class="fa fa-upload"></i> Upload 360 Video</a>
+                                </div>
+                                <div class="row" style="margin-top: 15px;">
+                                    <div class="float-img-list" ng-repeat="item in data.factoryRawMaterialGalleryDTO">
+                                        <div style="width: 203px;{{item.isUsedForWarehouseConnect ? 'border-color: #0000ff;' : ''}}" class="img-item" title="{{item.articleCode}}">
+                                            <video controls width="170" height="170">
+                                                <source ng-src="{{item.factoryGalleryFile|trustUrl}}" type="video/mp4">
+                                                Your browser does not support the video tag.
+                                            </video>
+                                            <a class="btn btn-default btn-xs" target="_blank" href="{{item.factoryGalleryFile|trustUrl}}">View</a>
+                                            @*<a href="javascript:void(0)" class="btn btn-primary btn-xs" title="Use the media for warehouse connect api" ng-click="event.toggleWarehouseConnectSelection(item)">Select</a>*@
+                                            @*<a class="btn btn-success btn-xs" href="javascript:void(0)" ng-click="event.editVideo(item)">Edit</a>*@
+                                            <!--<a class="btn btn-default action" href="javascript:void(0)" ng-click="event.setDefaultItem(item.imageGalleryID, 3)"><i class="fa fa-check"></i> Default</a>-->
+                                            <a class="btn btn-danger btn-xs" href="javascript:void(0)" ng-click="event.removeGalleryItem(item.factoryRawMaterialGalleryID)">Delete</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+                    <div class="col-col-12 tab-pane" id="tabImage">
+                        <div id="image-section" class="well-sm col-sm-12" style="background: #fff;">
+                            <div>
+                                <div class="widget-body">
+                                    <a href="javascript:void(0)" class="btn btn-primary" ng-click="event.addImage()"><i class="fa fa-plus"></i> Add New Picture</a>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="widget-body">
+                                    <div id="searchResult" class="tilsoft-table-wrapper">
+                                        <div class="row image-wrapper" style="width: auto;border:1px solid #ddd;">
+                                            <section ng-repeat="item in data.factoryRawMaterialImages | orderBy: '-updatedDate'" class="col-sm-3">
+                                                <p style="margin: 15px 0px 0px 0px;height:40px;padding:10px;color:#000;text-align:left;font-size:12px;overflow:hidden;">{{item.description}}</p>
+                                                <div style="padding: 10px;">
+                                                    <a data-featherlight="image" href="{{item.fileLocation}}" class="input-group" style="display:block;">
+                                                        <div class="img m-bottom-15" style="background: url('{{item.thumbnailLocation}}') center center no-repeat;background-size:100%;"></div>
+                                                    </a>
+                                                </div>
+                                                <div>
+                                                    <a title="Change" ng-click="event.editImage(item)" class="btn btn-default btn-sm"><i class="fa fa-folder-open-o"></i> Change</a>
+                                                    <a title="Remove" ng-click="event.removeImage(item)" class="btn btn-default btn-sm"><i class="fa fa-times danger"></i> <span class="text-danger">Remove</span></a>
+                                                </div>
+                                            </section>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-col-12 tab-pane" id="tabDocument">
+                        <div class="row">
+                            <div class="col-sm-12 m-bottom-15">
+                                <div>
+                                    <a href="javascript:void(0);" ng-click="event.addDocument($event)"><b><u>Add new documents</u></b></a>
+                                </div>
+                                <div id="contract" class="tilsoft-table-wrapper">
+                                    <div class="tilsoft-table">
+                                        <div class="tilsoft-table-header" style="width: 950px; ">
+                                            <div style="width: 50px;"></div>
+                                            <div style="width: 150px;">Document Type</div>
+                                            <div style="width: 150px;">Document Name</div>
+                                            <div style="width: 300px;">Document File</div>
+                                            <div>Description</div>
+                                        </div>
+                                        <div class="tilsoft-table-body" style="width: 950px; ">
+                                            <table>
+                                                <tr ng-repeat="item in data.subSupplierContracts | filter: {contractTypeID: '!1'}">
+                                                    <td style="width: 49px; text-align: center;">
+                                                        <a href="javascript:void(0)" title="Delete" ng-click="event.removeContract($event, item.subSupplierContractID)"><i class="fa fa-times-circle grid-button"></i></a>
+                                                    </td>
+
+                                                    <td style="width: 150px; text-align: center;">
+                                                        <select class="form-control" style="width: 100%;" ng-model="item.contractTypeID" ng-options="contractType.subSupplierDocumentTypeID as contractType.subSupplierDocumentTypeNM for contractType in subsupplierDocumentTypes | filter: {subSupplierDocumentTypeID: '!1'}">
+                                                            <option value=""></option>
+                                                        </select>
+                                                    </td>
+
+                                                    <td style="width: 150px; text-align: center;">
+                                                        <input class="form-control" style="width: 100%;" type="text" name="contractNo" ng-model="item.contractNo">
+                                                    </td>
+
+                                                    <td style="width: 300px;">
+                                                        @Html.Partial("~/Views/Shared/_Controls/_FileUploadBox.cshtml", new Frontend.Models.FileUploadViewModel() { ControlID = "item.subSupplierContractID", URLBinding = "item.contractFileURL", FileName = "item.contractFileFriendlyName", JSOnChangeHandler = "changeFile", JSONRemoveHandler = "removeFile" })
+                                                    </td>
+
+                                                    <td>
+                                                        <input class="form-control" style="width: 100%;" type="text" name="contractDescription" ng-model="item.remark">
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-col-12 tab-pane" id="tracking">
+                        <div class="smart-form">
+                            <fieldset>
+                                <div class="row">
+                                    <section class="col col-3">
+                                        <label class="label">Updated By</label>
+                                        <label class="input">
+                                            <span class="form-control">
+                                                <a ng-if="data.updatedBy" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{data.updatedBy}}" dat data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                    <i class="fa fa-user"></i> {{data.updatorNM}}
+                                                </a>
+                                            </span>
+                                        </label>
+                                    </section>
+                                    <section class="col col-3">
+                                        <label class="label">Updated Date</label>
+                                        <label class="input">
+                                            <span class="form-control">{{data.updatedDate}}</span>
+                                        </label>
+                                    </section>
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+                    <div class="col-col-12 tab-pane" id="listofmaterial">
+                        <div class="smart-form">
+                            <fieldset>
+                                <div class="row">
+                                    <div class=" m-bottom-15">
+                                        <div>
+                                            <a href="javascript:void(0);" ng-click="event.addnewMaterial($event,item)"><b><u>Add new Material</u></b></a>
+                                        </div>
+                                        <div id="contract" class="tilsoft-table-wrapper">
+                                            <div class="tilsoft-table">
+                                                <div class="tilsoft-table-header" style="width: 1600px; ">
+                                                    <div style="width: 150px; padding-left: 5px;">Total<br><b style="color: blue; padding: 10px;">{{data.materialsPrices.length|number}}</b></div>
+                                                    <div style="width: 150px;">Status</div>
+                                                    <div style="width: 300px;">Product Name</div>
+                                                    <div style="width: 150px;">Product Code</div>
+                                                    <div style="width: 100px;">Unit</div>
+                                                    <div style="width: 100px;">QNT</div>
+                                                    <div style="width: 100px;">Price (VND)</div>
+                                                    <div style="width: 150px;">Valid From</div>
+                                                    <div style="width: 100px;">Type</div>
+                                                    <div style="width: 100px;">Remark</div>
+                                                    <div>Attach File</div>
+                                                </div>
+                                                <div class="tilsoft-table-body" style="width: 1600px; ">
+                                                    <table>
+                                                        <tr ng-repeat="item in data.materialsPrices | orderBy: '-validFrom' ">
+                                                            <td style="width: 150px;">
+
+                                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Reset, HttpContext.Current) != "disabled")
+                                                                {
+
+                                                                    <a class="btn btn-primary btn-xs font-11" ng-click="event.edit(item)" ng-show="item.materialsPriceID > 0" title="Edit Supplier" style="width: 60px; margin-top: 3px;"><i class="fa fa-pencil"></i>Edit</a>
+
+                                                                    <a href="javascript:void(0)" class="btn btn-default btn-danger btn-xs font-11" title="Delete Item" style="width: 60px; margin-top: 3px;margin-left:30px;" ng-show="item.materialsPriceID < 0" ng-click="event.cannelMaterial($event, item.materialsPriceID)">
+                                                                        <i class="fa fa-times"></i> Cannel
+                                                                    </a>
+                                                                }
+                                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current) != "disabled")
+                                                                {
+                                                                    <a href="javascript:void(0)" class="btn btn-primary btn-xs font-11" ng-click="event.openHictoryPrice(item)" ng-show="item.materialsPriceID > 0" ng-disabled="item.materialPriceHistories.length<=0" style="width:60px; background-color: green; margin-top: 5px"> History</a>
+                                                                }
+                                                            </td>
+                                                            <td style="width: 150px; text-align: center;">
+
+
+                                                                <select class="form-control" ng-model="item.statusID" name="contractNo" ng-disabled="!item.isEditItem" ng-options="xxx.statusID as xxx.statusNM for xxx in  statusMaterialPrices" ng-change="event.changePrice(item)">
+                                                                    <option value=""></option>
+                                                                </select>
+                                                            </td>
+
+                                                            <td style="width: 300px; text-align: center;">
+                                                                <input class="form-control" style="font-family: Arial; font-size: 12px" id="productionname" disabled="disabled" ng-disabled="!item.isEditProductNM" name="contractNo" avs-remote-auto-complete data-method="POST" ng-request-param="productionItemBox.request" ng-init-param="item.productionItemNM" ng-init-param-2="item.productionItemNM" ng-model="item.productionItemNM" ng-item-value="productionItemBox.data" data-format-function="formatProductionItem" ng-item-selected="event.selectedProductionItem(productionItemBox.data, item)" />
+                                                            </td>
+
+                                                            <td style="width: 150px; text-align: center;">
+                                                                <input class="form-control" style="width: 100%;" type="text" name="contractNo" ng-model="item.productionItemUD" ng-disabled="!item.isEditProductUD">
+                                                            </td>
+
+                                                            <td style="width: 100px; text-align: center;">
+                                                                <select class="form-control" ng-model="item.unitID" ng-options="xxx.unitID as xxx.unitNM for xxx in item.units" ng-disabled="!item.isEdiuUnit">
+                                                                    <option value=""></option>
+                                                                </select>
+                                                            </td>
+                                                            <td style="width: 100px; text-align: center;">
+                                                                <input class="form-control" style="width: 100%;text-align:right;" type="text" name="contractNo" avs-number-2 ng-model="item.qty" ng-decimal="4" ng-disabled="!item.isEditItem" ng-change="event.changePrice(item)">
+                                                            </td>
+                                                            <td style="width: 100px; text-align: center;">
+                                                                <input class="form-control" style="width: 100%;text-align:right;" type="text" name="contractNo" avs-number-2 ng-model="item.price" ng-decimal="2" ng-disabled="!item.isEditItem" ng-change="event.changePrice(item)">
+                                                            </td>
+                                                            <td style="width: 150px; text-align: center;">
+                                                                <input class="form-control" style="width: 100%;" type="text" name="validfrom" avs-calendar ng-model="item.validFrom" {{ validFrom | date: 'dd/MM/yyyy' }} ng-data-source="item.validFrom" ng-disabled="!item.isEditItem" ng-change="event.changeVaidFrom(item)">
+                                                            </td>
+
+                                                            <td style="width: 100px; text-align: center;">
+                                                                <input class="form-control" style="width: 100%;" type="text" name="contractNo" value="Material" ng-model="item.productionItemTypeNM" disabled>
+                                                            </td>
+                                                            <td style="width: 100px; text-align: center;">
+                                                                <input class="form-control" style="width: 100%;" type="text" name="contractDescription" ng-model="item.remark" ng-change="event.changePrice(item)" ng-disabled="!item.isEditItem">
+                                                            </td>
+                                                            <td>
+                                                                <span ng-show="!item.isEditItem"> @Html.Partial("~/Views/Shared/_Controls/_FileUploadBox.cshtml", new Frontend.Models.FileUploadViewModel() { ControlID = "item.materialsPriceID", URLBinding = "item.attachFileURL", FileName = "item.attachFileFriendlyName", JSOnChangeHandler = "changeAttachFile", JSONRemoveHandler = "removeAttachFile" })</span>
+                                                                <span ng-show="item.isEditItem"> @Html.Partial("~/Views/Shared/_Controls/_FileUploadBox.cshtml", new Frontend.Models.FileUploadViewModel() { ControlID = "item.materialsPriceID", URLBinding = "item.attachFileURL", FileName = "item.attachFileFriendlyName", JSOnChangeHandler = "event.changeAttachFile", JSONRemoveHandler = "event.removeAttachFile" })</span>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
+                        <div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="frmHictoryPrice" class="modal fade" style="display: none;" data-backdrop="static">
+                            <div class="modal-dialog">
+                                <div class="modal-content" style="width: 1606px;margin-left:-500px;">
+                                    <div class="modal-header">
+                                        <button aria-hidden="true" data-dismiss="modal" class="close" type="button">
+                                            ×
+                                        </button>
+                                        <h4 id="myModalLabel" class="modal-title">History Material</h4>
+                                    </div>
+                                    <div id="contract" class="tilsoft-table-wrapper">
+                                        <div class="tilsoft-table">
+                                            <div class="tilsoft-table-header" style="width: 950px; ">
+                                                <div style="width: 74px; padding-left: 5px;">Total<br><b style="color: blue; padding: 10px;">{{materialsPrices.materialPriceHistories.length|number}}</b></div>
+                                                <div style="width: 150px;">Status</div>
+                                                <div style="width: 300px;">Product Name</div>
+                                                <div style="width: 150px;">Product Code</div>
+                                                <div style="width: 100px;">Unit</div>
+                                                <div style="width: 100px;">QNT</div>
+                                                <div style="width: 100px;">Price (VND)</div>
+                                                <div style="width: 150px;">Valid From</div>
+                                                <div style="width: 100px;">Type</div>
+                                                <div style="width: 100px;">Attach File</div>
+                                                <div>Remark</div>
+                                            </div>
+                                            <div class="tilsoft-table-body" style="width: 950px; ">
+                                                <table>
+                                                    <tr ng-repeat="itema in materialsPrices.materialPriceHistories">
+                                                        <td style="width:74px;"></td>
+                                                        <td style="width: 150px; text-align: center;">
+                                                            <select class="form-control" ng-model="itema.statusID" name="contractNo" disabled ng-options="xxx.statusID as xxx.statusNM for xxx in  statusMaterialPrices">
+                                                                <option value=""></option>
+                                                            </select>
+                                                        </td>
+
+                                                        <td style="width: 300px; text-align: center;">
+                                                            <input class="form-control" style="font-family: Arial; font-size: 12px" avs-remote-auto-complete data-method="POST" disabled ng-model="itema.productionItemNM" />
+                                                        </td>
+
+                                                        <td style="width: 150px; text-align: center;">
+                                                            <input class="form-control" style="width: 100%;" type="text" name="contractNo" ng-model="itema.productionItemUD" disabled>
+                                                        </td>
+
+                                                        <td style="width: 100px; text-align: center;">
+                                                            <input class="form-control" style="width: 100%;" type="text" name="contractNo" ng-model="itema.unitNM" disabled>
+                                                        </td>
+                                                        <td style="width: 100px; text-align: center;">
+                                                            <input class="form-control" style="width: 100%;text-align:right;" type="text" name="contractNo" avs-number-2 ng-model="itema.qty" ng-decimal="4" disabled>
+                                                        </td>
+                                                        <td style="width: 100px; text-align: center;">
+                                                            <input class="form-control" style="width: 100%;text-align:right;" type="text" name="contractNo" avs-number-2 ng-model="itema.price" ng-decimal="2" disabled>
+                                                        </td>
+                                                        <td style="width: 150px; text-align: center;">
+                                                            <input class="form-control " style="width: 100%;" type="text" name="contractNo" avs-calendar ng-data-source="itema.validFrom" disabled>
+                                                        </td>
+
+                                                        <td style="width: 100px; text-align: center;">
+                                                            <input class="form-control" style="width: 100%;" type="text" name="contractNo" value="Material" ng-model="itema.productionItemTypeNM" disabled>
+                                                        </td>
+                                                        <td style="width: 100px; text-align: center;">
+                                                            <a ng-if="itema.attachFileURL" class="btn btn-primary btn-xs font-11" target="_blank" href="{{itema.attachFileURL}}">
+                                                                View
+                                                            </a>
+                                                        </td>
+                                                        <td>
+                                                            <input class="form-control" style="width: 100%;" type="text" name="contractDescription" ng-model="itema.remarkHistory" disabled>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button data-dismiss="modal" class="btn btn-default" type="button">
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </article>
+
+</form>
+
+<!--Pricing-->
+<div id="pricingForm" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static" style="z-index: 1400;">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title" id="myModalLabel">Select employee</h4>
+            </div>
+            <div class="modal-body">
+                <div class="smart-form">
+                    <fieldset>
+                        <div class="row">
+                            <select id="pricingID" ng-model="pricingSelected" multiple="multiple" placeholder="Type name of employee">
+                                <option ng-repeat="item in employees" ng-value="item.employeeID" ng-selected="item.priceSelected">{{item.employeeNM}}</option>
+                            </select>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" ng-click="event.updatePricing(pricingSelected)">
+                    OK
+                </button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="qualityForm" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static" style="z-index: 1400;">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title" id="myModalLabel">Select employee</h4>
+            </div>
+            <div class="modal-body">
+                <div class="smart-form">
+                    <fieldset>
+                        <div class="row">
+                            <select id="qualityID" ng-model="qualitySelected" multiple="multiple" placeholder="Type name of employee">
+                                <option ng-repeat="item in employees" ng-value="item.employeeID" ng-selected="item.qualitySelected">{{item.employeeNM}}</option>
+                            </select>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" ng-click="event.updateQuality(qualitySelected)">
+                    OK
+                </button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="directorForm" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static" style="z-index: 1400;">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title" id="myModalLabel">Select employee</h4>
+            </div>
+            <div class="modal-body">
+                <div class="smart-form">
+                    <fieldset>
+                        <div class="row">
+                            <select id="directorID" ng-model="directorSelected" multiple="multiple">
+                                <option ng-repeat="item in employees" ng-value="item.employeeID" ng-selected="item.selected">{{item.employeeNM}}</option>
+                            </select>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" ng-click="event.updateDirector(directorSelected)">
+                    OK
+                </button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Managers-->
+<div id="managerForm" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static" style="z-index: 1400;">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title" id="myModalLabel">Select Manager</h4>
+            </div>
+            <div class="modal-body">
+                <div class="smart-form">
+                    <fieldset>
+                        <div class="row">
+                            <select id="managerID" ng-model="managerSelected" multiple="multiple">
+                                <option ng-repeat="item in employees" ng-value="item.employeeID" ng-selected="item.selected">{{item.employeeNM}}</option>
+                            </select>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" ng-click="event.updateManager(managerSelected)">
+                    OK
+                </button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="sampleForm" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static" style="z-index: 1400;">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title" id="myModalLabel">Select employee</h4>
+            </div>
+            <div class="modal-body">
+                <div class="smart-form">
+                    <fieldset>
+                        <div class="row">
+                            <select id="sampleID" ng-model="sampleSeleted" multiple="multiple">
+                                <option ng-repeat="item in employees" ng-value="item.employeeID" ng-selected="item.selected">{{item.employeeNM}}</option>
+                            </select>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" ng-click="event.updateSample(sampleSelected)">
+                    OK
+                </button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--New Raw Material-->
+<div id="newKeyForm" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static" style="z-index: 1400;">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title" id="myModalLabel">Edit Key Raw Material List</h4>
+            </div>
+            <div class="modal-body">
+                <section class="col col-lg-12">
+                    <div id="grdMaterial" class="tilsoft-table-wrapper">
+                        <div class="MaterialForm tilsoft-table" style="overflow-x: hidden;margin-bottom: 20px">
+                            <div class="tilsoft-table-body" style="width: 100%; margin-top:0px;height:auto;">
+                                <table>
+                                    <tr style="width:100%;">
+                                        <th style="display:block;">Key Raw Material</th>
+                                    </tr>
+                                    <tr style="width:100%;">
+                                        <td colspan="8">
+                                            <a class="btn btn-primary btn-xs" ng-click="event.addRaw($event)"><i class=" fa fa-plus"></i></a>
+                                        </td>
+                                    </tr>
+                                    <tr ng-repeat="item in tmpKeyRawMaterials">
+                                        <td style="text-align:center; vertical-align:middle">
+                                            <a ng-click="event.removeRaw($event,$index, item)" class="btn btn-danger btn-xs font-11" href="javascript:void(0);"><i class=" fa fa-times"></i></a>
+                                        </td>
+                                        <td>
+                                            <input class="form-control" type="text" name="keyRawMaterialNM" ng-model="item.keyRawMaterialNM">
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+            <div class="modal-footer" style="border:none;">
+                <button type="button" class="btn btn-primary" ng-click="event.updateRawList(tmpKeyRawMaterials)">
+                    OK
+                </button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--Business Card Form-->
+<div id="cardForm" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title" id="myModalLabel">Business Card</h4>
+            </div>
+            <div class="modal-body no-padding">
+                <div class="smart-form">
+                    <fieldset>
+                        <section class="col col-6">
+                            <label class="label">Preview Image</label>
+                            <div class="input" style="text-align: center;">
+                                <div style="width: 100%; border: solid 1px #ddd; vertical-align: central">
+                                    @*<img ng-if="currentCard.frontFileLocation" style="width: 100%; display:block;" class="background-size:100%;" ng-src="{{currentCard.frontFileLocation}}">*@
+                                    <a data-featherlight="image" href="{{currentCard.frontFileLocation}}" class="input-group" style="display:block;">
+                                        <div class="img" style="background: url('{{currentCard.frontThumbnailLocation}}') center center no-repeat;background-size:100%;"></div>
+                                    </a>
+                                </div>
+                                <br />
+                                <a ng-click="event.addPreviewCardImage(1)" class="btn btn-primary btn-xs font-11" href="javascript:void(0);"><i class="fa fa-pencil"></i> Change</a>
+                            </div>
+                        </section>
+                        <section class="col col-6">
+                            <label class="label">&nbsp;</label>
+                            <div class="input" style="text-align: center;">
+                                <div style="width: 100%; border: solid 1px #ddd;vertical-align:central">
+                                    @*<img ng-if="currentCard.behindFileLocation" style="width: 100%; display:block;" class="background-size:100%;" ng-src="{{currentCard.behindFileLocation}}">*@
+                                    <a data-featherlight="image" href="{{currentCard.behindFileLocation}}" class="input-group" style="display:block;">
+                                        <div class="img" style="background: url('{{currentCard.behindThumbnailLocation}}') center center no-repeat;background-size:100%;"></div>
+                                    </a>
+                                </div>
+                                <br />
+                                <a ng-click="event.addPreviewCardImage(2)" class="btn btn-primary btn-xs font-11" href="javascript:void(0);"><i class="fa fa-pencil"></i> Change</a>
+                            </div>
+                        </section>
+                        <section class="col col-6">
+                            <label class="label">Info Description</label>
+                            <label class="textarea">
+                                <i class="icon-append fa fa-comment"></i>
+                                <textarea class="form-control" ng-model="currentCard.description" rows="3" style="padding:5px"></textarea>
+                            </label>
+                        </section>
+                        <section class="col col-6">
+                            <label class="label">Remark</label>
+                            <label class="textarea">
+                                <i class="icon-append fa fa-comment"></i>
+                                <textarea class="form-control" ng-model="currentCard.remark" rows="3" style="padding:5px"></textarea>
+                            </label>
+                        </section>
+                        <section class="col col-6">
+                            <label class="label">Name</label>
+                            <lable class="select">
+                                <select ng-model="currentCard.controllerID" ng-options="user.userID as (user.employeeNM + ' ('+user.internalCompanyNM+')') for user in users | orderBy : 'employeeNM'" ng-change="event.changeController(currentCard.controllerID)">
+                                    <option value="">No Account</option>
+                                </select>
+                            </lable>
+                        </section>
+                        <section class="col col-6">
+                            <label class="label">Other Name</label>
+                            <lable class="input" ng-if="currentCard.controllerID > 0 ">
+                                <input readonly type="text" />
+                            </lable>
+                            <lable class="input" ng-if="currentCard.controllerID == 0 || currentCard.controllerID==null">
+                                <input type="text" ng-model="currentCard.otherName" />
+                            </lable>
+                        </section>
+                    </fieldset>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" ng-click="event.updateCard()">
+                    OK
+                </button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--Image from-->
+<div id="imageForm" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static" style="z-index: 1400;">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title" id="myModalLabel">Picture</h4>
+            </div>
+            <div class="modal-body no-padding">
+                <div class="smart-form">
+                    <fieldset>
+                        <section class="col col-6">
+                            <label class="label">Preview Image</label>
+                            <div class="input" style="text-align: center;">
+                                <div style="width: 100%; height: 300px; border: solid 1px #ddd;">
+                                    <img ng-if="currentImage.fileLocation" style="width: 100%;" ng-src="{{currentImage.fileLocation}}">
+                                </div>
+                                <br />
+                                <a ng-click="event.addPreviewImage()" class="btn btn-primary btn-xs font-11" href="javascript:void(0);"><i class="fa fa-pencil"></i> Change</a>
+                            </div>
+                        </section>
+                        <section class="col col-6">
+                            <label class="label">Image description</label>
+                            <label class="textarea">
+                                <i class="icon-append fa fa-comment"></i>
+                                <textarea class="form-control" ng-model="currentImage.description" rows="3" style="padding:5px"></textarea>
+                            </label>
+                        </section>
+                    </fieldset>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" ng-click="event.updateImage()">
+                    OK
+                </button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section FormAction {
+<ul id="sparks">
+    <li class="sparks-info">
+        <a href="@Url.Action("Index", "FactoryRawMaterialMng")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="event.update($event)"><i class="fa fa-save"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current))" title="Delete" ng-click="event.deleteItem()" style="color: #ff0000;"><i class="fa fa-times"></i></a>
+    </li>
+    @if (!string.IsNullOrEmpty(userManualUrl))
+    {
+        <li class="sparks-info">
+            <a target="_blank" href="@userManualUrl" class="btn btn-default" title="Help"><i class="fa fa-info"></i></a>
+        </li>
+    }
+</ul>
+}
+
+@section pagejs {
+    <script type="text/javascript">
+    var context = {
+            id: @ViewBag.ID,
+            serviceUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/factoryrawmaterialmng/',
+            token: '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]',
+            backUrl: '@Url.Action("Index", "FactoryRawMaterialMng")',
+            refreshUrl: '@Url.Action("Edit", "FactoryRawMaterialMng", new { id = UrlParameter.Optional })/',
+
+
+            CurrentSeason: '@CurrentSeason',
+            PrevSeason1: '@PrevSeason1',
+            PrevSeason2: '@PrevSeason2',
+            PrevSeason3: '@PrevSeason3',
+            NextSeason: '@NextSeason',
+
+            token: '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]',
+            viewName: 'Edit',
+            getProductionItemUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/factoryrawmaterialmng/' + 'get-product-item',
+            supportServiceUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/support/',
+    }
+
+    </script>
+    <script src="~/Angular/app/factoryRawMaterialMng/edit.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/jsonService2.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/factoryRawMaterialMng/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/support/service.js?c=@System.Guid.NewGuid().ToString().Replace("-","")"></script>
+}

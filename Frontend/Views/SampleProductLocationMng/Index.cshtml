@@ -1,0 +1,264 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    var pageSize = System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"];
+    var cookieID = HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString();
+
+    var canUpdate = (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current) != "disabled");
+
+    ViewBag.Title = "Search Sample Product Location";
+    ViewBag.Module = "Sample Production Location";
+}
+<style>
+    .select2-arrow {
+        width: 15px !important;
+    }
+
+    .search-text {
+        height: 29px !important;
+        padding: 8px !important;
+        border: 1px solid #ddd !important;
+    }
+</style>
+<div class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-table"></i>
+                </span>
+                <h2>Search Results</h2>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div avs-scroll grid-handler="gridHandler" class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header" style="width: 1650px">
+                                <div style="width:80px">Found(s)<br><strong style="color:darkblue">{{currentRows}}</strong>/<strong style="color:maroon">{{totalRows}}</strong></div>
+                                <div style="width:70px"></div>
+                                <div style="width:140px">Image</div>
+                                <div style="width:110px" class="sorting_asc">Season</div>
+                                <div style="width:140px" class="sorting">Code</div>
+                                <div style="width:230px" class="sorting">Article<br>Description</div>
+                                <div style="width:130px" class="sorting">Factory</div>
+                                <div style="width:130px" class="sorting">Location</div>
+                                <div style="width:130px" class="sorting">Client</div>
+                                <div style="width:90px" class="sorting">Quantity</div>
+                                <div style="width:120px" class="sorting">Status</div>
+                                <div>More<br>Information</div>
+                            </div>
+                            <div class="tilsoft-table-filter" style="width: 1650px">
+                                <div style="width:80px">
+                                    <a href="javascript:void(0)" class="btn btn-{{isDefaultFilter?'default':'primary'}} btn-xs" title="Search with filters" ng-click="event.research()"><i class="fa fa-filter"></i></a>
+                                    <a href="javascript:void(0)" class="btn btn-default btn-xs" title="Clear filters" ng-click="event.clear()"><i class="fa fa-ban"></i></a>
+                                </div>
+                                <div style="width:70px">
+                                    <input type="checkbox" ng-model="checkAll" ng-click="event.all()">
+                                </div>
+                                <div style="width:140px"></div>
+                                <div style="width:110px">
+                                    <select style="width:100%" class="form-control search-filter" ng-model="filters.Season" ng-options="season.seasonValue as season.seasonText for season in supportSeason">
+                                        <option value=""></option>
+                                    </select>
+                                </div>
+                                <div style="width:140px">
+                                    <input type="text" style="width:100%" class="form-control search-filter" ng-model="filters.Code">
+                                </div>
+                                <div style="width:230px">
+                                    <input type="text" style="width:100%" class="form-control search-filter" ng-model="filters.ArticleDescription">
+                                </div>
+                                <div style="width:130px">
+                                    <select style="width:100%" class="form-control search-filter" ng-model="filters.Factory" ng-options="factory.factoryUD as factory.factoryUD for factory in supportFactory">
+                                        <option value=""></option>
+                                    </select>
+                                    @*<input avs-local-auto-complete type="text" style="width:100%" class="form-control search-filter" ng-item-value="filters.Factory" ng-ui-items="supportFactory">*@
+                                    @*<select avs-select style="width:100%" class="form-control search-filter" ng-data-source="supportFactory">
+                                            <option value=""></option>
+                                        </select>*@
+                                </div>
+                                <div style="width:130px">
+                                    <select style="width:100%" class="form-control search-filter" ng-model="filters.Location" ng-options="location.factoryUD as location.factoryUD for location in supportLocation">
+                                        <option value=""></option>
+                                    </select>
+                                    @*<input avs-local-auto-complete type="text" style="width:100%" class="form-control search-filter" ng-item-value="filters.Location" ng-ui-items="supportLocation">*@
+                                </div>
+                                <div style="width:130px">
+                                    <select style="width:100%" class="form-control search-filter" ng-model="filters.Client" ng-options="client.clientUD as client.clientUD for client in supportClient">
+                                        <option value=""></option>
+                                    </select>
+                                    @*<input avs-local-auto-complete type="text" style="width:100%" class="form-control search-filter" ng-item-value="filters.Client" ng-ui-items="supportClient">*@
+                                </div>
+                                <div style="width:90px">
+                                    <input avs-number type="text" style="width:100%; text-align:right" class="form-control search-filter" ng-data-source="filters.Quantity">
+                                </div>
+                                <div style="width:120px">
+                                    <select style="width:100%" class="form-control search-filter" ng-model="filters.Status" ng-options="status.sampleProductStatusID as status.sampleProductStatusNM for status in supportStatus">
+                                        <option value=""></option>
+                                    </select>
+                                </div>
+                                <div></div>
+                            </div>
+                            <div class="tilsoft-table-body" style="width: 1650px">
+                                <table>
+                                    <tbody>
+                                        <tr ng-repeat="item in data">
+                                            <td style="width:79px; text-align:center"></td>
+                                            <td style="width:70px; text-align:center">
+                                                <input type="checkbox" ng-model="item.isSelected" ng-click="event.item(item, $index)">
+                                            </td>
+                                            <td style="width:140px">
+                                                <a href="{{item.fileLocation}}" data-featherlight="image">
+                                                    <img style="width:95%;" ng-src="{{item.thumbnailLocation}}">
+                                                </a>
+                                            </td>
+                                            <td style="width:110px; text-align:center">{{item.season}}</td>
+                                            <td style="width:140px">{{item.sampleProductItemUD}}</td>
+                                            <td style="width:230px">{{item.articleDescription}}</td>
+                                            <td style="width:130px; text-align:center">{{item.factoryUD}}</td>
+                                            <td style="width:130px; text-align:center">{{item.locationUD}}</td>
+                                            <td style="width:130px; text-align:center">{{item.clientUD}}</td>
+                                            <td style="width:90px; text-align:right">{{item.quantity | number}}</td>
+                                            <td style="width:120px; text-align:center">{{item.sampleProductStatusNM}}</td>
+                                            <td>
+                                                <section class="box">
+                                                    <div style="width:108px" class="col col-lg-2">
+                                                        <label><i class="fa fa-user"></i> Update By</label>
+                                                        <label><i class="fa fa-calendar"></i> Update Date</label>
+                                                    </div>
+                                                    <div style="width:168px" class="col col-lg-4">
+                                                        <label>
+                                                            <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.updatedBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600" ng-if="item.updatedBy != null">
+                                                                {{item.updatorName}}
+                                                            </a>
+                                                        </label>
+                                                        <label>{{item.updatedDate}}</label>
+                                                    </div>
+                                                </section>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+<!-- Select location -->
+<div id="frmSelectLocation" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+    <form name="editForm" class="row">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true"> &times; </button>
+                    <h4 class="modal-title">Setting location transfer Sample Product</h4>
+                </div>
+                <div class="modal-body no-padding">
+                    <div class="smart-form">
+                        <fieldset>
+                            <div class="row">
+                                <section class="col col-sm-3">
+                                    <label class="label">Location Date</label>
+                                    <label class="input">
+                                        <i class="icon-append fa fa-calendar"></i>
+                                        <input avs-calendar class="form-control" style="font-family: Arial;" name="dateLocation" ng-data-source="dateLocation" required>
+                                    </label>
+                                </section>
+                                <section class="col col-sm-3">
+                                    <label class="label">Factory Location <em class="note note-error" ng-show="factoryLocation == null && otherLocation == null">(Required)</em></label>
+                                    <label class="input" ng-class="{'state-error': factoryLocation == null && otherLocation == null}">
+                                        <select class="form-control" style="height: 30px;" ng-model="factoryLocation" ng-options="factory.factoryID as factory.factoryUD for factory in editFactoryLocation" ng-disabled="otherLocation != null" ng-required="factoryLocation == null && otherLocation == null">
+                                            <option value=""></option>
+                                        </select>
+                                        <i></i>
+                                    </label>
+                                </section>
+                                <section class="col col-sm-3">
+                                    <label class="label">Other Location <em class="note note-error" ng-show="factoryLocation == null && otherLocation == null">(Required)</em></label>
+                                    <label class="input" ng-class="{'state-error': factoryLocation == null && otherLocation == null}">
+                                        <select class="form-control" style="height: 30px;" ng-model="otherLocation" ng-options="other.sampleOtherLocationID as other.sampleOtherLocationNM for other in editOtherLocation" ng-disabled="factoryLocation != null" ng-required="factoryLocation == null && otherLocation == null">
+                                            <option value=""></option>
+                                        </select>
+                                        <i></i>
+                                    </label>
+                                </section>
+                            </div>
+                            <div>
+                                <div class="jarviswidget-editbox"></div>
+                                <div class="widget-body">
+                                    <div class="tilsoft-table-wrapper">
+                                        <div class="tilsoft-table">
+                                            <div class="tilsoft-table-body" style="width: 100%; overflow-x: hidden; height: auto; min-height: 100px; margin-top: 0px;">
+                                                <table>
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width: 185px;"> Sample Product </th>
+                                                            <th> Location </th>
+                                                            <th style="width: 100px;"> Client </th>
+                                                            <th> Remark </th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr ng-repeat="item in editData">
+                                                            <td style="text-align: center;"> {{item.sampleProductItemUD}} </td>
+                                                            <td style="text-align: center;">
+                                                                {{ item.displayLocation }}
+                                                            </td>
+                                                            <td style="text-align: center;"> {{item.clientUD}} </td>
+                                                            <td>
+                                                                <input type="text" class="form-control" ng-model="item.remark">
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <a href="javascript:void(0)" class="btn btn-primary btn-xs" ng-click="event.save()"> <i class="fa fa-save"></i> Save </a>
+                    <a href="javascript:void(0)" class="btn btn-danger btn-xs" ng-click="event.close()"> <i class="fa fa-times"></i> Cancel </a>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section FormAction{
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default" title="Search data" ng-click="event.research()"> <i class="fa fa-search"></i> </a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default" title="Refresh data" ng-click="event.research()"> <i class="fa fa-refresh"></i> </a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default" ng-hide="@canUpdate" ng-class="{'disabled': !isEnabled}" ng-click="event.edit()"> <i class="fa fa-pencil"></i> </a>
+            <a href="javascript:void(0)" class="btn btn-default" ng-hide="!@canUpdate"> <i class="fa fa-folder-open"></i> </a>
+        </li>
+    </ul>
+}
+
+@section pagejs{
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(serviceRoot)/api/sampleProductLocation/',
+            token: '@token',
+            pageSize: '@pageSize',
+            cookieID: '@cookieID',
+            currentSeason: '@Frontend.Helper.Common.GetCurrentSeason().ToString()'
+        };
+    </script>
+    <script type="text/javascript" src="~/Angular/app/sampleProductLocation/index.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/sampleProductLocation/service.js?v=@guid"></script>
+    @*<script src="~/Angular/app/waynMng/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>*@
+}

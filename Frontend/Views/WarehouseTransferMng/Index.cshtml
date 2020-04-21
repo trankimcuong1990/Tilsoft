@@ -1,0 +1,183 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    var pageSize = System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"];
+    var cookieID = HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString();
+
+    ViewBag.Title = "Search Warehouse Transfer";
+    ViewBag.Module = "Warehouse Transfer";
+}
+<form class="row" id="main-form">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-search-result" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Search Result</h2>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div avs-scroll grid-handler="gridHandler" class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table">
+                            <div style="width:1340px" class="tilsoft-table-header">
+                                <div style="width:100px">Found(s)<br /><strong style="color:maroon">{{totalRows}}</strong></div>
+                                <div style="width:100px">Receipt No</div>
+                                <div style="width:140px">Receipt Date</div>
+                                <div style="width:140px">Warehouse Transfer Type</div>
+                                <div style="width:200px;">From Warehouse</div>
+                                <div style="width:200px;">To Warehouse</div>
+                                <div style="width:100px">Delivery Note</div>
+                                <div style="width:100px">Receiving Note</div>
+                                <div>More Information</div>
+                            </div>
+                            <div style="width:1340px" class="tilsoft-table-filter">
+                                <div style="width:100px; text-align:center">
+                                    <a href="javascript:void(0)" class="btn btn-default btn-xs" title="Apply Filter" ng-click="event.refresh()">
+                                        <i class="fa fa-filter"></i>
+                                    </a>
+                                    <a href="javascript:void(0)" class="btn btn-default btn-xs" title="Clear Filter" ng-click="event.clear()">
+                                        <i class="fa fa-ban"></i>
+                                    </a>
+                                </div>
+                                <div style="width:100px">
+                                    <input type="text" class="form-control  search-filter" style="width:100%" ng-model="filters.receiptNo" />
+                                </div>
+                                <div style="width:140px; padding:0px">
+                                    <div class="input-group" style="border:none">
+                                        <input type="text" class="form-control search-filter" style="width:100%" avs-calendar ng-data-source="filters.receiptDate" />
+                                        <span class="input-group-addon">
+                                            <i class="fa fa-calendar"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div style="width:140px;">
+                                    <select class="form-control" ng-model="filters.warehouseTransferType">
+                                        <option value="0">SENT</option>
+                                        <option value="1">TRANSFERRED</option>
+                                    </select>
+                                </div>
+                                <div style="width:200px;">
+                                    <select id="fromFactoryWarehouseID" name="fromFactoryWarehouseID" class="form-control  search-filter" ng-model="filters.fromFactoryWarehouseID" ng-options="warehouseItem.factoryWarehouseID as warehouseItem.factoryWarehouseNM for warehouseItem in factoryWarehouses" required>
+                                        <option value=""></option>
+                                    </select>
+                                </div>
+                                <div style="width:200px;">
+                                    <select id="toFactoryWarehouseID" name="toFactoryWarehouseID" class="form-control  search-filter" ng-model="filters.toFactoryWarehouseID" ng-options="warehouseItem.factoryWarehouseID as warehouseItem.factoryWarehouseNM for warehouseItem in factoryWarehouses" required>
+                                        <option value=""></option>
+                                    </select>
+                                </div>
+
+                                <div style="width:100px">
+                                    <input type="text" class="form-control  search-filter" style="width:100%" ng-model="filters.deliveryNoteUD" />
+                                </div>
+                                <div style="width:100px">
+                                    <input type="text" class="form-control  search-filter" style="width:100%" ng-model="filters.receivingNoteUD" />
+                                </div>
+                                <div></div>
+                            </div>
+                            <div style="width:1340px" class="tilsoft-table-body">
+                                <table>
+                                    <tbody>
+                                        <tr ng-repeat="item in data">
+                                            <td style="width:99px; text-align:center">
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current) == "disabled")
+                                                {
+                                                    <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "WarehouseTransferMng")/{{item.warehouseTransferID}}" title="View (Read Only)" target="_blank"><i class="fa fa-folder-open"></i>View</a>
+                                                }
+                                                else
+                                                {
+                                                    <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "WarehouseTransferMng")/{{item.warehouseTransferID}}" title="Edit" target="_blank" style=""><i class="fa fa-pencil"></i>Edit</a>
+                                                }
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current) != "disabled")
+                                                {
+                                                    <a class="btn btn-danger btn-xs font-11" href="#" title="Delete" ng-click="event.remove(item)" style="margin-top:3px;"><i class="fa fa-times"></i>Del</a>
+                                                }
+                                            </td>
+                                            <td style="width:100px; text-align:center; vertical-align:middle">{{item.receiptNo}}</td>
+                                            <td style="width:140px;text-align:center; vertical-align:middle">{{item.receiptDate}}</td>
+                                            <td style="width:140px;text-align:left; vertical-align:middle">{{item.warehouseTransferType}}</td>
+                                            <td style="width:200px;text-align:left; font-size:10px">
+                                                <div ng-repeat="sItem in item.showFactoryhouseNMs">- {{sItem.fromFactoryWarehouseNM}}</div>
+                                            </td>
+                                            <td style="width:200px;text-align:left; font-size:10px">
+                                                <div ng-repeat="sItem in item.showFactoryhouseNMs">- {{sItem.toFactoryWarehouseNM}}</div>
+                                            </td>
+                                             @*<td style="width:180px; text-align:left">
+                                                <table>
+                                                    <tr ng-repeat="itemx in item.showFactoryhouseNMs">
+                                                        <td style="border:none;">{{itemx.fromFactoryWarehouseNM}}</td>
+
+                                                    </tr>
+                                                </table>
+                                            </td>
+                                            <td style="width:180px; text-align:left">
+                                                <table>
+                                                    <tr ng-repeat="itemy in item.showFactoryhouseNMs">
+
+                                                        <td style="border:none;">{{itemy.toFactoryWarehouseNM}}</td>
+                                                    </tr>
+                                                </table>
+                                            </td>*@
+
+                                            <td style="width:100px;text-align:center; vertical-align:middle">
+                                                <a ng-if="item.deliveryName=='AmendTeam2Team'" href="@Url.Action("AmendTeam2Team", "DeliveryNote2")/{{item.deliveryNoteID}}" target="_blank">{{item.deliveryNoteUD}}</a>
+                                                <a ng-if="item.deliveryName=='AmendWarehouse2Team'" href="@Url.Action("AmendWarehouse2Team", "DeliveryNote2")/{{item.deliveryNoteID}}" title="Edit" target="_blank">{{item.deliveryNoteUD}}</a>
+                                                <a ng-if="item.deliveryName=='Team2Team'" href="@Url.Action("Team2Team", "DeliveryNote2")/{{item.deliveryNoteID}}" target="_blank">{{item.deliveryNoteUD}}</a>
+                                                <a ng-if="item.deliveryName=='SaleOrder'" href="@Url.Action("SaleOrder", "DeliveryNote2")/{{item.deliveryNoteID}}" target="_blank">{{item.deliveryNoteUD}}</a>
+                                                @* not approved *@
+                                                <a ng-if="item.deliveryName=='Warehouse2Team'" href="@Url.Action("Warehouse2Team", "DeliveryNote2")/{{item.deliveryNoteID}}" target="_blank" ng-show="!item.deliveryApproved">{{item.deliveryNoteUD}}</a>
+                                                <a ng-if="item.deliveryName=='SaleOrderWithoutWorkOrder'" href="@Url.Action("SaleOrderWithoutWorkOrder", "DeliveryNote2")/{{item.deliveryNoteID}}" target="_blank" ng-show="!item.deliveryApproved">{{item.deliveryNoteUD}}</a>
+                                                @* approved *@
+                                                <a ng-if="item.deliveryName=='Warehouse2Team'" href="@Url.Action("Warehouse2TeamOverView", "DeliveryNote2")/{{item.deliveryNoteID}}" target="_blank" ng-show="item.deliveryApproved">{{item.deliveryNoteUD}}</a>
+                                                <a ng-if="item.deliveryName=='SaleOrderWithoutWorkOrder'" href="@Url.Action("SaleOrderWithoutWorkOrder", "DeliveryNote2")/{{item.deliveryNoteID}}" target="_blank" ng-show="item.deliveryApproved">{{item.deliveryNoteUD}}</a>
+                                            </td>
+                                            <td style="width:100px;text-align:center; vertical-align:middle">
+                                                <a ng-if="item.receivingName=='PO2Warehouse'" href="@Url.Action("PO2Warehouse", "ReceivingNote")/{{item.receivingNoteID}}" target="_blank">{{item.receivingNoteUD}}</a>
+                                                <a ng-if="item.receivingName=='Team2Warehouse'" href="@Url.Action("Team2Warehouse", "ReceivingNote")/{{item.receivingNoteID}}" target="_blank">{{item.receivingNoteUD}}</a>
+                                                <a ng-if="item.receivingName=='PO2WarehouseWithoutWorkOrder'" href="@Url.Action("PO2WarehouseWithoutWorkOrder", "ReceivingNote")/{{item.receivingNoteID}}" target="_blank">{{item.receivingNoteUD}}</a>
+                                            </td>
+                                            <td style="vertical-align:middle">
+                                                <span ng-show="!item.updatorName">{{item.creatorName}} created on {{item.createdDate}}</span>
+                                                <span ng-show="item.updatorName">{{item.updatorName}} updated on {{item.updatedDate}}</span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Search" ng-click="event.refresh()"><i class="fa fa-search"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Search" ng-click="event.refresh()"><i class="fa fa-refresh"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="@Url.Action("Edit", "WarehouseTransferMng", new { id = UrlParameter.Optional })/0" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="Create new " target="_blank"><i class="fa fa-file-o"></i></a>
+        </li>
+    </ul>
+}
+@section pagepopup2{
+}
+
+@section pagejs {
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(serviceRoot)/api/WarehouseTransferMng/',
+            token: '@token',
+            pageSize: '@pageSize',
+            cookieID: '@cookieID'
+        }
+    </script>
+    <script type="text/javascript" src="~/Angular/app/warehouseTransferMng/index.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/warehouseTransferMng/service.js?v=@guid"></script>
+}

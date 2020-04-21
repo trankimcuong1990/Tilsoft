@@ -1,0 +1,283 @@
+﻿@{
+    ViewBag.Title = "Create new loading plan";
+    ViewBag.Module = "Loading Plan";
+}
+
+<form class="row" name="editForm">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <h2>Select options below to create loading plan</h2>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div class="smart-form">
+                        <fieldset>
+                            
+                            <div class="row">
+                                <section class="col col-10">
+                                    <label class="checkbox">
+                                        <input type="checkbox" ng-model="data.isAttachmentLoad">
+                                        <i></i>Is attachment load
+                                    </label>
+                                </section>
+                            </div> 
+                            
+                            <div class="row">
+                                <section class="col col-6">
+                                    <label class="label">Factory</label>
+                                    <label class="select">
+                                        <select id="factoryBox" ng-model="data.factory" ng-options="item as item.factoryUD for item in factories | orderBy : 'factoryUD'">
+                                            <option value=""></option>
+                                        </select>
+                                    </label>
+                                </section>
+                            </div> 
+                            
+                            <div class="row" style="display:{{data.isAttachmentLoad==false ? 'block' : 'none'}}">
+                                <section class="col col-6">
+                                    <label class="label">Booking</label>
+                                    <label class="select">
+                                        <select id="bookingBox" ng-model="data.booking" ng-options="item as item.displayText for item in data.factory.bookings | orderBy : 'displayText'">
+                                            <option value=""></option>
+                                        </select>
+                                    </label>
+                                </section>
+                            </div>
+                            
+                            <div class="row" style="display:{{data.isAttachmentLoad==true ? 'block' : 'none'}}">
+                                <section class="col col-6">
+                                   <label class="label">Attachment with loading plan</label>
+                                    
+                                    <label class="input">
+                                        <input type="text" placeholder="press enter to search all loading plan or type at least 3 chars to search loading plan" ng-model="quicksearchLoadingPlan.loadingPlanUD" autocomplete="off" ng-keyup="quicksearchLoadingPlan.event.searchBoxKeyUp($event)" id="txtLoadingPlanUD" />
+                                        <a ng-click="quicksearchLoadingPlan.event.clickSearch()" href="javascript:void(0);"> <i class="icon-append fa fa-search"></i></a>
+                                    </label>
+                                    <div id="loadingPlan-popup" class="popup-container-2">
+                                        <div style="float: right; margin-bottom: 8px;">
+                                            <a ng-click="quicksearchLoadingPlan.event.close($event, true)" class="btn btn-primary btn-xs" href="javascript:void(0);"><i class="fa fa-remove"></i> Close</a>
+                                        </div>
+                                        <div class="clear"></div>
+                                        <div id="quicksearchLoadingPlanGrid" class="tilsoft-table-wrapper">
+                                            <div class="tilsoft-table">
+                                                <div class="tilsoft-table-header" style="width: 600px;">
+                                                    <div style="width: 80px;"></div>
+                                                    <div style="width: 150px;">Loading Ref</div>
+                                                    <div style="width: 100px;">Factory</div>
+                                                    <div style="width: 150px;">Container No</div>
+                                                    <div style="width: 70px;">Client</div>
+                                                    <div>BL No</div>
+                                                </div>
+                                                <div class="tilsoft-table-body" style="width: 600px;">
+                                                    <table>
+                                                        <tr ng-repeat="item in quicksearchLoadingPlan.data">
+                                                            <td style="width: 80px; text-align: center;"><a ng-click="quicksearchLoadingPlan.event.ok($event, item.loadingPlanID)" class="btn btn-primary btn-xs" href="javascript:void(0);"><i class="fa fa-check"></i> Select</a></td>
+                                                            <td style="width: 150px;">{{item.loadingPlanUD}}</td>
+                                                            <td style="width: 100px;">{{item.factoryUD}}</td>
+                                                            <td style="width: 150px;">{{item.containerNo}}</td>
+                                                            <td style="width: 70px;">{{item.clientUD}}</td>
+                                                            <td>{{item.blNo}}</td>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+                            </div>
+                            
+                                                            
+                        </fieldset>
+                        <footer>
+                            <button class="btn btn-primary" type="button" ng-click="event.goNext($event)">
+                                Next
+                            </button>
+                            <button class="btn btn-default" type="button" ng-click="event.goBack($event)">
+                                Cancel
+                            </button>
+                        </footer>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+@section pagejs {
+    <script src="~/Angular/app/jsonService.js"></script>
+    <script src="~/Angular/app/loadingplan/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script type="text/javascript">
+
+        var quicksearchLoadingPlanGrid = jQuery('#quicksearchLoadingPlanGrid').scrollableTable2(
+            'quicksearchLoadingPlan.filters.pageIndex',
+            'quicksearchLoadingPlan.totalPage',
+            function (currentPage) {
+                var scope = angular.element(jQuery('body')).scope();
+                scope.$apply(function () {
+                    scope.quicksearchLoadingPlan.filters.pageIndex = currentPage;
+                    scope.quicksearchLoadingPlan.method.searchModel();
+                });
+            },
+            function (sortedBy, sortedDirection) {
+            }
+        );
+
+        jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/loadingplan/';
+        jsonService.supportServiceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/loadingplan/';
+        jsonService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+        var tilsoftApp = angular.module('tilsoftApp', []);
+        tilsoftApp.controller('tilsoftController', ['$scope', function ($scope) {
+            //
+            // property
+            //
+            $scope.data = {
+                booking: '',
+                factory: '',
+                parentLoadingPlanID: 0,
+                isAttachmentLoad : false,
+            };
+            $scope.factories = null;
+
+            //
+            // event
+            //
+            $scope.event = {
+                goNext: function ($event) {
+                    $event.preventDefault();
+
+                    if ($scope.data.isAttachmentLoad) {
+                        if ($scope.data.factory == '') {
+                            alert('Please select all option before proceed to the next step');
+                            return;
+                        }
+                        window.location = '@Url.Action("Edit", "LoadingPlan")/0?fID=' + $scope.data.factory.factoryID + '&bID=0' + '&pID=' + $scope.data.parentLoadingPlanID;
+                    }
+                    else {
+                        if ($scope.data.booking == '' || $scope.data.factory == '') {
+                            alert('Please select all option before proceed to the next step');
+                            return;
+                        }
+                        window.location = '@Url.Action("Edit", "LoadingPlan")/0?fID=' + $scope.data.factory.factoryID + '&bID=' + $scope.data.booking.bookingID + '&pID=0';
+                    }
+                   
+                },
+                goBack: function ($event) {
+                    $event.preventDefault();
+                    window.location = '@Url.Action("Index", "LoadingPlan")';
+                },
+                init: function () {
+                    jsonService.getinitdata(
+                        function (data) {
+                            $scope.factories = data.data.factories;
+                            $scope.$apply();
+
+                            //select 2
+                            $("#factoryBox").select2();
+                            $("#bookingBox").select2();
+
+                            jQuery('#content').show();
+                        },
+                        function (error) {
+                            jsHelper.showMessage('warning', error);
+
+                            $scope.factories = null;
+                            $scope.$apply();
+                        }
+                    );
+                }
+            };
+
+            
+            searchLoadingPlanTimer = null;
+            $scope.quicksearchLoadingPlan = {
+                data: null,
+                filters: {
+                    filters: {
+                        searchQuery: '',
+                    },
+                    sortedBy: 'LoadingPlanUD',
+                    sortedDirection: 'ASC',
+                    pageSize: 20,
+                    pageIndex: 1
+                },
+
+                loadingPlanUD: '',
+                totalPage: 0,
+
+                method: {
+                    searchLoadingPlan: function () {
+                        jsonService.quicksearchLoadingPlan($scope.quicksearchLoadingPlan.filters,
+                            function (data) {
+                                $scope.quicksearchLoadingPlan.data = data.data;
+                                $scope.quicksearchLoadingPlan.totalPage = Math.ceil(data.totalRows / $scope.quicksearchLoadingPlan.filters.pageSize);
+                                quicksearchLoadingPlanGrid.updateLayout();
+                                $scope.$apply();
+
+                                jQuery('#loadingPlan-popup').show();
+                            },
+                            function (error) {
+                                $scope.quicksearchLoadingPlan.data = null;
+                                $scope.quicksearchLoadingPlan.filters.pageIndex = 1;
+                                $scope.quicksearchLoadingPlan.totalPage = 0;
+                                $scope.$apply();
+                            }
+                        );
+                    },
+                },
+
+                event: {
+                    searchBoxKeyUp: function ($event) {
+                        if ($event.keyCode == 13) {
+                            $scope.quicksearchLoadingPlan.filters.filters.searchQuery = jQuery('#txtLoadingPlanUD').val();
+                            $scope.quicksearchLoadingPlan.filters.pageIndex = 1;
+                            $scope.quicksearchLoadingPlan.method.searchLoadingPlan();
+                        }
+                        else if (jQuery('#txtLoadingPlanUD').val().length >= 3) {
+                            clearTimeout(searchLoadingPlanTimer);
+                            searchLoadingPlanTimer = setTimeout(
+                                function () {
+                                    $scope.quicksearchLoadingPlan.filters.filters.searchQuery = jQuery('#txtLoadingPlanUD').val();
+                                    $scope.quicksearchLoadingPlan.filters.pageIndex = 1;
+                                    $scope.quicksearchLoadingPlan.method.searchLoadingPlan();
+                                },
+                                500);
+                        }
+                    },
+
+                    clickSearch: function () {
+                        $scope.quicksearchLoadingPlan.filters.filters.searchQuery = jQuery('#txtLoadingPlanUD').val();
+                        $scope.quicksearchLoadingPlan.filters.pageIndex = 1;
+                        $scope.quicksearchLoadingPlan.method.searchLoadingPlan();
+                    },
+
+                    close: function ($event, clearSearchBox) {
+                        jQuery('#loadingPlan-popup').hide();
+                        if (clearSearchBox) {
+                            $scope.quicksearchLoadingPlan.loadingPlanUD = '';
+                            $scope.data.parentLoadingPlanID = 0;
+                        }
+                        $scope.quicksearchLoadingPlan.data = null;
+                        $event.preventDefault();
+                    },
+                    ok: function ($event, id) {
+                        $scope.data.parentLoadingPlanID = id;
+                        var arr = $scope.quicksearchLoadingPlan.data.filter(function (o) { return o.loadingPlanID == id });
+                        $scope.quicksearchLoadingPlan.loadingPlanUD = arr[0].loadingPlanUD;
+                        $scope.quicksearchLoadingPlan.event.close($event, false);
+                        $scope.$apply();
+                    }
+                }
+
+            }
+
+
+
+            //
+            // init
+            //
+            $scope.event.init();
+        }]);
+    </script>
+}
+

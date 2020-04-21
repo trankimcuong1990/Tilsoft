@@ -1,0 +1,163 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var supportServiceRoot = (System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"]);
+    var cookieID = HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString();
+    ViewBag.Icon = "fa-bar-chart-o";
+    ViewBag.Title = "Summary Purchases";
+    ViewBag.Module = "Summary Purchase";
+}
+
+<div class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-search-filter" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Filters</h2>
+            </header>
+
+            <div>
+                <div class="widget-body no-padding">
+                    <div class="smart-form">
+                        <fieldset>
+                            <section class="col col-sm-3">
+                                <label class="label">Supplier</label>
+                                <select class="select2" id="subSupplier" ng-model="filter.factoryRawMaterialID" ng-options="item.factoryRawMaterialID as item.factoryRawMaterialShortNM for item in subSuppliers" ng-change="event.changeSubSupplier(filter.factoryRawMaterialID)">
+                                    <option value=""></option>
+                                </select>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label class="label">Code</label>
+                                <label class="input">
+                                    <input type="text" class="form-control"  ng-model="filter.productionItemUD"/>
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label class="label">
+                                    From Date <em class="note note-error" ng-show="(filter.startDate == null || filter.startDate == '')">(Required)</em>
+                                </label>
+                                <label class="input-group">
+                                    <input id="startDate" type="text" class="form-control" avs-calendar ng-data-source="filter.startDate" required />
+                                    <span class="input-group-addon">
+                                        <i class="fa fa-calendar"></i>
+                                    </span>
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label class="label">
+                                    To Date <em class="note note-error" ng-show="(filter.endDate == null || filter.endDate == '')">(Required)</em>
+                                </label>
+                                <label class="input-group">
+                                    <input id="endDate" type="text" class="form-control" avs-calendar ng-data-source="filter.endDate" required />
+                                    <span class="input-group-addon">
+                                        <i class="fa fa-calendar"></i>
+                                    </span>
+                                </label>
+                            </section>
+                        </fieldset>
+                        <footer>
+                            <a href="javascript:void(0)" class="btn btn-primary" style="float: none;" ng-click="event.search()"><i class="fa fa-code"></i> HTML Version</a>
+                            <a href="javascript:void(0)" class="btn btn-primary" ng-click="event.generateExcel()" style="float: none;"><i class="fa fa-file-excel-o"></i> Excel Version</a>
+                        </footer>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="margin-top: 5px;">
+        <div class="jarviswidget jarviswidget-color-darken" id="." data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Results HTML</h2>
+            </header>
+            <div>
+                <div class="jarviswidget-editbox"></div>
+                <div class="widget-body no-padding">
+                    <div class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-body" style="width: 100%; overflow-y: hidden; margin-top: 0px; max-height:none">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th style="width:80px; background-color: #adc7e7; border: 1px solid black"><strong>Date</strong></th>
+                                            <th style="width:120px; background-color: #adc7e7; border: 1px solid black"><strong>Receiving No</strong></th>
+                                            <th style="width:120px; background-color: #adc7e7; border: 1px solid black"><strong>Delivery No</strong></th>
+                                            <th style="width:150px; background-color: #adc7e7; border: 1px solid black"><strong>Deliver name</strong></th>
+                                            <th style="width:180px; background-color: #adc7e7; border: 1px solid black"><strong>Code</strong></th>
+                                            <th style="width:300px; background-color: #adc7e7; border: 1px solid black"><strong>Name</strong></th>
+                                            <th style="width:60px; background-color: #adc7e7; border: 1px solid black"><strong>Unit</strong></th>
+                                            <th style="width:85px; background-color: #adc7e7; border: 1px solid black"><strong>Purchase Qnt</strong></th>
+                                            <th style="width:100px; background-color: #adc7e7; border: 1px solid black"><strong>Unit Price</strong></th>
+                                            <th style="width:120px; background-color: #adc7e7; border: 1px solid black"><strong>Purchase value</strong></th>
+                                            <th style="width:100px; background-color: #adc7e7; border: 1px solid black"><strong>VAT value</strong></th>
+                                            <th style="width:120px; background-color: #adc7e7; border: 1px solid black"><strong>Total value</strong></th>
+                                            <th style="width:85px; background-color: #adc7e7; border: 1px solid black"><strong>Quanlity of Returns</strong></th>
+                                            <th style="width:100px; background-color: #adc7e7; border: 1px solid black"><strong>Value of return</strong></th>
+                                            <th style="width:150px; background-color: #adc7e7; border: 1px solid black"><strong>Total Purchase Amount</strong></th>
+                                            <th style="width:120px; background-color: #adc7e7; border: 1px solid black"><strong>Purchasing Order No</strong></th>
+                                            <th style="width:90px; background-color: #adc7e7; border: 1px solid black"><strong>Branch</strong></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody ng-repeat="wItem in dataGroupOfSupplier">
+                                        <tr style="background-color:yellow">
+                                            <td colspan="11" style="width: 1395px"><strong>{{wItem.factoryRawMaterialShortNM}}</strong></td>
+                                            <td style="text-align: right; width:120px">
+                                                <div style="display: none">{{method.totalAmountSupplier(wItem)}}</div>
+                                                <strong>{{wItem.totalValue | number}}</strong>
+                                            </td>
+                                            <td style="width: 85px"></td>
+                                            <td style="width: 100px"></td>
+                                            <td style="text-align: right; width:150px">
+                                                <div style="display: none">{{method.totalAmountSupplier(wItem)}}</div>
+                                                <strong>{{wItem.totalAmountOfSupplier | number}}</strong>
+                                            </td>
+                                            <td style="width: 120px"></td>
+                                            <td style="width: 90px"></td>
+                                        </tr>
+                                        <tr ng-repeat="item in data | factoryRawMaterialFilter : wItem.factoryRawMaterialID">
+                                            <td style="width: 80px">{{item.receivingNoteDateForExcel}}</td>
+                                            <td style="width: 120px"><a target="_blank" href="@Url.Action("PO2WarehouseWithoutWorkOrder", "ReceivingNote", new { id = UrlParameter.Optional })/{{item.receivingNoteID}}">{{item.receivingNoteUD}}</a></td>
+                                            <td style="width: 120px"><a target="_blank" href="@Url.Action("SaleOrderWithoutWorkOrder", "DeliveryNote2", new { id = UrlParameter.Optional })/{{item.deliveryNoteID}}">{{item.deliveryNoteUD}}</a></td>
+                                            <td style="width: 150px">{{item.deliverName}}</td>
+                                            <td style="width: 180px">{{item.productionItemUD}}</td>
+                                            <td style="width: 300px">{{item.productionItemNM}}</td>
+                                            <td style="text-align: center; width: 60px">{{item.unit}}</td>
+                                            <td style="text-align: center; width: 85px">{{item.quantity}}</td>
+                                            <td style="text-align: right; width: 100px">{{item.unitPrice | number}}</td>
+                                            <td style="text-align: right; width: 120px">{{item.purchaseValue | number}}</td>
+                                            <td style="text-align: right; width: 100px">{{(item.purchaseValue * item.vat) / 100 | number}}</td>
+                                            <td style="text-align: right; width: 120px">{{item.purchaseValue + ( (item.purchaseValue * item.vat) / 100 )  | number}}</td>
+                                            <td style="text-align: right; width: 85px">{{item.quantityReturn}}</td>
+                                            <td style="text-align: right; width: 100px">{{item.valueReturn | number}}</td>
+                                            <td style="text-align: right; width: 150px">{{item.totalAmount | number}}</td>
+                                            <td style="width:120px"><a target="_blank" href="@Url.Action("Edit", "PurchaseOrderMng", new { id = UrlParameter.Optional })/{{item.purchaseOrderID}}">{{item.purchasingOrderNo}}</a></td>
+                                            <td style="width:90px">{{item.branchUD}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>                                    
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section pagejs {
+    <script type="text/javascript">
+        var context = {
+            token: '@token',
+            serviceUrl: '@(serviceRoot)/api/summarypurchasesrpt/',
+            supportServiceUrl: '@(supportServiceRoot)/api/support/',
+            reportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]',
+            backendReportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]',
+            cookieID: '@cookieID'
+        }
+    </script>
+    <script type="text/javascript" src="~/Views/SummaryPurchasesRpt/index.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Views/SummaryPurchasesRpt/service.js?v=@guid"></script>
+}

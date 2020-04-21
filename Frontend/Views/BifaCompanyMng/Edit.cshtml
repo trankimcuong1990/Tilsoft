@@ -1,0 +1,1020 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var supportServiceRoot = (System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"]);
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    var id = ViewBag.ID;
+
+    ViewBag.Title = (id == 0) ? "Create Bifa company" : "Edit Bifa company";
+    ViewBag.Module = "Bifa company";
+    ViewBag.Icon = "fa-database";
+}
+
+<form class="row" name="editForm">
+    <article class="col-xs-12 col-sm-12 col-lg-12 col-md-12">
+        <div class="jarviswidget" id="wid-id-1" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <h2>@ViewBag.Title</h2>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div class="smart-form">
+                        <fieldset>
+                            <section class="col col-sm-3">
+                                <label class="label">Logo company</label>
+                                <label class="input-group">
+                                    @Html.Partial("~/Views/Shared/_Controls/_ImageBox.cshtml", new Frontend.Models.ImageBoxViewModel() { URLBinding = "bifaCompany.logo_DisplayUrl", JSOnChangeHandler = "event.changeLogoBifaCompany", JSONRemoveHandler = "event.removeLogoBifaCompany" })
+                                </label>
+                            </section>
+                            <section class="col col-sm-9 no-padding">
+                                <section class="col col-sm-2">
+                                    <label class="label">Code <em class="note note-error" ng-if="(bifaCompany.bifaCompanyUD == null || bifaCompany.bifaCompanyUD == '')">(Required)</em></label>
+                                    <label class="input">
+                                        <input type="text" class="form-control" style="font-family: 'Arial';" ng-model="bifaCompany.bifaCompanyUD" />
+                                    </label>
+                                </section>
+                                <section class="col col-sm-10">
+                                    <label class="label">Name <em class="note note-error" ng-if="(bifaCompany.bifaCompanyNM == null || bifaCompany.bifaCompanyNM == '')">(Required)</em></label>
+                                    <label class="input">
+                                        <input type="text" class="form-control" style="font-family: 'Arial';" ng-model="bifaCompany.bifaCompanyNM" />
+                                    </label>
+                                </section>
+                                <section class="col col-sm-2">
+                                    <label class="label">Tax Code</label>
+                                    <label class="input">
+                                        <input type="text" class="form-control" style="font-family: 'Arial';" ng-model="bifaCompany.taxCode" />
+                                    </label>
+                                </section>
+                                <section class="col col-sm-2">
+                                    <label class="label">Founding Date</label>
+                                    <label class="input-group">
+                                        <input type="text" class="form-control" style="font-family: 'Arial'; height: 30px;" avs-calendar ng-data-source="bifaCompany.foundingDate" />
+                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                    </label>
+                                </section>
+                                <section class="col col-sm-3">
+                                    <label class="label">Industry [<a href="javascript:void(0);" ng-click="event.openBifaIndustry();"><i class="fa fa-plus"></i> Add new industry</a>]</label>
+                                    <label class="input">
+                                        <select style="font-family: 'Arial';" avs-select ng-data-source="bifaCompany.bifaIndustryID">
+                                            <option value=""></option>
+                                            <option value="{{bifaIndustry.bifaIndustryID}}" ng-repeat="bifaIndustry in support.bifaIndustries">{{bifaIndustry.bifaIndustryNM}}</option>
+                                        </select>
+                                    </label>
+                                </section>
+                                <section class="col col-sm-3">
+                                    <label class="label">City [<a href="javascript:void(0);" ng-click="event.openBifaCity();"><i class="fa fa-plus"></i> Add new city</a>]</label>
+                                    <label class="input">
+                                        <select style="font-family: 'Arial';" avs-select ng-data-source="bifaCompany.bifaCityID">
+                                            <option value=""></option>
+                                            <option value="{{bifaCity.bifaCityID}}" ng-repeat="bifaCity in support.bifaCities">{{bifaCity.bifaCityNM}}</option>
+                                        </select>
+                                    </label>
+                                </section>
+                                <section class="col col-sm-2">
+                                    <label class="label">Nr. of Employee</label>
+                                    <label class="input">
+                                        <input type="text" class="form-control" style="font-family: 'Arial'; text-align: right;" avs-number ng-data-source="bifaCompany.numberOfEmployee" />
+                                    </label>
+                                </section>
+                                <section class="col col-sm-2">
+                                    <label class="label">Acreage(m<sup>2</sup>)</label>
+                                    <label class="input">
+                                        <input type="text" class="form-control" style="font-family: 'Arial'; text-align: right;" avs-number ng-data-source="bifaCompany.acreage" ng-decimal="2" />
+                                    </label>
+                                </section>
+                                <section class="col col-sm-2">
+                                    <label class="label">Joined Date</label>
+                                    <label class="input-group">
+                                        <input type="text" class="form-control" style="font-family: 'Arial'; height: 30px;" avs-calendar ng-data-source="bifaCompany.joinedDate" />
+                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                    </label>
+                                </section>
+                                <section class="col col-sm-8">
+                                    <label class="label">Remark</label>
+                                    <label class="input">
+                                        <input type="text" class="form-control" style="font-family: 'Arial';" ng-model="bifaCompany.remark" />
+                                    </label>
+                                </section>
+                                <section class="col col-sm-2">
+                                    <label class="label">Active</label>
+                                    <label class="label">
+                                        <span class="onoffswitch">
+                                            <input name="onoffswitch" class="onoffswitch-checkbox" id="myonoffswitch" type="checkbox" ng-model="bifaCompany.isActive" />
+                                            <label class="onoffswitch-label" for="myonoffswitch"> <span class="onoffswitch-inner" data-swchon-text="YES" data-swchoff-text="NO"></span> <span class="onoffswitch-switch"></span> </label>
+                                        </span>
+                                    </label>
+                                </section>
+                            </section>
+                            <section class="col col-sm-12" ng-if="bifaCompany.updatedBy != null">
+                                Updated by <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{bifaCompany.updatedBy}}" dat data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                    <i class="fa fa-user"></i> {{bifaCompany.employeeNM}}
+                                </a> on {{bifaCompany.updatedDate}}
+                            </section>
+
+                            <section class="col col-sm-12" ng-if="(bifaCompany.bifaCompanyID != null && bifaCompany.bifaCompanyID > 0)">
+                                <h5>Address [<a href="javascript:void(0);" ng-click="event.openBifaAddress(0);"><i class="fa fa-plus"></i> Add new address</a>]</h5>
+                                <hr />
+                                <div class="tilsoft-table-wrapper" style="margin-top: 5px;" avs-scrollable-table>
+                                    <div class="tilsoft-table">
+                                        <div class="tilsoft-table-header" style="width: 1045px;">
+                                            <div style="width: 65px; background-color: #eee;">Found<br /><b>{{bifaCompany.bifaAddresses.length | number:0}}</b></div>
+                                            <div style="width: 320px; background-color: #eee;">Address</div>
+                                            <div style="width: 150px; background-color: #eee;">City</div>
+                                            <div style="width: 320px; background-color: #eee;">Remark</div>
+                                            <div style="width: 180px; background-color: #eee;">Update Info</div>
+                                            <div style="border-bottom: none;"></div>
+                                        </div>
+                                        <div class="tilsoft-table-body" style="width: 1045px; margin-top: 50px;">
+                                            <table>
+                                                <tbody>
+                                                    <tr ng-repeat="item in bifaCompany.bifaAddresses">
+                                                        <td style="width: 65px; text-align: center;">
+                                                            <a href="javascript:void(0);" class="btn btn-default btn-xs font-11" ng-click="event.openBifaAddress(item.bifaAddressID)"><i class="fa fa-pencil"></i></a>
+                                                            <a href="javascript:void(0);" class="btn btn-default btn-xs font-11" ng-click="event.deleteBifaAddress($event, item)"><i class="fa fa-times"></i></a>
+                                                        </td>
+                                                        <td style="width: 320px;">
+                                                            <label ng-if="(item.addressLine1 != null && item.addressLine1 != '')"><b>Address 1:</b><br />{{item.addressLine1}}</label>
+                                                            <label ng-if="(item.addressLine2 != null && item.addressLine2 != '')"><b>Address 2:</b><br />{{item.addressLine2}}</label>
+                                                        </td>
+                                                        <td style="width: 150px; text-align: center;">{{item.bifaCityNM}}</td>
+                                                        <td style="width: 320px;">{{item.remark}}</td>
+                                                        <td style="width: 180px;">
+                                                            <label ng-if="(item.updatedBy != null)">
+                                                                Updated by <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.updatedBy}}" dat data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                                    <i class="fa fa-user"></i> {{item.employeeNM}}
+                                                                </a> on {{item.updatedDate}}
+                                                            </label>
+                                                        </td>
+                                                        <td style="border-bottom: none;"></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+
+                            <section class="col col-sm-12" ng-if="(bifaCompany.bifaCompanyID != null && bifaCompany.bifaCompanyID > 0)">
+                                <h5>Club Member [<a href="javascript:void(0);" ng-click="event.openBifaClubMember(null)"><i class="fa fa-plus"></i> Add new club member</a>]</h5>
+                                <hr />
+                                <div class="tilsoft-table-wrapper" style="margin-top: 5px;" avs-scrollable-table>
+                                    <div class="tilsoft-table">
+                                        <div class="tilsoft-table-header" style="width: 865px;">
+                                            <div style="width: 65px; background-color: #eee;">Found<br /><b>{{bifaCompany.bifaClubMembers.length | number:0}}</b></div>
+                                            <div style="width: 200px; background-color: #eee;">Club</div>
+                                            <div style="width: 90px; background-color: #eee;">Joined Date</div>
+                                            <div style="width: 320px; background-color: #eee;">Remark</div>
+                                            <div style="width: 180px; background-color: #eee;">Update Info</div>
+                                            <div style="border-bottom: none;"></div>
+                                        </div>
+                                        <div class="tilsoft-table-body" style="width: 865px; margin-top: 50px;">
+                                            <table>
+                                                <tbody>
+                                                    <tr ng-repeat="item in bifaCompany.bifaClubMembers">
+                                                        <td style="width: 65px; text-align: center;">
+                                                            <a href="javascript:void(0);" class="btn btn-default btn-xs font-11" ng-click="event.openBifaClubMember(item)"><i class="fa fa-pencil"></i></a>
+                                                            <a href="javascript:void(0);" class="btn btn-default btn-xs font-11" ng-click="event.deleteBifaClubMember(item)"><i class="fa fa-times"></i></a>
+                                                        </td>
+                                                        <td style="width: 200px;">
+                                                            <b>{{item.bifaClubUD}}</b><br />{{item.bifaClubNM}}
+                                                        </td>
+                                                        <td style="width: 90px; text-align: center;">{{item.joinedDate}}</td>
+                                                        <td style="width: 320px;">{{item.remark}}</td>
+                                                        <td style="width: 180px;">
+                                                            <label ng-if="(item.updatedBy != null)">
+                                                                Updated by <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.updatedBy}}" dat data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                                    <i class="fa fa-user"></i> {{item.employeeNM}}
+                                                                </a> on {{item.updatedDate}}
+                                                            </label>
+                                                        </td>
+                                                        <td style="border-bottom: none;"></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+
+                            <section class="col col-sm-12" ng-if="(bifaCompany.bifaCompanyID != null && bifaCompany.bifaCompanyID > 0)">
+                                <h5>Email Address [<a href="javascript:void(0)" ng-click="event.openBifaEmailAddress(null, null)"><i class="fa fa-plus"></i> Add new email address</a>]</h5>
+                                <hr />
+                                <div class="tilsoft-table-wrapper" style="margin-top: 5px;" avs-scrollable-table>
+                                    <div class="tilsoft-table">
+                                        <div class="tilsoft-table-header" style="width: 505px;">
+                                            <div style="width: 65px; background-color: #eee;">Found<br /><b>{{bifaCompany.bifaEmailAddresses.length | number : 0}}</b></div>
+                                            <div style="width: 250px; background-color: #eee;">Email Address</div>
+                                            <div style="width: 180px; background-color: #eee;">Update Info</div>
+                                            <div style="border-bottom: none;"></div>
+                                        </div>
+                                        <div class="tilsoft-table-body" style="width: 505px; margin-top: 50px;">
+                                            <table>
+                                                <tbody>
+                                                    <tr ng-repeat="item in bifaCompany.bifaEmailAddresses">
+                                                        <td style="width: 65px; text-align: center;">
+                                                            <a href="javascript:void(0);" class="btn btn-default btn-xs font-11" ng-click="event.openBifaEmailAddress(item, null)"><i class="fa fa-pencil"></i></a>
+                                                            <a href="javascript:void(0);" class="btn btn-default btn-xs font-11" ng-click="event.deleteBifaEmailAddress(item)"><i class="fa fa-times"></i></a>
+                                                        </td>
+                                                        <td style="width: 250px;">{{item.emailAddress}}</td>
+                                                        <td style="width: 180px;">
+                                                            <label ng-if="(item.updatedBy != null)">
+                                                                Updated by <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.updatedBy}}" dat data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                                    <i class="fa fa-user"></i> {{item.employeeNM}}
+                                                                </a> on {{item.updatedDate}}
+                                                            </label>
+                                                        </td>
+                                                        <td style="border-bottom: none;"></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+
+                            <section class="col col-sm-12" ng-if="(bifaCompany.bifaCompanyID != null && bifaCompany.bifaCompanyID > 0)">
+                                <h5>Telephone [<a href="javascript:void(0)" ng-click="event.openTelephone(null)"><i class="fa fa-plus"></i> Add new telephone</a>]</h5>
+                                <hr />
+                                <div class="tilsoft-table-wrapper" style="margin-top: 5px;" avs-scrollable-table>
+                                    <div class="tilsoft-table">
+                                        <div class="tilsoft-table-header" style="width: 915px">
+                                            <div style="width: 65px; background-color: #eee;">Found<br /><b>{{bifaCompany.bifaTelephones.length | number : 0}}</b></div>
+                                            <div style="width: 90px; background-color: #eee;">Type</div>
+                                            <div style="width: 95px; background-color: #eee;">Number</div>
+                                            <div style="width: 85px; background-color: #eee;">Extension</div>
+                                            <div style="width: 320px; background-color: #eee;">Remark</div>
+                                            <div style="width: 70px; background-color: #eee;">Primary</div>
+                                            <div style="width: 180px; background-color: #eee;">Update Info</div>
+                                            <div style="border-bottom: none;"></div>
+                                        </div>
+                                        <div class="tilsoft-table-body" style="margin-top: 50px; width: 915px">
+                                            <table>
+                                                <tbody>
+                                                    <tr ng-repeat="item in bifaCompany.bifaTelephones">
+                                                        <td style="width: 65px; text-align: center;">
+                                                            <a href="javascript:void(0);" class="btn btn-default btn-xs font-11" ng-click="event.openTelephone(item)"><i class="fa fa-pencil"></i></a>
+                                                            <a href="javascript:void(0);" class="btn btn-default btn-xs font-11" ng-click="event.deleteTelephone(item)"><i class="fa fa-times"></i></a>
+                                                        </td>
+                                                        <td style="width: 90px; text-align: center;">{{item.phoneTypeNM}}</td>
+                                                        <td style="width: 95px; text-align: center;">{{item.phoneNumber}}</td>
+                                                        <td style="width: 85px; text-align: center;">{{item.phoneExtension}}</td>
+                                                        <td style="width: 320px;">{{item.remark}}</td>
+                                                        <td style="width: 70px; padding: 0px; text-align: center;">
+                                                            <input type="checkbox" class="form-control" disabled ng-model="item.isPrimary" />
+                                                        </td>
+                                                        <td style="width: 180px;">
+                                                            <label ng-if="(item.updatedBy != null)">
+                                                                Updated by <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.updatedBy}}" dat data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                                    <i class="fa fa-user"></i> {{item.employeeNM}}
+                                                                </a> on {{item.updatedDate}}
+                                                            </label>
+                                                        </td>
+                                                        <td style="border-bottom: none;"></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+
+                            <section class="col col-sm-12" ng-if="(bifaCompany.bifaCompanyID != null && bifaCompany.bifaCompanyID > 0)">
+                                <h5>Person [<a href="javascript:void(0)" ng-click="event.openPerson(null)"><i class="fa fa-plus"></i> Add new person</a>]</h5>
+                                <hr />
+                                <div class="tilsoft-table-wrapper" style="margin-top: 5px" avs-scrollable-table>
+                                    <div class="tilsoft-table">
+                                        <div class="tilsoft-table-header" style="width: 1185px">
+                                            <div style="width: 65px; background-color: #eee">Found<br /><b>{{bifaCompany.bifaPersons.length | number : 0}}</b></div>
+                                            <div style="width: 180px; background-color: #eee">Person Name</div>
+                                            <div style="width: 90px; background-color: #eee">Date of Birth</div>
+                                            <div style="width: 250px; background-color: #eee">Job</div>
+                                            <div style="width: 90px; background-color: #eee">Position</div>
+                                            <div style="width: 320px; background-color: #eee">Remark</div>
+                                            <div style="width: 180px; background-color: #eee">Update Info</div>
+                                            <div style="border-bottom: none"></div>
+                                        </div>
+                                        <div class="tilsoft-table-body" style="width: 1185px; margin-top: 50px">
+                                            <table>
+                                                <tbody>
+                                                    <tr ng-repeat="item in bifaCompany.bifaPersons">
+                                                        <td style="width: 65px; text-align: center;">
+                                                            <a href="javascript:void(0);" class="btn btn-default btn-xs font-11" ng-click="event.openPerson(item)"><i class="fa fa-pencil"></i></a>
+                                                            <a href="javascript:void(0);" class="btn btn-default btn-xs font-11" ng-click="event.deletePerson(item)"><i class="fa fa-times"></i></a>
+                                                        </td>
+                                                        <td style="width: 180px"><b>{{item.fullName}}</b><br />{{item.callingName}}</td>
+                                                        <td style="width: 90px; text-align: center">{{item.dateOfBirth}}</td>
+                                                        <td style="width: 250px"><b>{{item.jobTitle}}</b><br />{{item.jobDescription}}</td>
+                                                        <td style="width: 90px; text-align: center">{{item.positionGroupNM}}</td>
+                                                        <td style="width: 320px">{{item.remark}}</td>
+                                                        <td style="width: 180px">
+                                                            <label ng-if="(item.updatedBy != null)">
+                                                                Updated by <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.updatedBy}}" dat data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                                    <i class="fa fa-user"></i> {{item.employeeNM}}
+                                                                </a> on {{item.updatedDate}}
+                                                            </label>
+                                                        </td>
+                                                        <td style="border-bottom: none"></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+
+                            <section class="col col-sm-12" ng-if="(bifaCompany.bifaCompanyID != null && bifaCompany.bifaCompanyID > 0)">
+                                <h5>Event [<a href="javascript:void(0)" ng-click="event.openEvent(null)"><i class="fa fa-plus"></i> Add new event</a>]</h5>
+                                <hr />
+                                <div class="tilsoft-table-wrapper" style="margin-top: 5px" avs-scrollable-table>
+                                    <div class="tilsoft-table">
+                                        <div class="tilsoft-table-header" style="width: 1215px">
+                                            <div style="width: 65px; background-color: #eee">Found<br /><b>{{bifaCompany.bifaEvents.length | number : 0}}</b></div>
+                                            <div style="width: 180px; background-color: #eee">Event</div>
+                                            <div style="width: 300px; background-color: #eee">Address</div>
+                                            <div style="width: 300px; background-color: #eee">Description</div>
+                                            <div style="width: 90px; background-color: #eee">Start<br />Date</div>
+                                            <div style="width: 90px; background-color: #eee">End<br />Date</div>
+                                            <div style="width: 180px; background-color: #eee">Update Info</div>
+                                            <div style="border-bottom: none"></div>
+                                        </div>
+                                        <div class="tilsoft-table-body" style="width: 1215px; margin-top: 50px">
+                                            <table>
+                                                <tbody>
+                                                    <tr ng-repeat="item in bifaCompany.bifaEvents">
+                                                        <td style="width: 65px; text-align: center">
+                                                            <a href="javascript:void(0);" class="btn btn-default btn-xs font-11" ng-click="event.openEvent(item)"><i class="fa fa-pencil"></i></a>
+                                                            <a href="javascript:void(0);" class="btn btn-default btn-xs font-11" ng-click="event.deleteEvent(item.bifaEventID, item, bifaCompany)"><i class="fa fa-times"></i></a>
+                                                        </td>
+                                                        <td style="width: 180px"><b>{{item.bifaEventUD}}</b><br />{{item.bifaEventNM}}</td>
+                                                        <td style="width: 300px">
+                                                            <label ng-if="(item.addressLine1 != null && item.addressLine1 != '')">
+                                                                <b>Address 1:</b><br />{{item.addressLine1}}
+                                                            </label>
+                                                            <br />
+                                                            <label ng-if="(item.addressLine2 != null && item.addressLine2 != '')">
+                                                                <b>Address 2:</b><br />{{item.addressLine2}}
+                                                            </label>
+                                                        </td>
+                                                        <td style="width: 300px">{{item.description}}</td>
+                                                        <td style="width: 90px; text-align: center">{{item.startDate}}</td>
+                                                        <td style="width: 90px; text-align: center">{{item.endDate}}</td>
+                                                        <td style="width: 180px">
+                                                            <label ng-if="(item.updatedBy != null)">
+                                                                Updated by <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.updatedBy}}" dat data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                                    <i class="fa fa-user"></i> {{item.employeeNM}}
+                                                                </a> on {{item.updatedDate}}
+                                                            </label>
+                                                        </td>
+                                                        <td style="border-bottom: none"></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+<div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="frmBifaCity" class="modal fade" style="display: none;" data-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="padding: 5px;">
+                <button style="margin-top: 2px; margin-right: 5px;" aria-hidden="true" data-dismiss="modal" class="close" type="button">
+                    ×
+                </button>
+                <h4 id="myModalLabel" class="modal-title"><i class="fa fa-cog"></i> Bifa City </h4>
+            </div>
+            <div class="modal-body no-padding">
+                <div class="smart-form">
+                    <fieldset>
+                        <section class="col col-sm-12">
+                            <label class="label">Name</label>
+                            <label class="input">
+                                <input type="text" class="form-control" style="font-family: 'Arial';" ng-model="bifaCity.bifaCityNM" />
+                            </label>
+                        </section>
+                        <section class="col col-sm-12">
+                            <div class="tilsoft-table-wrapper" avs-scrollable-table>
+                                <div class="tilsoft-table">
+                                    <div class="tilsoft-table-header" style="width: 495px;">
+                                        <div style="width: 85px; background-color: #eee;">Found<br /><b>{{support.bifaCities.length | number:0}}</b></div>
+                                        <div style="width: 400px; background-color: #eee;">Name</div>
+                                        <div style="border-bottom: none;"></div>
+                                    </div>
+                                    <div class="tilsoft-table-body" style="width: 495px; margin-top: 50px;">
+                                        <table>
+                                            <tbody>
+                                                <tr ng-repeat="bifaCity in support.bifaCities">
+                                                    <td style="width: 85px; text-align: center;">
+                                                        <a href="javascript:void(0);" class="btn btn-default btn-xs font-11" ng-click="event.selectBifaCity(bifaCity);"><i class="fa fa-check"></i></a>
+                                                        <a href="javascript:void(0);" class="btn btn-default btn-xs font-11" ng-click="event.editBifaCity(bifaCity);"><i class="fa fa-pencil"></i></a>
+                                                        <a href="javascript:void(0);" class="btn btn-default btn-xs font-11" ng-click="event.deleteBifaCity($event, bifaCity);"><i class="fa fa-times"></i></a>
+                                                    </td>
+                                                    <td style="width: 400px;">{{bifaCity.bifaCityNM}}</td>
+                                                    <td style="border-bottom: none;"></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </fieldset>
+                </div>
+            </div>
+            <div class="modal-footer" style="padding: 5px;">
+                <a href="javascript:void(0);" class="btn btn-default btn-sm" ng-click="event.updateBifaCity($event);"><i class="fa fa-floppy-o"></i> Update</a>
+                <a href="javascript:void(0);" class="btn btn-default btn-sm" ng-click="event.clearBifaCity();"><i class="fa fa-ban"></i> Clear</a>
+                <a href="javascript:void(0);" class="btn btn-default btn-sm" ng-click="event.closeBifaCity();"><i class="fa fa-reply"></i> Close</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="frmBifaIndustry" class="modal fade" style="display: none;" data-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="padding: 5px;">
+                <button style="margin-top: 2px; margin-right: 5px;" aria-hidden="true" data-dismiss="modal" class="close" type="button">
+                    ×
+                </button>
+                <h4 id="myModalLabel" class="modal-title"><i class="fa fa-cog"></i> Bifa Industry </h4>
+            </div>
+            <div class="modal-body no-padding">
+                <div class="smart-form">
+                    <fieldset>
+                        <section class="col col-sm-12">
+                            <label class="label">Name</label>
+                            <label class="input">
+                                <input type="text" class="form-control" style="font-family: 'Arial';" ng-model="bifaIndustry.bifaIndustryNM" />
+                            </label>
+                        </section>
+                        <section class="col col-sm-12">
+                            <div class="tilsoft-table-wrapper" avs-scrollable-table>
+                                <div class="tilsoft-table">
+                                    <div class="tilsoft-table-header" style="width: 495px;">
+                                        <div style="width: 85px; background-color: #eee;">Found<br /><b>{{support.bifaIndustries.length | number:0}}</b></div>
+                                        <div style="width: 400px; background-color: #eee;">Name</div>
+                                        <div style="border-bottom: none;"></div>
+                                    </div>
+                                    <div class="tilsoft-table-body" style="width: 495px; margin-top: 50px;">
+                                        <table>
+                                            <tbody>
+                                                <tr ng-repeat="bifaIndustry in support.bifaIndustries">
+                                                    <td style="width: 85px; text-align: center;">
+                                                        <a href="javascript:void(0);" class="btn btn-default btn-xs font-11" ng-click="event.selectBifaIndustry(bifaIndustry);"><i class="fa fa-check"></i></a>
+                                                        <a href="javascript:void(0);" class="btn btn-default btn-xs font-11" ng-click="event.editBifaIndustry(bifaIndustry);"><i class="fa fa-pencil"></i></a>
+                                                        <a href="javascript:void(0);" class="btn btn-default btn-xs font-11" ng-click="event.deleteBifaIndustry($event, bifaIndustry);"><i class="fa fa-times"></i></a>
+                                                    </td>
+                                                    <td style="width: 400px;">{{bifaIndustry.bifaIndustryNM}}</td>
+                                                    <td style="border-bottom: none;"></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </fieldset>
+                </div>
+            </div>
+            <div class="modal-footer" style="padding: 5px;">
+                <a href="javascript:void(0);" class="btn btn-default btn-sm" ng-click="event.updateBifaIndustry($event);"><i class="fa fa-floppy-o"></i> Update</a>
+                <a href="javascript:void(0);" class="btn btn-default btn-sm" ng-click="event.clearBifaIndustry();"><i class="fa fa-ban"></i> Clear</a>
+                <a href="javascript:void(0);" class="btn btn-default btn-sm" ng-click="event.closeBifaIndustry();"><i class="fa fa-reply"></i> Close</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="frmBifaAddress" class="modal fade" style="display: none;" data-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="padding: 5px;">
+                <button style="margin-top: 2px; margin-right: 5px;" aria-hidden="true" data-dismiss="modal" class="close" type="button">
+                    ×
+                </button>
+                <h4 id="myModalLabel" class="modal-title"><i class="fa fa-cogs"></i> Bifa Address </h4>
+            </div>
+            <div class="modal-body no-padding">
+                <div class="smart-form">
+                    <fieldset>
+                        <section class="col col-sm-12">
+                            <label class="label">Address <em class="note note-error" ng-if="(bifaAddress.addressLine1 == null || bifaAddress.addressLine1 == '')">(Required)</em></label>
+                            <label class="input" ng-class="{'state-error': (bifaAddress.addressLine1 == null || bifaAddress.addressLine1 == '')}">
+                                <input type="text" class="form-control" style="font-family: 'Arial';" ng-model="bifaAddress.addressLine1" />
+                            </label>
+                            <label class="input" style="margin-top: 5px;">
+                                <input type="text" class="form-control" style="font-family: 'Arial';" ng-model="bifaAddress.addressLine2" />
+                            </label>
+                        </section>
+                        <section class="col col-sm-12">
+                            <label class="label">City [<a href="javascript:void(0);" ng-click="event.openBifaCity(1);"><i class="fa fa-plus"></i> Add new city</a>]</label>
+                            <label class="input">
+                                <select avs-select ng-data-source="bifaAddress.bifaCityID">
+                                    <option value=""></option>
+                                    <option value="{{item.bifaCityID}}" ng-repeat="item in support.bifaCities">{{item.bifaCityNM}}</option>
+                                </select>
+                            </label>
+                        </section>
+                        <section class="col col-sm-12">
+                            <label class="label">Remark</label>
+                            <label class="input">
+                                <input type="text" class="form-control" style="font-family: 'Arial';" ng-model="bifaAddress.remark" />
+                            </label>
+                        </section>
+                        <section class="col col-sm-12" ng-if="bifaAddress.updatedBy != null">
+                            Updated by <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{bifaAddress.updatedBy}}" dat data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                <i class="fa fa-user"></i> {{bifaAddress.employeeNM}}
+                            </a> on {{bifaAddress.updatedDate}}
+                        </section>
+                    </fieldset>
+                </div>
+            </div>
+            <div class="modal-footer" style="padding: 5px;">
+                <a href="javascript:void(0);" class="btn btn-default btn-sm" ng-click="event.updateBifaAddress($event)"><i class="fa fa-floppy-o"></i> Update</a>
+                <a href="javascript:void(0);" class="btn btn-default btn-sm" ng-click="event.clearBifaAddress()"><i class="fa fa-ban"></i> Clear</a>
+                <a href="javascript:void(0);" class="btn btn-default btn-sm" ng-click="event.closeBifaAddress()"><i class="fa fa-reply"></i> Close</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="frmBifaClubMember" class="modal fade" style="display: none;" data-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="padding: 5px;">
+                <button style="margin-top: 2px; margin-right: 5px;" aria-hidden="true" data-dismiss="modal" class="close" type="button">
+                    ×
+                </button>
+                <h4 id="myModalLabel" class="modal-title"><i class="fa fa-cogs"></i> Bifa Club Member </h4>
+            </div>
+            <div class="modal-body no-padding">
+                <div class="smart-form">
+                    <fieldset>
+                        <section class="col col-sm-12">
+                            <label class="label">Club [<a href="javascript:void(0)" ng-click="event.openBifaClub();"><i class="fa fa-plus"></i> Add new Club</a>]</label>
+                            <label class="input">
+                                <select avs-select ng-data-source="bifaClubMember.bifaClubID">
+                                    <option value=""></option>
+                                    <option value="{{item.bifaClubID}}" ng-repeat="item in support.bifaClubs">{{item.bifaClubNM}}</option>
+                                </select>
+                            </label>
+                        </section>
+                        <section class="col col-sm-12">
+                            <label class="label">Joined Date</label>
+                            <label class="input-group">
+                                <input type="text" class="form-control" style="font-family: 'Arial'; height: 30px;" avs-calendar ng-data-source="bifaClubMember.joinedDate" />
+                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                            </label>
+                        </section>
+                        <section class="col col-sm-12">
+                            <label class="label">Remark</label>
+                            <label class="input">
+                                <input type="text" class="form-control" style="font-family: 'Arial';" ng-model="bifaClubMember.remark" />
+                            </label>
+                        </section>
+                        <section class="col col-sm-12" ng-if="bifaClubMember.updatedBy != null">
+                            Updated by <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{bifaClubMember.updatedBy}}" dat data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                <i class="fa fa-user"></i> {{bifaClubMember.employeeNM}}
+                            </a> on {{bifaClubMember.updatedDate}}
+                        </section>
+                    </fieldset>
+                </div>
+            </div>
+            <div class="modal-footer" style="padding: 5px;">
+                <a href="javascript:void(0);" class="btn btn-default btn-sm" ng-click="event.updateBifaClubMember()"><i class="fa fa-floppy-o"></i> Update</a>
+                <a href="javascript:void(0);" class="btn btn-default btn-sm" ng-click="event.clearBifaClubMember()"><i class="fa fa-ban"></i> Clear</a>
+                <a href="javascript:void(0);" class="btn btn-default btn-sm" ng-click="event.closeBifaClubMember()"><i class="fa fa-reply"></i> Close</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="frmBifaClub" class="modal fade" style="display: none;" data-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="padding: 5px;">
+                <button style="margin-top: 2px; margin-right: 5px;" aria-hidden="true" data-dismiss="modal" class="close" type="button">
+                    ×
+                </button>
+                <h4 id="myModalLabel" class="modal-title"><i class="fa fa-cog"></i> Bifa Club</h4>
+            </div>
+            <div class="modal-body no-padding">
+                <div class="smart-form">
+                    <fieldset>
+                        <section class="col col-sm-5">
+                            <label class="label">Code <em class="note note-error" ng-if="(bifaClub.bifaClubUD == null || bifaClub.bifaClubUD == '')">(Required)</em></label>
+                            <label class="input" ng-class="{'state-error': (bifaClub.bifaClubUD == null || bifaClub.bifaClubUD == '')}">
+                                <input type="text" class="form-control" style="font-family: 'Arial';" ng-model="bifaClub.bifaClubUD" />
+                            </label>
+                        </section>
+                        <section class="col col-sm-7">
+                            <label class="label">Name <em class="note note-error" ng-if="(bifaClub.bifaClubNM == null || bifaClub.bifaClubNM == '')">(Required)</em></label>
+                            <label class="input" ng-class="{'state-error': (bifaClub.bifaClubNM == null || bifaClub.bifaClubNM == '')}">
+                                <input type="text" class="form-control" style="font-family: 'Arial';" ng-model="bifaClub.bifaClubNM" />
+                            </label>
+                        </section>
+                        <section class="col col-sm-12">
+                            <label class="label">Description</label>
+                            <label class="input">
+                                <input type="text" class="form-control" style="font-family: 'Arial';" ng-model="bifaClub.description" />
+                            </label>
+                        </section>
+                        <section class="col col-sm-12">
+                            <div class="tilsoft-table-wrapper" avs-scrollable-table>
+                                <div class="tilsoft-table">
+                                    <div class="tilsoft-table-header" style="width: 745px;">
+                                        <div style="width: 85px; background-color: #eee;">Found<br /><b>{{support.bifaClubs.length | number:0}}</b></div>
+                                        <div style="width: 90px; background-color: #eee;">Code</div>
+                                        <div style="width: 180px; background-color: #eee;">Name</div>
+                                        <div style="width: 200px; background-color: #eee;">Description</div>
+                                        <div style="width: 180px; background-color: #eee;">Update Info</div>
+                                        <div style="border-bottom: none;"></div>
+                                    </div>
+                                    <div class="tilsoft-table-body" style="width: 745px; margin-top: 50px;">
+                                        <table>
+                                            <tbody>
+                                                <tr ng-repeat="item in support.bifaClubs">
+                                                    <td style="width: 85px; text-align: center;">
+                                                        <a href="javascript:void(0);" class="btn btn-default btn-xs font-11" ng-click="event.selectBifaClub(item)"><i class="fa fa-check"></i></a>
+                                                        <a href="javascript:void(0);" class="btn btn-default btn-xs font-11" ng-click="event.editBifaClub(item)"><i class="fa fa-pencil"></i></a>
+                                                        <a href="javascript:void(0);" class="btn btn-default btn-xs font-11" ng-click="event.deleteBifaClub(item)"><i class="fa fa-times"></i></a>
+                                                    </td>
+                                                    <td style="width: 90px; text-align: center;">{{item.bifaClubUD}}</td>
+                                                    <td style="width: 180px;">{{item.bifaClubNM}}</td>
+                                                    <td style="width: 200px;">{{item.description}}</td>
+                                                    <td style="width: 180px;">
+                                                        <label ng-if="(item.updatedBy != null)">
+                                                            Updated by <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.updatedBy}}" dat data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                                <i class="fa fa-user"></i> {{item.employeeNM}}
+                                                            </a> on {{item.updatedDate}}
+                                                        </label>
+                                                    </td>
+                                                    <td style="border-bottom: none;"></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </fieldset>
+                </div>
+            </div>
+            <div class="modal-footer" style="padding: 5px;">
+                <a href="javascript:void(0);" class="btn btn-default btn-sm" ng-click="event.updateBifaClub()"><i class="fa fa-floppy-o"></i> Update</a>
+                <a href="javascript:void(0);" class="btn btn-default btn-sm" ng-click="event.clearBifaClub()"><i class="fa fa-ban"></i> Clear</a>
+                <a href="javascript:void(0);" class="btn btn-default btn-sm" ng-click="event.closeBifaClub()"><i class="fa fa-reply"></i> Close</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="frmBifaEmailAddress" class="modal fade" style="display: none;" data-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="padding: 5px;">
+                <button style="margin-top: 2px; margin-right: 5px;" aria-hidden="true" data-dismiss="modal" class="close" type="button">
+                    ×
+                </button>
+                <h4 id="myModalLabel" class="modal-title"><i class="fa fa-cog"></i> Bifa Email Address </h4>
+            </div>
+            <div class="modal-body no-padding">
+                <div class="smart-form">
+                    <fieldset>
+                        <section class="col col-sm-12">
+                            <label class="label">Email [<a href="javascript:void(0)" ng-click="event.addBifaEmailAddress()"><i class="fa fa-plus"></i> Add item</a>]</label>
+                            <label class="input">
+                                <input type="text" class="form-control" style="font-family: 'Arial';" ng-model="emailAddress.emailAddress" />
+                            </label>
+                            <label class="input" style="margin-top: 3px;" ng-repeat="item in listEmailAddress">
+                                <input type="text" class="form-control" style="font-family: 'Arial';" ng-model="item.emailAddress" />
+                            </label>
+                        </section>
+                    </fieldset>
+                </div>
+            </div>
+            <div class="modal-footer" style="padding: 5px;">
+                <a href="javascript:void(0);" class="btn btn-default btn-sm" ng-click="event.updateBifaEmailAddress()"><i class="fa fa-floppy-o"></i> Update</a>
+                <a href="javascript:void(0);" class="btn btn-default btn-sm" ng-click="event.clearBifaEmailAddress()"><i class="fa fa-ban"></i> Clear</a>
+                <a href="javascript:void(0);" class="btn btn-default btn-sm" ng-click="event.closeBifaEmailAddress()"><i class="fa fa-reply"></i> Close</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="frmBifaTelephone" class="modal fade" style="display: none;" data-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="padding: 5px;">
+                <button style="margin-top: 2px; margin-right: 5px;" aria-hidden="true" data-dismiss="modal" class="close" type="button">
+                    ×
+                </button>
+                <h4 id="myModalLabel" class="modal-title"><i class="fa fa-cogs"></i> Bifa Telephone </h4>
+            </div>
+            <div class="modal-body no-padding">
+                <div class="smart-form">
+                    <fieldset>
+                        <section class="col col-sm-12">
+                            <label class="label">Type</label>
+                            <label class="input">
+                                <select class="form-control" ng-model="telephone.phoneTypeID" ng-options="item.phoneTypeID as item.phoneTypeNM for item in support.bifaPhoneTypes">
+                                    <option value=""></option>
+                                </select>
+                            </label>
+                        </section>
+                        <section class="col col-sm-4">
+                            <label class="label">Number</label>
+                            <label class="input">
+                                <input type="text" class="form-control" style="font-family: 'Arial'" ng-model="telephone.phoneNumber" />
+                            </label>
+                        </section>
+                        <section class="col col-sm-4">
+                            <label class="label">Extension</label>
+                            <label class="input">
+                                <input type="text" class="form-control" style="font-family: 'Arial'" ng-model="telephone.phoneExtension" />
+                            </label>
+                        </section>
+                        <section class="col col-sm-4">
+                            <label class="label">Primary</label>
+                            <input type="checkbox" ng-model="telephone.isPrimary" />
+                        </section>
+                        <section class="col col-sm-12">
+                            <label class="label">Remark</label>
+                            <label class="input">
+                                <input type="text" class="form-control" style="font-family: 'Arial'" ng-model="telephone.remark" />
+                            </label>
+                        </section>
+                        <section class="col col-sm-12" ng-if="telephone.updatedBy != null">
+                            Updated by <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{telephone.updatedBy}}" dat data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                <i class="fa fa-user"></i> {{telephone.employeeNM}}
+                            </a> on {{telephone.updatedDate}}
+                        </section>
+                    </fieldset>
+                </div>
+            </div>
+            <div class="modal-footer" style="padding: 5px;">
+                <a href="javascript:void(0);" class="btn btn-default btn-sm" ng-click="event.updateTelephone()"><i class="fa fa-floppy-o"></i> Update</a>
+                <a href="javascript:void(0);" class="btn btn-default btn-sm" ng-click="event.clearTelephone()"><i class="fa fa-ban"></i> Clear</a>
+                <a href="javascript:void(0);" class="btn btn-default btn-sm" ng-click="event.closeTelephone()"><i class="fa fa-reply"></i> Close</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="frmPerson" class="modal fade" style="display: none;" data-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="padding: 5px;">
+                <button style="margin-top: 2px; margin-right: 5px;" aria-hidden="true" data-dismiss="modal" class="close" type="button">
+                    ×
+                </button>
+                <h4 id="myModalLabel" class="modal-title"><i class="fa fa-cogs"></i> Bifa Person </h4>
+            </div>
+            <div class="modal-body no-padding">
+                <div class="smart-form">
+                    <fieldset>
+                        <section class="col col-sm-4">
+                            <label class="label">Full Name</label>
+                            <label class="input">
+                                <input type="text" class="form-control" style="font-family: 'Arial'" ng-model="person.fullName" />
+                            </label>
+                        </section>
+                        <section class="col col-sm-4">
+                            <label class="label">Calling Name</label>
+                            <label class="input">
+                                <input type="text" class="form-control" style="font-family: 'Arial'" ng-model="person.callingName" />
+                            </label>
+                        </section>
+                        <section class="col col-sm-4">
+                            <label class="label">Date of Birth</label>
+                            <label class="input-group">
+                                <input type="text" class="form-control" style="font-family: 'Arial'; height: 30px;" avs-calendar ng-data-source="person.dateOfBirth" />
+                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                            </label>
+                        </section>
+                        <section class="col col-sm-4">
+                            <label class="label">Job Title</label>
+                            <label class="input">
+                                <input type="text" class="form-control" style="font-family: 'Arial'" ng-model="person.jobTitle" />
+                            </label>
+                        </section>
+                        <section class="col col-sm-4">
+                            <label class="label">Job Description</label>
+                            <label class="input">
+                                <input type="text" class="form-control" style="font-family: 'Arial'" ng-model="person.jobDescription" />
+                            </label>
+                        </section>
+                        <section class="col col-sm-4">
+                            <label class="label">Position Group</label>
+                            <label class="input">
+                                <select class="form-control" ng-model="person.positionGroupID" ng-options="item.positionGroupID as item.positionGroupNM for item in support.positionGroup">
+                                    <option value=""></option>
+                                </select>
+                            </label>
+                        </section>
+                        <section class="col col-sm-12">
+                            <label class="label">Remark</label>
+                            <label class="input">
+                                <input type="text" class="form-control" style="font-family: 'Arial'" ng-model="person.remark" />
+                            </label>
+                        </section>
+                        <section class="col col-sm-12">
+                            <label class="label">Email Address [<a href="javascript:void(0)" ng-click="event.openBifaEmailAddress(null)"><i class="fa fa-plus"></i> Add row email address</a>]</label>
+                            <hr />
+                            <div class="tilsoft-table-wrapper" style="margin-top: 5px" avs-scrollable-table>
+                                <div class="tilsoft-table">
+                                    <div class="tilsoft-table-header" style="width: 505px;">
+                                        <div style="width: 65px; background-color: #eee;">Found<br /><b>{{person.bifaEmailAddresses.length | number : 0}}</b></div>
+                                        <div style="width: 250px; background-color: #eee;">Email Address</div>
+                                        <div style="width: 180px; background-color: #eee;">Update Info</div>
+                                        <div style="border-bottom: none;"></div>
+                                    </div>
+                                    <div class="tilsoft-table-body" style="width: 505px; margin-top: 50px;">
+                                        <table>
+                                            <tbody>
+                                                <tr ng-repeat="item in person.bifaEmailAddresses">
+                                                    <td style="width: 65px; text-align: center;">
+                                                        <a href="javascript:void(0);" class="btn btn-default btn-xs font-11" ng-click="event.openBifaEmailAddress(item)"><i class="fa fa-pencil"></i></a>
+                                                        <a href="javascript:void(0);" class="btn btn-default btn-xs font-11" ng-click="event.deleteBifaEmailAddress(item)"><i class="fa fa-times"></i></a>
+                                                    </td>
+                                                    <td style="width: 250px;">{{item.emailAddress}}</td>
+                                                    <td style="width: 180px;">
+                                                        <label ng-if="(item.updatedBy != null)">
+                                                            Updated by <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.updatedBy}}" dat data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                                <i class="fa fa-user"></i> {{item.employeeNM}}
+                                                            </a> on {{item.updatedDate}}
+                                                        </label>
+                                                    </td>
+                                                    <td style="border-bottom: none;"></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                        <section class="col col-sm-12">
+                            <label class="label">Telephone [<a href="javascript:void(0)" ng-click="event.openTelephone(null)"><i class="fa fa-plus"></i> Add row telephone</a>]</label>
+                            <hr />
+                            <div class="tilsoft-table-wrapper" style="margin-top: 5px;" avs-scrollable-table>
+                                <div class="tilsoft-table">
+                                    <div class="tilsoft-table-header" style="width: 915px">
+                                        <div style="width: 65px; background-color: #eee;">Found<br /><b>{{person.bifaTelephones.length | number : 0}}</b></div>
+                                        <div style="width: 90px; background-color: #eee;">Type</div>
+                                        <div style="width: 95px; background-color: #eee;">Number</div>
+                                        <div style="width: 85px; background-color: #eee;">Extension</div>
+                                        <div style="width: 320px; background-color: #eee;">Remark</div>
+                                        <div style="width: 70px; background-color: #eee;">Primary</div>
+                                        <div style="width: 180px; background-color: #eee;">Update Info</div>
+                                        <div style="border-bottom: none;"></div>
+                                    </div>
+                                    <div class="tilsoft-table-body" style="margin-top: 50px; width: 915px">
+                                        <table>
+                                            <tbody>
+                                                <tr ng-repeat="item in person.bifaTelephones">
+                                                    <td style="width: 65px; text-align: center;">
+                                                        <a href="javascript:void(0);" class="btn btn-default btn-xs font-11" ng-click="event.openTelephone(item)"><i class="fa fa-pencil"></i></a>
+                                                        <a href="javascript:void(0);" class="btn btn-default btn-xs font-11" ng-click="event.deleteTelephone(item)"><i class="fa fa-times"></i></a>
+                                                    </td>
+                                                    <td style="width: 90px; text-align: center;">{{method.getPhoneTypeNM(item.phoneTypeID)}}</td>
+                                                    <td style="width: 95px; text-align: center;">{{item.phoneNumber}}</td>
+                                                    <td style="width: 85px; text-align: center;">{{item.phoneExtension}}</td>
+                                                    <td style="width: 320px;">{{item.remark}}</td>
+                                                    <td style="width: 70px; padding: 0px; text-align: center;">
+                                                        <input type="checkbox" class="form-control" disabled ng-model="item.isPrimary" />
+                                                    </td>
+                                                    <td style="width: 180px;">
+                                                        <label ng-if="(item.updatedBy != null)">
+                                                            Updated by <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.updatedBy}}" dat data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                                <i class="fa fa-user"></i> {{item.employeeNM}}
+                                                            </a> on {{item.updatedDate}}
+                                                        </label>
+                                                    </td>
+                                                    <td style="border-bottom: none;"></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </fieldset>
+                </div>
+            </div>
+            <div class="modal-footer" style="padding: 5px;">
+                <a href="javascript:void(0);" class="btn btn-default btn-sm" ng-click="event.updatePerson()"><i class="fa fa-floppy-o"></i> Update</a>
+                <a href="javascript:void(0);" class="btn btn-default btn-sm" ng-click="event.clearPerson()"><i class="fa fa-ban"></i> Clear</a>
+                <a href="javascript:void(0);" class="btn btn-default btn-sm" ng-click="event.closePerson()"><i class="fa fa-reply"></i> Close</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="frmEvent" class="modal fade" style="display: none;" data-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="padding: 5px;">
+                <button style="margin-top: 2px; margin-right: 5px;" aria-hidden="true" data-dismiss="modal" class="close" type="button">
+                    ×
+                </button>
+                <h4 id="myModalLabel" class="modal-title"><i class="fa fa-cogs"></i> Event </h4>
+            </div>
+            <div class="modal-body no-padding">
+                <div class="smart-form">
+                    <fieldset>
+                        <section class="col col-sm-4">
+                            <label class="label">Code</label>
+                            <label class="input">
+                                <input type="text" class="form-control" style="font-family: 'Arial'" ng-model="eventData.bifaEventUD" />
+                            </label>
+                        </section>
+                        <section class="col col-sm-8">
+                            <label class="label">Name</label>
+                            <label class="input">
+                                <input type="text" class="form-control" style="font-family: 'Arial'" ng-model="eventData.bifaEventNM" />
+                            </label>
+                        </section>
+                        <section class="col col-sm-12">
+                            <label class="label">Address</label>
+                            <label class="input">
+                                <input type="text" class="form-control" style="font-family: 'Arial'" ng-model="eventData.addressLine1" />
+                            </label>
+                            <label class="input">
+                                <input type="text" class="form-control" style="font-family: 'Arial'; margin-top: 5px" ng-model="eventData.addressLine2" />
+                            </label>
+                        </section>
+                        <section class="col col-sm-6">
+                            <label class="label">Start date</label>
+                            <label class="input-group">
+                                <input type="text" class="form-control" style="font-family: 'Arial'; height: 30px;" avs-calendar ng-data-source="eventData.startDate" />
+                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                            </label>
+                        </section>
+                        <section class="col col-sm-6">
+                            <label class="label">End date</label>
+                            <label class="input-group">
+                                <input type="text" class="form-control" style="font-family: 'Arial'; height: 30px;" avs-calendar ng-data-source="eventData.endDate" />
+                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                            </label>
+                        </section>
+                        <section class="col col-sm-12">
+                            <label class="label">Attachment file(s) [<a href="javascript:void(0)" ng-click="event.addAttachmentFile()"><i class="fa fa-plus"></i> Add new file</a>]</label>
+                            <div style="height:112px" class="furnindo-image-editor">
+                                <div class="img-item" ng-repeat="item in eventData.bifaEventFiles">
+                                    <a data-featherlight="image" href="{{item.fileLocation}}">
+                                        <img style="width: 100%;" ng-src="{{item.thumbnailLocation}}">
+                                    </a>
+                                    <span title="Remove image" class="action" ng-click="event.removeAttachmentFile(item)">x</span>
+                                    <a href="{{item.fileLocation}}" target="_blank">{{item.friendlyName}}</a>
+                                </div>
+                                <div class="clear"></div>
+                            </div>
+                        </section>
+                    </fieldset>
+                </div>
+            </div>
+            <div class="modal-footer" style="padding: 5px;">
+                <a href="javascript:void(0);" class="btn btn-default btn-sm" ng-click="event.updateEvent(eventData.bifaEventID, eventData, bifaCompany)"><i class="fa fa-floppy-o"></i> Update</a>
+                <a href="javascript:void(0);" class="btn btn-default btn-sm" ng-click="event.clearEvent()"><i class="fa fa-ban"></i> Clear</a>
+                <a href="javascript:void(0);" class="btn btn-default btn-sm" ng-click="event.closeEvent()"><i class="fa fa-reply"></i> Close</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section FormAction{
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default btn-sm" title="Back" ng-click="event.returnBifaCompany();"><i class="fa fa-arrow-left"></i> Back</a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default btn-sm @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Update" ng-click="event.updateBifaCompany();"><i class="fa fa-floppy-o"></i> Update</a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default btn-sm @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current))" title="Delete"><i class="fa fa-times"></i> Delete</a>
+        </li>
+    </ul>
+}
+
+@section pagejs{
+    <script type="text/javascript">
+        var context = {
+            id: '@id',
+            token: '@token',
+            backUrl: '@Url.Action("Index", "BifaCompanyMng")',
+            refreshUrl: '@Url.Action("Edit", "BifaCompanyMng", new { id = UrlParameter.Optional })/',
+            serviceUrl: '@(serviceRoot)/api/bifaCompanyMng/',
+        }
+    </script>
+    <script type="text/javascript" src="~/Views/BifaCompanyMng/edit.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Views/BifaCompanyMng/service.js?v=@guid"></script>
+}

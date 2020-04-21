@@ -1,0 +1,163 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    var pageSize = System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"];
+    var cookieID = HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString();
+
+    ViewBag.Title = "Factory Location Management";
+    ViewBag.Module = "Factory Location";
+}
+
+<div class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div>
+            <div class="widget-body" style="margin-bottom: 5px;">
+                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current) != "disabled")
+                {
+                    <a href="javascript:void(0);" class="btn btn-default btn-success btn-xs" title="New Item" ng-click="event.addItem()">
+                        <i class="fa fa-plus"></i> Add Factory Location
+                    </a>
+                }
+            </div>
+        </div>
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-search-result" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-table"></i>
+                </span>
+                <h2>Search Results</h2>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div class="tilsoft-table-wrapper" avs-scroll grid-handler="gridHandler">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header" style="width: 735px;">
+                                <div style="width: 80px;">Found<br /><strong style="color: blue;">{{data.totalRows}}</strong></div>
+                                <div style="width: 60px;" class="sorting" data-column="LocationUD">Code</div>
+                                <div style="width: 100px;" class="sorting" data-column="LocationNM">Name</div>
+                                <div style="width: 155px;" class="sorting_asc" data-column="ManufacturerCountryID">Country</div>
+                                <div>More Information</div>
+                            </div>
+                            <div class="tilsoft-table-filter" style="width: 735px;">
+                                <div style="width: 80px;">
+                                    <a href="javascript:void(0)" class="btn btn-{{conditions.isDefaultFilter ? 'default' : 'primary'}} btn-xs" title="Filter Items" ng-click="event.refresh()">
+                                        <i class="fa fa-filter"></i>
+                                    </a>
+                                    <a href="javascript:void(0)" class="btn btn-default btn-xs" title="Clear Filters" ng-click="event.clear()">
+                                        <i class="fa fa-ban"></i>
+                                    </a>
+                                </div>
+                                <div style="width: 60px;">
+                                    <input class="form-control search-filter" style="height: 30px; width: 100%;" maxlength="20" ng-model="filters.locationUD" />
+                                </div>
+                                <div style="width: 100px;">
+                                    <input class="form-control search-filter" style="height: 30px; width: 100%;" maxlength="50" ng-model="filters.locationNM" />
+                                </div>
+                                <div style="width: 155px;">
+                                    <select class="form-control search-filter" style="height: 30px; width: 100%;" ng-model="filters.manufacturerCountryID" ng-options="item.manufacturerCountryID as item.manufacturerCountryNM for item in support.countries">
+                                        <option value=""></option>
+                                    </select>
+                                </div>
+                                <div></div>
+                            </div>
+                            <div class="tilsoft-table-body" style="width: 735px;">
+                                <table>
+                                    <tbody>
+                                        <tr style="height: 55px;" ng-repeat="item in data.factoryLocations">
+                                            <td style="width: 79px; text-align: center;">
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current) != "disabled")
+                                                {
+                                                    <a href="javascript:void(0)" class="btn btn-default btn-primary btn-xs font-11" title="Edit Item" style="width: 60px;" ng-show="item.locationID > 0 && (item.isEditItem == null || !item.isEditItem)" ng-click="event.updateItem(item)">
+                                                        <i class="fa fa-pencil"></i> Edit
+                                                    </a>
+                                                    <a href="javascript:void(0)" class="btn btn-default btn-warning btn-xs font-11" title="Save Item" style="width: 60px;" ng-show="item.locationID <= 0 || item.isEditItem" ng-click="event.saveItem(item)">
+                                                        <i class="fa fa-save"></i> Save
+                                                    </a>
+                                                }
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current) != "disabled")
+                                                {
+                                                    <a href="javascript:void(0)" class="btn btn-default btn-danger btn-xs font-11" title="Delete Item" style="width: 60px; margin-top: 3px;" ng-show="item.locationID > 0 && (item.isEditItem == null || !item.isEditItem)" ng-click="event.deleteItem(item)">
+                                                        <i class="fa fa-times"></i> Del
+                                                    </a>
+                                                }
+                                                <a href="javascript:void(0)" class="btn btn-default btn-danger btn-xs font-11" title="Cancel Update Item" style="width: 60px; margin-top: 3px;" ng-show="item.locationID <= 0 || item.isEditItem" ng-click="event.cancelItem(item)">
+                                                    <i class="fa fa-times"></i> Cancel
+                                                </a>
+                                            </td>
+                                            <td style="width: 60px; text-align: center;">
+                                                <label ng-show="item.locationID > 0">{{item.locationUD}}</label>
+                                                <input class="form-control" style="height: 30px; width: 100%;" maxlength="20" ng-model="item.locationUD" ng-show="item.locationID <= 0" ng-style="{'background': item.locationUD == null || item.locationUD == '' ? '#fff0f0' : '#fff', 'border-color': item.locationUD == null || item.locationUD == '' ? '#a90329' : '#bdbdbd'}" />
+                                            </td>
+                                            <td style="width: 100px; text-align: center;">
+                                                <label ng-show="item.locationID > 0 && (item.isEditItem == null || !item.isEditItem)">{{item.locationNM}}</label>
+                                                <input class="form-control" style="height: 30px; width: 100%;" maxlength="50" ng-model="item.locationNM" ng-show="item.locationID <= 0 || item.isEditItem" />
+                                            </td>
+                                            <td style="width: 155px; text-align: center;">
+                                                <label ng-show="item.locationID > 0 && (item.isEditItem == null || !item.isEditItem)">{{item.manufacturerCountryNM}}</label>
+                                                <select class="form-control" style="height: 30px; width: 100%;" ng-model="item.manufacturerCountryID" ng-options="item.manufacturerCountryID as item.manufacturerCountryNM for item in support.countries" ng-show="item.locationID <= 0 || item.isEditItem">
+                                                    <option value=""></option>
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <label ng-show="item.createdBy != null">
+                                                    <strong>Created By</strong>:
+                                                    <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.createdBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600" ng-show="item.hasLink1">
+                                                        {{item.creatorName}}
+                                                    </a>
+                                                    <span ng-show="!item.hasLink1">{{item.creatorName}}</span> on {{item.createdDate}}
+                                                </label>
+                                                <label ng-show="item.updatedBy != null">
+                                                    <strong>Updated By</strong>:
+                                                    <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.updatedBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600" ng-show="item.hasLink2">
+                                                        {{item.updatorName}}
+                                                    </a>
+                                                    <span ng-show="!item.hasLink2">{{item.updatorName}}</span> on {{item.updatedDate}}
+                                                </label>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction{
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Search" ng-click="event.refresh()">
+                <i class="fa fa-search"></i>
+            </a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Refresh" ng-click="event.refresh()">
+                <i class="fa fa-refresh"></i>
+            </a>
+        </li>
+
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" style="display: none;" title="Save All Items">
+                <i class="fa fa-save"></i>
+            </a>
+        </li>
+    </ul>
+}
+
+@section pagejs{
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(serviceRoot)/api/factoryLocationMng/',
+            token: '@token',
+            pageSize: '@pageSize',
+            cookieID: '@cookieID',
+        };
+    </script>
+    <script type="text/javascript" src="~/Angular/app/factoryLocationMng/index.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/factoryLocationMng/service.js?v=@guid"></script>
+}

@@ -1,0 +1,151 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    var pageSize = System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"];
+    var cookieID = HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString();
+    var backendReportUrl = System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"];
+
+    ViewBag.Title = "Search Frame Weight";
+    ViewBag.Module = "Frame Weight";
+}
+
+
+<form class="row" id="main-form">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-search-result" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Search Result</h2>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div avs-scroll grid-handler="gridHandler" class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table">
+                            <div style="width:1250px" class="tilsoft-table-header">
+                                <div style="width:80px">Found(s)<br /><strong style="color:maroon">{{totalRows}}</strong></div>
+                                <div style="width:400px">Name</div>
+                                <div style="width:120px">Client</div>
+                                <div style="width:100px">PI</div>
+                                <div style="width:150px">Work Order</div>
+                                <div style="width:150px">Material Type</div>
+                                <div style="width:120px">Frame Weight</div>
+                                <div>Remark</div>
+                            </div>
+                            <div style="width:1250px" class="tilsoft-table-filter">
+                                <div style="width:80px; text-align:center">
+                                    <a href="javascript:void(0)" class="btn btn-default btn-xs" title="Apply Filter" ng-click="event.refresh()">
+                                        <i class="fa fa-filter"></i>
+                                    </a>
+                                    <a href="javascript:void(0)" class="btn btn-default btn-xs" title="Clear Filter" ng-click="event.clear()">
+                                        <i class="fa fa-ban"></i>
+                                    </a>
+                                </div>
+                                <div style="width:400px">
+                                    <input type="text" class="form-control search-filter" style="width:100%" ng-model="filters.ProductionItem" />
+                                </div>                             
+                                <div style="width:120px">
+                                    <input type="text" class="form-control search-filter" style="width:100%" ng-model="filters.ClientUD" />
+                                </div>
+                                <div style="width:100px">
+                                    <input type="text" class="form-control search-filter" style="width:100%" ng-model="filters.ProformaInvoiceNo" />
+                                </div>
+                                <div style="width:150px">
+                                    <input type="text" class="form-control search-filter" style="width:100%" ng-model="filters.WorkOrderUD" />
+                                </div>
+                                <div style="width:150px">
+
+                                </div>
+                                <div style="width:120px">
+                                </div>
+                                <div></div>
+                            </div>
+                            <div style="width:1250px" class="tilsoft-table-body">
+                                <table>
+                                    <tbody>
+                                        <tr ng-repeat="item in data">
+                                            <td style="width:79px; text-align:center">
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current) == "disabled")
+                                                {
+                                                    <a class="btn btn-default btn-xs font-11" href="@Url.Action("Edit", "ProductionFrameWeightMng")/{{item.productionFrameWeightID}}" title="View (Read Only)" style="width: 60px" target="_blank"><i class="fa fa-folder-open"></i> View</a>
+                                                }
+                                                else
+                                                {
+                                                    <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "ProductionFrameWeightMng")/{{item.productionFrameWeightID}}" title="Edit" target="_blank" style="width: 60px"><i class="fa fa-pencil-square-o"></i> Edit</a>
+                                                }
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current) != "disabled")
+                                                {
+                                                    <a class="btn btn-danger btn-xs font-11" href="#" title="Delete" style="width: 60px; margin-top: 3px" ng-click="event.remove(item)"><i class="fa fa-times"></i> Delete</a>
+                                                }
+                                            </td>
+                                            <td style="width:400px;text-align:left">
+                                                <span><b>{{item.productionItemUD}}</b></span><br />
+                                                <span>{{item.productionItemNM}}</span>
+                                            </td>
+                                            <td style="width:120px;text-align:center">
+                                                <div ng-repeat="subItem in item.productionFrameWeightClient">
+                                                    <div>
+                                                        {{subItem.clientUD}}
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td style="width:100px;text-align:center">
+                                                <div ng-repeat="subItem in item.productionFrameWeightSaleOrder">
+                                                    <div>
+                                                        {{subItem.proformaInvoiceNo}}
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td style="width:150px;text-align:center">
+                                                <div ng-repeat="subItem in item.productionFrameWeightWorkOrder">
+                                                    <div>
+                                                        {{subItem.workOrderUD}}
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td style="width:150px;text-align:left">
+                                                {{item.materialTypeNM}}
+                                            </td>
+                                            <td style="width:120px;text-align:center">{{item.frameWeight}}</td>
+                                            <td>{{item.remark}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+@section FormAction {
+<ul id="sparks">
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default" ng-click="event.refresh()" title="Search"><i class="fa fa-search"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default" ng-click="event.clear()" title="Refresh Page"><i class="fa fa-refresh"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default btn-sm" ng-click="event.exportExcel()"><i class="fa fa-file-excel-o"></i></a>
+    </li>
+</ul>
+}
+
+
+@section pagejs {
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(serviceRoot)/api/productionFrameWeight/',
+            token: '@token',
+            pageSize: '@pageSize',
+            cookieID: '@cookieID',
+            backendReportUrl: '@backendReportUrl',
+        }
+    </script>
+    <script src="~/Views/ProductionFrameWeightMng/index.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/jsonService2.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/ProductionFrameWeightMng/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}

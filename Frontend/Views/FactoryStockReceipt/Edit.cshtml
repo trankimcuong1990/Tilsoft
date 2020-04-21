@@ -1,0 +1,357 @@
+﻿@{
+    if (ViewBag.ID == 0)
+    {
+        ViewBag.Title = "Factory Inventory";
+    }
+    else
+    {
+        ViewBag.Title = "Edit factory inventory";
+    }
+
+    ViewBag.Module = "Factory Inventory";
+}
+
+<form class="row" name="editForm" id="main-form">
+
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+
+        <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>{{ui.title}}</h2>
+            </header>
+            <div>
+                <div class="widget-body">
+                    
+                    <div class="smart-form" ng-show="ui.screenName=='receipt'">
+
+                        <div class="row">
+                            <section class="col col-lg-2">
+                                <label>Receipt No</label>
+                                <span class="form-control">{{data.receiptNo}}</span>
+                            </section>
+                            <section class="col col-lg-2">
+                                <label>Type</label>
+                                <span class="form-control">{{method.getReceiptTypeName(data.receiptTypeID)}}</span>
+                            </section>
+                            <section class="col col-lg-2">
+                                <label>Factory</label>
+                                <span class="form-control">{{method.getFactoryUD(data.factoryID)}}</span>
+                            </section>
+                            <section class="col col-lg-2">
+                                <label>Receipt Date</label>
+                                <label class="input">
+                                    <input type="text" class="datepicker" ng-model="data.receiptDate" data-dateformat="dd/mm/yy" />
+                                    <i class="icon-append fa fa-calendar"></i>
+                                </label>
+                            </section>
+                            <section class="col col-2">
+                                <label>Created By</label>
+                                <span class="form-control">
+                                    <a ng-show="(data.createdBy!=null && data.creatorName2!=null)" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{data.createdBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                        <i class="fa fa-user"></i> {{data.creatorName2}}
+                                    </a>
+                                    <span ng-show="(data.createdBy!=null && data.creatorName2==null && data.creatorName!=null)">{{data.creatorName}}</span>
+                                </span>
+                            </section>
+                            <section class="col col-2">
+                                <label>Created Date</label>
+                                <span class="form-control">{{data.createdDate}}</span>
+                            </section>
+                            
+                        </div>
+
+                        <div class="row">
+                            <section class="col col-sm-8">
+                                <label>Remark</label>
+                                <input type="text" ng-model="data.remark" class="form-control" />
+                            </section>
+                            <section class="col col-2">
+                                <label>Updated By</label>
+                                <span class="form-control">
+                                    <a ng-show="(data.updatedBy!=null && data.updatorName2!=null)" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{data.updatedBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                        <i class="fa fa-user"></i> {{data.updatorName2}}
+                                    </a>
+                                    <span ng-show="(data.updatedBy!=null && data.updatorName2==null && data.updatorName!=null)">{{data.updatorName}}</span>
+                                </span>
+                            </section>
+                            <section class="col col-2">
+                                <label>Updated Date</label>
+                                <span class="form-control">{{data.updatedDate}}</span>
+                            </section>
+                        </div>
+                        
+
+                        <div class="row" ng-if="data.receiptTypeID==1">
+                            <section class="col col-sm-12">
+                                <div class="input">
+                                    <input id="quickSearchBox-product" placeholder="press enter to search all product or type at least 3 chars to search product" class="form-control" type="text" ng-keyup="quickSearchProduct.event.searchBoxKeyUp($event)" autocomplete="off">
+                                    <a ng-click="quickSearchproduct.event.searchClick()" href="javascript:void(0);"><i class="icon-append fa fa-search"></i></a>
+                                    <div id="popup-product" class="popup-container-2" style="display: none; left: 0px; top: 32px;">
+                                        <div style="float: right; margin-bottom: 8px;">
+                                            <a href="javascript:void(0);" ng-click="quickSearchProduct.event.itemSelected($event)" class="btn btn-primary btn-xs">OK</a>
+                                            <a href="javascript:void(0);" ng-click="quickSearchProduct.event.close($event)" class="btn btn-danger btn-xs">Close</a>
+                                        </div>
+                                        <div class="clear"></div>
+                                        <div id="quickSearchResultGrid-product" class="tilsoft-table-wrapper">
+                                            <div class="tilsoft-table">
+                                                <div class="tilsoft-table-header" style="width: 700px;">
+                                                    <div style="width: 60px; text-align: center"></div>
+                                                    <div style="width: 80px" class="sorting"></div>
+                                                    <div style="width: 150px" class="sorting">ArticleCode</div>
+                                                    <div class="sorting">Desctiption</div>
+                                                </div>
+
+                                                <div class="tilsoft-table-body" style="width: 700px;">
+                                                    <table>
+                                                        <tr ng-repeat="item in quickSearchProduct.data">
+                                                            <td style="width: 60px; text-align: center; vertical-align:middle">
+                                                                <label class="checkbox" style="margin-left:15px; margin-bottom:20px">
+                                                                    <input type="checkbox" ng-model="item.isSelected">
+                                                                    <i></i>
+                                                                </label>
+                                                            </td>
+                                                            <td style="width: 80px;">
+                                                                <a href="{{item_image.imageFile}}" da data-featherlight="image">
+                                                                    <img ng-src="{{item_image.imageFileFullSize}}" width="70" height="70" />
+                                                                </a>
+                                                            </td>
+                                                            <td style="width: 150px;">{{item.articleCode}}</td>   
+                                                            <td>{{item.description}}</td>                                                              
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+                        
+                        <div class="row" ng-if="data.receiptTypeID==2">
+                            <section class="col col-sm-12">
+                                <a href="#" class="btn btn-success btn-xs" title="Add" ng-click="quickSearchStockRemain.event.openScreen($event)"><i class="fa fa-plus"></i> Add Product to export</a>
+                            </section>
+                        </div>
+
+                        <div class="row">
+                            <section class="col col-sm-12">
+                                <div id="grdReceiptDetail" class="tilsoft-table-wrapper" avs-scroll grid-handler="gridHandler">
+                                    <div class="tilsoft-table">
+                                        <div class="tilsoft-table-header" style="width: 1150px;">
+                                            <div style="width:50px"></div>
+                                            <div style="width:60px;vertical-align:middle" class="sorting" data-colname="clientUD">Client</div>
+                                            <div style="width:70px;vertical-align:middle" class="sorting" data-colname="proformaInvoiceNo">Order</div>
+                                            <div style="width:80px;vertical-align:middle" class="sorting" data-colname="lds">LDS</div>
+                                            <div style="width:70px" class="sorting" data-colname="articleCode">Article Code</div>
+                                            <div style="width:200px" class="sorting" data-colname="description">Description</div>
+                                            <div style="width:60px" class="sorting" data-colname="totalStockQnt">Stock Qnt</div>
+                                            <div style="width:80px" class="sorting" data-colname="producedQnt">Output Produced</div>
+                                            <div style="width:120px" class="sorting" data-colname="notPackedQnt">Free To Sale (Not Packed)</div>
+                                            <div style="width:120px" class="sorting" data-colname="packedQnt">Free To Sale (Packed)</div>
+                                            <div style="width:70px" class="sorting" data-colname="totalPackedQnt">Total Packed</div>
+                                            <div style="width:70px" class="sorting" data-colname="totalShipped">Total Shipped</div>
+                                            <div class="sorting" data-colname="unitPrice">Price</div>
+                                        </div>
+
+                                        <div class="tilsoft-table-filter" style="width: 1150px;">
+                                            <div style="width:50px"></div>
+                                            <div style="width: 60px;"><input type="text" ng-model="gridFilter.clientUD" /></div>
+                                            <div style="width: 70px;"><input type="text" ng-model="gridFilter.proformaInvoiceNo" /></div>
+                                            <div style="width: 80px;"><input type="text" ng-model="gridFilter.lds" /></div>
+                                            <div style="width: 70px;"><input type="text" ng-model="gridFilter.articleCode" /></div>
+                                            <div style="width: 200px;"><input type="text" ng-model="gridFilter.description" /></div>
+                                            <div style="width: 60px;font-weight:bold;text-align:right">{{filterResult | sumFunction:'totalStockQnt' | number}}</div>
+                                            <div style="width: 80px;font-weight:bold;text-align:right">{{filterResult | sumFunction:'producedQnt' | number}}</div>
+                                            <div style="width: 120px;font-weight:bold;text-align:right">{{filterResult | sumFunction:'notPackedQnt' | number}}</div>
+                                            <div style="width: 120px;font-weight:bold;text-align:right">{{filterResult | sumFunction:'packedQnt' | number}}</div>
+                                            <div style="width: 70px;font-weight:bold;text-align:right">{{filterResult | sumFunction:'totalPackedQnt' | number}}</div>
+                                            <div style="width: 70px;font-weight:bold;text-align:right">{{filterResult | sumFunction:'totalShipped' | number}}</div>
+                                            <div></div>
+                                        </div>
+
+                                        <div class="tilsoft-table-body" style="width: 1150px;">
+                                            <table>
+                                                <tr ng-repeat="item in filterResult=(data.factoryStockReceiptDetails | filter: {clientUD: gridFilter.clientUD, proformaInvoiceNo: gridFilter.proformaInvoiceNo, lds: gridFilter.lds, articleCode: gridFilter.articleCode, description: gridFilter.description})">
+                                                    <td style="text-align:center; vertical-align:middle; width:49px">
+                                                        <a ng-click="event.removeProduct($event,item.factoryStockReceiptDetailID)" class="btn btn-danger btn-xs font-11" href="javascript:void(0);"><i class=" fa fa-times"></i>Del</a>
+                                                    </td>
+                                                    <td style="width:60px;vertical-align:middle">{{item.clientUD}}</td>
+                                                    <td style="width:70px;vertical-align:middle">{{item.proformaInvoiceNo}}</td>
+                                                    <td style="width:80px;vertical-align:middle">{{item.lds}}</td>
+                                                    <td style="width:70px; vertical-align:middle">{{item.articleCode}}</td>
+                                                    <td style="width:200px; vertical-align:middle">{{item.description}}</td>
+                                                    <td style="width:60px; text-align:right; vertical-align:top"><span class="form-control">{{method.getTotalStock(item)  | number}}</span></td>
+                                                    <td style="width:80px; text-align:center">
+                                                        <input type="text" class="form-control" ng-model="item.producedQnt" style="text-align:right" ng-disabled="true"  ng-change="event.changeProducedQnt(item)"/>
+                                                    </td>
+                                                    <td style="width:120px; text-align:center"><input type="text" class="form-control" ng-model="item.notPackedQnt" style="text-align:right" ng-disabled="item.factoryOrderDetailID" /></td>
+                                                    <td style="width:120px; text-align:center"><input type="text" class="form-control" ng-model="item.packedQnt" style="text-align:right" ng-disabled="item.factoryOrderDetailID" /></td>
+                                                    <td style="width:70px; text-align:right"><span class="form-control">{{item.totalPackedQnt | number}}</span></td>
+                                                    <td style="width:70px; text-align:right"><span class="form-control">{{item.totalShipped | number}}</span></td>
+                                                    <td>
+                                                        <input avs-number ng-data-source="item.unitPrice" ng-decimal="2" class="form-control" style="text-align:right" />
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="6"><b>Total Rows() : {{data.factoryStockReceiptDetails.length}}</b></td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+
+                    </div>
+
+
+                    <div class="smart-form" ng-show="ui.screenName=='search-stock-remain'">
+                        <div class="row">
+
+                            <section class="col col-sm-2">
+                                <label>ArticleCode</label>
+                                <input type="text" class="form-control" ng-model="quickSearchStockRemain.filters.filters.articleCode" />
+                            </section>
+
+                            <section class="col col-sm-10">
+                                <label>Description</label>
+                                <input type="text" class="form-control" ng-model="quickSearchStockRemain.filters.filters.description" />
+                            </section>
+                        </div>
+
+                        <div class="row">
+                            <section class="col col-sm-12">
+                                <a href="#" class="btn btn-primary btn-xs" title="Search" ng-click="quickSearchStockRemain.event.search($event)"><i class="fa fa-search"></i> Search</a>
+                                <a href="#" class="btn btn-success btn-xs" title="Select" ng-click="quickSearchStockRemain.event.itemSelected($event)"><i class="fa fa-check"></i> Select</a>
+                                <a href="#" class="btn btn-warning btn-xs" title="Back" ng-click="quickSearchStockRemain.event.close($event)"><i class="fa fa-arrow-left"></i> Back</a>
+                            </section>
+                        </div>
+
+                        <div class="row">
+                            <section class="col col-sm-12">
+
+                                <div id="grdStockRemain" class="tilsoft-table-wrapper">
+                                    <div class="tilsoft-table">
+                                        <div class="tilsoft-table-header" style="width: 1000px;">
+                                            <div style="width: 60px; text-align: center"></div>
+                                            <div style="width:210px" class="sorting" data-colname="articleCode">ArticleCode</div>
+                                            <div style="width:700px" class="sorting" data-colname="description">Description</div>
+                                            <div class="sorting" data-colname="totalStockQnt">Current Stock Qnt</div>
+                                        </div>
+                                        <div class="tilsoft-table-body" style="width: 1000px;">
+                                            <table>
+                                                <tr ng-repeat="item in quickSearchStockRemain.data">
+                                                    <td style="width: 60px; text-align: center; vertical-align:middle">
+                                                        <label class="checkbox" style="margin-left:15px; margin-bottom:20px">
+                                                            <input type="checkbox" ng-model="item.isSelected">
+                                                            <i></i>
+                                                        </label>
+                                                    </td>
+                                                    <td style="width:210px; vertical-align:middle" class="sorting">{{item.articleCode}}</td>
+                                                    <td style="width:700px; vertical-align:middle" class="sorting">{{item.description}}</td>
+                                                    <td class="sorting">{{item.totalStockQnt}}</td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </section>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </article>
+
+</form>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "FactoryStockReceipt")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="#" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="event.update($event)"><i class="fa fa-save"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="#" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="Delete" style="color: #ff0000;" ng-click="event.delete($event)"><i class="fa fa-times"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagepopup2{
+    <div id="receiptTypeForm" style="display:none">
+        <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+            <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+                <header></header>
+                <div>
+                    <div class="widget-body no-padding">
+                        <form class="smart-form">
+                            <fieldset>
+                                <section class="col col-lg-2">
+                                    <label class="label">Select receipt type to continue</label>
+                                    <div class="inline-group">
+                                        <label class="radio" ng-repeat="item in receiptTypes">
+                                            <input type="radio" name="radio-inline" ng-model="$parent.data.receiptTypeID" ng-value="item.receiptTypeID">
+                                            <i></i>{{item.receiptTypeName}}
+                                        </label>
+                                    </div>
+                                </section>
+                            </fieldset>
+
+                            <fieldset ng-if="data.receiptTypeID==1">
+                                <section class="col col-lg-2">
+                                    <label>Factory</label>
+                                    <select name="factoryID1" class="form-control" ng-model="data.factoryID" ng-options="item.factoryID as item.factoryUD for item in factories">
+                                        <option value=""></option>
+                                    </select>
+                                </section>
+                            </fieldset>
+
+                            <fieldset ng-if="data.receiptTypeID==2">
+                                <section class="col col-lg-2">
+                                    <label>Export from factory</label>
+                                    <select name="factoryID2" class="form-control" ng-model="data.factoryID" ng-options="item.factoryID as item.factoryUD for item in factories">
+                                        <option value=""></option>
+                                    </select>
+                                </section>
+                            </fieldset>
+
+                            <footer style="">
+                                <a href="javascript:void(0);" class="btn btn-primary" ng-click="event.onNextButtonClick()">Next</a>
+                            </footer>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </article>
+    </div>
+}
+
+@section pagejs {
+    <script src="~/Angular/app/jsonService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/support/service.js?c=@System.Guid.NewGuid().ToString().Replace("-","")"></script>
+    <script type="text/javascript">
+        jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/factoryStockReceipt/';
+        jsonService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+        supportService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/support/';
+        supportService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+        var context = {
+            id: '@ViewBag.ID',
+            backUrl: '@Url.Action("Index", "FactoryStockReceipt")',
+            refreshUrl: '@Url.Action("Edit", "FactoryStockReceipt", new { id = UrlParameter.Optional })/',
+            errMsg: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED',
+        }
+    </script>
+    <script src="~/Angular/app/FactoryStockReceipt/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/FactoryStockReceipt/edit.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}
+

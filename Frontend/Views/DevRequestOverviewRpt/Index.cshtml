@@ -1,0 +1,110 @@
+﻿@{
+    ViewBag.Title = "Dev Request Overview";
+    ViewBag.Module = "Dev Request Overview";
+    ViewBag.Icon = "fa-bar-chart-o";
+}
+
+<style>
+    .fc-view-month .fc-event-time{
+        display : none;
+    }
+</style>
+
+<div class="row" id="main-form">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-search-filter" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-filter"></i> </span>
+                <h2>Filters</h2>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div class="smart-form form-horizontal">
+                        <fieldset>
+                            <div class="form-group">
+                                <div class="col-sm-4">
+                                    <label class="col-md-2 control-label" for="select-1" style="box-sizing: border-box; padding-right: 15px;">Year</label>
+                                    <div class="col-md-10">
+                                        <select id="select-1" class="form-control" ng-model="filters.year" ng-options="year.value as year.text for year in years"></select>
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+                        <footer>
+                            <a href="javascript:void(0)" ng-click="event.load()" class="btn btn-primary">Generate Report</a>
+                        </footer>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="jarviswidget" id="wid-id-overview" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-bar-chart-o"></i> </span>
+                <h2>Overview</h2>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div class="smart-form">
+                        <fieldset style="padding-top: 0px;">
+                            <div class="row">
+                                <div class="tilsoft-table">
+                                    <div style="width: 100%; overflow-y: hidden; height: auto; margin-top: 0px;" class="tilsoft-table-body">
+                                        <table>
+                                            <tbody>
+                                                <tr>
+                                                    <th style="font-weight: bold;" rowspan="2">Developer</th>
+                                                    <th colspan="3" style="font-weight: bold;">Requests</th>
+                                                    <th style="font-weight: bold; color: #ff0000;" rowspan="2">Not yet est request</th>
+                                                    <th colspan="2" style="font-weight: bold;">Working Hour</th>
+                                                </tr>
+                                                <tr>
+                                                    <th style="font-weight: bold;">Total</th>
+                                                    <th style="font-weight: bold;">Resolved</th>
+                                                    <th style="font-weight: bold;">Pending</th>                                                    
+                                                    <th style="font-weight: bold;">Est</th>
+                                                    <th style="font-weight: bold;">Actual</th>
+                                                </tr>
+                                                <tr ng-repeat="item in data">
+                                                    <td style="min-width: 150px;">
+                                                        <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.userID}}">{{item.employeeNM}}</a> 
+                                                        <a href="javascript:void(0)" class="btn btn-default btn-xs" ng-click="detailService.openForm(item)" style="float: right;"><i class="fa fa-list-ul"></i> Detail</a>
+                                                    </td>
+                                                    <td style="text-align: right;">{{item.totalRequest | currency:'':0}}</td>
+                                                    <td style="text-align: right;">{{item.totalResolvedRequest | currency:'':0}}</td>
+                                                    <td style="text-align: right;">{{item.totalPendingRequest | currency:'':0}}</td>
+                                                    <td style="text-align: right; color: #ff0000;">{{item.notYetEstRequest | currency:'':0}}</td>
+                                                    <td style="text-align: right;">{{item.totalEstHour | currency:'':0}}</td>
+                                                    <td style="text-align: right;">{{item.totalActHour | currency:'':0}}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div id="chartOverview" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+<!-- DETAIL RPT -->
+@Html.Partial("~/Views/DevRequestOverviewRpt/Index/Detail.cshtml")
+
+@section pagejs {
+    <script type="text/javascript">
+        var context = {
+            serviceUrl : '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/devrequestoverviewrpt/',
+            token : '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]'
+        }
+    </script>
+    <script src="~/Angular/app/devRequestOverviewRpt/index.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/jsonService2.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/devRequestOverviewRpt/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/devRequestOverviewRpt/index/detailService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}

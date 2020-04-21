@@ -1,0 +1,139 @@
+﻿@{
+    ViewBag.Title = "Create New Dev Request";
+    ViewBag.Icon = "fa-pencil-square-o";
+    ViewBag.Module = "Dev Request";
+    Frontend.APIDTO.APIUserInformation userInfo = (Frontend.APIDTO.APIUserInformation)Session[Frontend.Customize.Common.ProjectDefinition.USER_INFO_SESSION];
+}
+
+<form class="row" name="editForm" id="main-form">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-0" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>&nbsp;</header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div class="smart-form">
+                        <fieldset>
+                            <section>
+                                <label class="label">
+                                    Title
+                                    <em ng-show="editForm.title.$error.required" class="note note-error">(Required)</em>
+                                </label>
+                                <label class="input" ng-class="{'state-error': editForm.title.$error.required}">
+                                    <input name="title" type="text" ng-model="data.title" required />
+                                </label>
+                            </section>
+                            <div class="row">                                
+                                <section class="col col-3">
+                                    <label class="label">
+                                        Type
+                                        <em ng-show="editForm.type.$error.required" class="note note-error">(Required)</em>
+                                    </label>
+                                    <label class="select" ng-class="{'state-error': editForm.type.$error.required}">
+                                        <select name="type" required ng-model="data.devRequestTypeID" ng-options="type.devRequestTypeID as type.devRequestTypeNM for type in devRequestTypes">
+                                            <option value=""></option>
+                                        </select>
+                                        <i></i>
+                                    </label>
+                                </section>
+                                <section class="col col-3">
+                                    <label class="label">
+                                        Project
+                                        <em ng-show="editForm.project.$error.required" class="note note-error">(Required)</em>
+                                    </label>
+                                    <label class="select" ng-class="{'state-error': editForm.project.$error.required}">
+                                        <select name="project" required ng-model="data.devRequestProjectID" ng-options="project.devRequestProjectID as project.devRequestProjectNM for project in devRequestProjects">
+                                            <option value=""></option>
+                                        </select>
+                                        <i></i>
+                                    </label>
+                                </section>
+                                <section class="col col-3">
+                                    <label class="label">
+                                        Priority
+                                        <em ng-show="editForm.priority.$error.required" class="note note-error">(Required)</em>
+                                    </label>
+                                    <label class="select" ng-class="{'state-error': editForm.priority.$error.required}">
+                                        <select name="priority" required ng-model="data.priority" ng-options="priority.devRequestPriorityID as priority.devRequestPriorityNM for priority in devRequestPriorities">
+                                            <option value=""></option>
+                                        </select>
+                                        <i></i>
+                                    </label>
+                                </section>
+                                <section class="col col-3">
+                                    <label class="label">
+                                        Requested By
+                                        <em ng-show="editForm.requesterID.$error.required" class="note note-error">(Required)</em>
+                                    </label>
+                                    <label class="select" ng-class="{'state-error': editForm.requesterID.$error.required}">
+                                        <select ui-select2 ng-model="data.requesterID" class="select2">
+                                            <option value="">--ALL REQUESTER--</option>
+                                            <option ng-repeat="requester in requesters | orderBy: 'employeeNM'" value="{{requester.userID}}">{{requester.employeeNM}}</option>
+                                        </select>
+                                    </label>
+                                </section>
+                            </div>    
+                            <section>
+                                <label class="label">
+                                    Description
+                                    <em ng-show="editForm.description.$error.required" class="note note-error">(Required)</em>
+                                </label>
+                                <label class="textarea" ng-class="{'state-error': editForm.description.$error.required}">
+                                    <textarea rows="10" ng-model="data.description" name="description" required></textarea>
+                                </label>
+                            </section>
+                            <section>
+                                <label>Attached File(s)</label>
+                                <table class="table table-bordered table-striped" style="margin-top: 5px;">
+                                    <thead>
+                                        <tr>
+                                            <th style="text-align:center;"><a href="javascript:void(0)" class="btn btn-primary btn-xs" ng-click="event.addAttachment()"><i class="fa fa-plus"></i> Add</a></th>
+                                            <th style="width: 100%;">File Name</th>
+                                        </tr>                                        
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="item in data.devRequestFiles">
+                                            <td style="text-align:center;"><a href="javascript:void(0)" class="btn btn-danger btn-xs" ng-click="event.removeAttachment(item)">Remove</a></td>
+                                            <td><a href="{{item.fileLocation}}" target="_blank">{{item.friendlyName}}</a></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </section>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "DevRequestMng")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="event.update()"><i class="fa fa-save"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script type="text/javascript">
+        var context = {
+            id: @ViewBag.ID,
+            errMsg: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED',
+            backUrl: '@Url.Action("Index", "DevRequestMng")',
+            refreshUrl: '@Url.Action("Detail", "DevRequestMng", new { id = UrlParameter.Optional })/',
+            userId: @userInfo.Data.UserId,
+
+            backendReportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]',
+            serviceUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/devrequestmng/',
+            token: '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]',
+            supportServiceUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/support/',
+        };
+    </script>
+    <script src="~/Angular/app/devRequestMng/edit.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/jsonService2.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/devRequestMng/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}
+

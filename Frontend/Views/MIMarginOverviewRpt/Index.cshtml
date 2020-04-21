@@ -1,0 +1,224 @@
+﻿@using Frontend.Helper;
+@{
+    ViewBag.Title = "Delta Overview";
+    ViewBag.Icon = "fa-bar-chart-o";
+    string CurrentSeason = Library.OMSHelper.Helper.GetCurrentSeason();
+    string PreSeason = Library.OMSHelper.Helper.GetPrevSeason(CurrentSeason);
+    string PreOfPreSeason = Library.OMSHelper.Helper.GetPrevSeason(PreSeason);
+
+    ViewBag.CurrentSeason = CurrentSeason;
+    ViewBag.PreSeason = PreSeason;
+    ViewBag.PreOfPreSeason = PreOfPreSeason;
+}
+
+<style>
+    .rpt-content {
+        display: none;
+    }
+
+    .rpt-loading {
+        color: #999;
+    }
+
+    .tilsoft-table {
+        padding: 0px;
+    }
+
+        .tilsoft-table .tilsoft-table-body {
+            margin-top: 0px;
+            height: auto;
+            max-height: unset;
+        }
+
+            .tilsoft-table .tilsoft-table-body table th {
+                font-weight: bold;
+                text-transform: uppercase;
+            }
+
+            .tilsoft-table .tilsoft-table-body table tbody td {
+                /*word-break: normal;*/
+            }
+</style>
+
+<div class="row">
+    <div class="col-sm-12">
+        <div class="well well-light">
+            <div class="row">
+                <div class="col-xs-12">
+                    <span style="font-weight: bold; margin-right: 15px;">Ex.Rate: {{settingValue.exRate | number:2}}</span>
+                    <span style="font-weight: bold;">Est.Cont Value: {{settingValue.usdContainerValue | currency:'$':2}} or {{settingValue.eurContainerValue | currency:'&euro;':2}}</span>
+                </div>
+            </div>
+
+            @Html.Partial("~/Views/MIMarginOverviewRpt/Index/SaleByAccManager.cshtml", new ViewDataDictionary() { { "season", CurrentSeason } })
+            @Html.Partial("~/Views/MIMarginOverviewRpt/Index/SaleByAccManagerPreSeason.cshtml", new ViewDataDictionary() { { "season", PreSeason } })
+
+            <h1><i class="fa fa-minus-square-o" ng-click="event.toggPanel($event,'pnlInvoiceByItem')"></i> COMMERCIAL INVOICE BY ITEM CATEGORY - @PreSeason</h1>
+            <div class="row" id="pnlInvoiceByItem">
+                <div class="rpt-content">
+                    @Html.Partial("~/Views/MIMarginOverviewRpt/Index/InvoiceByItem.cshtml")
+                </div>
+                <div class="col-xs-12 rpt-loading">
+                    <i class="fa fa-spin fa-refresh"></i> Loading, please wait ...
+                </div>
+            </div>
+
+            <hr />
+
+            <h1><i class="fa fa-minus-square-o" ng-click="event.toggPanel($event,'pnlSaleByCountry')"></i> SUMMARY SALES BY COUNTRY (COMMERCIAL INVOICE - @CurrentSeason, @PreSeason)</h1>
+            <div class="row" id="pnlSaleByCountry">
+                <div class="col-xs-12 rpt-content">
+                    @Html.Partial("~/Views/MIMarginOverviewRpt/Index/SaleByCountry.cshtml")
+                </div>
+                <div class="col-xs-12 rpt-loading">
+                    <i class="fa fa-spin fa-refresh"></i> Loading, please wait ...
+                </div>
+            </div>
+
+            <hr />
+
+            <h1><i class="fa fa-minus-square-o" ng-click="event.toggPanel($event,'pnlExpectedByClient')"></i> EXPECTED BY CLIENT (@CurrentSeason) COMPARE TO COMMERCIAL INVOICE @PreSeason</h1>
+            <div class="row" id="pnlExpectedByClient">
+                <div class="col-xs-12 rpt-content">
+                    @Html.Partial("~/Views/MIMarginOverviewRpt/Index/ExpectedByClient.cshtml")
+                </div>
+                <div class="col-xs-12 rpt-loading">
+                    <i class="fa fa-spin fa-refresh"></i> Loading, please wait ...
+                </div>
+            </div>
+
+            <hr />
+
+            <h1><i class="fa fa-minus-square-o" ng-click="event.toggPanel($event,'pnlPIByClient')"></i> PROFORMA INVOICE BY CLIENT (@CurrentSeason) COMPARE TO COMMERCIAL INVOICE @PreSeason</h1>
+            <div class="row" id="pnlPIByClient">
+                <div class="col-xs-12 rpt-content">
+                    @Html.Partial("~/Views/MIMarginOverviewRpt/Index/PIByClient.cshtml")
+                </div>
+                <div class="col-xs-12 rpt-loading">
+                    <i class="fa fa-spin fa-refresh"></i> Loading, please wait ...
+                </div>
+            </div>
+
+            <hr />
+            
+            <div class="row">
+                <div class="col-xs-12">
+                    @Html.Partial("~/Views/MISaleByClientRpt/Widget/PiConfirmed.cshtml", new ViewDataDictionary() { { "season", CurrentSeason } })
+                </div>
+            </div>
+
+            <hr />
+
+            <h1><i class="fa fa-minus-square-o" ng-click="event.toggPanel($event,'pnlCIByClient')"></i> COMMERCIAL INVOICE BY CLIENT @CurrentSeason - @PreSeason - @PreOfPreSeason</h1>
+            <div class="row" id="pnlCIByClient">
+                <div class="col-lg-12 rpt-content">
+                    @Html.Partial("~/Views/MIMarginOverviewRpt/Index/CIByClient.cshtml")
+                </div>
+                <div class="col-xs-12 rpt-loading">
+                    <i class="fa fa-spin fa-refresh"></i> Loading, please wait ...
+                </div>
+            </div>
+
+            <hr />
+
+            @*<div class="row">
+            <div class="col-xs-6" id="pnlNewClientCurrentSeason">
+                <h1>NEW CLIENTS (BASE ON COMMERCIAL INVOICE)  (HAVE TURN OVER IN @CurrentSeason BUT NOT IN @PreSeason)</h1>
+                <div class="rpt-content">
+                    @Html.Partial("~/Views/MIMarginOverviewRpt/Index/NewClientCurrentSeason.cshtml")
+                </div>
+                <div class="col-xs-12 rpt-loading">
+                    <i class="fa fa-spin fa-refresh"></i> Loading, please wait ...
+                </div>
+            </div>
+            <div class="col-xs-6" id="pnlLostClientCurrentSeason">
+                <h1>LOST CLIENTS (BASE ON COMMERCIAL INVOICE)  (HAVE TURN OVER IN @PreSeason BUT NOT IN @CurrentSeason)</h1>
+                <div class="rpt-content">
+                    @Html.Partial("~/Views/MIMarginOverviewRpt/Index/LostClientCurrentSeason.cshtml")
+                </div>
+                <div class="col-xs-12 rpt-loading">
+                    <i class="fa fa-spin fa-refresh"></i> Loading, please wait ...
+                </div>
+            </div>
+        </div>*@
+
+            <div class="row">
+                <div class="col-xs-6">
+                    <h1><i class="fa fa-minus-square-o" ng-click="event.toggPanel($event,'pnlNewClientOnProformaInvoice')"></i> NEW CLIENTS (BASE ON PROFORMA INVOICE)  (HAVE TURN OVER IN @CurrentSeason BUT NOT IN @PreSeason)</h1>
+                    <div id="pnlNewClientOnProformaInvoice">
+                        <div class="rpt-content">
+                            @Html.Partial("~/Views/MIMarginOverviewRpt/Index/NewClientOnProformaInvoice.cshtml")
+                        </div>
+                        <div class="col-xs-12 rpt-loading">
+                            <i class="fa fa-spin fa-refresh"></i> Loading, please wait ...
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xs-6">
+                    <h1><i class="fa fa-minus-square-o" ng-click="event.toggPanel($event,'pnlLostClientOnProformaInvoice')"></i> LOST CLIENTS (BASE ON PROFORMA INVOICE)  (HAVE TURN OVER IN @PreSeason BUT NOT IN @CurrentSeason)</h1>
+                    <div id="pnlLostClientOnProformaInvoice">
+                        <div class="rpt-content">
+                            @Html.Partial("~/Views/MIMarginOverviewRpt/Index/LostClientOnProformaInvoice.cshtml")
+                        </div>
+                        <div class="col-xs-12 rpt-loading">
+                            <i class="fa fa-spin fa-refresh"></i> Loading, please wait ...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <hr />
+
+            <div class="row">
+                <div class="col-xs-6">
+                    <h1><i class="fa fa-minus-square-o" ng-click="event.toggPanel($event,'pnlNewClientPreSeason')"></i> NEW CLIENTS (BASE ON COMMERCIAL INVOICE) (HAVE TURN OVER IN @PreSeason BUT NOT IN @PreOfPreSeason)</h1>
+                    <div id="pnlNewClientPreSeason">
+                        <div class="rpt-content">
+                            @Html.Partial("~/Views/MIMarginOverviewRpt/Index/NewClientPreSeason.cshtml")
+                        </div>
+                        <div class="col-xs-12 rpt-loading">
+                            <i class="fa fa-spin fa-refresh"></i> Loading, please wait ...
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xs-6">
+                    <h1><i class="fa fa-minus-square-o" ng-click="event.toggPanel($event,'pnlLostClientPreSeason')"></i> LOST CLIENTS (BASE ON COMMERCIAL INVOICE) (HAVE TURN OVER IN @PreOfPreSeason BUT NOT IN @PreSeason)</h1>
+                    <div id="pnlLostClientPreSeason">
+                        <div class="rpt-content">
+                            @Html.Partial("~/Views/MIMarginOverviewRpt/Index/LostClientPreSeason.cshtml")
+                        </div>
+                        <div class="col-xs-12 rpt-loading">
+                            <i class="fa fa-spin fa-refresh"></i> Loading, please wait ...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section FormAction {
+    <ul id="sparks"></ul>
+}
+
+@section pagejs {
+    <script type="text/javascript">
+        var context = {
+            serviceUrl : '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/',
+            token: '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]',
+            season: '@CurrentSeason',
+            preSeason: '@PreSeason'
+        }
+    </script>
+    <script src="~/Views/MIMarginOverviewRpt/index.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/MIMarginOverviewRpt/Index/SaleByAccManager.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/MIMarginOverviewRpt/Index/SaleByAccManagerPreSeason.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/MIMarginOverviewRpt/Index/InvoiceByItem.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/MIMarginOverviewRpt/Index/MISaleByClient.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/MIMarginOverviewRpt/Index/SaleByCountry.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+
+    <script src="~/Angular/app/jsonService2.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/MIMarginOverviewRpt/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/MISaleByClientRpt/Widget/PiConfirmed.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}

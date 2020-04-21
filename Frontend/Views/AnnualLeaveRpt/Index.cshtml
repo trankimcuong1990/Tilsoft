@@ -1,0 +1,240 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    var pageSize = System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"];
+    var cookieID = HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString();
+
+    ViewBag.Title = "Search Annual Leave";
+    ViewBag.Module = "Annual Leave";
+
+    string userManualUrl = string.Empty;
+    if (System.IO.File.Exists(Server.MapPath("~/UserManual/" + ViewBag.ModuleCode + ".pdf")))
+    {
+        userManualUrl = "/UserManual/" + ViewBag.ModuleCode + ".pdf";
+    }
+}
+
+<div class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Search Result</h2>
+                <div class="widget-toolbar">
+                    <div class="smart-form">
+                        <div class="inline-group">
+                            <label class="radio">
+                                <input name="hasleft" type="radio" ng-model="filters.HasLeft" value="false" ng-change="event.refreshWorkCenter()">
+                                <i></i>Active
+                            </label>
+                            <label class="radio">
+                                <input name="hasleft" type="radio" ng-model="filters.HasLeft" value="true" ng-change="event.refreshWorkCenter()">
+                                <i></i>Not active
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            <div>
+                <div class="jarviswidget-editbox"></div>
+                <div class="widget-body">
+                    <div class="tilsoft-table-wrapper" avs-scroll grid-handler="gridHandler">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header" style="width:1200px">
+                                <div style="width: 101px">Found(s)<br /><strong style="color:blue">{{totalRows}}</strong>/<strong style="color:maroon">{{totalRows}}</strong></div>
+                                <div style="width: 150px">Company</div>
+                                <div style="width: 150px">Full Name</div>
+                                <div style="width: 80px">Year</div>
+                                <div style="width: 100px">Total days</div>
+                                <div style="width: 100px" class="sorting" data-colname="RequestedTimeOff">Taken</div>
+                                <div style="width: 100px">Available</div>
+                                <div style="width: 100px">Other Leave</div>
+                                <div></div>
+                            </div>
+                            <div class="tilsoft-table-filter" style="width:1200px">
+                                <div style="width: 101px">
+                                    <a href="javascript:void(0)" class="btn btn-{{isDefaultFilter ? 'default' : 'primary'}} btn-xs font-11" ng-click="event.refreshWorkCenter()"><i class="fa fa-filter"></i></a>
+                                    <a href="javascript:void(0)" class="btn btn-default btn-xs font-11" ng-click="event.clearFiltersWorkCenter()"><i class="fa fa-ban"></i></a>
+                                </div>
+                                <div style="width: 150px">
+                                    <select class="form-control search-filter" style="width: 100%" ng-model="filters.companyID" ng-options="company.companyID as company.companyNM for company in companies"></select>
+
+                                    @*<label class="select" style="width: 100%">
+                                    <select ui-select2 ng-model="filters.companyID" class="select2">
+                                        <option value=""></option>
+                                        <option ng-repeat="company in companies" value="{{company.companyID}}">{{company.companyNM}}</option>
+                                    </select>
+                                </label>*@
+
+                                </div>
+                                <div style="width: 150px">
+                                    <input type="text" class="form-control search-filter" ng-model="filters.employeeNM" />
+                                </div>
+                                <div style="width: 80px">
+                                    <select class="form-control search-filter" style="width: 100%" ng-model="filters.affectedYear" ng-options="affectedYear.id as affectedYear.name for affectedYear in affectedYears"></select>
+                                </div>
+                                <div style="width: 100px">
+
+                                </div>
+                                <div style="width: 100px">
+
+                                </div>
+                                <div style="width: 100px">
+
+                                </div>
+                                <div style="width: 100px">
+
+                                </div>
+                                <div></div>
+                            </div>
+                            <div class="tilsoft-table-body" style="width:1200px">
+                                <table>
+                                    <tr ng-repeat="item in data">
+                                        <td style="width: 100px; text-align: center">
+                                            <a href="javascript:void(0)" data-toggle="modal" data-target="#Detail" class="btn btn-default btn-xs font-11 btn-primary" ng-click="event.openDetail(item.employeeID, item.affectedYear)">Detail</a>
+                                        </td>
+                                        <td style="width: 150px">
+                                            <a href="@Url.Action("Edit", "CompanyBranchMng")/{{item.companyID}}" target="_blank">{{item.companyNM}}</a>
+                                        </td>
+                                        <td style="width: 150px; text-align: left">
+                                            <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.userID}}" dat data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                {{item.employeeNM}}
+                                            </a>
+                                        </td>
+                                        <td style="width: 80px; text-align:right">{{item.affectedYear}}</td>
+                                        <td style="width: 100px; text-align:right">{{item.totalAvailableDay}}</td>
+                                        <td style="width: 100px; text-align:right">{{item.requestedTimeOff}}</td>
+                                        <td style="width: 100px; text-align:right">{{item.totalAvailableDay - item.requestedTimeOff}}</td>
+                                        <td style="width: 100px; text-align:right">{{item.totalOtherLeave}}</td>
+                                        <td></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+<div class="modal fade" id="Detail" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel">Detail</h4>
+            </div>
+            <div class="modal-body">
+                <div class="tilsoft-table-wrapper" avs-scroll grid-handler="gridHandler">
+                    <div class="tilsoft-table">
+                        <div class="tilsoft-table-header">
+                            <div style="width: 230px">Employee</div>
+                            <div style="width: 150px">{{employeeNMDetail}}</div>
+                            <div style="width: 150px">{{companyNMDetail}}</div>
+                            <div></div>
+                        </div>
+                        <div class="tilsoft-table-body">
+                            <table>
+                                <tr ng-repeat="item in details">
+                                    <td style="width: 230px; text-align: left">
+                                        {{item.annualLeaveTypeNM}}
+                                    </td>
+                                    <td style="width: 150px; text-align: right">{{item.requestedTimeOff}}</td>
+                                    <td style="width: 150px; text-align: center">
+                                        <a href="javascript:void(0)" ng-hide="(item.annualLeaveTypeID == 0 || item.annualLeaveTypeID == 6)" data-toggle="modal" class="btn btn-default btn-xs font-11 btn-primary" data-target="#DetailHistory" ng-click="event.openDetailTotal(item.annualLeaveTypeID, item.annualLeaveTypeNM)">Detail</a>
+                                    </td>
+                                    <td></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Close
+                </button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+<div class="modal fade" id="DetailHistory" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel">{{employeeNMDetailTotal}} - {{typeDetailTotal}}</h4>
+            </div>
+            <div class="modal-body">
+                <div class="tilsoft-table-wrapper" avs-scroll grid-handler="gridHandler">
+                    <div class="tilsoft-table">
+                        <div class="tilsoft-table-header">
+                            <div style="width: 80px">From Date</div>
+                            <div style="width: 80px">To Date</div>
+                            <div style="width: 70px">Days Off</div>
+                            <div style="width: 150px">Leave Reason</div>
+                            <div style="width: 150px">Comment</div>
+                            <div></div>
+                        </div>
+                        <div class="tilsoft-table-body">
+                            <table>
+                                <tr ng-repeat="item in detailTotals">
+                                    <td style="width: 80px; text-align: center">{{item.fromDate}}</td>
+                                    <td style="width: 80px; text-align: center">{{item.toDate}}</td>
+                                    <td style="width: 70px; text-align: right">{{item.numberOfDays}}</td>
+                                    <td style="width: 150px;">{{item.remark}}</td>
+                                    <td style="width: 150px;">{{item.managerRemark}}</td>
+                                    <td></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Close
+                </button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+@section FormAction{
+<ul id="sparks">
+    <li class="sparks-info">
+        <a href="javascript:void(0)" class="btn btn-default" title="Search" ng-click="event.refreshWorkCenter()">
+            <i class="fa fa-search"></i>
+        </a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0)" class="btn btn-default" title="Refresh" ng-click="event.refreshWorkCenter()">
+            <i class="fa fa-refresh"></i>
+        </a>
+    </li>
+    @if (!string.IsNullOrEmpty(userManualUrl))
+    {
+        <li class="sparks-info">
+            <a target="_blank" href="@userManualUrl" class="btn btn-default" title="Help"><i class="fa fa-info"></i></a>
+        </li>
+    }
+</ul>
+}
+
+@section pagejs{
+    <script type="text/javascript">
+        var context = {
+            
+            serviceUrl: '@(serviceRoot)/api/AnnualLeaveRpt/',
+            token: '@token',
+            pageSize: '@pageSize',
+            cookieID: '@cookieID',
+            urlNewWorkCenter: '@Url.Action("Edit", "AnnualLeaveRpt")/'
+        };
+    </script>
+    <script type="text/javascript" src="~/Views/AnnualLeaveRpt/index.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Views/AnnualLeaveRpt/service.js?v=@guid"></script>
+}

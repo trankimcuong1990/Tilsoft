@@ -1,0 +1,133 @@
+﻿@{
+    if (ViewBag.ID == 0)
+    {
+        ViewBag.Title = "Create material";
+    }
+    else
+    {
+        ViewBag.Title = "Edit material";
+    }
+
+    ViewBag.Module = "Factory Material";
+}
+
+<form class="row" name="editForm">
+
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>General</h2>
+            </header>
+            <div>
+                <div class="widget-body">
+                    <div class="smart-form">
+                        <div class="row">
+                            <section class="col col-2">
+                                <label>Material Code</label>
+                                <input type="text" class="form-control" ng-model="data.factoryMaterialUD" />
+                            </section>
+
+                            <section class="col col-5">
+                                <label>VietNamese Material Name</label>
+                                <input type="text" class="form-control" ng-model="data.factoryMaterialNM" />
+                            </section>
+                            <section class="col col-5">
+                                <label>English Material Name</label>
+                                <input type="text" class="form-control" ng-model="data.factoryMaterialEnglishName" />
+                            </section>
+                        </div>
+
+                        <div class="row">
+                            <section class="col col-2">
+                                <label>Material Group</label>
+                                <select class="form-control" ng-model="data.factoryMaterialGroupID" ng-options="item.factoryMaterialGroupID as item.factoryMaterialGroupNM for item in factoryMaterialGroups | orderBy : 'factoryMaterialGroupNM'" name="factoryMaterialGroupID" required>
+                                    <option value=""></option>
+                                </select>
+                                <span class="help-block" ng-show="editForm.factoryMaterialGroupID.$error.required"><i class="fa fa-warning"></i>Material Group is required.</span>
+                            </section>
+                            
+                            <section class="col col-2">
+                                <label>Material Type</label>
+                                <select class="form-control" ng-model="data.factoryMaterialTypeID" ng-options="item.factoryMaterialTypeID as item.factoryMaterialTypeNM for item in factoryMaterialTypes | orderBy : 'factoryMaterialTypeNM'">
+                                    <option value=""></option>
+                                </select>
+                            </section>
+
+                            <section class="col col-3">
+                                <label>Material Color</label>
+                                <select class="form-control" ng-model="data.factoryMaterialColorID" ng-options="item.factoryMaterialColorID as item.factoryMaterialColorNM for item in factoryMaterialColors | orderBy : 'factoryMaterialColorNM'">
+                                    <option value=""></option>
+                                </select>
+                            </section>
+
+                            <section class="col col-1">
+                                <label>Unit</label>
+                                <select class="form-control" ng-model="data.unitID" ng-options="item.unitID as item.unitNM for item in units | orderBy : 'unitNM'">
+                                    <option value=""></option>
+                                </select>
+                            </section>
+                            
+                        </div>
+
+                        <div class="row">
+                            <section class="col col-lg-12">
+                                <div class="furnindo-image-editor">
+                                    <a href="javascript:void(0);" class="btn btn-primary" ng-click="event.addFactoryMaterialImage()">+</a>
+                                    <div class="img-item" ng-repeat="item in data.factoryMaterialImages">
+                                        <a data-featherlight="image" href="{{item.fileLocation}}">
+                                            <img style="width: 100%;" ng-src="{{item.thumbnailLocation}}">
+                                        </a>
+                                        <span title="Remove image" class="action" ng-click="event.removeFactoryMaterialImage($index)">x</span>
+                                    </div>
+                                    <div class="clear"></div>
+                                </div>
+                            </section>
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+
+</form>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "FactoryMaterial")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="#"  class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="event.update($event)"><i class="fa fa-save"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="#"  class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="Delete" style="color: #ff0000;" ng-click="event.delete($event)"><i class="fa fa-times"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script src="~/Angular/app/jsonService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/support/service.js?c=@System.Guid.NewGuid().ToString().Replace("-","")"></script>
+    <script type="text/javascript">
+        jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/factoryMaterial/';
+        jsonService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+        supportService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/factoryMaterial/';
+        supportService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+        var context = {
+            id: '@ViewBag.ID',
+            backUrl: '@Url.Action("Index", "FactoryMaterial")',
+            refreshUrl: '@Url.Action("Edit", "FactoryMaterial", new { id = UrlParameter.Optional })/',
+            errMsg: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED',
+        }
+    </script>
+    <script src="~/Angular/app/factoryMaterial/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/factoryMaterial/edit.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}
+

@@ -1,0 +1,157 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var pageSize = System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"];
+    var cookieID = HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString();
+    ViewBag.Title = "Search Transportation Service";
+    ViewBag.Module = "TransportationService";
+    ViewBag.Icon = "fa-bar-chart-o";
+}
+
+<form class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-search-filter" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-filter"></i> </span>
+                <h2>Search Results</h2>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div avs-scroll grid-handler="gridHandler" class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header">
+                                <div style="width:120px;vertical-align:middle;text-align:center">
+                                    Found(s)<br />
+                                    <strong style="color:maroon">
+                                        {{totalRows}} <font style="color:maroon; text-transform:none">row(s)</font>
+                                    </strong>
+                                </div>
+                                @*<div class="sorting" style="width:130px;vertical-align:middle;text-align:center" data-colname="TransportationServiceUD">Code</div>*@
+                                <div class="sorting" style="width:180px;vertical-align:middle;text-align:center" data-colname="TransportationServiceNM">Name</div>
+                                <div class="sorting" style="width:130px;vertical-align:middle;text-align:center" data-colname="PlateNumber">Plate number</div>
+                                <div class="sorting" style="width:180px;vertical-align:middle;text-align:center" data-colname="DriverName">Driver name</div>
+                                <div class="sorting" style="width:110px;vertical-align:middle;text-align:center" data-colname="MobileNumber">Mobile number</div>
+                                <div class="sorting" style="width:130px;vertical-align:middle;text-align:center">Remark</div>
+                                <div style="vertical-align:middle;text-align:center">More info</div>
+                            </div>
+                            <div class="tilsoft-table-filter" style="top: 50px">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>
+                                                <div style="width:120px;text-align:center;vertical-align:middle;border-right:solid 1px #ddd">
+                                                    <a href="javascript:void(0)" class="btn btn-{{isDefaultFilter?'default':'primary'}} btn-xs" title="Apply Filter" ng-click="event.refresh()"><i class="fa fa-filter"></i></a>
+                                                    <a href="javascript:void(0)" class="btn btn-default btn-xs" title="Clear Filter" ng-click="event.clear()"><i class="fa fa-ban"></i></a>
+                                                </div>
+                                            </th>
+                                            @*<th>
+                                                <div style="width:130px;text-align:center;vertical-align:middle;border-right:solid 1px #ddd">
+                                                    <input class="search-filter" style="text-align:center;font-weight:normal" type="text" maxlength="255" ng-model="filters.TransportationServiceUD" />
+                                                </div>
+                                            </th>*@
+                                            <th>
+                                                <div style="width:180px;text-align:center;vertical-align:middle;border-right:solid 1px #ddd">
+                                                    <input class="search-filter" style="text-align:left;font-weight:normal" type="text" maxlength="255" ng-model="filters.TransportationServiceNM" />
+                                                </div>
+                                            </th>
+                                            <th>
+                                                <div style="width:130px;text-align:center;vertical-align:middle;border-right:solid 1px #ddd">
+                                                    <input class="search-filter" style="text-align:left;font-weight:normal" type="text" maxlength="255" ng-model="filters.PlateNumber" />
+                                                </div>
+                                            </th>
+                                            <th>
+                                                <div style="width:180px;text-align:center;vertical-align:middle;border-right:solid 1px #ddd">
+                                                    <input class="search-filter" style="text-align:left;font-weight:normal" type="text" maxlength="255" ng-model="filters.DriverName" />
+                                                </div>
+                                            </th>
+                                            <th>
+                                                <div style="width:110px;text-align:center;vertical-align:middle;border-right:solid 1px #ddd">
+                                                    <input class="search-filter" style="text-align:left;font-weight:normal" type="text" maxlength="255" ng-model="filters.MobileNumber" />
+                                                </div>
+                                            </th>
+                                            <th >
+                                                <div style="width:130px;text-align:center;vertical-align:middle;border-right:solid 1px #ddd">
+                                                    
+                                                </div>
+                                            </th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                            <div class="tilsoft-table-body" style="margin-top: 95px">
+                                <table>
+                                    <tbody>
+                                        <tr ng-repeat="item in data">
+                                            <td style="width:120px;text-align:center;vertical-align:middle">
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current) == "disabled")
+                                                {
+                                                    <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "TransportationService" )/{{item.transportationServiceID}}" title="View (Read Only)"><i class="fa fa-folder-open"></i> View</a>
+                                                }
+                                                else
+                                                {
+                                                    <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "TransportationService" )/{{item.transportationServiceID}}" title="Edit" target="_blank"><i class="fa fa-pencil"></i> Edit</a>
+                                                }
+
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current) != "disabled")
+                                                {
+                                                    <a class="btn btn-danger btn-xs font-11" href="javascript:void(0)" ng-click="event.remove(item)" title="Delete"><i class="fa fa-times"></i> Delete</a>
+                                                }
+                                            </td>
+                                            @*<td style="width:130px;text-align:center;vertical-align:middle">{{item.transportationServiceUD}}</td>*@
+                                            <td style="width:180px;text-align:left;vertical-align:middle">{{item.transportationServiceNM}}</td>
+                                            <td style="width:130px;text-align:left;vertical-align:middle">{{item.plateNumber}}</td>
+                                            <td style="width:180px;text-align:left;vertical-align:middle">{{item.driverName}}</td>
+                                            <td style="width:110px;text-align:left;vertical-align:middle">{{item.mobileNumber}}</td>
+                                            <td style="width:130px;text-align:left;vertical-align:middle">{{item.remark}}</td>
+                                            <td style="text-align:left;vertical-align:middle">
+                                                <span class="box">
+                                                    <i class="fa fa-user"></i>
+                                                    <strong>Updated By</strong>:
+                                                    <a ng-if="item.updatedBy" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.updatedBy}}" dat data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                        {{item.updatorNM}}
+                                                    </a>
+                                                </span>
+                                                <span class="box"><i class="fa fa-calendar"></i> <strong>Updated Date</strong>: {{item.updatedDate}}</span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <span>Found: <b>{{totalRows}}</b> record(s).</span>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+@section FormAction {
+<ul id="sparks">
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default" title="Search" ng-click="event.refresh()"><i class="fa fa-search"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default" title="Refresh" ng-click="event.refresh()"><i class="fa fa-refresh"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a target="_blank" href="@Url.Action("Edit", "TransportationService" )/0" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="New"><i class="fa fa-file-o"></i></a>
+    </li>
+</ul>
+}
+
+@section pagejs {
+<script type="text/javascript">
+    var context = {
+        serviceUrl: '@(serviceRoot)/api/transportationservice/',
+        token: '@token',
+        pageSize: '@pageSize',
+        cookieID: '@cookieID'
+    }
+</script>
+<script type="text/javascript" src="~/Views/TransportationService/index.js?v=@guid"></script>
+<script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+<script type="text/javascript" src="~/Views/TransportationService/service.js?v=@guid"></script>
+}

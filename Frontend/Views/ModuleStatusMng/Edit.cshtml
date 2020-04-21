@@ -1,0 +1,98 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var supportServiceRoot = (System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"]);
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+
+    ViewBag.Title = (ViewBag.ID == 0) ? "Create Module Status" : "Edit Module Status";
+    ViewBag.SubTitle = (ViewBag.ID == 0) ? "Create" : "Edit";
+    ViewBag.Module = " Module Status";
+}
+
+<form name="editForm" class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>@(ViewBag.ID == 0 ? "Create Module Status" : "Edit Module Status")</h2>
+            </header>
+            <div>
+                <div class="jarviswidget-editbox"></div>
+                <div class="widget-body">
+                    <div class="smart-form">
+                        <div class="row">
+                            <section class="col col-sm-2">
+                                <label class="label">Module</label>
+                                <label class="input">
+                                    <select id="moduleID" style="font-family: Arial; font-size: 12px; height: 30px" ng-model="data.moduleID" ng-options="moduleItem.moduleID as moduleItem.displayText for moduleItem in modules">
+                                        <option value=""></option>
+                                    </select>
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label class="label">Module Status NO</label>
+                                <label class="input">
+                                    <input type="text" class="form-control" style="font-family: Arial" ng-model="data.statusUD" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label class="label">Module Status Name</label>
+                                <label class="input">
+                                    <input type="text" class="form-control" style="font-family: Arial" ng-model="data.statusNM" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label></label>
+                                <br />
+                                <label>Active</label>
+                                <span class="onoffswitch">
+                                    <input name="onoffswitch" class="onoffswitch-checkbox" id="myonoffswitch" type="checkbox" ng-model="data.isActived" />
+                                    <label class="onoffswitch-label" for="myonoffswitch"> <span class="onoffswitch-inner" data-swchon-text="YES" data-swchoff-text="NO"></span> <span class="onoffswitch-switch"></span> </label>
+                                </span>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+@section FormAction{
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "ModuleStatusMng")" class="btn btn-default" title="Back">
+                <i class="fa fa-arrow-left"></i>
+            </a>
+        </li>
+        @*<li class="sparks-info" ng-show="data.purchaseOrderStatusID != 3 && data.purchaseOrderStatusID != 4 && data.purchaseOrderStatusID != 5">
+                <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current))" ng-disabled="data.purchaseOrderID == null || data.purchaseOrderID == 0" title="Delete" ng-click="event.del(data.purchaseOrderID)">
+                    <i class="fa fa-times"></i>
+                </a>
+            </li>*@
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Lưu" ng-click="event.update()">
+                <i class="fa fa-floppy-o"></i>
+            </a>
+        </li>
+    </ul>
+}
+
+@section pagejs{
+    <script type="text/javascript">
+        var context = {
+        id: @ViewBag.ID,
+        backUrl: '@Url.Action("Index", "ModuleStatusMng")',
+        refreshUrl: '@Url.Action("Edit", "ModuleStatusMng", new { id = UrlParameter.Optional })/',
+        serviceUrl: '@(serviceRoot)/api/module-status/',
+        supportServiceUrl: '@(supportServiceRoot)/api/support/',
+        token: '@token',
+        msgValid: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED',
+        backendReportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]'
+        };
+    </script>
+    <script type="text/javascript" src="~/Views/ModuleStatusMng/edit.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Views/ModuleStatusMng/service.js?v=@guid"></script>
+}

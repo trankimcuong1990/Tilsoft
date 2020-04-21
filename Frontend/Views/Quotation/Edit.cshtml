@@ -1,0 +1,353 @@
+﻿@{
+    if (ViewBag.ID == 0)
+    {
+        ViewBag.Title = "Create New Quotation";
+    }
+    else
+    {
+        ViewBag.Title = "Edit Quotation";
+    }
+
+    ViewBag.Module = "Quotation";
+    int factoryID = 0;
+    string orders = string.Empty;
+    string season = string.Empty;
+
+    if (Request.Params["f"] != null)
+    {
+        factoryID = Convert.ToInt32(Request.Params["f"]);
+    }
+    if (Request.Params["o"] != null)
+    {
+        orders = Request.Params["o"].ToString();
+    }
+    if (Request.Params["s"] != null)
+    {
+        season = Request.Params["s"].ToString();
+    }
+}
+
+
+<form class="row" name="editForm" id="main-form">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-product-information" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <ul class="nav nav-tabs pull-left in">
+                    <li class="active">
+                        <a data-toggle="tab" href="#tabGeneral"> <span> General </span> </a>
+                    </li>
+                    <li>
+                        <a data-toggle="tab" href="#tabOffer"> <span> Offers </span> </a>
+                    </li>
+                    <li>
+                        <a data-toggle="tab" href="#tabTracking"> <i class="fa fa-history"></i> <span> Tracking </span> </a>
+                    </li>
+                </ul>
+            </header>
+            <div>
+                <div class="widget-body">
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="tabGeneral">
+                            <div class="smart-form">
+                                <fieldset>
+                                    <div class="row">
+                                        <section class="col col-4">
+                                            <label class="label">Quotation No</label>
+                                            <label class="input">
+                                                <span class="form-control">{{data.quotationUD}}</span>
+                                            </label>
+                                        </section>
+                                        <section class="col col-4">
+                                            <label class="label">Season</label>
+                                            <label class="input">
+                                                <span class="form-control">{{data.season}}</span>
+                                            </label>
+                                        </section>
+                                        <section class="col col-4">
+                                            <label class="label">Factory</label>
+                                            <label class="input">
+                                                <span class="form-control">{{data.factoryUD}}</span>
+                                            </label>
+                                        </section>                                     
+                                    </div>
+                                    <div class="row">
+                                        <section class="col col-6">
+                                            <label class="label">Delivery Term</label>
+                                            <label class="select">
+                                                <select ng-model="data.deliveryTermID" ng-options="deliveryTerm.deliveryTermID as deliveryTerm.deliveryTermNM for deliveryTerm in deliveryTerms">
+                                                    <option value=""></option>
+                                                </select>
+                                                <i></i>
+                                            </label>
+                                        </section>
+                                        <section class="col col-6">
+                                            <label class="label">Payment Term</label>
+                                            <label class="select">
+                                                <select ng-model="data.paymentTermID" ng-options="paymentTerm.paymentTermID as paymentTerm.paymentTermNM for paymentTerm in paymentTerms">
+                                                    <option value=""></option>
+                                                </select>
+                                                <i></i>
+                                            </label>
+                                        </section>
+                                    </div>
+                                    <div class="row" style="padding: 15px;">
+                                        <a ng-click="event.openApplyDifferenceCodeForm()" title="Apply difference code for all item" href="javascript:void(0)" class="btn btn-primary btn-xs font-11 ng-scope" style="margin-bottom: 10px;"><i class="fa fa-pencil"></i> Apply difference code for all item</a>
+                                        <div ui-grid="grdQuotationDetail" class="grid" style="width: 100%; height: 500px;" ui-grid-resize-columns ui-grid-pinning ui-grid-cellnav></div>
+                                    </div>
+                                </fieldset>
+                            </div>
+                            <div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="frmEditQuotation" class="modal fade" style="display: none;">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button aria-hidden="true" data-dismiss="modal" class="close" type="button">
+                                                ×
+                                            </button>
+                                            <h4 id="myModalLabel" class="modal-title">Edit quotation detail</h4>
+                                        </div>
+                                        <div class="modal-body smart-form">
+                                            <fieldset>
+                                                <div class="row">
+                                                    <section class="col col-12">
+                                                        <label class="label">Art.Code</label>
+                                                        <label class="input">
+                                                            <span class="form-control">{{selectedQuotationDetail.articleCode}}</span>
+                                                        </label>
+                                                    </section>
+                                                    <section class="col col-12">
+                                                        <label class="label">Description</label>
+                                                        <label class="input">
+                                                            <span class="form-control">{{selectedQuotationDetail.description}}</span>
+                                                        </label>
+                                                    </section>
+                                                    <section class="col col-3">
+                                                        <label class="label">Status</label>
+                                                        <label class="select">
+                                                            <select ng-model="selectedQuotationDetailUpdateValue.statusID" ng-options="quotationStatus.quotationStatusID as quotationStatus.quotationStatusNM for quotationStatus in quotationStatuses">
+                                                                <option value=""></option>
+                                                            </select>
+                                                            <i></i>
+                                                        </label>
+                                                    </section>
+                                                    <section class="col col-3">
+                                                        <label class="label">Difference</label>
+                                                        <label class="select">
+                                                            <select ng-model="selectedQuotationDetailUpdateValue.priceDifferenceCode" ng-options="priceDifference.priceDifferenceUD as priceDifference.priceDifferenceUD for priceDifference in priceDifferences">
+                                                                <option value=""></option>
+                                                            </select>
+                                                            <i></i>
+                                                        </label>
+                                                    </section>
+                                                    <section class="col col-3">
+                                                        <label class="label">Order</label>
+                                                        <label class="input">
+                                                            <span class="form-control">{{selectedQuotationDetail.factoryOrderUD}}</span>
+                                                        </label>
+                                                    </section>
+                                                    <section class="col col-3">
+                                                        <label class="label">LDS</label>
+                                                        <label class="input">
+                                                            <span class="form-control">{{selectedQuotationDetail.lds}}</span>
+                                                        </label>
+                                                    </section>
+                                                    <section class="col col-3">
+                                                        <label class="label">Client</label>
+                                                        <label class="input">
+                                                            <span class="form-control">{{selectedQuotationDetail.clientUD}}</span>
+                                                        </label>
+                                                    </section>
+                                                </div>
+                                                <div class="row">
+                                                    <section class="col col-3">
+                                                        <label class="label">Old Price</label>
+                                                        <label class="input">
+                                                            <input type="text" ng-model="selectedQuotationDetail.oldPrice" style="text-align: right;" />
+                                                        </label>
+                                                    </section>
+                                                    <section class="col col-3">
+                                                        <label class="label">Purchasing</label>
+                                                        <label class="input">
+                                                            <span class="form-control" style="text-align: right;">{{selectedQuotationDetail.purchasingPrice}}</span>
+                                                        </label>
+                                                    </section>
+                                                    <section class="col col-3">
+                                                        <label class="label">Sale</label>
+                                                        <label class="input">
+                                                            <span class="form-control" style="text-align: right;">{{selectedQuotationDetail.salePrice}}</span>
+                                                        </label>
+                                                    </section>
+                                                    <section class="col col-3">
+                                                        <label class="label">Target</label>
+                                                        <label class="input">
+                                                            <span class="form-control" style="text-align: right;">{{selectedQuotationDetail.targetPrice}}</span>
+                                                        </label>
+                                                    </section>
+                                                </div>
+                                                <div class="row">
+                                                    <section class="col col-4">
+                                                        <label class="label">Sale price adjustment</label>
+                                                        <label class="input">
+                                                            <input class="control" style="text-align: right;" ng-model="selectedQuotationDetailUpdateValue.salePrice" />
+                                                        </label>
+                                                    </section>
+                                                    <section class="col col-8">
+                                                        <label class="label">Offer remark</label>
+                                                        <label class="input">
+                                                            <input class="control" ng-model="selectedQuotationDetail.remark" />
+                                                        </label>
+                                                    </section>
+                                                </div>
+                                            </fieldset>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button data-dismiss="modal" class="btn btn-default" type="button">
+                                                Cancel
+                                            </button>
+                                            <button class="btn btn-primary" type="button" ng-click="event.updateQuotationDetail()">
+                                                OK
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- popup apply difference code for all item -->
+                            <div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="frmApplyDifferenceCodeAllItem" class="modal fade" style="display: none;">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button aria-hidden="true" data-dismiss="modal" class="close" type="button">
+                                                ×
+                                            </button>
+                                            <h4 id="myModalLabel" class="modal-title">Select difference code to apply for all items</h4>
+                                        </div>
+                                        <div class="modal-body smart-form">
+                                            <fieldset>
+                                                <div class="row">
+                                                    <section class="col col-6">
+                                                        <label class="label">Difference</label>
+                                                        <label class="select">
+                                                            <select ng-model="applyDifferenceCodeForm.data.priceDifferenceCode" ng-options="priceDifference.priceDifferenceUD as priceDifference.priceDifferenceUD for priceDifference in priceDifferences">
+                                                                <option value=""></option>
+                                                            </select>
+                                                            <i></i>
+                                                        </label>
+                                                    </section>
+                                                </div>
+                                            </fieldset>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button data-dismiss="modal" class="btn btn-default" type="button">
+                                                Cancel
+                                            </button>
+                                            <button class="btn btn-primary" type="button" ng-click="event.onApplyDifferenceCodeFormOK()">
+                                                OK
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- //popup apply difference code for all item -->
+                        </div>
+                        <div class="tab-pane" id="tabOffer">
+                            <div class="smart-form">
+                                <fieldset>
+                                    <div class="row" style="padding: 15px; padding-bottom: 0px;">
+                                        <div style="width: 49%; float: left;">
+                                            <a class="btn btn-primary btn-xs font-11" style="margin-bottom: 15px;" href="javascript:void(0)" ng-click="event.onGetFactoryQuotation()"><i class="fa fa-sign-out"></i> Export Factory</a>
+                                            <a class="btn btn-primary btn-xs font-11" style="margin-bottom: 15px;" href="javascript:void(0)" ng-click="event.onImportFactoryPrice()"><i class="fa fa-sign-in"></i> Import Factory</a>
+                                        </div>
+                                        <div style="width: 49%; float: right; text-align: right;">
+                                            <a class="btn btn-success btn-xs font-11" style="margin-bottom: 15px;" href="javascript:void(0)" ng-click="event.onGetEurofarQuotation()"><i class="fa fa-sign-out"></i> Export Eurofar</a>
+                                            <a class="btn btn-success btn-xs font-11" style="margin-bottom: 15px;" href="javascript:void(0)" ng-click="event.onImportEurofarPrice()"><i class="fa fa-sign-in"></i> Import Eurofar</a>
+                                        </div>
+                                        <div class="clear"></div>
+                                    </div>                                    
+                                    <div class="row" style="padding: 15px; padding-top: 0px;">
+                                        <div ui-grid="grdQuotationOffer" class="grid" style="width: 100%; height: 200px;" ui-grid-resize-columns ui-grid-pinning ui-grid-cellnav></div>
+                                    </div>
+                                    <div class="row" style="padding: 15px;">
+                                        <div ui-grid="grdQuotationOfferDetail" class="grid" style="width: 100%; height: 500px;" ui-grid-resize-columns ui-grid-pinning ui-grid-edit ui-grid-cellnav></div>
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="tabTracking">
+                            <div class="smart-form">
+                                <fieldset>
+                                    <div class="row">
+                                        <section class="col col-3">
+                                            <label class="label">Updated By</label>
+                                            <label class="input">
+                                                <span class="form-control">
+                                                    <a ng-show="(data.updatedBy!=null && data.updatorName2!=null)" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{data.updatedBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                        <i class="fa fa-user"></i> {{data.updatorName2}}
+                                                    </a>
+                                                    <span ng-show="(data.updatedBy!=null && data.updatorName2==null && data.updatorName!=null)">{{data.updatorName}}</span>
+                                                </span>
+                                            </label>
+                                        </section>
+                                        <section class="col col-3">
+                                            <label class="label">Updated Date</label>
+                                            <label class="input">
+                                                <span class="form-control">{{data.updatedDate}}</span>
+                                            </label>
+                                        </section>
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "Quotation")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="event.update($event)" ng-disabled="data.isConfirmed"><i class="fa fa-save"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default@(ViewBag.ID==0?" disabled":"") @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="Delete" style="color: #ff0000;" ng-click="event.delete($event)" ng-disabled="data.isConfirmed"><i class="fa fa-times"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default" title="Print"><i class="fa fa-print"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Approve, HttpContext.Current))" title="Approve" ng-click="event.approve($event)" ng-disabled="data.isConfirmed || @ViewBag.ID == 0"><i class="fa fa-thumbs-o-up"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Reset, HttpContext.Current))" title="Reset Approval status" ng-click="event.reset($event)" ng-disabled="!data.isConfirmed || @ViewBag.ID == 0"><i class="fa fa-thumbs-o-down"></i></a>
+        </li>
+    </ul>
+}
+@section pagejs {
+    <script src="~/Angular/app/jsonService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script type="text/javascript">
+    jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/quotation/';
+    jsonService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+        jsonService.supportServiceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/support/';
+
+        var context = {
+            id: @ViewBag.ID,
+        factoryid: @factoryID,
+        orders: jQuery.parseJSON('@orders'),
+        season: '@season',
+        backUrl: '@Url.Action("Index", "Quotation")',
+        refreshUrl: '@Url.Action("Edit", "Quotation", new { id = UrlParameter.Optional })/',
+        errMsg: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED',
+        currentDate: '@DateTime.Now.ToString("dd/MM/yyyy")',
+        currentUserId: @(((Frontend.APIDTO.APIUserInformation)Session[Frontend.Customize.Common.ProjectDefinition.USER_INFO_SESSION]).Data.UserId),
+        currentUserNm: '@(((Frontend.APIDTO.APIUserInformation)Session[Frontend.Customize.Common.ProjectDefinition.USER_INFO_SESSION]).Data.FullName)',
+        backendReportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]',
+        viewUrl: '@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })'
+    }
+    </script>
+    <script src="~/Angular/app/quotation/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/quotation/edit.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}

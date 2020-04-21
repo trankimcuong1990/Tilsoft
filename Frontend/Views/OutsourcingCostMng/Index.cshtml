@@ -1,0 +1,142 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var pageSize = System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"];
+    var cookieID = HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString();
+    ViewBag.Title = "Search Outsource Cost";
+    ViewBag.Module = "OutsourceCostMng";
+    ViewBag.Icon = "fa-bar-chart-o";
+}
+
+<form class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-search-filter" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-filter"></i> </span>
+                <h2>Search Results</h2>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div avs-scroll grid-handler="gridHandler" class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header">
+                                <div style="width:120px;vertical-align:middle;text-align:center">Found(s)<br /><strong style="color:maroon">{{totalRows}}</strong></div>
+                                <div class="sorting" style="width:130px;vertical-align:middle;text-align:center" data-colname="OutsourcingCostUD">Code</div>
+                                <div class="sorting" style="width:300px;vertical-align:middle;text-align:center" data-colname="OutsourcingCostNM">Name</div>
+                                <div class="sorting" style="width:300px;vertical-align:middle;text-align:center" data-colname="OutsourcingCostNMEN">Name EN</div>
+                                <div class="sorting" style="width:120px;vertical-align:middle;text-align:center" data-colname="WorkCenterID">Work center</div>
+                                <div class="sorting" style="width:100px;vertical-align:middle;text-align:center" data-colname="IsAdditionalCost">Additional</div>
+                                <div>Remark</div>
+                            </div>
+                            <div class="tilsoft-table-filter" style="top: 50px">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>
+                                                <div style="width:120px;text-align:center;vertical-align:middle;border-right:solid 1px #ddd">
+                                                    <a href="javascript:void(0)" class="btn btn-{{isDefaultFilter?'default':'primary'}} btn-xs" title="Apply Filter" ng-click="event.refresh()"><i class="fa fa-filter"></i></a>
+                                                    <a href="javascript:void(0)" class="btn btn-default btn-xs" title="Clear Filter" ng-click="event.clear()"><i class="fa fa-ban"></i></a>
+                                                </div>
+                                            </th>
+                                            <th>
+                                                <div style="width:130px;text-align:center;vertical-align:middle; border-right:solid 1px #ddd">
+                                                    <input class="search-filter" style="text-align:center;font-weight:normal" type="text" maxlength="5" ng-model="filters.OutsourcingCostUD" />
+                                                </div>
+                                            </th>
+                                            <th>
+                                                <div style="width:300px; text-align:center;vertical-align:middle; border-right:solid 1px #ddd">
+                                                    <input class="search-filter" style="text-align:left;float:left;width:100%;font-weight:normal" type="text" maxlength="255" ng-model="filters.OutsourcingCostNM" />
+                                                </div>
+                                            </th>
+                                            <th>
+                                                <div style="width:300px; text-align:center;vertical-align:middle; border-right:solid 1px #ddd">
+                                                    <input class="search-filter" style="text-align:left;float:left;width:100%;font-weight:normal" type="text" maxlength="255" ng-model="filters.OutsourcingCostNMEN" />
+                                                </div>
+                                            </th>
+                                            <th>
+                                                <div style="width:120px; text-align:center;vertical-align:middle; border-right:solid 1px #ddd">
+                                                    <select class="form-control search-filter" ng-model="filters.WorkCenterID" ng-options="workCenter.workCenterID as workCenter.workCenterNM for workCenter in workCenters">
+                                                        <option value=""></option>
+                                                    </select>
+                                                </div>
+                                            </th>
+                                            <th>
+                                                <div style="width:100px; text-align:center;vertical-align:middle;border-right:solid 1px #ddd">
+                                                    <select class="form-control search-filter" ng-model="filters.IsAdditionalCost">
+                                                        <option value=""></option>
+                                                        <option value="true">YES</option>
+                                                        <option value="false">NO</option>
+                                                    </select>
+                                                </div>
+                                            </th>
+                                            <th style="width:100px;"></th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                            <div class="tilsoft-table-body" style="margin-top: 95px">
+                                <table>
+                                    <tbody>
+                                        <tr ng-repeat="item in data">
+                                            <td style="width:119px;text-align:center;vertical-align:middle">
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current) == "disabled")
+                                                {
+                                                    <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "OutsourcingCostMng")/{{item.outsourcingCostID}}" title="View (Read Only)"><i class="fa fa-folder-open"></i> View</a>
+                                                }
+                                                else
+                                                {
+                                                    <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "OutsourcingCostMng")/{{item.outsourcingCostID}}" title="Edit" target="_blank"><i class="fa fa-pencil"></i> Edit</a>
+                                                }
+
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current) != "disabled")
+                                                {
+                                                    <a class="btn btn-danger btn-xs font-11" href="javascript:void(0)" ng-click="event.remove(item)" title="Delete"><i class="fa fa-times"></i> Delete</a>
+                                                }
+                                            </td>
+                                            <td style="width:130px;text-align:center;vertical-align:middle">{{item.outsourcingCostUD}}</td>
+                                            <td style="width:300px;text-align:left;vertical-align:middle">{{item.outsourcingCostNM}}</td>
+                                            <td style="width:300px;text-align:left;vertical-align:middle">{{item.outsourcingCostNMEN}}</td>
+                                            <td style="width:120px;text-align:left;vertical-align:middle">{{item.workCenterNM}}</td>
+                                            <td style="width:100px;text-align:center;vertical-align:middle"><label ng-class="item.isAdditionalCost == true ? 'fa fa-check' : 'label'"></label></td>
+                                            <td></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <span>Found: <b>{{totalRows}}</b> record(s).</span>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Search" ng-click="event.refresh()"><i class="fa fa-search"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Refresh" ng-click="event.clear()"><i class="fa fa-refresh"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="@Url.Action("Edit", "OutsourcingCostMng")/0" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="New" target="_blank"><i class="fa fa-file-o"></i></a>
+        </li>      
+    </ul>
+}
+
+@section pagejs {
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(serviceRoot)/api/outsourcingcostmng/',
+            token: '@token',
+            pageSize: '@pageSize',
+            cookieID: '@cookieID'
+        }
+    </script>
+    <script type="text/javascript" src="~/Views/OutsourcingCostMng/index.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Views/OutsourcingCostMng/service.js?v=@guid"></script>
+}

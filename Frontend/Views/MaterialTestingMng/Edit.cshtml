@@ -1,0 +1,251 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var supportServiceRoot = (System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"]);
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+
+    ViewBag.Title = (ViewBag.ID == 0) ? "Create Material Testing" : "Edit Material Testing";
+    ViewBag.SubTitle = (ViewBag.ID == 0) ? "Create" : "Edit";
+    ViewBag.Module = " Material Testing ";
+}
+
+<form name="editForm" class="row">
+<article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+    <div class="jarviswidget" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+        <header>         
+            <ul class="nav nav-tabs pull-left in">
+                <li class="active">
+                    <a data-toggle="tab" href="#tabGeneral" name="gtab"> <span>@(ViewBag.ID == 0 ? "Create Material Testing" : "Edit Material Testing") </span> </a>
+                </li>                            
+            </ul>
+        </header>
+        <div>
+            <div class="jarviswidget-editbox"></div>
+            <div class="widget-body">
+                <div class="tab-content">
+                    <div class="tab-pane active" id="tabGeneral">
+                        <div class="smart-form">
+                            <div class="row">
+                                <section class="col col-sm-2">
+                                    <label class="label">
+                                        <label>Test Code</label>
+                                    </label>
+                                    <label class="input">
+                                        <input type="text" class="form-control" ng-model="data.materialTestReportUD" name="materialTestReportUD" readonly />
+                                    </label>
+                                </section>
+                                <section class="col col-sm-3">
+                                    <label class="label">
+                                        <label>Material Option</label>
+                                        <em class="note note-error" ng-show="editForm.materialOptionNM.$error.required"> (Required)</em>
+                                    </label>
+                                    <label class="input">
+                                        <span class="form-control" ng-if="data.materialTestReportID != null && data.materialTestReportID != 0">{{data.materialOptionNM}}</span>
+                                        <input type="text" class="form-control" name="materialOptionNM" required style="font-family:Arial" avs-remote-auto-complete ng-request-param="ngRequestMaterialOption" ng-init-param="data.materialOptionNM" ng-model="data.materialOptionNM" ng-item-value="materialOption" ng-item-selected="event.selectMaterialOption(materialOption)" data-method="POST" data-format-function="formatData" ng-if="data.materialTestReportID == 0 || data.materialTestReportID == null" />
+                                    </label>
+                                </section>
+                                <section class="col col-sm-2">
+                                    <label class="label">Client</label>
+                                    <label class="input">
+                                        <span class="form-control" ng-if="data.materialTestReportID != null && data.materialTestReportID != 0">{{data.clientUD}}</span>
+                                        <input type="text" class="form-control" id="client" name="clientName" ng-model="data.clientUD" ng-if="data.materialTestReportID == 0 || data.materialTestReportID == null" />
+                                    </label>
+                                </section>
+                                <section class="col col-sm-2">
+                                    <label class="label">Test Date</label>
+                                    <label class="input-group">
+                                        <input type="text" class="form-control" style="font-family:Arial" avs-calendar ng-data-source="data.testDate" />
+                                        <span class="input-group-addon">
+                                            <i class="fa fa-calendar"></i>
+                                        </span>
+                                    </label>
+                                </section>
+                                <section class="col col-sm-3">
+                                    <label class="label">Remark</label>
+                                    <label class="input">
+                                        <input type="text" ng-model="data.remark" />
+                                    </label>
+                                </section>
+                            </div> 
+                            <section>
+                                <div class="note">
+                                    <strong>Updated By</strong>
+                                    <a ng-show="(data.updatedBy != null && data.updaterName != null)" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{data.updatedBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                        <i class="fa fa-user"></i> {{data.updaterName}}
+                                    </a>
+                                    <span ng-show="(data.updatedBy != null && data.updatorName == null)"> <i class="fa fa-user"></i> {{data.updatorName}}</span>
+                                    on {{data.updatedDate}}
+                                </div>
+                            </section>
+                            <div class="row">
+                                <section class="col col-sm-6">                    
+                                    <header style="border-top:none; background:none; border-bottom: solid 0px #ddd">
+                                        <a href="javascrip:void(0)" class="btn btn-primary btn-sm"  ng-click="event.addTestfile()" style="width:78px;height:28px"><i class="fa fa-plus"></i> Add File</a>
+                                    </header>
+                                    <div>
+                                    <label></label>
+                                    </div>
+                                    <div class="widget-body">
+                                        <div id="searchResult" class="tilsoft-table-wrapper">
+                                            <div class="tilsoft-table">
+                                                <div class="tilsoft-table-body" style="width:100%; max-width:880px; overflow-y:auto; height:auto; min-height:100px; margin-top:0px">
+                                                    <table>
+                                                        <tbody>
+                                                            <tr>
+                                                                <th style="width:90px"></th>
+                                                                <th style="width:300px">File</th>
+                                                                <th>Remark</th>
+                                                            </tr>
+                                                            <tr ng-repeat="item in data.materialTestReportFileDTOs">
+                                                                <td style="text-align:center; width:85px">
+                                                                    <a href="javascrip:void(0)" class="btn btn-primary btn-xs font-11" ng-click="event.editTestfile(item)"><i class="fa fa-pencil"></i> Edit</a>
+                                                                    <a href="javascrip:void(0)" class="btn btn-danger btn-xs font-11" ng-click="event.removeTestfile(item)"><i class="fa fa-times"></i> Del</a>
+                                                                </td>
+                                                                <td style="width:300px">
+                                                                    <a href="{{item.scanFileLocation}}" target="_blank">{{item.friendlyName}}</a>
+                                                                </td>
+                                                                <td>{{item.remark}}</td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+                                <section class="col col-sm-6">
+                                    <header style="border-top:none; background:none; border-bottom: solid 0px #ddd">
+                                        <div class="row">
+                                            <section class="col col-5">
+                                                <select class="select2" id="materialStandard">
+                                                    <option value=""></option>
+                                                    <option ng-repeat="option in materialTestStandards" value="{{option.testStandardID}}">{{option.testStandardNM}}</option>
+                                                </select>
+                                            </section>
+                                            <section class="col col-1">
+                                                <a style="text-align: left" href="javascript:void(0)" class="btn btn-primary btn-sm" ng-click="event.addTestStandard()"><i class="fa fa-plus"></i> Add</a>
+                                            </section>
+                                        </div>
+                                    </header>
+                                    <div class="widget-body">
+                                        <div class="tilsoft-table-wrapper">
+                                            <div class="tilsoft-table">
+                                                <div class="tilsoft-table-body" style="width:100%; max-width:880px; overflow-y:auto; height:auto; min-height:100px; margin-top:0px">
+                                                    <table>
+                                                        <tbody>
+                                                            <tr>
+                                                                <th style="width:80px;">&nbsp;</th>
+                                                                <th style="text-align:center">Test Standard</th>
+                                                            </tr>
+                                                            <tr ng-repeat="item in data.materialTestStandardDTOs">
+                                                                <td style="text-align: center; width:80px"><a href="javascript:void(0)" class="btn btn-danger btn-xs" ng-click="event.removeTestStandard(item)"><i class="fa fa-times"></i> Remove</a></td>
+                                                                <td>{{item.testStandardNM}}</td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+                            </div>
+                        </div>
+                    </div>  
+
+                    <div id="testFileForm" class="modal fade" role="dialog" aria-labelledby="myModalLable" aria-hidden="true" data-backdrop="static">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                                        &times;
+                                    </button>
+                                    <h4 class="modal-title" id="myModalLable">Test File</h4>
+                                </div>
+                                <div class="modal-body no-padding">
+                                    <div class="smart-form">
+                                        <fieldset>
+                                            <div class="row">
+                                                <section class="col col-lg-12">
+                                                    <label class="label">Scan File</label>
+                                                    <label class="input">
+                                                        <span class="form-control">
+                                                            <div style="position:absolute; right:5px; top:5px">
+                                                                {{currenTDfile.friendlyName}}
+                                                                <a ng-click="event.addTestScanFile()" class="btn btn-primary btn-xs font-11" href="javascrip:void(0)"><i class="fa fa-pencil">Change</i></a>
+                                                                <a target="_blank" ng-if="currenTDfile.scanFileLocation != null" class="btn btn-default btn-xs font-11" href="{{currenTDfile.scanFileLocation}}"><i class="fa fa-download"></i>DownLoad</a>
+                                                            </div>
+                                                        </span>
+                                                    </label>
+                                                </section>
+                                            </div>
+                                        </fieldset>
+                                        <fieldset>
+                                            <div class="row">
+                                                <section class="col col-10">
+                                                    <label class="label">Remark</label>
+                                                    <label class="textarea">
+                                                        <textarea rows="5" ng-model="currenTDfile.remark"></textarea>
+                                                    </label>
+                                                </section>
+                                            </div>
+                                        </fieldset>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-primary" ng-click="event.updateTestfile(currenTDfile)">
+                                        OK
+                                    </button>
+
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>                   
+                </div>
+            </div>
+    </div>
+  </div>
+</article>
+</form>
+
+@section FormAction{
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "MaterialTestingMng")" class="btn btn-default" title="Back">
+                <i class="fa fa-arrow-left"></i>
+            </a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current))" title="Delete" ng-click="event.del(data.materialTestReportID)">
+                <i class="fa fa-times"></i>
+            </a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="event.update()">
+                <i class="fa fa-floppy-o"></i>
+            </a>
+        </li>        
+    </ul>
+}
+
+@section pagejs{
+    <script type="text/javascript">
+    var context = {
+    id: @ViewBag.ID,
+    backUrl: '@Url.Action("Index", "MaterialTestingMng")',
+    refreshUrl: '@Url.Action("Edit", "MaterialTestingMng", new { id = UrlParameter.Optional })/',
+    serviceUrl: '@(serviceRoot)/api/materialTestingMng/',
+    supportServiceUrl: '@(supportServiceRoot)/api/support/',
+    token: '@token',
+    msgValid: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED'
+
+};
+    </script>
+    <script type="text/javascript" src="~/Views/MaterialTestingMng/edit.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Views/MaterialTestingMng/service.js?v=@guid"></script>
+}
+
+

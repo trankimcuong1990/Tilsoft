@@ -1,0 +1,299 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    var supportServiceRoot = (System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"]);
+
+    ViewBag.Title = (ViewBag.ID == 0) ? "Create Purchase Quotation" : "Edit Purchase Quotation";
+    ViewBag.SubTitle = (ViewBag.ID == 0) ? "Create" : "Edit";
+    ViewBag.Module = "Purchase Quotation";
+
+    string userManualUrl = string.Empty;
+    if (System.IO.File.Exists(Server.MapPath("~/UserManual/" + ViewBag.ModuleCode + ".pdf")))
+    {
+        userManualUrl = "/UserManual/" + ViewBag.ModuleCode + ".pdf";
+    }
+}
+<form name="editForm" class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+
+        <div class="jarviswidget jarviswidget-color-darken" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>@(ViewBag.ID == 0 ? "Create Purchase Quotation" : "Edit Purchase Quotation")</h2>
+            </header>
+            <div>
+                <div class="jarviswidget-editbox"></div>
+                <div class="widget-body">
+                    <div class="smart-form">
+                        <fieldset>
+                            <div class="row">
+                                <section class="col col-sm-2">
+                                    <label class="label">Quotation No</label>
+                                    <label class="input">
+                                        <span class="form-control">{{data.purchaseQuotationUD}}</span>
+                                    </label>
+                                </section>
+
+                                <section class="col col-sm-2">
+                                    <label class="label">Supplier</label>
+                                    <label class="input" ng-show="!data.isApproved">
+                                        <select avs-select id="supplier" name="supplier" ng-data-source="data.factoryRawMaterialID">
+                                            <option value=""></option>
+                                            <option ng-repeat="item in supportFactoryRawMaterials" value="{{item.factoryRawMaterialID}}">{{item.factoryRawMaterialShortNM}}</option>
+                                        </select>
+                                        <i></i>
+                                    </label>
+                                    <label class="input" ng-show="data.isApproved">
+                                        <span class="form-control">{{data.factoryRawMaterialShortNM}}</span>
+                                    </label>
+                                </section>
+
+                                <section class="col col-sm-2">
+                                    <label class="label">Valid From</label>
+                                    <label class="input-group" ng-show="!data.isApproved">
+                                        <input id="validFrom" type="text" class="form-control" placeholder="From date" name="validDateFrom" ng-data-source="data.validFrom" style="font-family:Arial" avs-calendar />
+                                        <span class="input-group-addon">
+                                            <i class="fa fa-calendar"></i>
+                                        </span>
+                                    </label>
+                                    <label class="input" ng-show="data.isApproved">
+                                        <span class="form-control">{{data.validFrom}}</span>
+                                    </label>
+                                </section>
+                                <section class="col col-sm-2">
+                                    <label class="label">Valid To</label>
+                                    <label class="input-group" ng-show="!data.isApproved">
+                                        <input id="validTo" type="text" class="form-control" placeholder="To date" name="validDateFrom" ng-data-source="data.validTo" style="font-family:Arial" avs-calendar />
+                                        <span class="input-group-addon">
+                                            <i class="fa fa-calendar"></i>
+                                        </span>
+                                    </label>
+                                    <label class="input" ng-show="data.isApproved">
+                                        <span class="form-control">{{data.validTo}}</span>
+                                    </label>
+                                </section>
+
+                                <section class="col col-sm-2">
+                                    <label class="label">Payment Term</label>
+                                    <label class="input" ng-show="!data.isApproved">
+                                        <select id="paymentTerm" name="paymentTerm" class="form-control" ng-model="data.purchasePaymentTermID" ng-options="spPayment.purchasePaymentTermID as spPayment.purchasePaymentTermNM for spPayment in supportPaymentTerms">
+                                            <option value=""></option>
+                                        </select>
+                                        <i></i>
+                                    </label>
+                                    <label class="input" ng-show="data.isApproved">
+                                        <span class="form-control">{{data.purchasePaymentTermNM}}</span>
+                                    </label>
+                                </section>
+
+                                <section class="col col-sm-2">
+                                    <label class="label">Delivery Term</label>
+                                    <label class="input" ng-show="!data.isApproved">
+                                        <select id="deliveryTerm" name="deliveryTerm" class="form-control" ng-model="data.purchaseDeliveryTermID" ng-options="spDelivery.purchaseDeliveryID as spDelivery.purchaseDeliveryNM for spDelivery in supportDeliveryTerms">
+                                            <option value=""></option>
+                                        </select>
+                                        <i></i>
+                                    </label>
+                                    <label class="input" ng-show="data.isApproved">
+                                        <span class="form-control">{{data.purchaseDeliveryTermNM}}</span>
+                                    </label>
+                                </section>
+
+                                <section class="col col-sm-2">
+                                    <label class="label">Currency</label>
+                                    <label class="input" ng-show="!data.isApproved">
+                                        <select id="currency" name="currency" class="form-control" ng-model="data.currency" ng-options="item.sname as item.name for item in supportCurency">
+                                            <option value=""></option>
+                                        </select>
+                                        <i></i>
+                                    </label>
+                                    <label class="input" ng-show="data.isApproved">
+                                        <span class="form-control">{{data.currency}}</span>
+                                    </label>
+                                </section>
+
+                                <section class="col col-sm-4">
+                                    <label class="label">Related Document File</label>
+                                    <label class="input" ng-show="!data.isApproved">
+                                        <span class="form-control">
+                                            {{data.friendlyName}}
+                                            <div style="position: absolute; right: 5px; top: 5px;">
+                                                <a ng-disabled="!data.fileLocation || data.friendlyName==null" href="javascript:void(0);" class="btn btn-primary btn-xs" style="font-size: 11px;" ng-click="event.downloadFile()">Download</a>
+                                                <a href="javascript:void(0);" class="btn btn-primary btn-xs" style="font-size: 11px;" ng-click="event.changeFile()">Change</a>
+                                                <a ng-disabled="!data.fileLocation || data.friendlyName==null" href="javascript:void(0);" class="btn btn-danger btn-xs" style="font-size: 11px;" ng-click="event.removeFile()">Remove</a>
+                                            </div>
+                                        </span>
+                                    </label>
+                                    <label class="input" ng-show="data.isApproved">
+                                        <span class="form-control">
+                                            <a href="{{data.fileLocation}}" target="_blank">
+                                                {{data.friendlyName}}
+                                            </a>
+                                        </span>
+                                    </label>
+                                </section>
+
+                                <section class="col col-sm-6">
+                                    <label class="label">Remark</label>
+                                    <label class="input" ng-show="!data.isApproved">
+                                        <input type="text" class="form-control" style="font-family:Arial" maxlength="255" ng-model="data.remark" />
+                                    </label>
+                                    <label class="input" ng-show="data.isApproved">
+                                        <span class="form-control">{{data.remark}}</span>
+                                    </label>
+                                </section>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="jarviswidget jarviswidget-color-darken" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>@(ViewBag.ID == 0 ? "Create Purchase Quotation Detail" : "Edit Purchase Quotation Detail")</h2>
+            </header>
+            <div>
+                <a class="btn btn-primary btn-xs" href="javascript:void(0);" style="margin-bottom: 10px;" ng-click="event.addNewLine()" ng-show="!data.isApproved"><i class="fa fa-plus"></i> Add details</a>
+                <div class="widget-body">
+                    <div class="smart-form">
+                        <div class="row">
+                            <section class="col col-sm-12">
+                                <div avs-scroll grid-handler="gridHandler" class="tilsoft-table-wrapper">
+                                    <div class="tilsoft-table">
+                                        <div class="tilsoft-table-header" style="width:1200px">
+                                            <div style="width:80px"></div>
+                                            <div style="width:250px">Name</div>
+                                            <div style="width:190px">Code</div>
+                                            <div style="width:100px">Weight</div>
+                                            <div style="width:100px">Oder Qnt</div>
+                                            <div style="width:90px">Price</div>
+                                            <div style="width:80px">Unit</div>
+                                            <div>Remark</div>
+                                        </div>
+                                        <div class="tilsoft-table-body" style="width:1200px">
+                                            <table>
+                                                <tbody ng-repeat="item in data.purchaseQuotationDetailDTOs">
+                                                    <tr>
+                                                        <td style="width:79px; text-align:center">
+                                                            <a href="javascript:void(0)" class="btn btn-danger btn-xs font-11" ng-click="event.removeLine(item)" ng-show="!data.isApproved">
+                                                                <i class="fa fa-times"></i> Delete
+                                                            </a>
+                                                        </td>
+                                                        <td style="width:250px; text-align:left">
+                                                            <label class="input">
+                                                                <input type="text" ng-model="item.productionItemNM" id="productItem{{item.purchaseQuotationDetailID}}" ng-show="!data.isApproved" />
+                                                                <span ng-show="data.isApproved">{{item.productionItemNM}}</span>
+                                                            </label>
+                                                        </td>
+                                                        <td style="width:190px; text-align:left">{{item.productionItemUD}}</td>
+                                                        <td style="width:100px" ng-if="item.productionItemTypeID == 1 && (item.frameWeight === null || item.frameWeight === '')"><input avs-number type="text" ng-decimal="3" ng-data-source="item.frameWeight" style="width: 100%;text-align:right" /></td>
+                                                        <td style="width:100px" ng-if="item.productionItemTypeID == 1 && item.frameWeight !== null && item.frameWeight !== ''"><input avs-number type="text" ng-readonly="(item.frameWeight !== null && item.frameWeight !== '' && item.isHasWeight)" ng-decimal="3" ng-data-source="item.frameWeight" style="width: 100%;text-align:right" /></td>
+                                                        <td style="width:100px" ng-if="item.productionItemTypeID != 1"><span class="form-control"></span></td>
+                                                        <td style="width:100px; text-align:right">
+                                                            <input type="text" class="form-control" avs-number style="text-align:right" ng-data-source="item.orderQnt" ng-decimal="4" ng-show="!data.isApproved" />
+                                                            <span ng-show="data.isApproved">{{item.orderQnt | number:4}}</span>
+                                                        </td>
+                                                        <td style="width:90px; text-align:right">
+                                                            <input type="text" class="form-control" avs-number style="text-align:right" ng-data-source="item.unitPrice" ng-decimal="2" ng-show="!data.isApproved" />
+                                                            <span ng-show="data.isApproved">{{item.unitPrice | number:2}}</span>
+                                                        </td>
+                                                        <td style="width:80px; text-align: center;">{{item.unitNM}}</td>
+                                                        <td>
+                                                            <input type="text" class="form-control" ng-model="item.remark" ng-show="!data.isApproved" />
+                                                            <span ng-show="data.isApproved">{{item.remark}}</span>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+@section FormAction {
+<ul id="sparks">
+    <li class="sparks-info">
+        <a href="@Url.Action("Index", "PurchaseQuotationMng")" class="btn btn-default" title="Back">
+            <i class="fa fa-arrow-left"></i>
+        </a>
+    </li>
+    <li class="sparks-info" ng-show="!data.isApproved">
+        <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current))" title="Delete" ng-class="{'disabled': data.purchaseQuotationID == 0}" ng-click="event.remove(data.purchaseQuotationID)">
+            <i class="fa fa-times"></i>
+        </a>
+    </li>
+    @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Approve, HttpContext.Current) != "disabled")
+    {
+        <li class="sparks-info" ng-show="data.isCancelled == null || data.isCancelled == false">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="event.update()">
+                <i class="fa fa-floppy-o"></i>
+            </a>
+        </li>
+    }
+    else
+    {
+        <li class="sparks-info" ng-show="!data.isApproved">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="event.update()">
+                <i class="fa fa-floppy-o"></i>
+            </a>
+        </li>
+    }
+    @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Approve, HttpContext.Current) != "disabled")
+    {
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default" title="Cancel" ng-click="event.cancel()" ng-disabled="(data.isApproved == null || !data.isApproved) || (data.isCancelled != null && data.isCancelled)" style="color: red">
+                <i class="fa fa-close"></i>
+            </a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default" ng-disabled="(data.purchaseQuotationID == null || data.purchaseQuotationID == 0) || (data.isApproved != null && data.isApproved)" title="Approve" ng-click="event.approve()" style="color: red">
+                <i class="fa fa-check"></i>
+            </a>
+        </li>
+    }
+    @if (!string.IsNullOrEmpty(userManualUrl))
+    {
+        <li class="sparks-info">
+            <a target="_blank" href="@userManualUrl" class="btn btn-default" title="Help"><i class="fa fa-info"></i></a>
+        </li>
+    }
+</ul>
+}
+
+@section pagejs{
+
+    <script type="text/javascript" src="~/Angular/app/purchaseQuotationMng/edit.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/purchaseQuotationMng/service.js?v=@guid"></script>
+
+    <script type="text/javascript">
+        var context = {
+            id: @ViewBag.ID,
+            backUrl: '@Url.Action("Index", "PurchaseQuotationMng")',
+            refreshUrl: '@Url.Action("Edit", "PurchaseQuotationMng", new { id = UrlParameter.Optional })/',
+            serviceUrl: '@(serviceRoot)/api/purchaseQuotationMng/',
+            supportServiceUrl: '@(supportServiceRoot)/api/support/',
+            token: '@token',
+            msgValid: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED' ,
+            getProductionItemUrl: '@(serviceRoot)/api/purchaseQuotationMng/' + 'getdefaultpriceproductionitem',
+            //getProductionItemUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/support/' + 'getProductionItem',
+        }
+    </script>
+
+}
+
+

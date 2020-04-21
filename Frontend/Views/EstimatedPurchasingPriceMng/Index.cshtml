@@ -1,0 +1,256 @@
+﻿@using Frontend.Helper;
+@{
+    ViewBag.Title = "Estimated Purchasing Price";
+    ViewBag.Icon = "fa-search";
+    Frontend.APIDTO.APIUserInformation userInfo = (Frontend.APIDTO.APIUserInformation)Session[Frontend.Customize.Common.ProjectDefinition.USER_INFO_SESSION];
+
+    string autoArtCode = string.Empty;
+    string autoSeason = string.Empty;
+    if (Request.Params.AllKeys.Contains("articleCode"))
+    {
+        autoArtCode = Request.Params["articleCode"].ToString();
+    }
+    if (Request.Params.AllKeys.Contains("season"))
+    {
+        autoSeason = Request.Params["season"].ToString();
+    }
+}
+<style>
+    .tilsoft-table-header div {
+        height: 75px !important;
+    }
+</style>
+<div class="row">
+    <article class="col-sm-12">
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-search-filter" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Search Filters</h2>
+            </header>
+
+            <div>
+                <div class="widget-body no-padding">
+                    <div class="smart-form">
+                        <fieldset>
+                            <div class="row">
+                                <section class="col col-3">
+                                    <label class="label">Season</label>
+                                    <label class="select">
+                                        <select class="search-filter" ng-model="filters.Season" ng-options="season.seasonValue as season.seasonText for season in seasons">
+                                            <option></option>
+                                        </select>
+                                        <i></i>
+                                    </label>
+                                </section>
+
+                                <section class="col col-3">
+                                    <label class="label">Factory</label>
+                                    <label class="input">
+                                        <input class="search-filter" type="text" ng-model="filters.FactoryUD" />
+                                    </label>
+                                </section>
+
+                                <section class="col col-3">
+                                    <label class="label">Packaging Method</label>
+                                    <label class="input">
+                                        <input class="search-filter" type="text" ng-model="filters.PackagingMethodNM" />
+                                    </label>
+                                </section>
+
+                                <section class="col col-3">
+                                    <label class="label">Description</label>
+                                    <label class="input">
+                                        <input class="search-filter" type="text" ng-model="filters.Description" />
+                                    </label>
+                                </section>
+                            </div>
+                            <div class="row">
+                                <section class="col col-3">
+                                    <label class="label">Offer</label>
+                                    <label class="input">
+                                        <input type="text" class="search-filter" ng-model="filters.OfferUD" />
+                                    </label>
+                                </section>
+
+                                <section class="col col-3">
+                                    <label class="label">Remark</label>
+                                    <label class="input">
+                                        <input type="text" class="search-filter" ng-model="filters.Remark" />
+                                    </label>
+                                </section>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="jarviswidget" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-search txt-color-darken"></i> </span>
+                <h2>Search Result - {{totalRows}} found</h2>
+            </header>
+            <div class="no-padding">
+                <div class="widget-body" style="padding-bottom: 0px;">
+                    <div avs-scroll grid-handler="gridHandler" class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table" id="pnlDetailArea">
+                            <div class="tilsoft-table-header">
+                                <div style="width: 80px;" class="sorting" data-colname="Season">Season</div>
+                                <div style="width: 90px;" class="sorting" data-colname="FactoryUD">Factory</div>
+                                <div style="width: 90px;" class="sorting" data-colname="FactoryUD">Image</div>
+                                <div style="width: 280px;" class="sorting" data-colname="Description">Item</div>
+                                <div style="width: 150px;" class="sorting" data-colname="PackagingMethodNM">Packaging</div>
+                                <div style="width: 80px;">Est Price</div>
+                                <div style="width: 100px;" class="sorting" data-colname="Remark">Remark</div>
+                                <div style="width: 80px;">New Price</div>
+                                <div style="width: 100px;">New Remark</div>
+                                <div style="width: 120px;" class="sorting_desc" data-colname="UpdatedDate">Tracking</div>
+
+                                <div>&nbsp;</div>
+                            </div>
+                            <div class="tilsoft-table-body">
+                                <table>
+                                    <tr ng-repeat="item in data">
+                                        <td style="text-align: center;">{{item.season}}</td>
+                                        <td style="text-align: center;">
+                                            {{item.factoryUD}}
+                                            <a class="btn btn-default btn-xs" href="javascript:void(0)" ng-click="event.addOtherFactory(item)">Add New</a>
+                                        </td>
+                                        <td style="width: 90px; text-align: center; vertical-align: middle;">
+                                            <a href="{{item.fileLocation}}" data-featherlight="image">
+                                                <img style="width: 95%;" ng-src="{{item.thumbnailLocation}}" />
+                                            </a>
+                                        </td>
+                                        <td>
+                                            <strong>{{item.articleCode}}</strong>
+                                            <br />
+                                            {{item.description}}
+                                        </td>
+                                        <td>{{item.packagingMethodNM}}</td>
+                                        <td style="text-align: center;">
+                                            <a href="javascript:void(0)" ng-click="event.getHistory(item)">{{item.estimatedPrice | currency:'$':2}}</a>
+                                        </td>
+                                        <td>{{item.remark}}</td>
+                                        <td><input avs-currency-2 type="text" ng-model="item.newEstimatedPrice" style="text-align: right;" /></td>
+                                        <td><input type="text" ng-model="item.newRemark" /></td>
+                                        <td>
+                                            <span ng-if="item.updatorName">
+                                                <strong>Updated By</strong>:
+                                                <a ng-if="item.updatedBy" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.updatedBy}}" dat data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                    {{item.updatorName}}
+                                                </a> on {{item.updatedDate}}
+                                            </span>
+                                        </td>
+
+                                        <td>&nbsp;</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+<div id="frmSelectFactory" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Select factory for estimated purchasing price</h4>
+            </div>
+            <div class="modal-body no-padding">
+                <div class="smart-form">
+                    <fieldset>
+                        <section>
+                            <label class="select">
+                                <select ng-model="frmSelectFactoryObject.data.factoryID" ng-options="item.factoryID as item.factoryUD for item in frmSelectFactoryObject.supportData.factories">
+                                    <option></option>
+                                </select>
+                                <i></i>
+                            </label>
+                        </section>
+                    </fieldset>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" ng-click="frmSelectFactoryObject.event.onOK()" class="btn btn-default">
+                    OK
+                </button>
+                <button type="button" class="btn btn-default" ng-click="frmSelectFactoryObject.event.onCancel()">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="frmHistory" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Price history</h4>
+            </div>
+            <div class="modal-body no-padding">
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th style="width: 150px;">Est.Price</th>
+                            <th>Remark</th>
+                            <th>Tracking</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="item in histories">
+                            <td style="text-align: right;">{{item.estimatedPrice | currency:'$':2}}</td>
+                            <td>{{item.remark}}</td>
+                            <td>
+                                <span ng-if="item.updatorName">
+                                    <strong>Updated By</strong>:
+                                    <a ng-if="item.updatedBy" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.updatedBy}}" data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                        {{item.updatorName}}
+                                    </a> on {{item.updatedDate}}
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section FormAction {
+    <script>
+    </script>
+    <ul id="sparks">
+        <li>
+            <a href="javascript:void(0)" class="btn btn-default" title="Search" ng-click="event.reload()"><i class="fa fa-refresh"></i></a>
+        </li>
+        <li>
+            <a href="javascript:void(0)" class="btn btn-primary @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="Update" ng-click="event.update()"><i class="fa fa-save"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/estimated-purchasing-price/',
+            token : '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]',
+            pageSize : 50,
+            cookieId: '@HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString()',
+            autoArtCode: '@autoArtCode',
+            autoSeason: '@autoSeason',
+            userId: @userInfo.Data.UserId
+        }
+    </script>
+    <script src="~/Views/EstimatedPurchasingPriceMng/index.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/jsonService2.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/EstimatedPurchasingPriceMng/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}

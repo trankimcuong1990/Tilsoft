@@ -1,0 +1,117 @@
+﻿@{
+    ViewBag.Title = "Init infomation";
+    ViewBag.Module = "Eurofar Commercial Invoice";
+}
+
+<form class="row" name="editForm">
+    <br />
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            @*<header>
+                <h2>Select type of invoice</h2>
+            </header>*@
+            <div>
+                <div class="widget-body no-padding">
+                    <div class="smart-form">
+                        <fieldset>
+                            <div class="row">
+                                <section class="col col-3">
+                                    <label>Type of invoice</label>
+                                    <label class="select">
+                                        <select ng-model="data.invoiceTypeID" ng-options="item.invoiceTypeValue as item.invoiceTypeText for item in invoiceTypes">
+                                            <option value=""></option>
+                                        </select>
+                                        <i></i>
+                                    </label>
+                                </section>
+                                <section class="col col-3">
+                                    <label>Invoice for company</label>
+                                    <label class="select">
+                                        <select ng-model="data.internalCompanyID" ng-options="item.internalCompanyID as item.internalCompanyNM for item in internalCompany3s">
+                                            <option value=""></option>
+                                        </select>
+                                        <i></i>
+                                    </label>
+                                </section>
+                            </div>                            
+                        </fieldset>
+                        <footer>
+                            <button class="btn btn-primary" type="button" ng-click="event.goNext($event)">
+                                Next
+                            </button>
+                            <button class="btn btn-default" type="button" ng-click="event.goBack($event)">
+                                Cancel
+                            </button>
+                        </footer>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+@section pagejs {
+    <script src="~/Views/ECommercialInvoice/Service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script type="text/javascript">
+        eCommercialInvoiceService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/ECommercialInvoice/';
+        eCommercialInvoiceService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+        var tilsoftApp = angular.module('tilsoftApp', []);
+        tilsoftApp.controller('tilsoftController', ['$scope', function ($scope) {
+
+            $scope.invoiceTypes = [];
+            $scope.internalCompany3s = [];
+            $scope.data = {
+                invoiceTypeID: '',
+                internalCompanyID:''
+            }
+
+            $scope.event = {
+                goNext: function ($event) {
+                    $event.preventDefault();
+
+                    if ($scope.data.invoiceTypeID == '') {
+                        bootbox.alert('Please select invoice type before go to next step');
+                        return;
+                    }
+                    if ($scope.data.internalCompanyID == '') {
+                        bootbox.alert('Please select company type before go to next step');
+                        return;
+                    }
+                    window.location = '@Url.Action("Init2", "ECommercialInvoice")?invoiceTypeID=' + $scope.data.invoiceTypeID + '&internalCompanyID=' + $scope.data.internalCompanyID;
+                },
+                goBack: function ($event) {
+                    $event.preventDefault();
+                    window.location = '@Url.Action("Index", "ECommercialInvoice")';
+                },
+                init: function () {
+                    $scope.method.getInitData();
+                }
+            };
+
+            $scope.method = {
+                getInitData: function () {
+                    eCommercialInvoiceService.getInitData(
+                        function (data) {
+                            $scope.invoiceTypes = data.data.invoiceTypes;
+                            $scope.invoiceTypes = $scope.invoiceTypes.filter(function (o) { return o.invoiceTypeValue != 4 });
+                            $scope.internalCompany3s = data.data.internalCompany3s;
+                            $scope.$apply();
+                            jQuery('#content').show();
+                        },
+                        function (error) {
+                            jsHelper.showMessage('warning', error);
+
+                            $scope.factories = null;
+                            $scope.$apply();
+                        }
+                    );
+                }
+            };
+
+
+            $scope.event.init();
+        }]);
+    </script>
+}
+

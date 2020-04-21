@@ -1,0 +1,588 @@
+﻿@{
+    ViewBag.Title = "Team to Warehouse";
+
+    Frontend.APIDTO.APIUserInformation userInfo = (Frontend.APIDTO.APIUserInformation)Session[Frontend.Customize.Common.ProjectDefinition.USER_INFO_SESSION];
+
+    string workOrderIDs = "";
+    if (Request.Params["workOrderIDs"] != null)
+    {
+        workOrderIDs = Request.Params["workOrderIDs"];
+    }
+}
+<style>
+
+    .modal-dialog {
+        top: 100px !important
+    }
+
+    .append1 {
+        right: 35px !important;
+    }
+
+    .append2 {
+        right: 5px !important;
+    }
+</style>
+<form class="row" name="editForm">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <ul class="nav nav-tabs pull-left in">
+                    <li class="active">
+                        <a data-toggle="tab" href="#tabGeneral" name="gtab"> <span> <i class="fa fa-database"></i> General </span> </a>
+                    </li>
+                </ul>
+            </header>
+            <div>
+                <div class="widget-body">
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="tabGeneral">
+                            <div class="smart-form">
+                                <div class="row">
+                                    <section class="col col-sm-2">
+                                        <label>Receiving Note Nr.</label>
+                                        <label class="input">
+                                            <input class="form-control" style="font-family: Arial, Helvetica, sans-serif; font-size: 12px" ng-model="data.receivingNoteUD" readonly />
+                                        </label>
+                                    </section>
+
+                                    <section class="col col-sm-1">
+                                        <label><i class="fa fa-calendar"></i>Date</label>
+                                        <label class="input">
+                                            <input id="receivingNoteDate" class="form-control" style="font-family: Arial; font-size: 12px" avs-date ng-model="data.receivingNoteDate" ng-if="@ViewBag.ID == 0" />
+                                            <input id="receivingNoteDate" class="form-control" style="font-family: Arial; font-size: 12px" ng-model="data.receivingNoteDate" ng-if="@ViewBag.ID > 0" readonly />
+                                        </label>
+                                    </section>
+
+                                    <section class="col col-sm-1">
+                                        <label>Type</label>
+                                        <label class="input">
+                                            <input class="form-control" style="font-family: Arial, Helvetica, sans-serif; font-size: 12px" ng-model="data.statusTypeNM" readonly />
+                                        </label>
+                                    </section>
+
+                                    <section class="col col-sm-2">
+                                        <label>Work Center <em class="note note-error" ng-if="(data.workCenterID === null)">(Required)</em></label>
+                                        <label class="input" ng-if="!data.isConfirm">
+                                            <select id="workCenterID"
+                                                    style="font-family: Arial; font-size: 12px"
+                                                    ng-change="event.changeSelectWorkCenter(data.workCenterID)"
+                                                    ng-model="data.workCenterID"
+                                                    ng-options="item.workCenterID as item.workCenterNM for item in workCenters"
+                                                    ng-confirm-click="event.initializeItem(data.workCenterID, data.productionTeamID)"
+                                                    selected-item="data.workCenterID"
+                                                    popupcloseevent="popupCloseEvent_workCenterID"
+                                                    ng-confirm-message="When you change Workcenter then all product in this receipt will be deleted. </br>Are you sure you want to changed?">
+                                                <option value=""></option>
+                                            </select>
+                                        </label>
+                                        <label class="input" ng-if="data.isConfirm">
+                                            <input type="text" class="form-control" style="font-family: Arial; font-size: 12px" ng-model="data.workCenterNM" readonly />
+                                        </label>
+                                    </section>
+
+                                    <section class="col col-sm-2">
+                                        <label>From Team <em class="note note-error" ng-if="(data.fromProductionTeamID === null)">(Required)</em></label>
+                                        <label class="input" ng-if="!data.isConfirm">
+                                            <select id="fromProductionTeamID"
+                                                    style="font-family: Arial; font-size: 12px"
+                                                    ng-model="data.fromProductionTeamID"
+                                                    ng-options="item.productionTeamID as item.productionTeamNM for item in productionTeams | productionTeamByWorkCenter : data.workCenterID">
+                                                <option value=""></option>
+                                            </select>
+                                        </label>
+                                        <label class="input" ng-if="data.isConfirm">
+                                            <input type="text" class="form-control" style="font-family: Arial; font-size: 12px" ng-model="data.fromProductionTeamNM" readonly />
+                                        </label>
+                                    </section>
+
+                                    <section class="col col-sm-2" ng-if="data.workCenterID == 9">
+                                        <label>Transportation Service</label>
+                                        <label class="input" ng-if="(!data.isConfirm)">
+                                            <select id="transportationServiceID" style="font-family: Arial; font-size: 12px" name="transportationServiceID" class="form-control" ng-model="data.transportationServiceID" ng-disabled="data.isApproved" ng-options="item.transportationServiceID as item.transportationServiceNM for item in transportationServiceDTOs">
+                                                <option value=""></option>
+                                            </select>
+                                        </label>
+                                        <label class="input" ng-if="(data.isConfirm)">
+                                            <input type="text" class="form-control" style="font-family: Arial; font-size: 12px" readonly ng-model="data.transportationServiceNM" />
+                                        </label>
+                                    </section>
+
+                                </div>
+
+                                <div class="row">
+                                    <section class="col col-sm-3">
+                                        <label>Deliver Name.</label>
+                                        <label class="input">
+                                            <input class="form-control" style="font-family: Arial; font-size: 12px" avs-remote-auto-complete ng-request-param="delieveryAPI" ng-init-param="data.deliverName" ng-model="data.deliverName" ng-item-value="delievery" ng-item-selected="event.selectDelivery(delievery)" data-method="POST" data-format-function="formatDataSupplier" ng-readonly="data.isConfirm" />
+                                        </label>
+                                    </section>
+
+                                    <section class="col col-sm-3">
+                                        <label>Deliver Address.</label>
+                                        <label class="input">
+                                            <input class="form-control" style="font-family: Arial; font-size: 12px" ng-model="data.deliverAddress" ng-readonly="data.isConfirm" />
+                                        </label>
+                                    </section>
+
+                                    <section class="col col-sm-3">
+                                        <label>Remark (Reason).</label>
+                                        <label class="input">
+                                            <input class="form-control" style="font-family: Arial; font-size: 12px" ng-model="data.description" ng-readonly="data.isConfirm" />
+                                        </label>
+                                    </section>
+
+                                    <section class="col col-sm-3">
+                                        <label>Tracking</label>
+                                        <span class="form-control">Updated by {{data.updatorName}} at {{data.updatedDate}}</span>
+                                    </section>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="jarviswidget" id="wid-id-item" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <ul class="nav nav-tabs pull-left in">
+                    <li class="active">
+                        <a data-toggle="tab" href="#tabItem" name="tabItem"> <span> <i class="fa fa-table"></i> Item </span> </a>
+                    </li>
+                    <li>
+                        <a data-toggle="tab" href="#tabSemiItem" name="tabSemiItem"> <span> <i class="fa fa-table"></i> Semi Item </span> </a>
+                    </li>
+                </ul>
+            </header>
+            <div>
+                <div class="widget-body">
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="tabItem">
+                            <div class="smart-form">
+
+                                <div class="row">
+                                    <section class="col col-sm-2">
+                                        <a href="javascript:void(0);" class="btn btn-primary btn-xs" ng-click="event.addNewLine($event)" ng-if="!data.isConfirm">
+                                            <i class="fa fa-plus"></i> Add Material(Component)
+                                        </a>
+                                    </section>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col col-sm-12">
+                                        <div avs-scrollable-table class="tilsoft-table-wrapper">
+                                            <div class="tilsoft-table">
+                                                <div class="tilsoft-table-header" style="width:1900px;">
+                                                    <div style="width:50px; padding-left: 5px;">No.<br><b style="color: blue; padding: 10px;">#{{receivingNoteProducts.length|number}}</b></div>
+                                                    <div style="width:230px">Item</div>
+                                                    <div style="width:65px">Unit</div>
+                                                    <div style="width:140px">Warehouse</div>
+                                                    <div style="width:65px">Pallet</div>
+                                                    <div style="width:75px">Price</div>
+                                                    <div style="width:75px" ng-if="data.workCenterID === 7 || data.workCenterID === 8">Frame Weight</div>
+                                                    <div style="width:75px">Stock Qnt</div>
+                                                    <div style="width:75px">Total Receive</div>
+                                                    <div style="width:71px">Qnt</div>
+                                                    <div style="width:85px">Work Order</div>
+                                                    <div style="width:200px">In Component</div>
+                                                    <div style="width:70px">Other Price</div>
+                                                    <div style="width:100px">Reason</div>
+                                                    <div style="width:75px">Norm Qnt</div>
+                                                    <div style="width:75px">Total Norm</div>
+                                                    <div style="width:75px">Receive<br />WO</div>
+                                                    <div style="">Remark</div>
+                                                </div>
+                                                <div class="tilsoft-table-body" style="width:1900px;">
+                                                    <table>
+                                                        <tbody ng-repeat="item in receivingNoteProducts | orderBy: 'productionItemTypeID'">
+                                                            <tr>
+                                                                <td style="width:50px; text-align:center;">
+                                                                    <a href="javascript:void(0);" class="btn btn-danger btn-xs font-11" ng-if="(!data.isConfirm)" ng-disabled="data.workCenterID == 11 && data.receivingNoteID > 0" ng-click="event.removeLine($event,item)">
+                                                                        <i class="fa fa-times"></i>Del
+                                                                    </a>
+                                                                    <label ng-if="(data.isConfirm)">{{($index + 1)}}</label>
+                                                                </td>
+
+                                                                <td style="width:230px;">
+                                                                    <label class="input" ng-if="(!data.isConfirm)" ng-class="{'state-error': (item.productionItemID === null)}">
+                                                                        <input type="text" class="input-xs" style="font-family: Arial; font-size: 12px;" avs-remote-auto-complete ng-request-param="productionItemBox.request" data-method="POST"
+                                                                               ng-init-param="item.productionItemNM" ng-init-param-2="@userInfo.Data.BranchID" ng-init-param-3="data.receivingNoteDate" ng-init-param-4="data.workOrderIDs" ng-init-param-5="data.workCenterID" ng-model="item.productionItemNM" ng-item-value="productionItemBox.data"
+                                                                               ng-item-selected="event.selectedProductionItem(productionItemBox.data, item)"
+                                                                               data-format-function="formatProductionItem" />
+                                                                    </label>
+                                                                    <label ng-if="(data.isConfirm)">{{item.productionItemNM}}</label>
+                                                                    <a href="@Url.Action("Edit", "ProductionItem")/{{item.productionItemID}}" target="_blank" ng-if="(item.productionItemID !== null)">
+                                                                        <b>{{item.productionItemUD}}</b>
+                                                                    </a>
+                                                                </td>
+
+                                                                <td style="width:65px; text-align:center;">
+                                                                    <label class="input" ng-if="(!data.isConfirm)" ng-class="{'state-error': (item.productionItemID !== null && item.unitID === null)}">
+                                                                        <select class="input-xs" style="font-family: Arial; font-size: 12px;" ng-model="item.unitID" ng-options="uItem.unitID as uItem.unitNM for uItem in item.productionItemUnits" @*ng-click="event.changeUnitItem(item, item.unitID)*@ ng-change="event.changeUnit(item)">
+                                                                            <option value=""></option>
+                                                                        </select>
+                                                                    </label>
+                                                                    <label ng-if="(data.isConfirm)">{{item.unitNM}}</label>
+                                                                </td>
+
+                                                                <td style="width:140px;">
+                                                                    <label class="input" ng-if="(!data.isConfirm)" ng-class="{'state-error': (item.productionItemID !== null && item.toFactoryWarehouseID === null)}">
+                                                                        <select class="input-xs" style="font-family: Arial; font-size: 12px;" ng-model="item.toFactoryWarehouseID" ng-options="wItem.factoryWarehouseID as wItem.factoryWarehouseNM for wItem in factoryWarehouses" ng-change="event.setContentDetail(item)">
+                                                                            <option value=""></option>
+                                                                        </select>
+                                                                    </label>
+                                                                    <label ng-if="(data.isConfirm)">{{item.toFactoryWarehouseNM}}</label>
+                                                                </td>
+
+                                                                <td style="width:65px;">
+                                                                    <label class="input" ng-if="(!data.isConfirm)">
+                                                                        <select class="input-xs" style="font-family: Arial; font-size: 12px;" ng-model="item.factoryWarehousePalletID" ng-options="pItem.factoryWarehousePalletID as pItem.factoryWarehousePalletNM for pItem in $parent.factoryWarehousePallets | filter:{factoryWarehouseID:item.toFactoryWarehouseID}">
+                                                                            <option value=""></option>
+                                                                        </select>
+                                                                    </label>
+                                                                    <label ng-if="(data.isConfirm && item.factoryWarehousePalletNM !== 'Unknown')">{{item.factoryWarehousePalletNM}}</label>
+                                                                </td>
+
+                                                                <td style="width:75px; text-align:right;">
+                                                                    {{item.unitPrice|number}}
+                                                                </td>
+
+                                                                <td style="width:75px; text-align:right;" ng-if="data.workCenterID === 7 || data.workCenterID === 8">
+                                                                    <label class="input" ng-if="!item.isHasFrameWeight && !data.isConfirm && item.productionItemTypeID == 1 && data.workCenterID == 7">
+                                                                        <input type="text" class="input-xs" style="font-family: Arial; font-size: 12px; text-align: right;" avs-number-2 ng-model="item.frameWeight" ng-decimal="4" />
+                                                                    </label>
+                                                                    <label ng-if="item.isHasFrameWeight || data.isConfirm || item.productionItemTypeID != 1 || data.workCenterID != 7">{{item.frameWeight|number}}</label>
+                                                                </td>
+
+                                                                <td style="width:75px; text-align:right;">
+                                                                    {{item.stockQnt|number}}
+                                                                </td>
+
+                                                                <td style="width:75px; text-align:right;">
+                                                                    {{item.totalReceive|number}}
+                                                                </td>
+
+                                                                <td>
+                                                                    <table style="border:1px #ccc solid;">
+                                                                        <tbody>
+                                                                            <tr ng-repeat="dItem in item.pieces">
+                                                                                <td style="width:69px; text-align:right;">
+                                                                                    <label class="input" ng-if="(!data.isConfirm)" ng-class="{'state-error': (item.productionItemID !== null && dItem.qtyByUnit === null || dItem.qtyByUnit === '')}">
+                                                                                        <input type="text" class="input-xs" style="font-family:Arial; font-size:12px; text-align:right;" avs-number-2 ng-model="dItem.qtyByUnit" ng-decimal="4" />
+                                                                                    </label>
+                                                                                    <label ng-if="(data.isConfirm)">
+                                                                                        {{dItem.qtyByUnit|number}}
+                                                                                    </label>
+                                                                                </td>
+                                                                                <td style="text-align:center; width:85px;">
+                                                                                    <label ng-if="(!data.isConfirm && !isAddNew)">
+                                                                                        <a href="@Url.Action("Edit", "WorkOrder")/{{dItem.workOrderID}}" target="_blank"><b>{{dItem.workOrderUD}}</b></a>
+                                                                                    </label>
+                                                                                    <label class="input" ng-if="(!data.isConfirm && isAddNew)">
+                                                                                        <select class="input-xs" ng-model="dItem.workOrderID" ng-options="woItem.workOrderID as woItem.workOrderUD for woItem in workOrderList">
+                                                                                            <option value=""></option>
+                                                                                        </select>
+                                                                                    </label>
+                                                                                    <label ng-if="(data.isConfirm)">
+                                                                                        <a href="@Url.Action("Edit", "WorkOrder")/{{dItem.workOrderID}}" target="_blank"><b>{{dItem.workOrderUD}}</b></a>
+                                                                                    </label>
+                                                                                </td>
+                                                                                <td style="width:200px;">
+                                                                                    <label ng-if="(dItem.parentProductionItemNM !== 'Unknown')">{{dItem.parentProductionItemNM}}</label>
+                                                                                </td>
+
+                                                                                <td style="width:70px; text-align:right;">
+                                                                                    <label class="input" ng-if="(!data.isConfirm)">
+                                                                                        <input type="text" class="input-xs" style="font-family:Arial; font-size:12px; text-align:right;" avs-number-2 ng-model="dItem.otherPrice" ng-decimal="2" />
+                                                                                    </label>
+                                                                                    <label ng-if="(data.isConfirm)">
+                                                                                        {{dItem.otherPrice | number : 2}}
+                                                                                    </label>
+                                                                                </td>
+
+                                                                                <td style="width:100px;">
+                                                                                    <label class="input" ng-if="(!data.isConfirm)">
+                                                                                        <select class="input-xs" style="font-family: Arial; font-size: 12px;" ng-model="dItem.reasonOtherPriceID" ng-options="wItem.reasonOtherPriceID as wItem.reasonOtherPriceName for wItem in reasonOtherPrices">
+                                                                                            <option value=""></option>
+                                                                                        </select>
+                                                                                    </label>
+                                                                                    <label ng-if="(data.isConfirm)">{{method.getReasonOtherPriceName(dItem.reasonOtherPriceID)}}</label>
+                                                                                </td>
+
+                                                                                <td style="width:75px; text-align:right;">
+                                                                                    <label class="label" style="text-align:right; font-size:12px;">{{dItem.bomQnt | number}}</label>
+                                                                                </td>
+                                                                                <td style="width:75px; text-align:right;">
+                                                                                    <label class="label" style="text-align:right; font-size:12px;">{{dItem.bomQntTotal | number}}</label>
+                                                                                </td>
+                                                                                <td style="width:75px; text-align:right;">
+                                                                                    <label class="label" style="text-align:right; font-size:12px;">{{dItem.totalReceiveWorkOrder | number}}</label>
+                                                                                </td>
+                                                                                <td style="text-align:left;">
+                                                                                    <label class="input" ng-if="(!data.isConfirm)">
+                                                                                        <input class="input-xs" style="font-family:Arial; font-size:12px;" ng-model="dItem.description" />
+                                                                                    </label>
+                                                                                    <label class="label" style="font-size:12px;" ng-if="(data.isConfirm)">
+                                                                                        {{dItem.description}}
+                                                                                    </label>
+                                                                                </td>
+                                                                            </tr>
+                                                                        </tbody>
+                                                                    </table>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <div class="tab-pane" id="tabSemiItem">
+                            <div class="smart-form">
+
+                                <div class="row">
+                                    <div class="col col-sm-12">
+                                        <div avs-scrollable-table class="tilsoft-table-wrapper">
+                                            <div class="tilsoft-table">
+                                                <div class="tilsoft-table-header" style="width:1900px;">
+                                                    <div style="width:50px; padding-left: 5px;">No.<br><b style="color: blue; padding: 10px;">#{{receivingNoteSemiProducts.length|number}}</b></div>
+                                                    <div style="width:230px">Item</div>
+                                                    <div style="width:65px">Unit</div>
+                                                    <div style="width:140px">Warehouse</div>
+                                                    <div style="width:65px">Pallet</div>
+                                                    <div style="width:75px">Price</div>
+                                                    <div style="width:75px" ng-if="data.workCenterID === 7 || data.workCenterID === 8">Frame Weight</div>
+                                                    <div style="width:75px">Stock Qnt</div>
+                                                    <div style="width:75px">Total Receive</div>
+                                                    <div style="width:71px">Qnt</div>
+                                                    <div style="width:85px">Work Order</div>
+                                                    <div style="width:200px">In Component</div>
+                                                    <div style="width:70px">Other Price</div>
+                                                    <div style="width:100px">Reason</div>
+                                                    <div style="width:75px">Norm Qnt</div>
+                                                    <div style="width:75px">Total Norm</div>
+                                                    <div style="width:75px">Receive<br />WO</div>
+                                                    <div style="">Remark</div>
+                                                </div>
+                                                <div class="tilsoft-table-body" style="width:1900px;">
+                                                    <table>
+                                                        <tbody ng-repeat="item in receivingNoteSemiProducts | orderBy: 'productionItemTypeID'">
+                                                            <tr>
+                                                                <td style="width:50px; text-align:center;">
+                                                                    <a href="javascript:void(0);" class="btn btn-danger btn-xs font-11" ng-if="(!data.isConfirm)" ng-disabled="data.workCenterID == 11 && data.receivingNoteID > 0" ng-click="event.removeLine($event,item)">
+                                                                        <i class="fa fa-times"></i>Del
+                                                                    </a>
+                                                                    <label ng-if="(data.isConfirm)">{{($index + 1)}}</label>
+                                                                </td>
+
+                                                                <td style="width:230px;">
+                                                                    <label class="input" ng-if="(!data.isConfirm)" ng-class="{'state-error': (item.productionItemID === null)}">
+                                                                        <input type="text" class="input-xs" 
+                                                                               style="font-family: Arial; font-size: 12px;" 
+                                                                               avs-remote-auto-complete 
+                                                                               ng-request-param="productionItemBox.request" data-method="POST"
+                                                                               ng-init-param="item.productionItemNM" 
+                                                                               ng-init-param-2="@userInfo.Data.BranchID" 
+                                                                               ng-init-param-3="data.receivingNoteDate" 
+                                                                               ng-init-param-4="data.workOrderIDs" 
+                                                                               ng-init-param-5="data.workCenterID" 
+                                                                               ng-model="item.productionItemNM" 
+                                                                               ng-item-value="productionItemBox.data"                                                                               
+                                                                               data-format-function="formatProductionItem"
+                                                                               ng-item-selected=""
+                                                                               />                                                                               
+                                                                    </label>
+                                                                    <label ng-if="(data.isConfirm)">{{item.productionItemNM}}</label>
+                                                                    <a href="@Url.Action("Edit", "ProductionItem")/{{item.productionItemID}}" target="_blank" ng-if="(item.productionItemID !== null)">
+                                                                        <b>{{item.productionItemUD}}</b>
+                                                                    </a>
+                                                                </td>
+
+                                                                <td style="width:65px; text-align:center;">
+                                                                    <label class="input" ng-if="(!data.isConfirm)" ng-class="{'state-error': (item.productionItemID !== null && item.unitID === null)}">
+                                                                        <select class="input-xs" style="font-family: Arial; font-size: 12px;" ng-model="item.unitID" ng-options="uItem.unitID as uItem.unitNM for uItem in item.productionItemUnits" ng-click="event.changeUnitItem(item, item.unitID)">
+                                                                            <option value=""></option>
+                                                                        </select>
+                                                                    </label>
+                                                                    <label ng-if="(data.isConfirm)">{{item.unitNM}}</label>
+                                                                </td>
+
+                                                                <td style="width:140px;">
+                                                                    <label class="input" ng-if="(!data.isConfirm)" ng-class="{'state-error': (item.productionItemID !== null && item.toFactoryWarehouseID === null)}">
+                                                                        <select class="input-xs" style="font-family: Arial; font-size: 12px;" ng-model="item.toFactoryWarehouseID" ng-options="wItem.factoryWarehouseID as wItem.factoryWarehouseNM for wItem in factoryWarehouses" ng-change="event.setContentDetail(item)">
+                                                                            <option value=""></option>
+                                                                        </select>
+                                                                    </label>
+                                                                    <label ng-if="(data.isConfirm)">{{item.toFactoryWarehouseNM}}</label>
+                                                                </td>
+
+                                                                <td style="width:65px;">
+                                                                    <label class="input" ng-if="(!data.isConfirm)">
+                                                                        <select class="input-xs" style="font-family: Arial; font-size: 12px;" ng-model="item.factoryWarehousePalletID" ng-options="pItem.factoryWarehousePalletID as pItem.factoryWarehousePalletNM for pItem in $parent.factoryWarehousePallets | filter:{factoryWarehouseID:item.toFactoryWarehouseID}">
+                                                                            <option value=""></option>
+                                                                        </select>
+                                                                    </label>
+                                                                    <label ng-if="(data.isConfirm && item.factoryWarehousePalletNM !== 'Unknown')">{{item.factoryWarehousePalletNM}}</label>
+                                                                </td>
+
+                                                                <td style="width:75px; text-align:right;">
+                                                                    {{item.unitPrice|number}}
+                                                                </td>
+
+                                                                <td style="width:75px; text-align:right;" ng-if="data.workCenterID === 7 || data.workCenterID === 8">
+                                                                    <label class="input" ng-if="!item.isHasFrameWeight && !data.isConfirm && item.productionItemTypeID == 1 && data.workCenterID == 7">
+                                                                        <input type="text" class="input-xs" style="font-family: Arial; font-size: 12px; text-align: right;" avs-number-2 ng-model="item.frameWeight" ng-decimal="4" />
+                                                                    </label>
+                                                                    <label ng-if="item.isHasFrameWeight || data.isConfirm || item.productionItemTypeID != 1 || data.workCenterID != 7">{{item.frameWeight|number}}</label>
+                                                                </td>
+
+                                                                <td style="width:75px; text-align:right;">
+                                                                    {{item.stockQnt|number}}
+                                                                </td>
+
+                                                                <td style="width:75px; text-align:right;">
+                                                                    {{item.totalReceive|number}}
+                                                                </td>
+
+                                                                <td>
+                                                                    <table style="border:1px #ccc solid;">
+                                                                        <tbody>
+                                                                            <tr ng-repeat="dItem in item.pieces">
+                                                                                <td style="width:69px; text-align:right;">
+                                                                                    <label class="input" ng-if="(!data.isConfirm)" ng-class="{'state-error': (item.productionItemID !== null && dItem.qtyByUnit === null || dItem.qtyByUnit === '')}">
+                                                                                        <input type="text" class="input-xs" style="font-family:Arial; font-size:12px; text-align:right;" avs-number-2 ng-model="dItem.qtyByUnit" ng-decimal="4" />
+                                                                                    </label>
+                                                                                    <label ng-if="(data.isConfirm)">
+                                                                                        {{dItem.qtyByUnit|number}}
+                                                                                    </label>
+                                                                                </td>
+                                                                                <td style="text-align:center; width:85px;">
+                                                                                    <label ng-if="(!data.isConfirm && !isAddNew)">
+                                                                                        <a href="@Url.Action("Edit", "WorkOrder")/{{dItem.workOrderID}}" target="_blank"><b>{{dItem.workOrderUD}}</b></a>
+                                                                                    </label>
+                                                                                    <label class="input" ng-if="(!data.isConfirm && isAddNew)">
+                                                                                        <select class="input-xs" ng-model="dItem.workOrderID" ng-options="woItem.workOrderID as woItem.workOrderUD for woItem in workOrderList">
+                                                                                            <option value=""></option>
+                                                                                        </select>
+                                                                                    </label>
+                                                                                    <label ng-if="(data.isConfirm)">
+                                                                                        <a href="@Url.Action("Edit", "WorkOrder")/{{dItem.workOrderID}}" target="_blank"><b>{{dItem.workOrderUD}}</b></a>
+                                                                                    </label>
+                                                                                </td>
+                                                                                <td style="width:200px;">
+                                                                                    <label ng-if="(dItem.parentProductionItemNM !== 'Unknown')">{{dItem.parentProductionItemNM}}</label>
+                                                                                </td>
+
+                                                                                <td style="width:70px; text-align:right;">
+                                                                                    <label class="input" ng-if="(!data.isConfirm)">
+                                                                                        <input type="text" class="input-xs" style="font-family:Arial; font-size:12px; text-align:right;" avs-number-2 ng-model="dItem.otherPrice" ng-decimal="2" />
+                                                                                    </label>
+                                                                                    <label ng-if="(data.isConfirm)">
+                                                                                        {{dItem.otherPrice | number : 2}}
+                                                                                    </label>
+                                                                                </td>
+
+                                                                                <td style="width:100px;">
+                                                                                    <label class="input" ng-if="(!data.isConfirm)">
+                                                                                        <select class="input-xs" style="font-family: Arial; font-size: 12px;" ng-model="dItem.reasonOtherPriceID" ng-options="wItem.reasonOtherPriceID as wItem.reasonOtherPriceName for wItem in reasonOtherPrices">
+                                                                                            <option value=""></option>
+                                                                                        </select>
+                                                                                    </label>
+                                                                                    <label ng-if="(data.isConfirm)">{{method.getReasonOtherPriceName(dItem.reasonOtherPriceID)}}</label>
+                                                                                </td>
+
+                                                                                <td style="width:75px; text-align:right;">
+                                                                                    <label class="label" style="text-align:right; font-size:12px;">{{dItem.bomQnt | number}}</label>
+                                                                                </td>
+                                                                                <td style="width:75px; text-align:right;">
+                                                                                    <label class="label" style="text-align:right; font-size:12px;">{{dItem.bomQntTotal | number}}</label>
+                                                                                </td>
+                                                                                <td style="width:75px; text-align:right;">
+                                                                                    <label class="label" style="text-align:right; font-size:12px;">{{dItem.totalReceiveWorkOrder | number}}</label>
+                                                                                </td>
+                                                                                <td style="text-align:left;">
+                                                                                    <label class="input" ng-if="(!data.isConfirm)">
+                                                                                        <input class="input-xs" style="font-family:Arial; font-size:12px;" ng-model="dItem.description" />
+                                                                                    </label>
+                                                                                    <label class="label" style="font-size:12px;" ng-if="(data.isConfirm)">
+                                                                                        {{dItem.description}}
+                                                                                    </label>
+                                                                                </td>
+                                                                            </tr>
+                                                                        </tbody>
+                                                                    </table>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "WorkOrder")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="#" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-disabled="data.isConfirm" ng-click="event.update()"><i class="fa fa-save"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="#" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="Delete" style="color: #ff0000;" ng-disabled="data.isConfirm || (data.workCenterID == 11 && data.receivingNoteID > 0)" ng-click="event.delete($event)"><i class="fa fa-times"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="#" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Print, HttpContext.Current))" title="Print" ng-click="event.getReceivingNotePrintout()"><i class="fa fa-print"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="#" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Print, HttpContext.Current))" title="Print HTML" ng-click="event.checkPrintOut(data.workCenterID, @userInfo.Data.BranchID)"><i class="fa fa-print"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="#" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Reset, HttpContext.Current))" title="Reset" ng-disabled="!data.isConfirm" ng-click="event.reset()"><i style="color:blue" class="fa fa-refresh"></i></a>
+        </li>
+    </ul>
+}
+@section pagejs {
+    <script src="~/Angular/app/jsonService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/support/service.js?c=@System.Guid.NewGuid().ToString().Replace("-","")"></script>
+    <script src="~/Views/ReceivingNote/Service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/ReceivingNote/Team2Warehouse.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script type="text/javascript">
+        jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/receivingNote/';
+        jsonService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+        supportService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/support/';
+        supportService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+        var context = {
+            id: '@ViewBag.ID',
+            backUrl: '@Url.Action("Index", "ReceivingNote")',
+            refreshUrl: '@Url.Action("Team2Warehouse", "ReceivingNote", new { id = UrlParameter.Optional })/',
+            errMsg: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED',
+            reportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]',
+            token: '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]',
+            viewName: 'Team2Warehouse',
+            workOrderIDs: '@workOrderIDs',
+            getProductionItemUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/receivingNote/' + 'get-production-item',
+            vanphatURL: '@Url.Action("VanPhatPrintOut", "ReceivingNote", new {ViewBag.ID})',
+            commonURL: '@Url.Action("PrintOut", "ReceivingNote", new {ViewBag.ID})',
+            branchID: '@userInfo.Data.BranchID',
+        }
+    </script>
+}

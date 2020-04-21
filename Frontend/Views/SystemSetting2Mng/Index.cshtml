@@ -1,0 +1,147 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    var pageSize = System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"];
+    var cookieID = HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString();
+
+    ViewBag.Title = "Search System Setting";
+    ViewBag.Module = "System Setting";
+}
+<div class="jarviswidget jarviswidget-color-darken" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+    <header>
+        <span class="widget-icon">
+            <i class="fa fa-table"></i>
+        </span>
+        <h2>Information</h2>
+    </header>
+    <div class="row" style="padding-bottom:10px;">
+        <section class="col col-sm-2">
+            @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current) != "disabled")
+            {
+            <a class="btn btn-default btn-success" style="height: 30px;" ng-click="event.additemseassion()">
+                <i class="fa fa-plus"></i>  Coppy From Last Seassion To New Seassion
+            </a>
+            }
+        </section>
+        <section class="col col-sm-2" style="margin-left:70px;">
+            <select class="form-control" style="height: 30px;" ng-model="filters.season" ng-options="item.seasonValue as item.seasonText for item in support.season" ng-change="event.refresh()"></select>
+        </section>
+    </div>
+</div>
+<div class="row" style="margin-top: 5px;">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-table"></i>
+                </span>
+                <h2>Search Result</h2>
+            </header>
+            <div>
+                <div class="jarviswidget-editbox"></div>
+                <div class="widget-body">
+                    <div class="tilsoft-table-wrapper" avs-scroll grid-handler="gridHandler">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header">
+                                <div style="width: 80px;">Found<br /><strong style="color: blue;">{{data.totalRows}}</strong></div>
+                                <div style="width: 160px;">Setting<br />Key</div>
+                                <div style="width: 80px;">Setting<br />Value</div>
+                                <div>Description</div>
+                            </div>
+                            <div class="tilsoft-table-filter">
+                                <div style="width: 80px; text-align: center;">
+                                    <a class="btn btn-{{conditions.isDefaultFilter ? 'default' : 'primary'}} btn-xs" ng-click="event.filter()">
+                                        <i class="fa fa-filter"></i>
+                                    </a>
+                                    <a class="btn btn-default btn-xs" ng-click="event.clear()">
+                                        <i class="fa fa-ban"></i>
+                                    </a>
+                                </div>
+                                <div style="width: 160px;">
+                                    <input class="form-control" style="height: 30px; width: 100%; display: none;" />
+                                </div>
+                                <div style="width: 80px;">
+                                    <input class="form-control" style="height: 30px; width: 100%; display: none;" />
+                                </div>
+                                <div></div>
+                            </div>
+                            <div class="tilsoft-table-body">
+                                <table>
+                                    <tbody>
+                                        <tr ng-repeat="item in data.systemSetting">
+                                            <td style="width: 79px; text-align: center;">
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current) != "disabled")
+                                                {
+                                                    <a href="javascript:void(0)" class="btn btn-default btn-primary btn-xs font-11" title="Edit Item" style="width: 60px;" ng-show="item.systemSettingID > 0 && (item.isEditItem == null || !item.isEditItem)" ng-click="event.edit(item)">
+                                                        <i class="fa fa-pencil"></i> Edit
+                                                    </a>
+                                                    <a href="javascript:void(0)" class="btn btn-default btn-warning btn-xs font-11" title="Save Item" style="width: 60px;" ng-show="item.systemSettingID <= 0 || item.isEditItem" ng-click="event.update(item)">
+                                                        <i class="fa fa-save"></i> Save
+                                                    </a>
+                                                }
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current) != "disabled")
+                                                {
+                                                    <a href="javascript:void(0)" class="btn btn-default btn-danger btn-xs font-11" title="Delete Item" style="width: 60px; margin-top: 3px;" ng-show="item.systemSettingID > 0 && (item.isEditItem == null || !item.isEditItem)" ng-click="event.remove(item)">
+                                                        <i class="fa fa-times"></i> Del
+                                                    </a>
+                                                }
+                                                <a href="javascript:void(0)" class="btn btn-default btn-danger btn-xs font-11" title="Cancel Update Item" style="width: 60px; margin-top: 3px;" ng-show="item.systemSettingID <= 0 || item.isEditItem" ng-click="event.cancel(item)">
+                                                    <i class="fa fa-times"></i> Cancel
+                                                </a>
+                                            </td>
+                                            <td style="width: 160px; text-align: center;">
+                                                <label ng-show="item.systemSettingID > 0">{{item.settingKey}}</label>
+                                                <input class="form-control" style="height: 30px; width: 100%;" ng-model="item.settingKeyInput" ng-show="item.systemSettingID < 0" ng-readonly="item.settingKeySelect != null" maxlength="50" ng-style="{'background': (item.settingKeyInput == null || item.settingKeyInput == '') && item.settingKeySelect == null ? '#fff0f0' : '#fff', 'border-color': (item.settingKeyInput == null || item.settingKeyInput == '') && item.settingKeySelect == null ? '#a90329' : '#bdbdbd'}" />
+                                                <select class="form-control" style="height: 30px; width: 100%; margin-top: 5px;" ng-model="item.settingKeySelect" ng-options="item.settingKeyValue as item.settingKeyText for item in support.settingKey" ng-show="item.systemSettingID < 0" ng-disabled="item.settingKeyInput != null && item.settingKeyInput != ''" ng-style="{'background': (item.settingKeyInput == null || item.settingKeyInput == '') && item.settingKeySelect == null ? '#fff0f0' : '#fff', 'border-color': (item.settingKeyInput == null || item.settingKeyInput == '') && item.settingKeySelect == null ? '#a90329' : '#bdbdbd'}">
+                                                    <option value=""></option>
+                                                </select>
+                                            </td>
+                                            <td style="width: 80px; text-align: right;">
+                                                <label ng-show="!item.isEditItem">{{item.settingValue}}</label>
+                                                <input class="form-control" style="height: 30px; width: 100%; text-align: right;" ng-model="item.settingValue" ng-show="item.isEditItem" maxlength="255" />
+                                            </td>
+                                            <td>
+                                                <label ng-show="!item.isEditItem">{{item.description}}</label>
+                                                <textarea class="form-control" style="width: 100%; border: 1px solid #ccc;" rows="3" ng-model="item.description" ng-show="item.isEditItem" maxlength="255"></textarea>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction{
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default" ng-click="event.refresh()">
+                <i class="fa fa-search"></i>
+            </a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default" ng-click="event.refresh()">
+                <i class="fa fa-refresh"></i>
+            </a>
+        </li>
+    </ul>
+}
+
+@section pagejs{
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(serviceRoot)/api/systemSetting2Mng/',
+            token: '@token',
+            pageSize: '@pageSize',
+            cookieID: '@cookieID',
+        };
+    </script>
+    <script type="text/javascript" src="~/Angular/app/systemSetting2Mng/index.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/systemSetting2Mng/service.js?v=@guid"></script>
+}

@@ -1,0 +1,316 @@
+﻿@{
+    if (ViewBag.ID == 0)
+    {
+        ViewBag.Title = "Create New Factory Credit Note";
+    }
+    else
+    {
+        ViewBag.Title = "Edit Factory Credit Note";
+    }
+
+    int supplierId = 0;
+    string season = "";
+    if (Request.Params["s"] != null)
+    {
+        supplierId = Convert.ToInt32(Request.Params["s"]);
+    }
+    if (Request.Params["se"] != null)
+    {
+        season = Request.Params["se"].ToString();
+    }
+}
+<style>
+    .custom-pagination {
+        display: none !important;
+    }
+</style>
+
+<form class="row" name="editForm" id="main-form">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-0" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>General Information</h2>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div class="smart-form">
+                        <fieldset>
+                            <div class="row">
+                                <section class="col col-2">
+                                    <label class="label">Credit Note No</label>
+                                    <label class="input" ng-if="!data.isConfirmed">
+                                        <input name="creditNoteNo" type="text" ng-model="data.creditNoteNo" ng-if="!data.isConfirmed" required />
+                                        <span class="help-block" ng-show="editForm.creditNoteNo.$error.required"><i class="fa fa-warning"></i> Required.</span>
+                                    </label>
+                                    <label class="input" ng-if="data.isConfirmed">
+                                        <span class="form-control">{{data.creditNoteNo}}</span>
+                                    </label>
+                                </section>
+                                <section class="col col-2">
+                                    <label class="label">Issued Date</label>
+                                    <label class="input" ng-if="!data.isConfirmed">
+                                        <input name="issuedDate" type="text" class="datepicker" ng-model="data.issuedDate" data-dateformat="dd/mm/yy" required />
+                                        <i class="icon-append fa fa-calendar"></i>
+                                        <span class="help-block" ng-show="editForm.issuedDate.$error.required"><i class="fa fa-warning"></i> Required.</span>
+                                    </label>
+                                    <label class="input" ng-if="data.isConfirmed">
+                                        <span class="form-control">{{data.issuedDate}}</span>
+                                    </label>
+                                </section>
+                                <section class="col col-2">
+                                    <label class="label">Season</label>
+                                    <label class="input">
+                                        <span class="form-control">{{data.season}}</span>
+                                    </label>
+                                </section>
+                            </div>
+                            <section>
+                                <label class="label">Supplier</label>
+                                <label class="input">
+                                    <span class="form-control">
+                                        <strong>{{data.supplierUD}}</strong> - {{data.supplierNM}}
+                                    </span>
+                                </label>
+                            </section>
+                            <div class="row">
+                                <div class="col col-8">
+                                    <section>
+                                        <label class="label">Remark</label>
+                                        <label class="input" ng-if="!data.isConfirmed">
+                                            <input name="remark" type="text" ng-model="data.remark" required />
+                                            <span class="help-block" ng-show="editForm.remark.$error.required"><i class="fa fa-warning"></i> Required.</span>
+                                        </label>
+                                        <label class="input" ng-if="data.isConfirmed">
+                                            <span class="form-control">{{data.remark}}</span>
+                                        </label>
+                                    </section>   
+                                </div>
+                                <section class="col col-4">
+                                    <div class="font-md">
+                                        <div>
+                                            <strong>STATUS :</strong>
+                                            <span class="pull-right" ng-if="!data.isConfirmed"> PENDING </span>
+                                            <span class="pull-right" ng-if="data.isConfirmed"> CONFIRMED </span>
+                                        </div>
+                                    </div>
+                                    <div class="font-md">
+                                        <div>
+                                            <strong>&nbsp;</strong>
+                                            <span class="pull-right">&nbsp;</span>
+                                        </div>
+                                    </div>
+                                    <div class="font-md">
+                                        <div>
+                                            <strong>TOTAL :</strong>
+                                            <span class="pull-right"> {{method.getTotal() | currency:'$':2}} </span>
+                                        </div>
+                                    </div>
+                                </section>
+                            </div>
+                            <section>
+                                <div class="note" ng-if="data.updatorName"><strong>Updated By</strong>: {{data.updatorName}} on {{data.updatedDate}}</div>
+                                <div class="note" ng-if="data.confirmerName"><strong>Confirmed By</strong>: {{data.confirmerName}} on {{data.confirmedDate}}</div>
+                            </section>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="jarviswidget" id="wid-id-1" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>Invoice</h2>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div class="smart-form">
+                        <fieldset>
+                            <section ng-if="!data.isConfirmed">
+                                <label class="input">
+                                    <i class="icon-append fa fa-search"></i>
+                                    <input placeholder="Provide at least 3 chars to search for the invoice" id="invoice-autocomplete" type="text">
+                                </label>
+                                <div class="note">
+                                    <strong>You selected</strong>: <span style="font-size: 11px;" ng-if="invoiceSearchResult.invoice">{{invoiceSearchResult.invoice.invoiceNo}} ({{invoiceSearchResult.invoice.invoiceDate}}): {{invoiceSearchResult.invoice.totalAmount | currency:'$':2}} <a class="btn btn-primary btn-xs font-11" href="javascript:void(0)" ng-click="event.addInvoice()">Add</a></span>
+                                </div>
+                            </section>
+
+                            <section>
+                                <div id="grdInvoice" class="tilsoft-table-wrapper">
+                                    <div class="tilsoft-table">
+                                        <div class="tilsoft-table-header" style="width: 1000px;">
+                                            <div style="width: 80px;">&nbsp;</div>
+                                            <div style="width: 120px;">Invoice No</div>
+                                            <div style="width: 120px;">Invoice Amount</div>
+                                            <div style="width: 120px;">Credit Amount</div>
+                                            <div>Remark</div>
+                                        </div>
+                                        <div class="tilsoft-table-body" style="width: 1000px;">
+                                            <table>
+                                                <tr ng-repeat="item in data.factoryCreditNoteDetails">
+                                                    <td style="width: 80px; text-align: center;">
+                                                        <a ng-click="event.removeInvoice(item)" class="btn btn-danger btn-xs font-11 {{data.isConfirmed==true?'disabled' : ''}}" href="javascript:void(0);"><i class=" fa fa-times"></i> Remove</a>
+                                                    </td>
+                                                    <td style="width: 120px; text-align: center;">
+                                                        {{item.invoiceNo}}
+                                                        <br />
+                                                        ({{item.invoiceDate}})
+                                                    </td>
+                                                    <td style="width: 120px; text-align: right;">{{item.invoiceAmount | currency:'$':2}}</td>
+
+                                                    <td style="width: 120px; text-align: right;" ng-if="!data.isConfirmed"><input type="text" ng-model="item.creditAmount" style="width: 100%; text-align: right;" /></td>
+                                                    <td style="width: 120px; text-align: right;" ng-if="data.isConfirmed">{{item.creditAmount | currency:'$':2}}</td>
+
+                                                    <td ng-if="!data.isConfirmed"><input type="text" ng-model="item.remark" style="width: 100%;" /></td>
+                                                    <td ng-if="data.isConfirmed">{{item.remark}}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="width: 80px; text-align:right">&nbsp;</td>
+                                                    <td style="text-align: right; width: 120px; font-weight: bold;">TOTAL</td>
+                                                    <td style="width: 120px; text-align:right; font-weight: bold;">&nbsp;</td>
+                                                    <td style="width: 120px; text-align:right; font-weight: bold;">{{method.getTotal() | currency:'$':2}}</td>
+                                                    <td>&nbsp;</td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+<div id="productDetail" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title" id="myModalLabel">Product: {{product.product.description}}</h4>
+            </div>
+            <div class="modal-body no-padding">
+                <div class="smart-form">
+                    <fieldset>
+                        <div class="row">
+                            <section class="col col-3">
+                                <label class="label">Factory</label>
+                                <label class="input">
+                                    <span class="form-control">{{product.product.factoryUD}}</span>
+                                </label>
+                            </section>
+
+                            <section class="col col-3">
+                                <label class="label">Client</label>
+                                <label class="input">
+                                    <span class="form-control">{{product.product.clientUD}}</span>
+                                </label>
+                            </section>
+                            <section class="col col-3">
+                                <label class="label">Factory Order</label>
+                                <label class="input">
+                                    <span class="form-control">{{product.product.factoryOrderUD}}</span>
+                                </label>
+                            </section>
+                            <section class="col col-3">
+                                <label class="label">LDS</label>
+                                <label class="input">
+                                    <span class="form-control">{{product.product.lds}}</span>
+                                </label>
+                            </section>
+                        </div>
+                        <section>
+                            <label class="label">Art.Code</label>
+                            <label class="input">
+                                <span class="form-control">{{product.product.articleCode}}</span>
+                            </label>
+                        </section>
+                        <section>
+                            <label class="label">Description</label>
+                            <label class="input">
+                                <span class="form-control">{{product.product.description}}</span>
+                            </label>
+                        </section>
+                        <div class="row">
+                            <section class="col col-3">
+                                <label class="label">Ordered qnt</label>
+                                <label class="input">
+                                    <span class="form-control" style="text-align: right;">{{product.product.orderQnt | currency:'':0}}</span>
+                                </label>
+                            </section>
+                            <section class="col col-3">
+                                <label class="label">Load ability (40HC)</label>
+                                <label class="input">
+                                    <span class="form-control" style="text-align: right;">{{product.product.qnt40HC | currency:'':0}}</span>
+                                </label>
+                            </section>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" ng-click="event.addProduct()">
+                    Add
+                </button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "FactoryCreditNoteMng")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="event.update()" ng-disabled="data.isConfirmed"><i class="fa fa-save"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current))" title="Delete" ng-click="event.delete()" style="color: #ff0000;" ng-disabled="data.isConfirmed"><i class="fa fa-times"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default disabled" title="Print"><i class="fa fa-print"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Approve, HttpContext.Current))" title="Approve" ng-disabled="data.isConfirmed" ng-click="event.approve()"><i class="fa fa-thumbs-o-up"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Reset, HttpContext.Current))" title="Reset approval status" ng-disabled="!data.isConfirmed" ng-click="event.reset()"><i class="fa fa-thumbs-o-down"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script src="~/TemplateResource/js/plugin/jquery.autocomplete.min.js"></script>
+    <script src="~/Angular/app/jsonService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script type="text/javascript">
+        jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/factorycreditnote/';
+        jsonService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+        jsonService.supportServiceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/support/';
+        var context = {
+            id: @ViewBag.ID,
+            supplierId : @supplierId,
+            season: '@season',
+            errMsg: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED',
+            backUrl: '@Url.Action("Index", "FactoryCreditNoteMng")',
+            refreshUrl: '@Url.Action("Edit", "FactoryCreditNoteMng", new { id = UrlParameter.Optional })/',
+            editTitle: '@ViewBag.Title'
+        }
+    </script>
+    <script src="~/Angular/app/factoryCreditNoteMng/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/factoryCreditNoteMng/edit.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}
+

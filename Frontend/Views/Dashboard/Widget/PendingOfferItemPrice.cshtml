@@ -1,0 +1,132 @@
+﻿@{
+    Frontend.APIDTO.APIUserInformation userInfo = (Frontend.APIDTO.APIUserInformation)ViewBag.CurrentLoginUserInfo;
+    string currentSeason = Library.Helper.GetCurrentSeason();
+    string nextSeason = Library.Helper.GetNextSeason(currentSeason);
+    string prevSeason = Library.Helper.GetPreviousSeason(currentSeason);
+
+    if (DateTime.Now.Month == 8)
+    {
+        currentSeason = nextSeason;
+    }
+    nextSeason = Library.Helper.GetNextSeason(currentSeason);
+    prevSeason = Library.Helper.GetPreviousSeason(currentSeason);
+}
+
+<style>
+    .tilsoft-table .tilsoft-table-body {
+        height: auto !important;
+        max-height: none
+    }
+
+    .border-left {
+        border-left: solid;
+        border-left-color: coral;
+    }
+
+    .border-top {
+        border-top: solid;
+        border-top-color: coral;
+    }
+
+    .border-right {
+        border-right: solid !important;
+        border-right-color: coral !important;
+    }
+
+    tbody.border-section-1 td:first-child {
+        border-left: solid 1px #959595;
+        border-bottom: solid 1px #959595 !important;
+    }
+
+    tbody.border-section-1 td:last-child {
+        border-right: solid 1px #959595;
+    }
+
+    tbody.border-section-1 tr:first-child td {
+        border-top: solid 1px #959595;
+    }
+
+    tbody.border-section-1 tr:last-child td {
+        border-bottom: solid 1px #959595;
+    }
+</style>
+
+<div class="col-sm-12" ng-controller="pendingOfferItemPriceController">
+
+    <div class="well" style="padding: 10px;">
+        <h1 style="margin-top: 0px;">PENDING OFFER ITEM PRICE @currentSeason</h1>
+        <div class="avs-table-wrapper" avs-table grid-handler="pendingOfferItemPrice.pendingOfferItemPriceHandler" id="widget-pendingOfferItemPrice-container" style="display:none">
+            <div class="avs-table-header">
+                <div class="avs-table-header-container">
+                    <table>
+                        <tr class="header-row">
+                            <td style="width:100px">Image</td>
+                            <td style="width:100px;">Client</td>
+                            <td style="width:100px;text-align:center">Factory</td>
+                            <td style="width:400px;text-align:left">Description</td>
+                            <td style="width:150px">Waiting Status</td>
+                        </tr>
+                        <tr class="filter-row">
+                            <td></td>
+                            <td><input type="text" ng-model="pendingOfferItemPrice.pendingOfferItemPriceFilter.clientUD" /></td>
+                            <td><input type="text" ng-model="pendingOfferItemPrice.pendingOfferItemPriceFilter.factoryUD" /></td>
+                            <td><input type="text" ng-model="pendingOfferItemPrice.pendingOfferItemPriceFilter.description" /></td>
+                            <td>
+                                <select ng-model="pendingOfferItemPrice.pendingOfferItemPriceFilter.waitingStatusID"
+                                        ng-options="gItem.id as gItem.name for gItem in pendingOfferItemPrice.waitStatuses">
+                                    <option value=""></option>
+                                </select>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div class="avs-table-body">
+                <table>
+                    <tr ng-repeat="item in pendingOfferItemPrice.pendingOfferItemPriceData | pendingOfferItemPriceCustomFilter : pendingOfferItemPrice.pendingOfferItemPriceFilter.clientUD :pendingOfferItemPrice.pendingOfferItemPriceFilter.factoryUD : pendingOfferItemPrice.pendingOfferItemPriceFilter.description : pendingOfferItemPrice.pendingOfferItemPriceFilter.waitingStatusID">
+                        <td>
+                            <a href="{{item.fileLocation}}" data-featherlight="image">
+                                <img style="width:95%" ng-src="{{item.thumbnailLocation}}" />
+                            </a>
+                        </td>
+                        <td style="text-align:center">
+                            <a href="@Url.Action("Edit", "Client", new { id = UrlParameter.Optional })/{{item.clientID}}">
+                                {{item.clientUD}}
+                            </a>
+                        </td>
+                        <td style="text-align:center">
+                            <a href="@Url.Action("Edit", "Factory", new { id = UrlParameter.Optional })/{{item.factoryID}}">
+                                {{item.factoryUD}}
+                            </a>
+                        </td>
+                        <td>
+                            <span style="font-weight:bold;">{{item.articleCode}}</span>
+                            <br />
+                            {{item.description}}
+                        </td>
+                        <td style="text-align:center">
+                            {{item.waitingStatusID === 1 ? 'WAIT FOR EUROFAR' : (item.waitingStatusID === 2 ? 'WAIT FOR FACTORY' : '')}}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="smart-form" id="widget-pendingOfferItemPrice-loading">
+            <fieldset>
+                <section>
+                    <i class="fa fa-spin fa-refresh"></i> LOADING ...
+                </section>
+            </fieldset>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    var pendingOfferItemPriceContext = {
+        serviceUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/dashboardmng/',
+        token: '@ViewBag.Token',
+        currentSeason: '@currentSeason',
+        prevSeason: '@prevSeason',
+        nextSeason: '@nextSeason'
+    }
+</script>

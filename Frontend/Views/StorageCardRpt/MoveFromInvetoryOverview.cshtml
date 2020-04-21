@@ -1,0 +1,235 @@
+﻿@{
+    ViewBag.Title = "Export Storage Card";
+    ViewBag.Module = "Storage Card";
+
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    var pageSize = System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"];
+    var backendReportUrl = System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"];
+    var supportServiceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+
+    Frontend.APIDTO.APIUserInformation userInfo = (Frontend.APIDTO.APIUserInformation)Session[Frontend.Customize.Common.ProjectDefinition.USER_INFO_SESSION];
+}
+
+<div class="row" name="indexForm">
+    <article class="col col-sm-12">
+        <div class="jarviswidget" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>Storage Card Overview</h2>
+            </header>
+            <div class="no-padding">
+                <div class="widget-body">
+                    <div class="smart-form">
+                        <fieldset>
+                            <!-- Production Item -->
+                            <section class="col col-sm-6">
+                                <label>Production Item <em class="note note-error" ng-show="(ngInitProductionItem == null || ngInitProductionItem == '')">(Required)</em></label>
+                                <label class="input">
+                                    <input class="form-control" style="font-family: Arial; font-size: 12px" avs-remote-auto-complete ng-request-param="ngRequestProductionItem" ng-init-param="ngInitProductionItem" ng-init-param-2="@userInfo.Data.BranchID" ng-model="ngInitProductionItem" ng-item-value="ngItemProductionItem" ng-item-selected="event.select(ngItemProductionItem)" data-method="POST" data-format-function="formatData" required>
+                                </label>
+                            </section>
+
+                            <!-- Factory Warehouse -->
+                            <section class="col col-sm-2">
+                                <label>Factory Warehouse <em class="note note-error" ng-show="(filters.factoryWarehouseID == null)">(Required)</em></label>
+                                <label class="input">
+                                    <select id="factoryWarehouse" class="select2" style="font-family: Arial; font-size: 12px" ng-model="filters.factoryWarehouseID" ng-options="item.factoryWarehouseID as item.factoryWarehouseNM for item in factoryWarehouses" required>
+                                        <option value=""></option>
+                                    </select>
+                                </label>
+                            </section>
+
+                            <!-- From Date -->
+                            <section class="col col-sm-2">
+                                <label><i class="fa fa-calendar"></i> From Date <em class="note note-error" ng-show="(filters.startDate == null || filters.startDate == '')">(Required)</em></label>
+                                <label class="input">
+                                    <input id="startDate" type="text" class="form-control" style="font-family: Arial; font-size: 12px" avs-date ng-model="filters.startDate" required />
+                                </label>
+                            </section>
+
+                            <!-- To Date -->
+                            <section class="col col-sm-2">
+                                <label><i class="fa fa-calendar"></i> To Date <em class="note note-error" ng-show="(filters.endDate == null || filters.endDate == '')">(Required)</em></label>
+                                <label class="input">
+                                    <input id="endDate" type="text" class="form-control" style="font-family: Arial; font-size: 12px" avs-date ng-model="filters.endDate" required />
+                                </label>
+                            </section>
+                        </fieldset>
+                    </div>
+                    <div avs-scrollable-table class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header" style="width:1430px;">
+                                <div style="width:45px; height:60px;">#</div>
+                                <div style="width:85px; height:60px;">DOCUMENT<br>DATE</div>
+                                <div class="no-padding" style="width: 180px; height: 60px; text-align: center;">
+                                    <div class="no-padding" style="width: 100%; height: 30px; border-right: none; line-height: 30px">DOCUMENT NUMBER</div>
+                                    <div class="no-padding" style="width: 100%; height: 30px; border-right: none; line-height: 30px">
+                                        <div class="no-padding" style="width: 90px; text-align: center; height: 30px; line-height: 30px;">IMPORT</div>
+                                        <div class="no-padding" style="text-align: center; height: 30px; line-height: 30px;">EXPORT</div>
+                                    </div>
+                                </div>
+                                <div style="width:250px; height:60px;">DOCUMENT<br>DESCRIPTION</div>
+                                <div style="width:65px; height:60px;">DEFAULT UNIT</div>
+                                <div style="width:60px; height:60px;">UNIT</div>
+                                <div class="no-padding" style="width: 360px; height: 60px; text-align: center;">
+                                    <div class="no-padding" style="width: 100%; height: 30px; border-right: none; line-height: 30px">QUANTITY</div>
+                                    <div class="no-padding" style="width: 100%; height: 30px; border-right: none; line-height: 30px">
+                                        <div class="no-padding" style="width: 90px; text-align: center; height: 30px; line-height: 30px;">BEGINNING</div>
+                                        <div class="no-padding" style="width: 90px; text-align: center; height: 30px; line-height: 30px;">RECEIVING</div>
+                                        <div class="no-padding" style="width: 90px; text-align: center; height: 30px; line-height: 30px;">DELIVERING</div>
+                                        <div class="no-padding" style="text-align: center; height: 30px; line-height: 30px;">ENDING</div>
+                                    </div>
+                                </div>
+                                <div style="width:300px; height:60px;">REMARK</div>
+                                <div style="border-bottom:none; height:60px;"></div>
+                            </div>
+                            <div class="tilsoft-table-totalrow" style="width:1430px; margin-top: 60px;">
+                                <div style="width:685px;">TOTAL</div>
+                                <div style="width:90px; color:#0026ff;">{{method.getBeginning() | number : 4}}</div>
+                                <div style="width:90px;">{{method.sumImport() | number : 4}}</div>
+                                <div style="width:90px;">{{method.sumExport() | number : 4}}</div>
+                                <div style="width:90px;">{{method.getBeginning() + method.sumImport() - method.sumExport() | number : 4}}</div>
+                                <div style="width:300px;"></div>
+                                <div style="border-bottom:none;"></div>
+                            </div>
+                            <div class="tilsoft-table-body" style="width:1430px; margin-top:90px;">
+                                <table>
+                                    <tbody>
+                                        <tr ng-repeat="item in data">
+                                            <td style="width:45px; text-align:center;">{{item.primaryID}}</td>
+                                            <td style="width:85px; text-align:center;">{{item.documentDate}}</td>
+                                            <td style="width:90px; text-align:center;">
+                                                <a href="@Url.Action("PO2WarehouseWithoutWorkOrder", "ReceivingNote")/{{item.receivingNoteID}}" target="_blank" ng-if="item.viewName == 'PO2WarehouseWithoutWorkOrder'">
+                                                    {{item.importDocumentNo}}
+                                                </a>
+
+                                                <a href="@Url.Action("PO2Warehouse", "ReceivingNote")/{{item.receivingNoteID}}" target="_blank" ng-if="item.viewName == 'PO2Warehouse'">
+                                                    {{item.importDocumentNo}}
+                                                </a>
+
+                                                <a href="@Url.Action("Team2Warehouse", "ReceivingNote")/{{item.receivingNoteID}}" target="_blank" ng-if="item.viewName == 'Team2Warehouse'">
+                                                    {{item.importDocumentNo}}
+                                                </a>
+
+                                                <a href="@Url.Action("Edit", "ReceivingNoteDefaultMng")/{{item.receivingNoteID}}" target="_blank" ng-if="item.documentTypeID == 1">
+                                                    {{item.importDocumentNo}}
+                                                </a>
+
+                                                <a href="@Url.Action("Edit", "ReceivingNoteRepairAssemblyMng")/{{item.receivingNoteID}}" target="_blank" ng-if="item.documentTypeID == 2">
+                                                    {{item.importDocumentNo}}
+                                                </a>
+
+                                                <a href="@Url.Action("Edit", "WarehouseTransferMng")/{{item.warehouseTransferID}}" target="_blank" ng-if="item.documentTypeID == 3">
+                                                    {{item.importDocumentNo}}
+                                                </a>
+                                            </td>
+                                            <td style="width:90px; text-align:center;">
+                                                <a href="@Url.Action("SaleOrderWithoutWorkOrder", "DeliveryNote2")/{{item.deliveryNoteID}}" target="_blank" ng-if="item.viewName == 'SaleOrderWithoutWorkOrder'">
+                                                    {{item.exportDocumentNo}}
+                                                </a>
+
+                                                <a href="@Url.Action("Warehouse2Team", "DeliveryNote2")/{{item.deliveryNoteID}}" target="_blank" ng-if="item.viewName == 'Warehouse2Team'">
+                                                    {{item.exportDocumentNo}}
+                                                </a>
+
+                                                <a href="@Url.Action("Team2Team", "DeliveryNote2")/{{item.deliveryNoteID}}" target="_blank" ng-if="item.viewName == 'Team2Team'">
+                                                    {{item.exportDocumentNo}}
+                                                </a>
+
+                                                <a href="@Url.Action("AmendWarehouse2Team", "DeliveryNote2")/{{item.deliveryNoteID}}" target="_blank" ng-if="item.viewName == 'AmendWarehouse2Team'">
+                                                    {{item.exportDocumentNo}}
+                                                </a>
+
+                                                <a href="@Url.Action("AmendTeam2Team", "DeliveryNote2")/{{item.deliveryNoteID}}" target="_blank" ng-if="item.viewName == 'AmendTeam2Team'">
+                                                    {{item.exportDocumentNo}}
+                                                </a>
+
+                                                <a href="@Url.Action("SaleOrder", "DeliveryNote2")/{{item.deliveryNoteID}}" target="_blank" ng-if="item.viewName == 'SaleOrder'">
+                                                    {{item.exportDocumentNo}}
+                                                </a>
+
+                                                <a href="@Url.Action("Edit", "DeliveryNoteDefaultMng")/{{item.deliveryNoteID}}" target="_blank" ng-if="item.documentTypeID == 1">
+                                                    {{item.exportDocumentNo}}
+                                                </a>
+
+                                                <a href="@Url.Action("Edit", "deliveryNoteRepairAssemplyMng")/{{item.deliveryNoteID}}" target="_blank" ng-if="item.documentTypeID == 2">
+                                                    {{item.exportDocumentNo}}
+                                                </a>
+
+                                                <a href="@Url.Action("Edit", "DeliveryNoteToBeDestroyedMng")/{{item.deliveryNoteID}}" target="_blank" ng-if="item.documentTypeID == 4">
+                                                    {{item.exportDocumentNo}}
+                                                </a>
+
+                                                <a href="@Url.Action("Edit", "WarehouseTransferMng")/{{item.warehouseTransferID}}" target="_blank" ng-if="item.documentTypeID == 3">
+                                                    {{item.exportDocumentNo}}
+                                                </a>
+                                            </td>
+                                            <td style="width:250px;">{{item.description}}</td>
+                                            <td style="width:65px;">{{item.productionUnitNM}}</td>
+                                            <td style="width:60px;">
+                                                <a href="" target="_blank" ng-if="item.deliveryNoteID != null" style="color:black">
+                                                    {{item.deliveryNoteUnitNM}}
+                                                </a>
+                                                <a href="" target="_blank" ng-if="item.receivingNoteID != null" style="color:black">
+                                                    {{item.recevingNoteUnitNM}}
+                                                </a>
+                                            </td>
+                                            <td style="width:90px; text-align:right;"></td>
+                                            <td style="width:90px; text-align:right;">{{(item.receiving === 0) ? '-' : (item.receiving | number : 4)}}</td>
+                                            <td style="width:90px; text-align:right;">{{(item.delivering === 0) ? '-' : (item.delivering | number : 4)}}</td>
+                                            <td style="width:90px; text-align:right;">{{item.ending | number : 4}}</td>
+                                            <td style="width:300px;">{{item.remark}}</td>
+                                            <td style="border-bottom:none;"></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction{
+    <ul id="sparks">
+        <li>
+            <a href="javascript:void(0)" class="btn btn-default btn-sm" ng-click="event.search(filters.productionItemID, filters.factoryWarehouseID, filters.startDate, filters.endDate)">
+                <i class="fa fa-code"></i> Search Storage Card
+            </a>
+        </li>
+        <li>
+            <a href="javascript:void(0)" class="btn btn-default btn-sm" ng-click="event.report()">
+                <i class="fa fa-file-excel-o"></i> Export Storage Card
+            </a>
+        </li>
+    </ul>
+}
+
+@section pagejs{
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(serviceRoot)/api/storageCardRpt/',
+            token: '@token',
+            pageSize: '@pageSize',
+            backendReportUrl: '@backendReportUrl',
+            supportServiceUrl: '@(supportServiceRoot)/api/support/',
+            errMsg: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED',
+
+            productionItemID: '@ViewBag.ProductionItemID',
+            factoryWarehouseID: '@ViewBag.FactoryWarehouseID',
+            startDate: '@ViewBag.StartDate',
+            endDate: '@ViewBag.EndDate',
+            branchID: '@userInfo.Data.BranchID',
+        };
+    </script>
+    <script type="text/javascript" src="~/Views/StorageCardRpt/moveFromInventoryOverview.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Views/StorageCardRpt/service.js?v=@guid"></script>
+}
+

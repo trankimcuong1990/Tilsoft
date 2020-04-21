@@ -1,0 +1,158 @@
+﻿@{
+    /**/
+
+    Layout = "~/Views/Shared/_Print.cshtml";
+    Frontend.Models.ReportDTO.ReceivingNotePrintoutDTO data = (Frontend.Models.ReportDTO.ReceivingNotePrintoutDTO)ViewBag.Data;
+    ViewBag.Day = DateTime.Now.Day;
+    ViewBag.Month = DateTime.Now.Month;
+    ViewBag.Year = DateTime.Now.Year;
+    int columns = 0;
+    decimal? totalQuantity = 0;
+    decimal? totalAmount = 0;
+    var issueDate = "03/05/2018";
+    var codeWareHouse = "AV-WH-FRM-03";
+
+}
+<script type="text/javascript">
+    function printMyPage() {
+        //Get the print button
+        var printButton = document.getElementById("myPrntbtn");
+        //Hide the print button
+        printButton.style.visibility = 'hidden';
+        //Print the page content
+        window.print()
+        //Show back the print button on web page
+        printButton.style.visibility = 'visible';
+    }
+</script>
+<button onclick="printMyPage()" id="myPrntbtn" style="float:right">Print this page</button>
+<body style="font-family:'Times New Roman'; font-size:16px" @*onload="window.print()"*@>
+    <table id="printArea" style="width:100%; max-width:1000px" @*width="1000"*@ border="0" align="center">
+        <tr>
+            <td width="300px"><img height="100" src="~/img/auvietfur/Logo.png" style="margin-left: 50px;" /></td>
+            <td style="vertical-align:bottom; text-align: right" width="800px">
+                <label style="font-weight:bold">Warehouse Dept.</label> <br />
+                <label style="font-weight:bold"> @codeWareHouse </label>   <br />
+                <label style="font-weight:bold">
+                    Issue Dated:
+                </label>
+                <label>
+                    @issueDate
+                </label>
+                <br />
+                <label> Mẫu số:01-VT( Ban hành theo QĐ số 15/2006/QĐ-BTC ngày 20/03/2006 của Bộ trưởng)</label>
+            </td>
+        </tr>
+        <tr>
+            <td width="500px"><strong>TY TNHH SX TM XNK ÂU VIỆT FURNITURE</strong></td>
+            <td align="center"><strong>PHIẾU NHẬP KHO</strong>  số: @data.ReceiptNo</td>
+        </tr>
+        <tr>
+            <td width="500px">Ấp Thành Hóa, Xã Tân Thành Bình, MCB, BT</td>
+            <td align="center" width="500px">Ngày @data.DayReceipt tháng @data.MonthReceipt năm @data.YearReceipt</td>
+        </tr>
+        <tr>
+            <td width="500px">Tel: (075)3 670 679</td>
+            <td width="500px">&nbsp;</td>
+        </tr>
+        <tr>
+            <td width="500px">&nbsp;</td>
+            <td width="500px">&nbsp;</td>
+        </tr>
+        <tr>
+            <td colspan="1" width="500px">- Họ và tên người nhập hàng: @data.DeliverName</td>
+            <td colspan="1" width="500px">- Địa chỉ(Bộ phận): @data.DeliverAddress</td>
+        </tr>
+        <tr>
+            <td colspan="2" width="1000px">- Lý do nhập hàng: @data.Reason</td>
+        </tr>
+        <tr>
+            <td colspan="1" width="500px">- Nhập tại kho (ngăn lô): </td>
+            <td colspan="1" width="500px">- Địa điểm: </td>
+        </tr>
+    </table>
+    <br />
+    <table @*width="1000"*@ style="border: 2px solid;border-collapse: collapse; width:100%; max-width:1000px" align="center">
+        <tr align="center" style="border: 1px solid">
+            <td style="border: 1px solid; font-weight:bold" width="21" rowspan="2">Số TT</td>
+            <td style="border: 1px solid; font-weight:bold" width="214" rowspan="2">Tên, nhãn hiệu, quy cách, phẩm chất vật tư,dụng cụ, hàng hóa</td>
+            <td style="border: 1px solid; font-weight:bold" width="85" rowspan="2">Mã Số</td>
+            <td style="border: 1px solid; font-weight:bold" width="56" rowspan="2">ĐVT</td>
+            <td style="border: 1px solid; font-weight:bold" width="56" rowspan="2">WorkOrder</td>
+            <td style="border: 1px solid; font-weight:bold; font-weight:bold" colspan="2">Số lượng</td>
+            <td style="border: 1px solid; font-weight:bold" width="55" rowspan="2">Client(ID)</td>
+            <td style="border: 1px solid; font-weight:bold" width="79" rowspan="2">Ghi chú</td>
+        </tr>
+        <tr style="border: 1px solid">
+            <td style="border: 1px solid; font-weight:bold" width="45" align="center">Yêu cầu</td>
+            <td style="border: 1px solid; font-weight:bold" width="45" align="center">Thực Nhập</td>
+        </tr>
+        @foreach (Frontend.Models.ReportDTO.ReceivingNoteDetailPrintoutDTO dtoDetail in data.ReceivingNoteDetailPrintoutDTOs)
+        {
+            columns = columns + 1;
+            totalQuantity += dtoDetail.Quantity;
+            totalAmount += dtoDetail.Amount;
+        <tr align="center" style="border: 1px solid; font-family:'Times New Roman'; font-size:15px">
+            <td style="border: 1px solid">@columns</td>
+            <td style="border: 1px solid; text-align:left">@dtoDetail.ProductionItemNM</td>
+            <td style="border: 1px solid; text-align:left">@dtoDetail.ProductionItemUD</td>
+            <td style="border: 1px solid">@dtoDetail.UnitNM</td>
+            <td style="border: 1px solid">@dtoDetail.WorkOrderUD</td>
+            <td style="border: 1px solid">&nbsp;</td>
+            <td style="border: 1px solid;text-align:right">@dtoDetail.Quantity</td>
+            <td style="border: 1px solid" align="center">@dtoDetail.ClientID</td>
+            @if (dtoDetail.Weight != 0)
+            {
+                <td style="border: 1px solid" align="left">@dtoDetail.Remark (@dtoDetail.Weight)</td>
+            }
+            else
+            {
+                <td style="border: 1px solid" align="left">@dtoDetail.Remark</td>
+            }         
+        </tr>
+        }
+
+        <tr align="center">
+            <td style="border: 1px solid">&nbsp;</td>
+            <td style="border: 1px solid;text-align:left"><strong>TỔNG CỘNG</strong></td>
+            <td style="border: 1px solid">&nbsp;</td>
+            <td style="border: 1px solid">&nbsp;</td>
+            <td style="border: 1px solid">&nbsp;</td>
+            <td style="border: 1px solid">&nbsp;</td>
+            <td style="border: 1px solid;text-align:right"><strong>@totalQuantity</strong></td>
+            <td style="border: 1px solid" align="right">&nbsp;</td>
+            <td style="border: 1px solid" align="right"><strong>&nbsp;</strong></td>
+        </tr>
+    </table>
+    <br />
+    <table style="width:100%; max-width:1000px" @*width="1000"*@ border="0" align="center">
+        <tr align="center">
+            <td width="800"></td>
+            <td width="200" align="left">Ngày @ViewBag.Day tháng @ViewBag.Month năm @ViewBag.Year</td>
+        </tr>
+    </table>
+    <br />
+    <table style="width:100%; max-width:1000px" @*width="1000"*@ border="0" align="center">
+        <tr align="center">
+            <td>Người lập phiếu</td>
+            <td>Tài xế</td>
+            <td>Người giao hàng</td>
+            <td>Thủ kho</td>
+            <td>
+                Thủ trưởng đơn vị
+                <br />
+                Hoặc Người được Ủy Quyền
+            </td>
+        </tr>
+        <tr align="center">
+            <td>(Ký, họ tên)</td>
+            <td>(Ký, họ tên)</td>
+            <td>(Ký, họ tên)</td>
+            <td>(Ký, họ tên)</td>
+            <td>(Ký, họ tên)</td>
+        </tr>
+    </table>
+
+</body>
+
+

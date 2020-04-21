@@ -1,0 +1,140 @@
+﻿<style>
+    .table th {
+        text-align: center;
+    }
+
+    .cb-t {
+        border-top: solid 2px #000 !important;
+    }
+    .cb-l {
+        border-left: solid 2px #000 !important;
+    }
+    .cb-r {
+        border-right: solid 2px #000 !important;
+    }
+    .cb-b {
+        border-bottom: solid 2px #000 !important;
+    }
+</style>
+
+<div class="col-sm-12" ng-controller="performanceController">
+    <div class="well rptContent" style="padding: 10px; display: none;">
+        <h1 style="margin-top: 0px;">PERFORMANCE</h1>
+
+        <div id="pnlPerformance">
+            <div style="overflow-x: scroll; background-color: #fff;">
+                <table class="table table-bordered" style="font-size: 11px; margin-bottom: 0px;">
+                    <tr>
+                        <th rowspan="2">Season</th>
+                        <th colspan="4" class="cb-l cb-t">Expectation</th>
+                        <th colspan="4" class="cb-l cb-t">P/I</th>
+                        <th colspan="7" class="cb-l cb-t">Confirmed P/I</th>
+                        <th colspan="4" class="cb-l cb-t cb-r">C/I</th>
+                    </tr>
+                    <tr>
+                        <th class="cb-l">Qnt 40HC</th>
+                        <th>USD</th>
+                        <th>EUR</th>
+                        <th>Total EUR</th>
+
+                        <th class="cb-l">Qnt 40HC</th>
+                        <th>USD</th>
+                        <th>EUR</th>
+                        <th>Total EUR</th>
+
+                        <th class="cb-l">Qnt 40HC</th>
+                        <th>USD</th>
+                        <th>EUR</th>
+                        <th>Total EUR</th>
+                        <th>Delta 6</th>
+                        <th>% Delta 6</th>
+                        <th>% AVG Delta 6</th>
+
+                        <th class="cb-l">Qnt 40HC</th>
+                        <th>USD</th>
+                        <th>EUR</th>
+                        <th class="cb-r">Total EUR</th>
+                    </tr>
+                    <tr ng-repeat="item in performance.data">
+                        <td style="text-align: center;">{{item.season}}</td>
+
+                        <td class="cb-l" style="text-align: right;">{{item.expectationQnt40HC | number:1}}</td>
+                        <td style="text-align: right;">{{item.expectationAmountUSD | currency:'$':0}}</td>
+                        <td style="text-align: right;">{{item.expectationAmountEUR | currency:'&euro;':0}}</td>
+                        <td style="text-align: right;">{{item.expectationTotalEUR | currency:'&euro;':0}}</td>
+
+                        <td class="cb-l" style="text-align: right;">{{item.piTotalQnt40HC | number:1}}</td>
+                        <td style="text-align: right;">{{item.piTotalAmountUSD | currency:'$':0}}</td>
+                        <td style="text-align: right;">{{item.piTotalAmountEUR | currency:'&euro;':0}}</td>
+                        <td style="text-align: right;">{{item.piTotalTotalEUR | currency:'&euro;':0}}</td>
+
+                        <td class="cb-l" style="text-align: right;">{{item.piConfirmedQnt40HC | number:1}}</td>
+                        <td style="text-align: right;">{{item.piConfirmedAmountUSD | currency:'$':0}}</td>
+                        <td style="text-align: right;">{{item.piConfirmedAmountEUR | currency:'&euro;':0}}</td>
+                        <td style="text-align: right;">{{item.piConfirmedTotalEUR | currency:'&euro;':0}}</td>
+                        <td style="text-align: right;">{{item.piConfirmedDelta6EUR | currency:'&euro;':0}}</td>
+                        <td style="text-align: right;">{{item.delta6Percent | number:1}}{{item.avgDelta6Percent !== null ? '%' : ''}}</td>
+                        <td style="text-align: right;">{{item.avgDelta6Percent | number:1}}{{item.avgDelta6Percent !== null ? '%' : ''}}</td>
+
+                        <td class="cb-l" style="text-align: right;">{{item.ciQnt40HC | number:1}}</td>
+                        <td style="text-align: right;">{{item.ciAmountUSD | currency:'$':0}}</td>
+                        <td style="text-align: right;">{{item.ciAmountEUR | currency:'&euro;':0}}</td>
+                        <td class="cb-r" style="text-align: right;">{{item.ciTotalEUR | currency:'&euro;':0}}</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div id="chart-performance"></div>
+
+            <div id="chart-delta" style="display: none; margin-bottom: 5px;"></div>
+            <div id="table-delta" style="overflow-x: scroll; background-color: #fff; display: none;">
+                <table class="table table-bordered" style="font-size: 11px; margin-bottom: 0px;">
+                    <tr>
+                        <th>Acc.Manager</th>
+                        <th ng-repeat="season in performance.delta.seasons">{{season}}</th>
+                    </tr>
+                    <tr ng-repeat="item in performance.delta.data">
+                        <td>{{item.name}}</td>
+                        <td ng-repeat="percent in item.data track by $index" style="text-align: right;">{{percent | number:1}}{{percent ? '%' : ''}}</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div id="chart-saleAmountEUR" style="display: none; margin-bottom: 5px;"></div>
+            <div id="table-saleAmountEUR" style="overflow-x: scroll; background-color: #fff; display: none;">
+                <table class="table table-bordered" style="font-size: 11px; margin-bottom: 0px;">
+                    <tr>
+                        <th>Acc.Manager</th>
+                        <th ng-repeat="season in performance.saleAmount.seasons">{{season}}</th>
+                    </tr>
+                    <tr ng-repeat="item in performance.saleAmount.data">
+                        <td>{{item.name}}</td>
+                        <td ng-repeat="saleAmount in item.data track by $index" style="text-align: right;">{{saleAmount | currency:'&euro;':0}}</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div id="chart-deltaAmountEUR" style="display: none; margin-bottom: 5px;"></div>
+            <div id="table-deltaAmountEUR" style="overflow-x: scroll; background-color: #fff; display: none;">
+                <table class="table table-bordered" style="font-size: 11px; margin-bottom: 0px;">
+                    <tr>
+                        <th>Acc.Manager</th>
+                        <th ng-repeat="season in performance.deltaAmount.seasons">{{season}}</th>
+                    </tr>
+                    <tr ng-repeat="item in performance.deltaAmount.data">
+                        <td>{{item.name}}</td>
+                        <td ng-repeat="deltaAmount in item.data track by $index" style="text-align: right;">{{deltaAmount | currency:'&euro;':0}}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="smart-form" id="pnlPerformance-loading">
+            <fieldset>
+                <section>
+                    <i class="fa fa-spin fa-refresh"></i> LOADING ...
+                </section>
+            </fieldset>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,139 @@
+﻿@{
+    if (Session[Frontend.Customize.Common.ProjectDefinition.USER_INFO_SESSION] == null)
+    {
+        Response.Redirect(Url.Action("Login", "Account"));
+        return;
+    }
+    Frontend.APIDTO.APIUserInformation userInfo = (Frontend.APIDTO.APIUserInformation)Session[Frontend.Customize.Common.ProjectDefinition.USER_INFO_SESSION];
+}
+
+<aside id="left-panel" style="z-index: 10001;">
+
+    <!-- User info -->
+    <div class="login-info">
+        <span>
+            <!-- User image size is adjusted inside CSS, it should stay as it -->
+
+            <a href="javascript:void(0);" id="show-shortcut" data-action="toggleShortcut">
+                <img src="@userInfo.Data.PersonalPhoto_DisplayUrl" style="width: 30px; height: 30px;" alt="me" class="online" />
+                <span>
+                    @(((Frontend.APIDTO.APIUserInformation)Session[Frontend.Customize.Common.ProjectDefinition.USER_INFO_SESSION]).Data.FullName)
+                </span>
+                <i class="fa fa-angle-down"></i>
+            </a>
+
+        </span>
+    </div>
+    <!-- end user info -->
+    <!-- NAVIGATION : This navigation is also responsive-->
+    <nav>
+        <ul>
+            <li @if (ViewContext.RouteData.Values["controller"].ToString().ToLower() == "dashboard") { <text> class="active" </text>     }>
+                <a href="/" title="Dashboard"><i class="fa fa-lg fa-fw fa-home"></i> <span class="menu-item-parent">Dashboard</span></a>
+            </li>
+            @(new HtmlString(NavRender(0, ((Frontend.APIDTO.APIUserInformation)Session[Frontend.Customize.Common.ProjectDefinition.USER_INFO_SESSION]).Data.Permissions)))
+        </ul>
+    </nav>
+    <span class="minifyme" data-action="minifyMenu">
+        <i class="fa fa-arrow-circle-left hit"></i>
+    </span>
+
+</aside>
+
+<div id="shortcut">
+    <ul>
+        <li>
+            <a href="@Url.Action("Index", "Profile")" class="jarvismetro-tile big-cubes selected bg-color-pinkDark"> <span class="iconbox"> <i class="fa fa-user fa-4x"></i> <span>My Profile </span> </span> </a>
+        </li>
+    </ul>
+</div>
+
+@functions{
+    string NavRender(int parentId, List<Frontend.APIDTO.APIUserPermission> permissions)
+    {
+        if (permissions == null) return string.Empty;
+
+        string controllerName = ViewContext.RouteData.Values["controller"].ToString();
+        string output = string.Empty;
+        foreach (Frontend.APIDTO.APIUserPermission permission in permissions.Where(o => o.CanRead == true && o.ParentID == 0 && o.NavType != "W").OrderBy(o => o.DisplayOrder))
+        {
+            output += "<li" + (controllerName.ToLower() == permission.URLLink.ToLower() ? " class='active'" : "") + ">";
+            if (permission.URLLink == "#")
+            {
+                output += "<a href='#' title='" + permission.Description + "'>" + (permission.ParentID == 0 ? "<i class='fa fa-lg fa-fw " + (!string.IsNullOrEmpty(permission.DisplayImage) ? permission.DisplayImage : "fa-cube") + "'></i> " : "") + (permission.ParentID == 0 ? "<span class='menu-item-parent'>" : "") + permission.DisplayText + (permission.ParentID == 0 ? "</span>" : "") + "</a>";
+            }
+            else
+            {
+                output += "<a href='" + Url.Action("Index", permission.URLLink) + "' target='_blank'  title='" + permission.Description + "'>" + (permission.ParentID == 0 ? "<i class='fa fa-lg fa-fw " + (!string.IsNullOrEmpty(permission.DisplayImage) ? permission.DisplayImage : "fa-cube") + "'></i> " : "") + (permission.ParentID == 0 ? "<span class='menu-item-parent'>" : "") + permission.DisplayText + (permission.ParentID == 0 ? "</span>" : "") + "</a>";
+            }
+
+            if (permissions.Count(o => o.CanRead == true && o.ParentID == permission.ParentID) > 0)
+            {
+                output += "<ul>";
+
+                // render not specify
+                if (permissions.Count(o => o.CanRead == true && o.ParentID == permission.ModuleID && (string.IsNullOrEmpty(o.NavType) || o.NavType == "E")) > 0)
+                {
+                    foreach (Frontend.APIDTO.APIUserPermission subPermission in permissions.Where(o => o.CanRead == true && o.ParentID == permission.ModuleID && (string.IsNullOrEmpty(o.NavType) || o.NavType == "E") && o.IsIncludeInNavigation).OrderBy(o => o.DisplayOrder))
+                    {
+                        output += "<li" + (controllerName.ToLower() == subPermission.URLLink.ToLower() ? " class='active'" : "") + ">";
+                        if (subPermission.NavType == "E")
+                        {
+                            output += "<a href='" + subPermission.URLLink + "' target='_blank'  title='" + subPermission.Description + "'><i class='fa fa-lg fa-globe'></i>" + subPermission.DisplayText + "</a>";
+                        }
+                        else
+                        {
+                            output += "<a href='" + Url.Action("Index", subPermission.URLLink) + "' target='_blank'  title='" + subPermission.Description + "'><i class='fa fa-lg fa-fw fa-caret-right'></i>" + subPermission.DisplayText + "</a>";
+                        }
+                        output += "</li>";
+                    }
+                }
+
+                // render category 
+                if (permissions.Count(o => o.CanRead == true && o.ParentID == permission.ModuleID && o.NavType == "C") > 0)
+                {
+                    output += "<li><a href='#' style='color: #F2DB91;'><i class='fa fa-lg fa-fw fa-list'></i> Category</a><ul>";
+                    foreach (Frontend.APIDTO.APIUserPermission subPermission in permissions.Where(o => o.CanRead == true && o.ParentID == permission.ModuleID && o.NavType == "C" && o.IsIncludeInNavigation).OrderBy(o => o.DisplayOrder))
+                    {
+                        output += "<li" + (controllerName.ToLower() == subPermission.URLLink.ToLower() ? " class='active'" : "") + ">";
+                        output += "<a href='" + Url.Action("Index", subPermission.URLLink) + "' target='_blank'  title='" + subPermission.Description + "'><i class='fa fa-lg fa-fw fa-caret-right'></i>" + subPermission.DisplayText + "</a>";
+                        output += "</li>";
+                    }
+                    output += "</ul></li>";
+                }
+
+                // render module
+                if (permissions.Count(o => o.CanRead == true && o.ParentID == permission.ModuleID && o.NavType == "M") > 0)
+                {
+                    output += "<li><a href='#' style='color: #F2DB91;'><i class='fa fa-lg fa-fw fa-cube'></i> Module</a><ul>";
+                    foreach (Frontend.APIDTO.APIUserPermission subPermission in permissions.Where(o => o.CanRead == true && o.ParentID == permission.ModuleID && o.NavType == "M" && o.IsIncludeInNavigation).OrderBy(o => o.DisplayOrder))
+                    {
+                        output += "<li" + (controllerName.ToLower() == subPermission.URLLink.ToLower() ? " class='active'" : "") + ">";
+                        output += "<a href='" + Url.Action("Index", subPermission.URLLink) + "' target='_blank'  title='" + subPermission.Description + "'><i class='fa fa-lg fa-fw fa-caret-right'></i>" + subPermission.DisplayText + "</a>";
+                        output += "</li>";
+                    }
+                    output += "</ul></li>";
+                }
+
+                // render report
+                if (permissions.Count(o => o.CanRead == true && o.ParentID == permission.ModuleID && o.NavType == "R") > 0)
+                {
+                    output += "<li><a href='#' style='color: #F2DB91;'><i class='fa fa-lg fa-fw fa-bar-chart-o'></i> Report</a><ul>";
+                    foreach (Frontend.APIDTO.APIUserPermission subPermission in permissions.Where(o => o.CanRead == true && o.ParentID == permission.ModuleID && o.NavType == "R" && o.IsIncludeInNavigation).OrderBy(o => o.DisplayOrder))
+                    {
+                        output += "<li" + (controllerName.ToLower() == subPermission.URLLink.ToLower() ? " class='active'" : "") + ">";
+                        output += "<a href='" + Url.Action("Index", subPermission.URLLink) + "' target='_blank'  title='" + subPermission.Description + "'><i class='fa fa-lg fa-fw fa-caret-right'></i>" + subPermission.DisplayText + "</a>";
+                        output += "</li>";
+                    }
+                    output += "</ul></li>";
+                }
+
+                output += "</ul>";
+            }
+
+            output += "</li>";
+        }
+        return output;
+    }
+
+}

@@ -1,0 +1,110 @@
+﻿<article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+    <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+        <header>
+            <span class="widget-icon">
+                <i class="fa fa-refresh"></i>
+            </span>
+            <h2>Purchasing Price</h2>
+        </header>
+        <div>
+            <div class="widget-body-toolbar">
+                <a class="btn btn-warning btn-sm" href="{{getRouterWithParam(originRouter)}}"><i class="fa fa-arrow-left"></i> Back</a>                
+                <a title="Client info" href="@Url.Action("Overview", "Client")/{{data.offerSeasonDTO.clientID}}" target="_blank">{{data.offerSeasonDTO.clientUD}}-{{data.offerSeasonDTO.clientNM}}</a>
+            </div>
+            <div class="widget-body">
+                <div class="smart-form">
+                    <a title="ArticleCode" href="@Url.Action("Edit", "Product")/{{offerDetailItemCopy.offerProductID}}" target="_blank"><span style="font-weight:bold;">{{offerDetailItemCopy.articleCode}}</span></a>
+                    <br />
+                    <a title="Description" href="@Url.Action("Edit", "Model")/{{offerDetailItemCopy.modelID}}" target="_blank">{{offerDetailItemCopy.description}}</a>
+                    <div class="row">
+                        <section class="col col-lg-12">
+                            <table class="table table-bordered table-striped" style="box-sizing: border-box;">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 50px;"></th>
+                                        <th style="width: 100px;">Factory</th>
+                                        <th style="width: 100px;">Price</th>
+                                        <th></th>
+                                        <th style="width: 150px;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody ng-repeat="category in data.planingPurchasingPriceSourceDTOs">
+                                    <tr>
+                                        <td colspan="5">
+                                            {{category.planingPurchasingPriceSourceNM}}
+                                        </td>
+                                    </tr>
+                                    <tr ng-repeat="item in planningPurchasingPriceDTOs | filter: {planingPurchasingPriceSourceID : category.planingPurchasingPriceSourceID}" ng-if="item.planingPurchasingPriceSourceID !== 3">
+                                        <td style="text-align: center;">
+                                            <a ng-if="offerDetailItem.itemStatus !== 5" href="{{getRouterWithParam(originRouter)}}" class="btn btn-primary btn-xs" ng-click="selectPlaningPurchasingPrice(item)">Select</a>                                            
+                                        </td>
+                                        <td style="text-align: center;">{{item.factoryUD}}</td>
+                                        <td style="text-align: right;">
+                                            <a target="_blank" href="@Url.Action("Index", "EurofarPurchasingPriceMng")?articleCode={{offerDetailItem.articleCode}}&season={{$parent.data.offerSeasonDTO.season}}&type=5" ng-if="category.planingPurchasingPriceSourceID === 1">{{item.purchasingPrice | currency:'$':2}}</a>
+                                            <font ng-if="category.planingPurchasingPriceSourceID !== 1">{{item.purchasingPrice | currency:'$':2}}</font>
+                                        </td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                    <tr ng-if="category.planingPurchasingPriceSourceID === 3">
+                                        <td style="text-align: center;">
+                                            @*has remark*@
+                                            <a ng-if="offerDetailItemCopy.planingPurchasingPriceRemark && offerDetailItemCopy.itemStatus !== 5" href="{{getRouterWithParam(originRouter)}}" class="btn btn-warning btn-xs {{offerDetailItemCopy.estimatedPurchasingPrice && offerDetailItemCopy.estimatedPurchasingPriceFromFactoryID ? '' : 'disabled'}}" ng-click="selectPlaningPurchasingPrice(null)">Select</a>                                            
+
+                                            @*has no remark*@
+                                            <a ng-if="!offerDetailItemCopy.planingPurchasingPriceRemark && offerDetailItemCopy.itemStatus !== 5" href="javascript:void(0)" class="btn btn-warning btn-xs {{offerDetailItemCopy.estimatedPurchasingPrice && offerDetailItemCopy.estimatedPurchasingPriceFromFactoryID ? '' : 'disabled'}}" ng-click="selectPlaningPurchasingPrice(null)">Select</a>                                            
+                                        </td>
+                                        <td style="text-align: center;">
+                                            <select ng-disabled="offerDetailItem.itemStatus === 5" style="padding: 3px;" ng-options="factory.factoryID as factory.factoryUD for factory in data.factoryDTOs" ng-model="offerDetailItemCopy.estimatedPurchasingPriceFromFactoryID">
+                                                <option></option>
+                                            </select>
+                                        </td>
+                                        <td style="text-align: left;">
+                                            <input ng-disabled="offerDetailItem.itemStatus === 5" type="text" avs-currency-2 ng-model="offerDetailItemCopy.estimatedPurchasingPrice" style="padding: 2px; text-align: right;width: 100%" />
+                                            <a ng-if="offerDetailItemCopy.estimatedPurchasingPriceUpdatedByID" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{offerDetailItemCopy.estimatedPurchasingPriceUpdatedByID}}" data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                Updated by {{offerDetailItemCopy.estimatedPurchasingPriceUpdatedByName}} 
+                                                <br />
+                                                at {{offerDetailItemCopy.estimatedPurchasingPriceUpdatedDate}}
+                                            </a>
+                                        </td>
+                                        <td>
+                                            <textarea rows="13" placeholder="Please write your explanation as clear as possible"
+                                                      ng-disabled="offerDetailItem.itemStatus === 5"
+                                                      type="text"
+                                                      ng-model="offerDetailItemCopy.planingPurchasingPriceRemark"
+                                                      style="padding: 2px; width:100%; height:100%" />
+                                            
+                                            <div>
+                                                Attach File:
+                                                <a href="{{offerDetailItemCopy.planingPurchasingPriceFileLocation}}" target="_blank">{{offerDetailItemCopy.planingPurchasingPriceFileFriendlyName}}</a>
+                                                <a ng-disabled="!offerDetailItemCopy.planingPurchasingPriceFileLocation" href="javascript:void(0);" class="btn btn-primary btn-xs" style="font-size: 11px;" ng-click="downloadFile()">Download</a>
+                                                <a href="javascript:void(0);" class="btn btn-primary btn-xs" style="font-size: 11px;" ng-click="changeFile()">Change</a>
+                                                <a ng-disabled="!offerDetailItemCopy.planingPurchasingPriceFileLocation" href="javascript:void(0);" class="btn btn-danger btn-xs" style="font-size: 11px;" ng-click="removeFile()">Remove</a>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <strong>Pending factory price</strong>
+                                            <br />
+                                            <span ng-repeat="price in factoryPendingPriceDTOs">
+                                                <a ng-if="offerDetailItem.itemStatus !== 5" ng-click="selectPendingFactoryPrice(price)" href="{{getRouterWithParam(originRouter)}}" class="btn btn-success btn-xs" style="margin-bottom:5px; margin-right:10px">Select</a>                                                
+                                                <font style="width: 100px; text-align: left; display: inline-block;">{{price.factoryUD}}</font>: <font style="width: 70px; text-align: right; display: inline-block;">{{price.salePrice | currency:'$':2}}</font>
+                                                <br />
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="5" ng-if="(planningPurchasingPriceDTOs | filter: {planingPurchasingPriceSourceID : category.planingPurchasingPriceSourceID}).length === 0 && category.planingPurchasingPriceSourceID !== 3" style="text-align: center;">
+                                            N/A
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+
+                        </section>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</article>

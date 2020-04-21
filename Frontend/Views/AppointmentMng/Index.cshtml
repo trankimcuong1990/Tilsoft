@@ -1,0 +1,214 @@
+﻿@{
+    ViewBag.Title = "Calendar";
+    ViewBag.Module = "Calendar";
+
+    Frontend.APIDTO.APIUserInformation userInfo = (Frontend.APIDTO.APIUserInformation)Session[Frontend.Customize.Common.ProjectDefinition.USER_INFO_SESSION];
+}
+<div class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-0" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <h2> Events </h2>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div class="widget-body-toolbar">
+                        <div id="calendar-buttons">
+                            <div class="btn-group">
+                                <a href="javascript:void(0)" class="btn btn-default btn-xs" id="btn-prev"><i class="fa fa-chevron-left"></i></a>
+                                <a href="javascript:void(0)" class="btn btn-default btn-xs" id="btn-next"><i class="fa fa-chevron-right"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="calendar"></div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+<form id="eventForm" name="eventForm" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title" id="myModalLabel">Event: ({{data.appointmentUD}}) {{data.subject}}</h4>
+            </div>
+            <div class="modal-body no-padding">
+                <div class="smart-form">
+                    <fieldset>
+                        <section>
+                            <label class="label">Subject</label>
+                            <label class="input" ng-show="data.userID == @userInfo.Data.UserId">
+                                <input type="text" name="subject" ng-model="data.subject" required />
+                                <span class="help-block" ng-show="eventForm.subject.$error.required"><i class="fa fa-warning"></i> Required.</span>
+                            </label>
+                            <label class="input" ng-show="data.userID != @userInfo.Data.UserId">
+                                <span class="form-control">{{data.subject}}</span>
+                            </label>
+                        </section>
+                        <div class="row">
+                            <section class="col col-8">
+                                <label class="label">Client</label>
+                                <label id="clientSearchBox" class="input" style="display: none;">
+                                    <i class="icon-append fa fa-search"></i>
+                                    <input placeholder="Provide at least 3 chars to search for the client" id="client-autocomplete" type="text">
+                                </label>
+                                <label id="clientTextBox" class="input">
+                                    <span class="form-control">{{data.clientNM == '' || data.clientNM == null? 'Client not selected' : data.clientNM}} <a href="javascript:void(0)" id="btnSwitch" ng-show="data.userID == @userInfo.Data.UserId">Change</a></span>
+                                </label>
+                                <span class="help-block" ng-show="data.clientID == null"><i class="fa fa-warning"></i> Required.</span>
+                            </section>
+                            <section class="col col-4">
+                                <label class="label">Owner</label>
+                                <label class="input">
+                                    <span class="form-control">{{data.ownerName}}</span>
+                                </label>
+                            </section>
+                        </div>
+                        <div class="row">
+                            <section class="col col-4">
+                                <label class="label">Start Date</label>
+                                <label class="input" ng-show="data.userID == @userInfo.Data.UserId">
+                                    <input name="startdate" type="text" class="datepicker" ng-model="data.startTime_Date" data-dateformat="dd/mm/yy" required />
+                                    <i class="icon-append fa fa-calendar"></i>
+                                    <span class="help-block" ng-show="eventForm.startdate.$error.required"><i class="fa fa-warning"></i> Required.</span>
+                                </label>
+                                <label class="input" ng-show="data.userID != @userInfo.Data.UserId">
+                                    <span class="form-control">{{data.startTime_Date}}</span>
+                                </label>
+                            </section>
+                            <section class="col col-2">
+                                <label class="label">Start Time</label>
+                                <label class="select" ng-show="data.userID == @userInfo.Data.UserId">
+                                    <select name="starttime" class="form-control" ng-model="data.startTime_Time" ng-options="time as time for time in timeRange" required>
+                                        <option value=""></option>
+                                    </select>
+                                    <i></i>
+                                </label>
+                                <label class="input" ng-show="data.userID != @userInfo.Data.UserId">
+                                    <span class="form-control">{{data.startTime_Time}}</span>
+                                </label>
+                                <span class="help-block" ng-show="eventForm.starttime.$error.required"><i class="fa fa-warning"></i> Required.</span>
+                            </section>
+                            <section class="col col-4">
+                                <label class="label">End Date</label>
+                                <label class="input" ng-show="data.userID == @userInfo.Data.UserId">
+                                    <input name="enddate" type="text" class="datepicker" ng-model="data.endTime_Date" data-dateformat="dd/mm/yy" required />
+                                    <i class="icon-append fa fa-calendar"></i>
+                                    <span class="help-block" ng-show="eventForm.enddate.$error.required"><i class="fa fa-warning"></i> Required.</span>
+                                </label>  
+                                <label class="input" ng-show="data.userID != @userInfo.Data.UserId">
+                                    <span class="form-control">{{data.endTime_Date}}</span>
+                                </label>                              
+                            </section>
+                            <section class="col col-2">
+                                <label class="label">End Time</label>
+                                <label class="select" ng-show="data.userID == @userInfo.Data.UserId">
+                                    <select name="endtime" class="form-control" ng-model="data.endTime_Time" ng-options="time as time for time in timeRange" required>
+                                        <option value=""></option>
+                                    </select>
+                                    <i></i>
+                                </label>
+                                <label class="input" ng-show="data.userID != @userInfo.Data.UserId">
+                                    <span class="form-control">{{data.endTime_Time}}</span>
+                                </label>  
+                                <span class="help-block" ng-show="eventForm.endtime.$error.required"><i class="fa fa-warning"></i> Required.</span>
+                            </section>
+                        </div>
+                        <div class="row">
+                            <section class="col col-6">
+                                <label class="label">Meeting Location</label>
+                                <label class="select" ng-show="data.userID == @userInfo.Data.UserId">
+                                    <select name="location" class="form-control" ng-model="data.meetingLocationID" ng-options="meetingLocation.meetingLocationID as meetingLocation.meetingLocationNM for meetingLocation in meetingLocations" required>
+                                        <option value=""></option>
+                                    </select>
+                                    <i></i>
+                                </label>
+                                <label class="input" ng-show="data.userID != @userInfo.Data.UserId">
+                                    <span class="form-control">{{data.meetingLocationNM}}</span>
+                                </label> 
+                                <span class="help-block" ng-show="eventForm.location.$error.required"><i class="fa fa-warning"></i> Required.</span>
+                            </section>
+                            <section class="col col-4">
+                                <label class="label">Reminded Date</label>
+                                <label class="input" ng-show="data.userID == @userInfo.Data.UserId">
+                                    <input type="text" class="datepicker" ng-model="data.remindTime_Date" data-dateformat="dd/mm/yy" />
+                                    <i class="icon-append fa fa-calendar"></i>
+                                </label>
+                                <label class="input" ng-show="data.userID != @userInfo.Data.UserId">
+                                    <span class="form-control">{{data.remindTime_Date}}</span>
+                                </label> 
+                            </section>
+                            <section class="col col-2">
+                                <label class="label">Reminded Time</label>
+                                <label class="select" ng-show="data.userID == @userInfo.Data.UserId">
+                                    <select class="form-control" ng-model="data.remindTime_Time" ng-options="time as time for time in timeRange">
+                                        <option value=""></option>
+                                    </select>
+                                    <i></i>
+                                </label>
+                                <label class="input" ng-show="data.userID != @userInfo.Data.UserId">
+                                    <span class="form-control">{{data.remindTime_Time}}</span>
+                                </label> 
+                            </section>
+                        </div>
+                        <section>
+                            <label class="label">Description</label>
+                            <label class="textarea" ng-show="data.userID == @userInfo.Data.UserId">
+                                <textarea ng-model="data.description"></textarea>
+                            </label>
+                            <label class="input" ng-show="data.userID != @userInfo.Data.UserId">
+                                <span class="form-control">{{data.description}}</span>
+                            </label>
+                        </section>
+                    </fieldset>
+                </div>
+            </div>
+            <div class="modal-footer">
+                {{data.userID}} - @userInfo.Data.UserId<br/>
+
+                <button type="button" class="btn btn-primary {{data.userID != @userInfo.Data.UserId ? 'disabled' : ''}}" ng-click="event.update()">
+                    <i class="fa fa-save"></i>
+                    Update
+                </button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Close
+                </button>
+                <button type="button" class="btn btn-danger {{data.userID != @userInfo.Data.UserId ? 'disabled' : ''}}" ng-click="event.delete()" style="float: left;">
+                    <i class="fa fa-times"></i>
+                    Delete
+                </button>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default" title="New" ng-click="event.add()"><i class="fa fa-file-o"></i> Add new event</a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script src="~/TemplateResource/js/plugin/jquery.autocomplete.min.js"></script>
+    <script src="~/Angular/app/jsonService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script type="text/javascript">
+        jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/appointment/';
+        jsonService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+        jsonService.supportServiceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/support/';
+
+        var context = {
+            userId: @userInfo.Data.UserId,
+            userName: '@userInfo.Data.FullName',
+            errMsg: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED',
+        }
+    </script>
+    <script src="~/Angular/app/appointmentMng/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/appointmentMng/index.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}
+

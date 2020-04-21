@@ -1,0 +1,13 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Module.FactoryQuotation2Mng.DTO
+{
+    public class SupportFormData
+    {
+        public List<QuotationStatusDTO> QuotationStatusDTOs { get; set; }
+    }
+}

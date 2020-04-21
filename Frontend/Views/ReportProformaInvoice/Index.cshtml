@@ -1,0 +1,83 @@
+﻿@{
+    ViewBag.Title = "ProformaInvoice Overview";
+    ViewBag.Module = "ProformaInvoice Overview";
+    ViewBag.CurrentSeason = Frontend.Helper.Common.GetCurrentSeason();
+}
+
+<div class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-search-filter" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Filters</h2>
+            </header>
+
+            <div>
+                <div class="jarviswidget-editbox"></div>
+
+                <div class="widget-body">
+                    <fieldset>
+                        <div class="form-group col-lg-3">
+                            <label>Season</label>
+                            <select class="form-control" ng-model="model.season" ng-options="item.seasonValue as item.seasonText for item in seasons | orderBy : 'seasonValue'"></select>
+                        </div>
+                    </fieldset>
+                    <div style="margin-left:13px;">
+                        <button ng-click="event.ok($event)" class="btn btn-primary">PRINT</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction {
+}
+
+@section pagejs {
+    <script src="~/Angular/app/reportProformaInvoice/service.js"></script>
+    <script type="text/javascript">
+        reportProformaInvoiceService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/report_proformainvoice/';
+        reportProformaInvoiceService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+        var tilsoftApp = angular.module('tilsoftApp', []);
+        tilsoftApp.controller('tilsoftController', ['$scope', function ($scope) {
+            $scope.seasons = null;
+            $scope.model = {
+                season: '@ViewBag.CurrentSeason',
+            };
+
+            $scope.event = {
+                ok: function ($event) {
+                    $event.preventDefault();
+                    season = $scope.model.season;
+                    reportProformaInvoiceService.getReport(
+                        season,
+                        function (data) {
+                            window.location = '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]' + data.data + '.xlsm';
+                        },
+                        function (error) {
+                            jsHelper.showMessage('warning', error);
+                        }
+                    );
+                }
+            }
+
+            $scope.prepareForm = function () {
+                reportProformaInvoiceService.getFilterData(
+                    function (data) {
+                        $scope.seasons = data.data;
+                        $scope.$apply();
+                        jQuery('#content').show();
+                    },
+                    function (error) {
+                        $scope.supportModel = null;
+                        $scope.$apply();
+                    }
+                );
+            }
+
+            $scope.prepareForm();
+        }]);
+    </script>
+}

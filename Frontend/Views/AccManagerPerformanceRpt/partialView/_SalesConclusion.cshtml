@@ -1,0 +1,642 @@
+﻿<div class="col-sm-12" ng-controller="salesConclusionController">
+    <div class="well rptContent" style="padding: 10px; display: none;">
+        <h1 style="margin-top: 0px;">SALES CONCLUSION</h1>
+
+        <div id="pnlSalesConclusion">
+            @*FIRST 4 LIST*@
+            @*expected by country compare with commercial invoice last season*@
+            <h2 style="margin-bottom: 0px; display: none;">EXPECTED BY COUNTRY  {{supportData.season}} COMPARE WITH COMMERCIAL INVOICE {{supportData.preSeason}}</h2>
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="tilsoft-table">
+                        <div style="width: 100%; overflow-y: hidden; height: auto; margin-top:0px" class="tilsoft-table-body">
+                            <table>
+                                <tbody>
+                                    <tr>
+                                        <th colspan="3"></th>
+                                        <th colspan="4" style="background-color:#92d678;font-weight:bold">EXPECTED {{supportData.season}}</th>
+                                        <th style="background-color:#a5a4f1;font-weight:bold">COMMERCIAL INVOICE {{supportData.preSeason}}</th>
+                                        <th></th>
+                                    </tr>
+
+                                    <tr>
+                                        <th style="font-weight: bold;width: 30px">#</th>
+                                        <th style="font-weight: bold;width: 50px">CODE</th>
+                                        <th style="font-weight: bold;">COUNTRY</th>
+
+                                        <th style="font-weight: bold;width: 60px;background-color:#92d678">CONT</th>
+                                        <th style="font-weight: bold;width: 85px;background-color:#92d678">TOTAL AMOUNT</th>
+                                        <th style="font-weight: bold;width: 55px;background-color:#92d678">% EXP</th>
+                                        <th style="font-weight: bold;width: 50px;background-color:#92d678"># CLI ENT</th>
+
+                                        <th style="font-weight: bold;width: 85px;background-color:#a5a4f1">TOTAL AMOUNT</th>
+                                        <th style="font-weight: bold;width: 60px">GROWTH</th>
+
+                                    </tr>
+                                    <tr>
+                                        <td colspan="3" style="font-weight: bold; text-align: left;">TOTAL({{salesConclusion.data.expectedCountries.length}}) countries</td>
+
+                                        <td style="font-weight: bold; text-align: right;background-color:#92d678">{{expectedCountryResult | sumFunction : 'totalExpectedCont' | number : 1}}</td>
+                                        <td style="font-weight: bold; text-align: right;background-color:#92d678">&euro;{{expectedCountryResult | sumFunction : 'totalExpectedAmount' | number : 0}}</td>
+                                        <td style="font-weight: bold; text-align: right;background-color:#92d678">100%</td>
+                                        <td style="font-weight: bold; text-align: right;background-color:#92d678">{{expectedCountryResult | sumFunction : 'totalClient' | number : 0}}</td>
+
+                                        <td style="font-weight: bold; text-align: right;background-color:#a5a4f1">&euro;{{expectedCountryResult | sumFunction : 'totalCommercialInvoiceAmountLastYear' | number : 0}}</td>
+                                        <td style="font-weight: bold; text-align: right;"
+                                            ng-class="{increase: (expectedCountryResult | sumFunction : 'totalExpectedAmount') > (expectedCountryResult | sumFunction : 'totalCommercialInvoiceAmountLastYear'), decrease: (expectedCountryResult | sumFunction : 'totalExpectedAmount') < (expectedCountryResult | sumFunction : 'totalCommercialInvoiceAmountLastYear')}">
+                                            {{((expectedCountryResult | sumFunction : 'totalExpectedAmount') - (expectedCountryResult | sumFunction : 'totalCommercialInvoiceAmountLastYear')) * 100 / (expectedCountryResult | sumFunction : 'totalCommercialInvoiceAmountLastYear') | currency:'':0}}%
+                                        </td>
+                                    </tr>
+                                    <tr ng-repeat="item in expectedCountryResult=(salesConclusion.data.expectedCountries)">
+                                        <td style="text-align: right;">{{$index+1}}</td>
+                                        <td>{{item.clientCountryUD}}</td>
+                                        <td>{{item.clientCountryNM}}</td>
+
+                                        <td style="text-align: right;background-color:#92d678">{{item.totalExpectedCont | currency:'':1}}</td>
+                                        <td style="text-align: right;background-color:#92d678">&euro;{{item.totalExpectedAmount | currency:'':0}}</td>
+                                        <td style="text-align: right;background-color:#92d678">{{item.percent | number:1}}%</td>
+                                        <td style="text-align: right;background-color:#92d678">{{item.totalClient | currency:'':0}}</td>
+
+                                        <td style="text-align: right;background-color:#a5a4f1">&euro;{{item.totalCommercialInvoiceAmountLastYear | currency:'':0}}</td>
+                                        <td style="text-align: right;" ng-class="{increase: item.totalExpectedAmount > item.totalCommercialInvoiceAmountLastYear, decrease: item.totalExpectedAmount < item.totalCommercialInvoiceAmountLastYear}">
+                                            {{item.growth | currency:'':0}}%
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div id="expectedSaleByCountry"></div>
+                </div>
+            </div>
+
+            @*proforma invoice by country compare with commecial invoice last season by country*@
+            <h2 style="margin-bottom: 0px;">PROFORMA INVOICE  BY COUNTRY {{supportData.season}} COMPARE WITH COMMERCIAL INVOICE {{supportData.preSeason}}</h2>
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="tilsoft-table">
+                        <div style="width: 100%; overflow-y: hidden; height: auto;margin-top:0px" class="tilsoft-table-body">
+                            <table>
+                                <tbody>
+
+                                    <tr>
+                                        <th colspan="3"></th>
+                                        <th colspan="4" style="background-color:#92d678;font-weight:bold">PROFORMA INVOICE {{supportData.season}}</th>
+                                        <th style="background-color:#a5a4f1;font-weight:bold">COMMERCIAL INVOICE {{supportData.preSeason}}</th>
+                                        <th></th>
+                                    </tr>
+
+                                    <tr>
+                                        <th style="font-weight: bold;width: 30px">#</th>
+                                        <th style="font-weight: bold;width: 50px">CODE</th>
+                                        <th style="font-weight: bold;">COUNTRY</th>
+
+                                        <th style="font-weight: bold;width: 55px;background-color:#92d678">CONT</th>
+                                        <th style="font-weight: bold;width: 85px;background-color:#92d678">TOTAL AMOUNT</th>
+                                        <th style="font-weight: bold;width: 55px;background-color:#92d678">%</th>
+                                        <th style="font-weight: bold;width: 50px;background-color:#92d678"># CLI ENT</th>
+
+                                        <th style="font-weight: bold;width: 85px;background-color:#a5a4f1">TOTAL AMOUNT</th>
+                                        <th style="font-weight: bold;width: 60px">GROWTH</th>
+
+                                    </tr>
+                                    <tr>
+                                        <td colspan="3" style="font-weight: bold; text-align: left;">TOTAL({{data.proformaCountries.length}}) countries</td>
+
+                                        <td style="font-weight: bold; text-align: right;background-color:#92d678">{{proformaCountryResult | sumFunction:'totalProformaCont' | number : 1}}</td>
+                                        <td style="font-weight: bold; text-align: right;background-color:#92d678">&euro;{{proformaCountryResult | sumFunction:'totalProformaAmount' | number : 0}}</td>
+                                        <td style="font-weight: bold; text-align: right;background-color:#92d678">100%</td>
+                                        <td style="font-weight: bold; text-align: right;background-color:#92d678">{{proformaCountryResult | sumFunction:'totalClient' | number : 0}}</td>
+
+                                        <td style="font-weight: bold; text-align: right;background-color:#a5a4f1">&euro;{{proformaCountryResult | sumFunction:'totalCommercialInvoiceAmountLastYear' | number : 0}}</td>
+                                        <td style="font-weight: bold; text-align: right;" ng-class="{increase: (proformaCountryResult | sumFunction:'totalProformaAmount') > (proformaCountryResult | sumFunction:'totalCommercialInvoiceAmountLastYear'), decrease: (proformaCountryResult | sumFunction:'totalProformaAmount') < (proformaCountryResult | sumFunction:'totalCommercialInvoiceAmountLastYear')}">
+                                            {{((proformaCountryResult | sumFunction:'totalProformaAmount') - (proformaCountryResult | sumFunction:'totalCommercialInvoiceAmountLastYear')) * 100 / (proformaCountryResult | sumFunction:'totalCommercialInvoiceAmountLastYear') | number : 0}}%
+                                        </td>
+                                    </tr>
+                                    <tr ng-repeat="item in proformaCountryResult=(salesConclusion.data.proformaCountries)">
+                                        <td>{{$index+1}}</td>
+                                        <td>{{item.clientCountryUD}}</td>
+                                        <td>{{item.clientCountryNM}}</td>
+
+                                        <td style="text-align: right;background-color:#92d678">{{item.totalProformaCont | currency:'':1}}</td>
+                                        <td style="text-align: right;background-color:#92d678">&euro;{{item.totalProformaAmount | currency:'':0}}</td>
+                                        <td style="text-align: right;background-color:#92d678">{{item.percent|number:1}}%</td>
+                                        <td style="text-align: right;background-color:#92d678">{{item.totalClient | currency:'':0}}</td>
+
+                                        <td style="text-align: right;background-color:#a5a4f1">&euro;{{item.totalCommercialInvoiceAmountLastYear | currency:'':0}}</td>
+                                        <td style="text-align: right;" ng-class="{increase: item.totalProformaAmount > item.totalCommercialInvoiceAmountLastYear, decrease: item.totalProformaAmount < item.totalCommercialInvoiceAmountLastYear}">
+                                            {{item.growth | currency:'':0}}%
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div id="proformaInvoiceByCountry"></div>
+                </div>
+            </div>
+
+            @*proforma invoice confirmed by country compare with commecial invoice last season by country*@
+            <h2 style="margin-bottom: 0px;">PROFORMA INVOICE CONFIRMED BY COUNTRY {{supportData.season}} COMPARE WITH COMMERCIAL INVOICE {{supportData.preSeason}}</h2>
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="tilsoft-table">
+                        <div style="width: 100%; overflow-y: hidden; height: auto;margin-top:0px" class="tilsoft-table-body">
+                            <table>
+                                <tbody>
+
+                                    <tr>
+                                        <th colspan="3"></th>
+                                        <th colspan="4" style="background-color:#92d678;font-weight:bold">PROFORMA INVOICE CONFIRMED {{supportData.season}}</th>
+                                        <th style="background-color:#a5a4f1;font-weight:bold">COMMERCIAL INVOICE {{supportData.preSeason}}</th>
+                                        <th></th>
+                                    </tr>
+
+                                    <tr>
+                                        <th style="font-weight: bold;width: 30px">#</th>
+                                        <th style="font-weight: bold;width: 50px">CODE</th>
+                                        <th style="font-weight: bold;">COUNTRY</th>
+
+                                        <th style="font-weight: bold;width: 55px;background-color:#92d678">CONT</th>
+                                        <th style="font-weight: bold;width: 85px;background-color:#92d678">TOTAL AMOUNT</th>
+                                        <th style="font-weight: bold;width: 55px;background-color:#92d678">%</th>
+                                        <th style="font-weight: bold;width: 50px;background-color:#92d678"># CLI ENT</th>
+
+                                        <th style="font-weight: bold;width: 85px;background-color:#a5a4f1">TOTAL AMOUNT</th>
+                                        <th style="font-weight: bold;width: 60px">GROWTH</th>
+
+                                    </tr>
+                                    <tr>
+                                        <td colspan="3" style="font-weight: bold; text-align: left;">TOTAL({{data.confirmedProformaCountries.length}}) countries</td>
+
+                                        <td style="font-weight: bold; text-align: right;background-color:#92d678">{{confirmedProforma2Result | sumFunction:'totalConfirmedProformaCont' | number : 1}}</td>
+                                        <td style="font-weight: bold; text-align: right;background-color:#92d678">&euro;{{confirmedProforma2Result | sumFunction:'totalConfirmedProformaAmount' | number : 0}}</td>
+                                        <td style="font-weight: bold; text-align: right;background-color:#92d678">100%</td>
+                                        <td style="font-weight: bold; text-align: right;background-color:#92d678">{{confirmedProforma2Result | sumFunction:'totalClient' | number : 0}}</td>
+
+                                        <td style="font-weight: bold; text-align: right;background-color:#a5a4f1">&euro;{{confirmedProforma2Result | sumFunction:'totalCommercialInvoiceAmountLastYear' | number : 0}}</td>
+                                        <td style="font-weight: bold; text-align: right;" ng-class="{increase: (confirmedProforma2Result | sumFunction:'totalConfirmedProformaAmount') > (confirmedProforma2Result | sumFunction:'totalCommercialInvoiceAmountLastYear'), decrease: (confirmedProforma2Result | sumFunction:'totalConfirmedProformaAmount') < (confirmedProforma2Result | sumFunction:'totalCommercialInvoiceAmountLastYear')}">
+                                            {{((confirmedProforma2Result | sumFunction:'totalConfirmedProformaAmount') - (confirmedProforma2Result | sumFunction:'totalCommercialInvoiceAmountLastYear')) * 100 / (confirmedProforma2Result | sumFunction:'totalCommercialInvoiceAmountLastYear') | number : 0}}%
+                                        </td>
+                                    </tr>
+                                    <tr ng-repeat="item in confirmedProforma2Result=(salesConclusion.data.confirmedProformaCountries)">
+                                        <td>{{$index+1}}</td>
+                                        <td>{{item.clientCountryUD}}</td>
+                                        <td>{{item.clientCountryNM}}</td>
+
+                                        <td style="text-align: right;background-color:#92d678">{{item.totalConfirmedProformaCont | currency:'':1}}</td>
+                                        <td style="text-align: right;background-color:#92d678">&euro;{{item.totalConfirmedProformaAmount | currency:'':0}}</td>
+                                        <td style="text-align: right;background-color:#92d678">{{item.percent|number:1}}%</td>
+                                        <td style="text-align: right;background-color:#92d678">{{item.totalClient | currency:'':0}}</td>
+
+                                        <td style="text-align: right;background-color:#a5a4f1">&euro;{{item.totalCommercialInvoiceAmountLastYear | currency:'':0}}</td>
+                                        <td style="text-align: right;" ng-class="{increase: item.totalConfirmedProformaAmount > item.totalCommercialInvoiceAmountLastYear, decrease: item.totalConfirmedProformaAmount < item.totalCommercialInvoiceAmountLastYear}">
+                                            {{item.growth | currency:'':0}}%
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div id="confirmedProformaInvoiceByCountry"></div>
+                </div>
+            </div>
+
+            @*commercial invoice by country of last season and last last season*@
+            <h2 style="margin-bottom: 0px;">COMMERCIAL INVOICE BY COUNTRY - {{supportData.season}}, {{supportData.preSeason}}</h2>
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="tilsoft-table">
+                        <div style="width: 100%; overflow-y: hidden; height: auto;margin-top:0px" class="tilsoft-table-body">
+                            <table>
+                                <tbody>
+                                    <tr>
+                                        <th colspan="3"></th>
+                                        <th colspan="4" style="background-color:#92d678;font-weight:bold">COMMERCIAL INVOICE {{supportData.season}}</th>
+                                        <th style="background-color:#a5a4f1;font-weight:bold">COMMERCIAL INVOICE {{supportData.preSeason}}</th>
+                                        <th></th>
+                                    </tr>
+
+                                    <tr>
+                                        <th style="font-weight: bold;width: 30px">#</th>
+                                        <th style="font-weight: bold;width: 50px">CODE</th>
+                                        <th style="font-weight: bold;">COUNTRY</th>
+
+                                        <th style="font-weight: bold;width: 55px;background-color:#92d678">CONT</th>
+                                        <th style="font-weight: bold;width: 85px;background-color:#92d678">TOTAL AMOUNT</th>
+                                        <th style="font-weight: bold;width: 55px;background-color:#92d678">%</th>
+                                        <th style="font-weight: bold;width: 50px;background-color:#92d678"># CLI ENT</th>
+
+                                        <th style="font-weight: bold;width: 85px;background-color:#a5a4f1">TOTAL AMOUNT</th>
+                                        <th style="font-weight: bold;width: 60px">GROWTH</th>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="3" style="font-weight: bold; text-align: right;">TOTAL({{data.commercialInvoiceCountries.length}}) countries</td>
+
+                                        <td style="font-weight: bold; text-align: right;background-color:#92d678">{{commercialInvoiceResult | sumFunction : 'totalCont' | number : 1}}</td>
+                                        <td style="font-weight: bold; text-align: right;background-color:#92d678">&euro;{{commercialInvoiceResult | sumFunction : 'totalAmount' | number : 0}}</td>
+                                        <td style="font-weight: bold; text-align: right;background-color:#92d678">100%</td>
+                                        <td style="font-weight: bold; text-align: right;background-color:#92d678">{{commercialInvoiceResult | sumFunction : 'totalClient' | number : 0}}</td>
+
+                                        <td style="font-weight: bold; text-align: right;background-color:#a5a4f1">&euro;{{commercialInvoiceResult | sumFunction : 'totalAmountLastYear' | number : 0}}</td>
+                                        <td style="font-weight: bold; text-align: right;"
+                                            ng-class="{increase: (commercialInvoiceResult | sumFunction : 'totalAmount') > (commercialInvoiceResult | sumFunction : 'totalAmountLastYear'), decrease: (commercialInvoiceResult | sumFunction : 'totalAmount') < (commercialInvoiceResult | sumFunction : 'totalAmountLastYear')}">
+                                            {{((commercialInvoiceResult | sumFunction : 'totalAmount') - (commercialInvoiceResult | sumFunction : 'totalAmountLastYear')) * 100 / (commercialInvoiceResult | sumFunction : 'totalAmountLastYear') | currency:'':0}}%
+                                        </td>
+
+                                    </tr>
+                                    <tr ng-repeat="item in commercialInvoiceResult=(salesConclusion.data.commercialInvoiceCountries)">
+                                        <td>{{$index+1}}</td>
+                                        <td>{{item.clientCountryUD}}</td>
+                                        <td>{{item.clientCountryNM}}</td>
+
+                                        <td style="text-align: right;background-color:#92d678">{{item.totalCont | currency:'':1}}</td>
+                                        <td style="text-align: right;background-color:#92d678">&euro;{{item.totalAmount | currency:'':0}}</td>
+                                        <td style="text-align: right;background-color:#92d678">{{item.percent|number:1}}%</td>
+                                        <td style="text-align: right;background-color:#92d678">{{item.totalClient | currency:'':0}}</td>
+
+                                        <td style="text-align: right;background-color:#a5a4f1">&euro;{{item.totalAmountLastYear | currency:'':0}}</td>
+                                        <td style="text-align: right;" ng-class="{increase: item.totalAmount > item.totalAmountLastYear, decrease: item.totalAmount < item.totalAmountLastYear}">
+                                            {{item.growth | currency:'':0}}%
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div id="commercialInvoiceByCountry"></div>
+                </div>
+            </div>
+
+
+            @*GROWTH*@
+            @*growth current season compared to last season (expected) -- expectedCountries *@
+            <div ng-if="true">
+                <h2 style="margin-bottom: 0px;">GROWTH {{supportData.season}} COMPARED TO {{supportData.preSeason}} (EXPECTED)</h2>
+                <div class="tilsoft-table">
+                    <div style="width: 100%; overflow-y: hidden; height: auto;margin-top:0px" class="tilsoft-table-body">
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <th style="font-weight: bold;width:30px">#</th>
+                                    <th style="font-weight: bold;width:120px">COUNTRY</th>
+                                    <th style="font-weight: bold;width:90px">GROWTH IN EURO</th>
+                                    <th style="font-weight: bold;width:70px">GROWTH IN %</th>
+                                    <th style="font-weight: bold;">IMPORTANT CLIENTS</th>
+                                </tr>
+                                <tr ng-repeat="item in salesConclusion.supportData.expectedSaleByCountryGrowthIncreaseData">
+                                    <td style="text-align:right">{{$index+1}}</td>
+                                    <td>{{item.countryNM}}</td>
+                                    <td style="text-align: right;" class="increase">&euro;{{item.amount | currency:'':0}}</td>
+                                    <td style="text-align: right;" class="increase">{{item.percent | currency:'':0}}%</td>
+                                    <td style="text-align:left">
+                                        <ul style="padding-left:15px">
+                                            <li ng-repeat="cItem in item.clients |  orderBy :'clientNM'">{{cItem.clientUD}} - {{cItem.clientNM}}</li>
+                                        </ul>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="3" style="text-align: right; font-weight: bold;" class="increase"> TOTAL: &euro;{{totalGrowthIncrease | currency:'':0}}</td>
+                                    <td colspan="3">&nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="5">&nbsp;</td>
+                                </tr>
+                                <tr ng-repeat="item in salesConclusion.supportData.expectedSaleByCountryGrowthDecreaseData">
+                                    <td style="text-align:right">{{$index+1}}</td>
+                                    <td>{{item.countryNM}}</td>
+                                    <td style="text-align: right;" class="decrease">&euro;{{item.amount | currency:'':0}}</td>
+                                    <td style="text-align: right;" class="decrease">{{item.percent | currency:'':0}}%</td>
+                                    <td style="text-align:left">
+                                        <ul style="padding-left:15px">
+                                            <li ng-repeat="cItem in item.clients |  orderBy :'clientNM'">{{cItem.clientUD}} - {{cItem.clientNM}}</li>
+                                        </ul>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="3" style="text-align: right; font-weight: bold;" class="decrease"> TOTAL: &euro;{{totalGrowthDecrease | currency:'':0}}</td>
+                                    <td colspan="3">&nbsp;</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            @*growth proforma invoice confirmed*@
+            <div ng-if="false">
+                <h2 style="margin-bottom: 0px;">GROWTH {{supportData.season}} COMPARED TO {{supportData.preSeason}} (PROFOMA INVOICE CONFRIMED)</h2>
+                <div class="tilsoft-table">
+                    <div style="width: 100%; overflow-y: hidden; height: auto;margin-top:0px" class="tilsoft-table-body">
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <th style="font-weight: bold;width:30px">#</th>
+                                    <th style="font-weight: bold;width:120px">COUNTRY</th>
+                                    <th style="font-weight: bold;width:90px">GROWTH IN EURO</th>
+                                    <th style="font-weight: bold;width:70px">GROWTH IN %</th>
+                                    <th style="font-weight: bold;">IMPORTANT CLIENTS</th>
+                                </tr>
+
+                                <tr ng-repeat="item in salesConclusion.supportData.confirmedSaleByCountryGrowthIncreaseData">
+                                    <td>{{$index+1}}</td>
+                                    <td>{{item.countryNM}}</td>
+                                    <td style="text-align: right;" class="increase">&euro;{{item.amount | currency:'':0}}</td>
+                                    <td style="text-align: right;" class="increase">{{item.percent | currency:'':0}}%</td>
+                                    <td style="text-align:left">
+                                        <ul style="padding-left:15px">
+                                            <li ng-repeat="cItem in item.clients |  orderBy :'clientNM'">{{cItem.clientUD}} - {{cItem.clientNM}}</li>
+                                        </ul>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="3" style="text-align: right; font-weight: bold;" class="increase"> TOTAL: &euro;{{confirmedTotalGrowthIncrease | currency:'':0}}</td>
+                                    <td colspan="2">&nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="5">&nbsp;</td>
+                                </tr>
+                                <tr ng-repeat="item in confirmedSaleByCountryGrowthDecreaseData">
+                                    <td>{{$index+1}}</td>
+                                    <td>{{item.countryNM}}</td>
+                                    <td style="text-align: right;" class="decrease">&euro;{{item.amount | currency:'':0}}</td>
+                                    <td style="text-align: right;" class="decrease">{{item.percent | currency:'':0}}%</td>
+                                    <td style="text-align:left">
+                                        <ul style="padding-left:15px">
+                                            <li ng-repeat="cItem in item.clients |  orderBy :'clientNM'">{{cItem.clientUD}} - {{cItem.clientNM}}</li>
+                                        </ul>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="3" style="text-align: right; font-weight: bold;" class="decrease"> TOTAL: &euro;{{confirmedTotalGrowthDecrease | currency:'':0}}</td>
+                                    <td colspan="2">&nbsp;</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+
+
+
+            @*TOP 10*@
+            @*top 10 clients by country(expected)*@
+            <div ng-if="true">
+                <h2 style="margin-bottom: 0px;">TOP 10 CLIENTS BY COUNTRY (EXPECTED - {{supportData.season}})</h2>
+                <div class="tilsoft-table">
+                    <div style="width: 100%; overflow-y: hidden; height: auto;margin-top:0px" class="tilsoft-table-body">
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <th style="font-weight: bold;width:30px">#</th>
+                                    <th style="font-weight: bold;">CLIENT</th>
+                                    <th style="font-weight: bold;width:100px">SALE IN EURO</th>
+                                    <th style="font-weight: bold;width:50px">%</th>
+                                </tr>
+                            </tbody>
+                            <tbody ng-repeat="country in salesConclusion.supportData.expectedTopCountries">
+                                <tr>
+                                    <td colspan="4" style="font-weight: bold; background: #eef;">{{country.countryNM}}</td>
+                                </tr>
+                                <tr ng-repeat="item in salesConclusion.data.expectedTopClients | filter:{clientCountryID: country.countryID}:true">
+                                    <td style="text-align:right">{{$index+1}}</td>
+                                    <td>{{item.clientNM}}</td>
+                                    <td style="text-align: right;">&euro;{{item.totalAmount | currency:'':0}}</td>
+                                    <td style="text-align: right;">{{$parent.method.getESTCPercent(country, item) | currency:'':0}}%</td>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td style="font-weight: bold; text-align: right;">TOTAL {{country.countryNM}}</td>
+                                    <td style="font-weight: bold; text-align: right;">&euro;{{country.total | currency:'':0}}</td>
+                                    <td style="font-weight: bold; text-align: right;">{{$parent.method.getESTCTotalPercent(country) | currency:'':0}}%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            @*top 10 client by proforma invoice*@
+            <div ng-if="false">
+                <h2 style="margin-bottom: 0px;">TOP 10 CLIENTS BY COUNTRY (PROFORMA INVOICE - {{supportData.season}})</h2>
+                <div class="tilsoft-table">
+                    <div style="width: 100%; overflow-y: hidden; height: auto;margin-top:0px" class="tilsoft-table-body">
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <th style="font-weight: bold;width:30px">#</th>
+                                    <th style="font-weight: bold;">CLIENT</th>
+                                    <th style="font-weight: bold;width:100px">SALE IN EURO</th>
+                                    <th style="font-weight: bold;width:50px">%</th>
+                                </tr>
+                            </tbody>
+                            <tbody ng-repeat="country in salesConclusion.supportData.proformaInvoiceTopCountries">
+                                <tr>
+                                    <td colspan="4" style="font-weight: bold; background: #eef;">{{country.countryNM}}</td>
+                                </tr>
+                                <tr ng-repeat="item in data.proformaInvoiceTopClients | filter:{clientCountryID: country.countryID}:true">
+                                    <td style="text-align:right">{{$index+1}}</td>
+                                    <td>{{item.clientNM}}</td>
+                                    <td style="text-align: right;">&euro;{{item.totalAmount | currency:'':0}}</td>
+                                    <td style="text-align: right;">{{item.totalAmount * 100 / country.totalAmountOfCountry | number : 0}}%</td>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td style="font-weight: bold; text-align: right;">TOTAL {{country.countryNM}}</td>
+                                    <td style="font-weight: bold; text-align: right;">&euro;{{country.total | currency:'':0}}</td>
+                                    <td style="font-weight: bold; text-align: right;">{{country.total * 100 / country.totalAmountOfCountry | number : 0}}%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            @*top 10 client by proforma invoice confirmed*@
+            <div ng-if="false">
+                <h2 style="margin-bottom: 0px;">TOP 10 CLIENT BY COUNTRY (PROFORMA INVOICE CONFIRMED - {{supportData.season}})</h2>
+                <div class="tilsoft-table">
+                    <div style="width: 100%; overflow-y: hidden; height: auto;margin-top:0px" class="tilsoft-table-body">
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <th style="font-weight: bold;">CLIENT</th>
+                                    <th style="font-weight: bold;">SALE IN EURO</th>
+                                    <th style="font-weight: bold;">%</th>
+                                </tr>
+                            </tbody>
+                            <tbody ng-repeat="country in salesConclusion.supportData.confirmedTopCountries">
+                                <tr>
+                                    <td colspan="3" style="font-weight: bold; background: #eef;">{{country.countryNM}}</td>
+                                </tr>
+                                <tr ng-repeat="item in salesConclusion.data.confirmedProformaTopClients | filter:{clientCountryID: country.countryID}:true">
+                                    <td>{{item.clientNM}}</td>
+                                    <td style="text-align: right;">&euro;{{item.totalAmount | currency:'':0}}</td>
+                                    <td style="text-align: right;">{{item.totalAmount * 100 / country.totalAmountOfCountry | number : 0}}%</td>
+                                </tr>
+                                <tr>
+                                    <td style="font-weight: bold; text-align: right;">TOTAL {{country.countryNM}}</td>
+                                    <td style="font-weight: bold; text-align: right;">&euro;{{country.total | currency:'':0}}</td>
+                                    <td style="font-weight: bold; text-align: right;">{{country.total * 100 / country.totalAmountOfCountry | number : 0}}%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+
+
+
+            @*CLIENT & SALES*@
+            @*client and sales(expected current season)*@
+            <div ng-if="true">
+                <h2 style="margin-bottom: 0px;">CLIENT & SALES (EXPECTED - {{supportData.season}})</h2>
+                <div class="row">
+                    <div class="col-sm-4">
+                        <div class="tilsoft-table">
+                            <div style="width: 100%; overflow-y: hidden; height: auto;margin-top:0px" class="tilsoft-table-body">
+                                <table>
+                                    <tbody>
+                                        <tr>
+                                            <th style="font-weight: bold;width:30px">#</th>
+                                            <th style="font-weight: bold;">SALE CATEGORY</th>
+                                            <th style="font-weight: bold;width:70px"># OF CLIENT</th>
+                                            <th style="font-weight: bold;width:70px">% SALE</th>
+                                        </tr>
+                                        <tr>
+                                            <td style="font-weight: bold; text-align: right;"></td>
+                                            <td style="font-weight: bold; text-align: right;">TOTAL</td>
+                                            <td style="font-weight: bold; text-align: right;">{{method.getExpectedRangeTotalClient() | currency:'':0}}</td>
+                                            <td style="font-weight: bold; text-align: right;">100%</td>
+                                        </tr>
+                                        <tr ng-repeat="item in salesConclusion.data.rangeExpected">
+                                            <td style="text-align:right">{{$index+1}}</td>
+                                            <td>{{item.rangeNM}}</td>
+                                            <td style="text-align: right;">{{item.totalClient | currency:'':0}}</td>
+                                            <td style="text-align: right;">{{$parent.method.getExpectedRangePercent($index, item)}}%</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-8">
+                        <div id="expectedClientAndSale"></div>
+                    </div>
+                </div>
+            </div>
+
+            @*client and sales(proforma invoice current season)*@
+            <div ng-if="false">
+                <h2 style="margin-bottom: 0px;">CLIENT & SALES (PROFORMA INVOICE - {{supportData.season}})</h2>
+                <div class="row">
+                    <div class="col-sm-4">
+                        <div class="tilsoft-table">
+                            <div style="width: 100%; overflow-y: hidden; height: auto;margin-top:0px" class="tilsoft-table-body">
+                                <table>
+                                    <tbody>
+                                        <tr>
+                                            <th style="font-weight: bold;width:30px">#</th>
+                                            <th style="font-weight: bold;">SALE CATEGORY</th>
+                                            <th style="font-weight: bold;width:70px"># OF CLIENT</th>
+                                            <th style="font-weight: bold;width:70px">% SALE</th>
+                                        </tr>
+                                        <tr>
+                                            <td style="font-weight: bold; text-align: right;"></td>
+                                            <td style="font-weight: bold; text-align: right;">TOTAL</td>
+                                            <td style="font-weight: bold; text-align: right;">{{method.getProformaInvoiceRangeTotalClient() | currency:'':0}}</td>
+                                            <td style="font-weight: bold; text-align: right;">100%</td>
+                                        </tr>
+                                        <tr ng-repeat="item in salesConclusion.data.rangeProformaInvoices">
+                                            <td style="text-align:right">{{$index+1}}</td>
+                                            <td>{{item.rangeNM}}</td>
+                                            <td style="text-align: right;">{{item.totalClient | currency:'':0}}</td>
+                                            <td style="text-align: right;">{{$parent.method.getProformaInvoiceRangePercent($index, item)}}%</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-8">
+                        <div id="proformaInvoiceClientAndSale"></div>
+                    </div>
+                </div>
+            </div>
+
+            @*client & sale proforma invoice confirmed*@
+            <div ng-if="false">
+                <h2 style="margin-bottom: 0px;">CLIENT & SALES (PROFORMA INVOICE CONFIRMED - {{supportData.preSeason}})</h2>
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="tilsoft-table">
+                            <div style="width: 100%; overflow-y: hidden; height: auto;margin-top:0px" class="tilsoft-table-body">
+                                <table>
+                                    <tbody>
+                                        <tr>
+                                            <th style="font-weight: bold;">SALE CATEGORY {{supportData.preSeason}}</th>
+                                            <th style="font-weight: bold;"># OF CLIENT</th>
+                                            <th style="font-weight: bold;">% SALE</th>
+                                        </tr>
+                                        <tr>
+                                            <td style="font-weight: bold; text-align: right;">TOTAL</td>
+                                            <td style="font-weight: bold; text-align: right;">{{method.getConfirmedRangeTotalClient() | currency:'':0}}</td>
+                                            <td style="font-weight: bold; text-align: right;">100%</td>
+                                        </tr>
+                                        <tr ng-repeat="item in salesConclusion.data.rangeConfirmedProformas">
+                                            <td>{{item.rangeNM}}</td>
+                                            <td style="text-align: right;">{{item.totalClient | currency:'':0}}</td>
+                                            <td style="text-align: right;">{{$parent.method.getConfirmedRangePercent($index, item)}}%</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div id="confirmedClientAndSale"></div>
+                    </div>
+                </div>
+            </div>
+
+
+
+
+            @*DISTRIBUTION OF CLIENTS*@
+            @*distribution of clients (expected - current season)*@
+            <div ng-if="true">
+                <h2 style="margin-bottom: 0px;">DISTRIBUTION OF CLIENTS (EXPECTED - {{supportData.season}})</h2>
+                <div id="expectedDistribution"></div>
+            </div>
+
+            @*distribution of clients (proforma invoice - current season)*@
+            <div ng-if="false">
+                <h2 style="margin-bottom: 0px;">DISTRIBUTION OF CLIENTS (PROFORMA INVOICE - {{supportData.season}})</h2>
+                <div id="proformaInvoiceDistribution"></div>
+            </div>
+
+            @*distribution of clients (confirmed proforma - current season)*@
+            <div ng-if="false">
+                <h2 style="margin-bottom: 0px;">DISTRIBUTION OF CLIENTS (PROFORMA INVOICE CONFIRMED - {{supportData.season}})</h2>
+                <div id="confirmedProformaDistribution"></div>
+            </div>
+        </div>
+
+        <div class="smart-form" id="pnlSalesConclusion-loading">
+            <fieldset>
+                <section>
+                    <i class="fa fa-spin fa-refresh"></i> LOADING ...
+                </section>
+            </fieldset>
+        </div>
+    </div>
+</div>

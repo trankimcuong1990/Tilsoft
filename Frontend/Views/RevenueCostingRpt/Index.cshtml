@@ -1,0 +1,78 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var supportServiceRoot = (System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"]);
+    var cookieID = HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString();
+
+    ViewBag.Title = "Revenue & Costing Report";
+    ViewBag.Module = "Revenue Costing";
+    ViewBag.Icon = "fa-bar-chart-o";
+}
+<div class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-search-filter" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Filters</h2>
+            </header>
+
+            <div>
+                <div class="widget-body no-padding">
+                    <div class="smart-form">
+                        <fieldset>
+                            <section class="col col-sm-5">
+                                <label class="label">Supplier</label>
+                                @*<select class="select2" id="subSupplier" ng-model="filter.factoryRawMaterialID" ng-options="item.subSupplierID as item.subSupplierFullNM for item in subSuppliers">
+                                    <option value=""></option>
+                                </select>*@
+                                <span class="form-control">{{subSupplierNM}}</span>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label class="label">
+                                    From Date <em class="note note-error" ng-show="(filter.startDate == null || filter.startDate == '')">(Required)</em>
+                                </label>
+                                <label class="input-group">
+                                    <input id="startDate" type="text" class="form-control" avs-calendar ng-data-source="filter.startDate" autocomplete="off" required />
+                                    <span class="input-group-addon">
+                                        <i class="fa fa-calendar"></i>
+                                    </span>
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label class="label">
+                                    To Date <em class="note note-error" ng-show="(filter.endDate == null || filter.endDate == '')">(Required)</em>
+                                </label>
+                                <label class="input-group">
+                                    <input id="endDate" type="text" class="form-control" avs-calendar ng-data-source="filter.endDate" autocomplete="off" required />
+                                    <span class="input-group-addon">
+                                        <i class="fa fa-calendar"></i>
+                                    </span>
+                                </label>
+                            </section>
+                        </fieldset>
+                        <footer>
+                            <a href="javascript:void(0)" class="btn btn-primary" ng-click="event.generateExcel($event)" style="float: none;"><i class="fa fa-file-excel-o"></i> Excel Version</a>
+                        </footer>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section pagejs {
+    <script type="text/javascript">
+        var context = {
+            token: '@token',
+            serviceUrl: '@(serviceRoot)/api/revenuecostingrpt/',
+            supportServiceUrl: '@(supportServiceRoot)/api/support/',
+            reportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]',
+            backendReportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]',
+            cookieID: '@cookieID'
+        }
+    </script>
+    <script type="text/javascript" src="~/Views/RevenueCostingRpt/index.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Views/RevenueCostingRpt/service.js?v=@guid"></script>
+}

@@ -1,0 +1,583 @@
+﻿@{
+    if (ViewBag.ID == 0)
+    {
+        ViewBag.Title = "Create New Sample Order";
+    }
+    else
+    {
+        ViewBag.Title = "Edit Sample Order";
+    }
+    ViewBag.Icon = "fa-pencil-square-o";
+    ViewBag.Module = "Sample Order";
+    Frontend.APIDTO.APIUserInformation userInfo = (Frontend.APIDTO.APIUserInformation)Session[Frontend.Customize.Common.ProjectDefinition.USER_INFO_SESSION];
+
+    string param = string.Empty;
+    if (Request.Params["param"] != null)
+    {
+        param = Request.Params["param"].ToString();
+    }
+}
+
+<style>
+    tr.approved {
+        background: #ca5100 !important;
+    }
+</style>
+
+<form class="row" name="editForm" id="main-form">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-0" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>General Information</h2>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div class="smart-form">
+                        <fieldset>
+                            <div class="row">
+                                <section class="col col-2">
+                                    <label class="label">Code</label>
+                                    <label class="input">
+                                        <span class="form-control">{{data.sampleOrderUD}}({{data.rankName}})</span>
+                                    </label>
+                                </section>
+                                <section class="col col-2">
+                                    <label class="label">Season</label>
+                                    <label class="select" ng-class="{'state-error': editForm.season.$error.required}">
+                                        <select name="season" class="form-control search-filter" ng-model="data.season" ng-options="season.seasonValue as season.seasonText for season in seasons" required>
+                                            <option value=""></option>
+                                        </select>
+                                        <i></i>
+                                        <div ng-show="editForm.season.$error.required" class="note note-error">Season is required</div>
+                                    </label>
+                                </section>
+                                <section class="col col-2">
+                                    <label class="label">Purpose</label>
+                                    <label class="select">
+                                        <select class="form-control search-filter" ng-model="data.purposeID" ng-options="purpose.purposeID as purpose.purposeNM for purpose in samplePurposes">
+                                            <option value=""></option>
+                                        </select>
+                                        <i></i>
+                                    </label>
+                                </section>
+                                <section class="col col-2">
+                                    <label class="label">Transport Type</label>
+                                    <label class="select">
+                                        <select class="form-control search-filter" ng-model="data.transportTypeID" ng-options="transport.transportTypeID as transport.transportTypeNM for transport in sampleTransportTypes">
+                                            <option value=""></option>
+                                        </select>
+                                        <i></i>
+                                    </label>
+                                </section>
+                                <section class="col col-2">
+                                    <label class="label">Deadline</label>
+                                    <label class="input">
+                                        <i class="icon-append fa fa-calendar"></i>
+                                        <input type="text" data-dateformat="dd/mm/yy" class="datepicker" ng-model="data.deadline" />
+                                    </label>
+                                </section>
+                                <section class="col col-2">
+                                    <label class="label">Status</label>
+                                    <div class="btn-group">
+                                        <button class="btn dropdown-toggle btn-sm btn-success" data-toggle="dropdown" aria-expanded="false">
+                                            {{data.sampleOrderStatusNM}} <i class="fa fa-caret-down"></i>
+                                        </button>
+                                        <ul class="dropdown-menu pull-right">
+                                            <li ng-repeat="item in sampleOrderStatuses">
+                                                <a href="javascript:void(0);" ng-click="$parent.event.setOrderStatus(item.sampleOrderStatusID)">{{item.sampleOrderStatusNM}}</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </section>
+                            </div>
+
+                            <div class="row">
+                                <section class="col col-2">
+                                    <label class="label">Client</label>
+                                    <label class="input" ng-class="{'state-error': editForm.client.$error.required}">
+                                        <div class="input-group">
+                                            <input name="client" class="form-control" type="text" readonly ng-model="data.clientUD" required>
+                                            <div class="input-group-btn">
+                                                <a href="javascript:void(0)" class="btn btn-default btn-sm" ng-click="event.searchClient()"><i class="fa fa-search" title="Search for client"></i></a>
+                                                <a href="javascript:void(0)" class="btn btn-warning btn-sm" ng-click="event.clearClient()"><i class="fa fa-times" title="Clear selection"></i></a>
+                                            </div>
+                                        </div>
+                                        <div ng-show="editForm.client.$error.required" class="note note-error">Client is required</div>
+                                    </label>
+                                </section>
+                                <section class="col col-2">
+                                    <label class="label">Destination</label>
+                                    <label class="input">
+                                        <input type="text" ng-model="data.destination" />
+                                    </label>
+                                </section>
+                                <section class="col col-2">
+                                    <label class="label">SHIPMENT DETAILS</label>
+                                    <label class="input">
+                                        <input type="text" ng-model="data.shipmentDetail" />
+                                    </label>
+                                </section>
+                                <section class="col col-2">
+                                    <label class="label">Hard Deadline</label>
+                                    <label class="input">
+                                        <i class="icon-append fa fa-calendar"></i>
+                                        <input type="text" data-dateformat="dd/mm/yy" class="datepicker" ng-model="data.hardDeadline" />
+                                    </label>
+                                </section>
+                                <section class="col col-4">
+                                    <label class="label">Remark</label>
+                                    <label class="input">
+                                        <input type="text" ng-model="data.remark" />
+                                    </label>
+                                </section>
+                            </div>
+
+                            <div class="row">
+                                <section class="col col-6">
+                                    <label class="label">
+                                        NL Monitor
+                                        <a href="javascript:void(0)" class="btn btn-success btn-xs" ng-click="event.addMonitor(2)"><i class="fa fa-plus"></i> Add User</a>
+                                    </label>
+
+                                    <div class="bootstrap-tagsinput" style="overflow:scroll; height:70px;">
+                                        <span class="tag label label-info" ng-repeat="item in data.sampleMonitors | filter: {sampleMonitorGroupID: 2}">
+                                            <a style="color: #fff;" ng-if="item.userID" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.userID}}" data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                {{item.fullName}}
+                                            </a>
+                                            ({{item.officeNM}}) &nbsp;
+                                            <span data-role="remove" ng-click="event.removeMonitor(item)"></span>
+                                        </span>
+                                    </div>
+
+                                    @*<label class="label" style="margin-top:2%;">
+                                        SCM Monitor
+                                        <a href="javascript:void(0)" class="btn btn-success btn-xs" ng-click="event.addMonitor(3)"><i class="fa fa-plus"></i> Add User</a>
+                                    </label>
+                                    <div class="bootstrap-tagsinput">
+                                        <span class="tag label label-info" ng-repeat="item in data.sampleMonitors | filter: {sampleMonitorGroupID: 3}">
+                                            <a style="color: #fff;" ng-if="item.userID" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.userID}}" data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                {{item.fullName}}
+                                            </a>
+                                            ({{item.officeNM}}) &nbsp;
+                                            <span data-role="remove" ng-click="event.removeMonitor(item)"></span>
+                                        </span>
+                                    </div>*@
+                                </section>
+
+                                <section class="col col-6">
+                                    <label class="label">
+                                        VN Monitor
+                                        <a href="javascript:void(0)" class="btn btn-success btn-xs" ng-click="event.addMonitor(1)">
+                                            <i class="fa fa-plus"></i>
+                                            Add User
+                                        </a>
+                                    </label>
+                                    <div class="bootstrap-tagsinput" style="overflow:scroll; height:70px;">
+                                        <span class="tag label label-info" ng-repeat="item in data.sampleMonitors | filter: {sampleMonitorGroupID: 1}">
+                                            <a style="color: #fff;" ng-if="item.userID" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.userID}}" data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                {{item.fullName}}
+                                            </a>
+                                            ({{item.officeNM}}) &nbsp;
+                                            <span data-role="remove" ng-click="event.removeMonitor(item)"></span>
+                                        </span>
+                                    </div>
+                                </section>
+                            </div>
+                            <div class="row">
+                                <section class=" col col-3">
+                                    <div class="note" ng-if="data.creatorName">
+                                        <strong>Created by:</strong>
+                                        <a ng-if="data.createdBy" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{data.createdBy}}" data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                            {{data.creatorName}}
+                                        </a>
+                                        ({{data.createdDate}})
+                                    </div>
+                                </section>
+                                <section class=" col col-3">
+                                    <div class="note" ng-if="data.updatorName">
+                                        <strong>Updated by:</strong>
+                                        <a ng-if="data.updatedBy" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{data.updatedBy}}" data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                            {{data.updatorName}}
+                                        </a>
+                                        ({{data.updatedDate}})
+                                    </div>
+                                </section>
+                                <section class=" col col-3">
+                                    <div class="note" ng-if="data.statusUpdatorName">
+                                        <strong>Status updated by:</strong>
+                                        <a ng-if="data.statusUpdatedBy" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{data.statusUpdatedBy}}" data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                            {{data.statusUpdatorName}}
+                                        </a>
+                                        ({{data.statusUpdatedDate}})
+                                    </div>
+                                </section>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="jarviswidget" id="wid-id-0" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false" data-widget-togglebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Product Detail</h2>
+            </header>
+            <div>
+                <div class="widget-body">
+                    <div class="widget-body-toolbar">
+                        <a href="javascript:void(0)" class="btn btn-primary" ng-click="event.addProduct()"><i class="fa fa-plus"></i> Add New Product</a>
+                    </div>
+                    <div class="smart-form">
+                        <div class="row" style="border-bottom: solid 1px #ddd;" ng-repeat="item in data.sampleProducts | orderBy: 'displayIndex'">
+                            <section class="col col-3" id="product-{{item.sampleProductID}}">
+                                <div>
+                                    <a data-featherlight="image" href="{{item.fileLocation}}" style="width: 100px; height: 100px; float: left">
+                                        <img style="width: 90px;height: 100px;" ng-src="{{item.thumbnailLocation}}">
+                                    </a>
+                                    <a data-featherlight="image" href="{{item.finishedImageFileLocation}}" style="width: 100px; height: 100px">
+                                        <img style="width: 90px;height: 100px;" ng-src="{{item.finishedImageThumbnailLocation}}">
+                                    </a>
+                                    <a data-featherlight="image" href="{{item.progressImageFileLocation}}" style="width: 100px; height: 100px">
+                                        <img style="width: 90px;height: 100px;" ng-src="{{item.progressImageThumbnailLocation}}">
+                                    </a>
+                                </div>
+                                <div style="margin-top: 5px">
+                                    <a href="javascript:void(0)" class="btn btn-primary btn-xs" ng-click="event.editProduct(item)" style="width: 80px" ng-if="item.sampleProductID > 0"> Edit</a>
+                                    <a href="javascript:void(0)" class="btn btn-default btn-xs" ng-click="event.editProduct(item)" style="width: 80px" ng-if="item.sampleProductID <= 0"> Edit</a>
+                                    <a href="javascript:void(0)" class="btn btn-primary btn-xs" ng-click="event.openQARemark(item)" style="width: 80px" ng-if="item.sampleQARemarks.length > 0"> QA Remark</a>
+                                    <a href="javascript:void(0)" class="btn btn-default btn-xs" ng-click="event.openQARemark(item)" style="width: 80px" ng-if="item.sampleQARemarks.length == 0"> QA Remark</a>
+                                    <a href="javascript:void(0)" class="btn btn-primary btn-xs" ng-click="event.openProgress(item)" style="width: 80px" ng-if="item.sampleProgresses.length > 0"> Progress</a>
+                                    <a href="javascript:void(0)" class="btn btn-default btn-xs" ng-click="event.openProgress(item)" style="width: 80px" ng-if="item.sampleProgresses.length == 0"> Progress</a>
+                                </div>
+                                <div style="margin-top: 5px;">
+                                    <a href="@Url.Action("Detail", "Sample2Mng")/@ViewBag.ID?param=pi:{{item.sampleProductID}},a:-1" target="_blank" class="btn btn-primary btn-xs" ng-if="item.sampleProductID > 0" style="width: 80px"> Detail</a>
+                                    @if (Frontend.Helper.AuthHelper.GetActionButtonStatus("BreakDownMng", Frontend.Helper.ActionEnum.Update, HttpContext.Current) != "disabled")
+                                    {
+                                        <a target="_blank" href="@Url.Action("Edit", "BreakDownMng", new { id = UrlParameter.Optional })/0?modelId=0&sampleProductId={{item.sampleProductID}}&offerSeasonDetailId=0" class="btn btn-primary btn-xs" title="Breakdown" style="width: 80px" ng-if="sampleProductBreakdownID != null"> Breakdown</a>
+                                        <a target="_blank" href="@Url.Action("Edit", "BreakDownMng", new { id = UrlParameter.Optional })/0?modelId=0&sampleProductId={{item.sampleProductID}}&offerSeasonDetailId=0" class="btn btn-default btn-xs" title="Breakdown" style="width: 80px" ng-if="sampleProductBreakdownID == null"> Breakdown</a>
+                                    }
+                                    <a href="javascript:void(0)" class="btn btn-danger btn-xs" ng-if="item.sampleProductID > 0 && item.sampleProductStatusID == 1" ng-click="event.removeProduct(item)" style="width: 80px"> Remove</a>
+                                    <a href="javascript:void(0)" class="btn btn-primary btn-xs" style="width: 80px" ng-if="item.sampleProductID > 0 && item.sampleProductStatusID == 9 && item.isEurofarSampleCollection"> Collection</a>
+                                    <a href="javascript:void(0)" class="btn btn-default btn-xs" ng-click="event.changeEurofarSampleCollection(item)" style="width: 80px" ng-if="item.sampleProductID > 0 && item.sampleProductStatusID == 9 && !item.isEurofarSampleCollection"> Collection</a>
+                                    <a ng-if="item.istdNeeded && false" href="javascript:void(0)" class="btn btn-success btn-xs" ng-click="event.openTechnicalDrawing(item)" style="width: 80px; margin-top: 5px"> Tec. Drawing</a>
+                                </div>
+                            </section>
+                            <section class="col col-9">
+                                <h5>
+                                    # {{item.displayIndex}}: {{item.sampleProductStatusNM}} - Code: {{item.sampleProductUD}} &nbsp;&nbsp;&nbsp;&nbsp;
+                                    <span style="font-size:13px">
+                                        Type: <span ng-if="item.developmentTypeID == 1">New Item</span><span ng-if="item.developmentTypeID == 2">Upgrade Item</span><span ng-if="item.developmentTypeID == 3">Exist Item</span>
+                                    </span>
+                                    &nbsp;&nbsp;
+                                    <span style="font-size:13px">
+                                        <span ng-if="item.sampleProductStatusID == 2 || item.sampleProductStatusID == 3">Status: In Progress</span><span ng-if="item.sampleProductStatusID > 3 && item.sampleProductStatusID != 5">Status: Finish</span>
+                                    </span>
+                                    &nbsp;&nbsp;
+                                    <span style="font-size:13px">
+                                        Approve By Client: <span ng-if="item.sampleProductStatusID > 4 && item.sampleProductStatusID != 7 && item.sampleProductStatusID != 10">Yes</span><span ng-if="item.sampleProductStatusID < 5 || item.sampleProductStatusID == 7 || item.sampleProductStatusID == 10">No</span>
+                                    </span>
+                                    &nbsp;&nbsp;
+                                    @*<span style="font-size:13px">
+                                        <label ng-if="item.isBuildFromExistModel != null">From Exists Model: <span ng-if="item.isBuildFromExistModel">Yes</span><span ng-if="!item.isBuildFromExistModel">No</span></label>
+                                    </span>*@
+                                </h5>
+                                <table class="info" style="margin-top: 2px">
+                                    <tr>
+                                        <td>Quantity</td>
+                                        <td>{{item.quantity}}</td>
+                                        <td>Factory</td>
+                                        <td><a target="_blank" href="@Url.Action("Edit","FactoryMng2")/{{item.vnSuggestedFactoryID}}">{{item.vnSuggestedFactoryUD}}</a></td>
+                                        <td style="background:#f9f9f9">Deadline</td>
+                                        <td>{{item.factoryDeadline}}</td>
+                                        <td style="background:#f9f9f9">Packaging Method</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Sub Factory</td>
+                                        <td>
+                                            <font ng-repeat="factory in item.sampleProductSubFactories">{{factory.factoryUD}}; </font>
+                                        </td>
+                                        <td style="background:#f9f9f9">Factory Breakdown</td>
+                                        <td>
+                                            <a target="_blank" ng-if="!item.factoryBreakdownID" href="@Url.Action("View", "BreakDownMng")/0?modelId=0&sampleProductId={{item.sampleProductID}}&offerLineId=0&factoryId={{item.vnSuggestedFactoryID}}">{{item.factoryBreakdownPriceUSD | currency:'$':2}}</a>
+                                            <a target="_blank" ng-if="item.factoryBreakdownID" href="@Url.Action("Edit", "FactoryBreakdownMng")/{{item.factoryBreakdownID}}?sampleProductId={{item.sampleProductID}}">{{item.factoryBreakdownPriceUSD | currency:'$':2}}</a>
+                                        </td>
+                                        <td style="background:#f9f9f9">AVT Breakdown</td>
+                                        <td>{{item.avtBreakdownPriceUSD | currency:'$':2}}</td>
+                                        <td>
+                                            {{item.packagingMethodNM}}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="background:#f9f9f9">Description</td>
+                                        <td colspan="6">
+                                            {{item.description}}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Internal Remark</td>
+                                        <td colspan="2"><a href="javascript:void(0)" ng-click="event.openSampleRemark(item.sampleRemarkID)" ng-if="item.sampleRemarkID">Last Internal Remark</a><font ng-if="!item.sampleRemarkID">Last Interal Remark</font></td>
+                                        <td style="background:#f9f9f9">Client Request</td>
+                                        <td colspan="3"><a href="javascript:void(0)" ng-click="event.openSampleProductMinute(item.sampleProductMinuteID)" ng-if="item.sampleProductMinuteID">Last Client Request</a><font ng-if="!item.sampleProductMinuteID">Last Client Request</font></td>
+                                    </tr>
+                                </table>
+
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+
+    <div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="frmModelList" class="modal fade" style="display: none; z-index: 0 !important" data-backdrop="static">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content" style="margin-top:90px !important">
+                <div class="modal-header">
+                    <button aria-hidden="true" data-dismiss="modal" class="close" type="button">
+                        ×
+                    </button>
+                    <h4 id="myModalLabel" class="modal-title">Model View</h4>
+                </div>
+                <div class="modal-body smart-form">
+                    <div>
+                        <div class="widget-body">
+                            <div class="row">
+                                <div class="tilsoft-table-wrapper" avs-scroll grid-handler="gridHandler">
+                                    <div class="tilsoft-table">
+                                        <div class="tilsoft-table-header" style="width:500px">
+                                            <div style="width:105px;height:32px">Code</div>
+                                            <div style="width:350px;height:32px">Name</div>
+                                            <div style="height:32px">Product Type</div>
+                                        </div>
+                                        <div class="tilsoft-table-body" style="width:500px; margin-top:32px">
+                                            <table>
+                                                <tbody>
+                                                    <tr ng-repeat="item in modelList">
+                                                        <td style="text-align: center; width: 104px">{{item.modelUD}}</td>
+                                                        <td style="width: 350px">{{item.modelNM}}</td>
+                                                        <td style="text-align: center">{{item.productTypeNM}}</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <a class="btn btn-danger btn-sm" data-dismiss="modal">
+                        <i class="fa fa-times"></i> Cancel
+                    </a>
+                    <a class="btn btn-primary btn-sm" href="@Url.Action("Edit", "Model")/0?sampleProductID={{sampleProductID}}" target="_blank">
+                        <i class="fa fa-arrow-right"></i> Continue
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @*SampleRemark*@
+    <div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="frmSampleRemark" class="modal fade" style="display: none;" data-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button aria-hidden="true" data-dismiss="modal" class="close" type="button">
+                        ×
+                    </button>
+                    <h4 id="myModalLabel" class="modal-title">View Internal Remark</h4>
+                </div>
+                <div class="modal-body smart-form">
+                    <fieldset>
+                        <h2 style="margin-bottom: 15px;">Internal Remark</h2>
+                        <div class="smart-timeline" style="margin-bottom: 30px;">
+                            <ul class="smart-timeline-list">
+                                <li>
+                                    <div class="smart-timeline-icon">
+                                        <i class="fa fa-user"></i>
+                                    </div>
+                                    <div class="smart-timeline-time">
+                                        <small>{{sampleRemark.updatedDate}}</small>
+                                    </div>
+                                    <div class="smart-timeline-content">
+                                        <p>
+                                            <a ng-if="sampleRemark.updatedBy" href="{{context.profileUrl}}{{sampleRemark.updatedBy}}" data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                <strong>{{sampleRemark.updatorName}}</strong>
+                                            </a>
+                                        </p>
+                                        <p>{{sampleRemark.remark}}</p>
+                                        <br />
+                                        <u>Attachment</u>
+                                        <ul style="margin-left: 15px;">
+                                            <li ng-repeat="image in sampleRemark.sampleRemarkImages" style="padding: 0px;">
+                                                <a href="{{image.fileLocation}}" target="_blank">{{image.friendlyName}}</a>
+                                            </li>
+                                        </ul>
+                                        <div class="clear"></div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @*SampleProductMinute*@
+    <div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="frmSampleProductMinute" class="modal fade" style="display: none;" data-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button aria-hidden="true" data-dismiss="modal" class="close" type="button">
+                        ×
+                    </button>
+                    <h4 id="myModalLabel" class="modal-title">View Client Request</h4>
+                </div>
+                <div class="modal-body smart-form">
+                    <fieldset>
+                        <h2 style="margin-bottom: 15px;">Client Request</h2>
+                        <div class="smart-timeline" style="margin-bottom: 30px;">
+                            <ul class="smart-timeline-list">
+                                <li>
+                                    <div class="smart-timeline-icon">
+                                        <i class="fa fa-user"></i>
+                                    </div>
+                                    <div class="smart-timeline-time">
+                                        <small>{{sampleProductMinute.updatedDate}}</small>
+                                    </div>
+                                    <div class="smart-timeline-content">
+                                        <p>
+                                            <a ng-if="sampleProductMinute.updatedBy" href="{{context.profileUrl}}{{sampleProductMinute.updatedBy}}" data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                <strong>{{sampleProductMinute.updatorName}}</strong>
+                                            </a>
+                                        </p>
+                                        <p>{{sampleProductMinute.meetingMinute}}</p>
+                                        <br />
+                                        <u>Attachment</u>
+                                        <ul style="margin-left: 15px;">
+                                            <li ng-repeat="image in sampleProductMinute.sampleProductMinuteImages" style="padding: 0px;">
+                                                <a href="{{image.fileLocation}}" target="_blank">{{image.friendlyName}}</a>
+                                            </li>
+                                        </ul>
+                                        <div class="clear"></div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<!-- FORM -->
+<ng-include autoscroll src="'@(Request.Url.GetLeftPart(UriPartial.Authority))/Angular/app/sample2Mng/view/edit/frmProduct.html'"></ng-include>
+<ng-include autoscroll src="'@(Request.Url.GetLeftPart(UriPartial.Authority))/Angular/app/sample2Mng/view/edit/frmTechnicalDrawing.html'"></ng-include>
+<ng-include autoscroll src="'@(Request.Url.GetLeftPart(UriPartial.Authority))/Angular/app/sample2Mng/view/edit/frmProgress.html'"></ng-include>
+@Html.Partial("~/Views/Sample2Mng/Edit/QARemark.cshtml")
+
+<!-- FORM POPUP -->
+<ng-include autoscroll src="'@(Request.Url.GetLeftPart(UriPartial.Authority))/Angular/app/sample2Mng/view/edit/frmSubFactory.html'"></ng-include>
+<ng-include autoscroll src="'@(Request.Url.GetLeftPart(UriPartial.Authority))/Angular/app/sample2Mng/view/edit/frmSearchClient.html'"></ng-include>
+<ng-include autoscroll src="'@(Request.Url.GetLeftPart(UriPartial.Authority))/Angular/app/sample2Mng/view/edit/frmSearchModel.html'"></ng-include>
+<ng-include autoscroll src="'@(Request.Url.GetLeftPart(UriPartial.Authority))/Angular/app/sample2Mng/view/edit/frmOtherModel.html'"></ng-include>
+<ng-include autoscroll src="'@(Request.Url.GetLeftPart(UriPartial.Authority))/Angular/app/sample2Mng/view/edit/frmSearchMaterial.html'"></ng-include>
+<ng-include autoscroll src="'@(Request.Url.GetLeftPart(UriPartial.Authority))/Angular/app/sample2Mng/view/edit/frmOtherMaterial.html'"></ng-include>
+<ng-include autoscroll src="'@(Request.Url.GetLeftPart(UriPartial.Authority))/Angular/app/sample2Mng/view/edit/frmSearchMaterialType.html'"></ng-include>
+<ng-include autoscroll src="'@(Request.Url.GetLeftPart(UriPartial.Authority))/Angular/app/sample2Mng/view/edit/frmOtherMaterialType.html'"></ng-include>
+<ng-include autoscroll src="'@(Request.Url.GetLeftPart(UriPartial.Authority))/Angular/app/sample2Mng/view/edit/frmSearchMaterialColor.html'"></ng-include>
+<ng-include autoscroll src="'@(Request.Url.GetLeftPart(UriPartial.Authority))/Angular/app/sample2Mng/view/edit/frmOtherMaterialColor.html'"></ng-include>
+<ng-include autoscroll src="'@(Request.Url.GetLeftPart(UriPartial.Authority))/Angular/app/sample2Mng/view/edit/frmSearchSubMaterial.html'"></ng-include>
+<ng-include autoscroll src="'@(Request.Url.GetLeftPart(UriPartial.Authority))/Angular/app/sample2Mng/view/edit/frmOtherSubMaterial.html'"></ng-include>
+<ng-include autoscroll src="'@(Request.Url.GetLeftPart(UriPartial.Authority))/Angular/app/sample2Mng/view/edit/frmSearchSubMaterialColor.html'"></ng-include>
+<ng-include autoscroll src="'@(Request.Url.GetLeftPart(UriPartial.Authority))/Angular/app/sample2Mng/view/edit/frmOtherSubMaterialColor.html'"></ng-include>
+<ng-include autoscroll src="'@(Request.Url.GetLeftPart(UriPartial.Authority))/Angular/app/sample2Mng/view/edit/frmSearchFrameMaterial.html'"></ng-include>
+<ng-include autoscroll src="'@(Request.Url.GetLeftPart(UriPartial.Authority))/Angular/app/sample2Mng/view/edit/frmOtherFrameMaterial.html'"></ng-include>
+<ng-include autoscroll src="'@(Request.Url.GetLeftPart(UriPartial.Authority))/Angular/app/sample2Mng/view/edit/frmSearchFrameMaterialColor.html'"></ng-include>
+<ng-include autoscroll src="'@(Request.Url.GetLeftPart(UriPartial.Authority))/Angular/app/sample2Mng/view/edit/frmOtherFrameMaterialColor.html'"></ng-include>
+<ng-include autoscroll src="'@(Request.Url.GetLeftPart(UriPartial.Authority))/Angular/app/sample2Mng/view/edit/frmSearchBackCushion.html'"></ng-include>
+<ng-include autoscroll src="'@(Request.Url.GetLeftPart(UriPartial.Authority))/Angular/app/sample2Mng/view/edit/frmOtherBackCushion.html'"></ng-include>
+<ng-include autoscroll src="'@(Request.Url.GetLeftPart(UriPartial.Authority))/Angular/app/sample2Mng/view/edit/frmSearchSeatCushion.html'"></ng-include>
+<ng-include autoscroll src="'@(Request.Url.GetLeftPart(UriPartial.Authority))/Angular/app/sample2Mng/view/edit/frmOtherSeatCushion.html'"></ng-include>
+<ng-include autoscroll src="'@(Request.Url.GetLeftPart(UriPartial.Authority))/Angular/app/sample2Mng/view/edit/frmSearchCushionColor.html'"></ng-include>
+<ng-include autoscroll src="'@(Request.Url.GetLeftPart(UriPartial.Authority))/Angular/app/sample2Mng/view/edit/frmOtherCushionColor.html'"></ng-include>
+<ng-include autoscroll src="'@(Request.Url.GetLeftPart(UriPartial.Authority))/Angular/app/sample2Mng/view/edit/frmReferenceImage.html'"></ng-include>
+<ng-include autoscroll src="'@(Request.Url.GetLeftPart(UriPartial.Authority))/Angular/app/sample2Mng/view/edit/frmMeetingMinute.html'"></ng-include>
+<ng-include autoscroll src="'@(Request.Url.GetLeftPart(UriPartial.Authority))/Angular/app/sample2Mng/view/edit/frmRemark.html'"></ng-include>
+<ng-include autoscroll src="'@(Request.Url.GetLeftPart(UriPartial.Authority))/Angular/app/sample2Mng/view/edit/frmMonitor.html'"></ng-include>
+<ng-include autoscroll src="'@(Request.Url.GetLeftPart(UriPartial.Authority))/Angular/app/sample2Mng/view/edit/frmImportProduct.html'"></ng-include>
+
+<ng-include autoscroll src="'@(Request.Url.GetLeftPart(UriPartial.Authority))/Angular/app/sample2Mng/view/edit/frmSearchMaterial2.html'"></ng-include>
+<ng-include autoscroll src="'@(Request.Url.GetLeftPart(UriPartial.Authority))/Angular/app/sample2Mng/view/edit/frmOtherMaterial2.html'"></ng-include>
+<ng-include autoscroll src="'@(Request.Url.GetLeftPart(UriPartial.Authority))/Angular/app/sample2Mng/view/edit/frmSearchMaterial2Type.html'"></ng-include>
+<ng-include autoscroll src="'@(Request.Url.GetLeftPart(UriPartial.Authority))/Angular/app/sample2Mng/view/edit/frmOtherMaterial2Type.html'"></ng-include>
+<ng-include autoscroll src="'@(Request.Url.GetLeftPart(UriPartial.Authority))/Angular/app/sample2Mng/view/edit/frmSearchMaterial2Color.html'"></ng-include>
+<ng-include autoscroll src="'@(Request.Url.GetLeftPart(UriPartial.Authority))/Angular/app/sample2Mng/view/edit/frmOtherMaterial2Color.html'"></ng-include>
+<ng-include autoscroll src="'@(Request.Url.GetLeftPart(UriPartial.Authority))/Angular/app/sample2Mng/view/edit/frmSearchMaterial3.html'"></ng-include>
+<ng-include autoscroll src="'@(Request.Url.GetLeftPart(UriPartial.Authority))/Angular/app/sample2Mng/view/edit/frmOtherMaterial3.html'"></ng-include>
+<ng-include autoscroll src="'@(Request.Url.GetLeftPart(UriPartial.Authority))/Angular/app/sample2Mng/view/edit/frmSearchMaterial3Type.html'"></ng-include>
+<ng-include autoscroll src="'@(Request.Url.GetLeftPart(UriPartial.Authority))/Angular/app/sample2Mng/view/edit/frmOtherMaterial3Type.html'"></ng-include>
+<ng-include autoscroll src="'@(Request.Url.GetLeftPart(UriPartial.Authority))/Angular/app/sample2Mng/view/edit/frmSearchMaterial3Color.html'"></ng-include>
+<ng-include autoscroll src="'@(Request.Url.GetLeftPart(UriPartial.Authority))/Angular/app/sample2Mng/view/edit/frmOtherMaterial3Color.html'"></ng-include>
+<ng-include autoscroll src="'@(Request.Url.GetLeftPart(UriPartial.Authority))/Angular/app/sample2Mng/view/edit/frmPackagingDetail.html'"></ng-include>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "Sample2Mng")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="event.update()"><i class="fa fa-save"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current))" title="Delete" ng-click="event.delete($event)" style="color: #ff0000;"><i class="fa fa-times"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default {{@ViewBag.ID?'':'disabled'}}" title="Print" ng-click="event.print()"><i class="fa fa-print"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default disabled" title="Approve"><i class="fa fa-thumbs-o-up"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default disabled" title="Reset Approval status"><i class="fa fa-thumbs-o-down"></i></a>
+        </li>
+    </ul>
+}
+
+
+
+@section pagejs {
+    <script src="~/TemplateResource/js/plugin/jquery.autocomplete.min.js"></script>
+    <script type="text/javascript">
+        var context = {
+            id: @ViewBag.ID,
+            errMsg: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED',
+            backUrl: '@Url.Action("Index", "Sample2Mng")',
+            refreshUrl: '@Url.Action("Edit", "Sample2Mng", new { id = UrlParameter.Optional })/',
+            backendUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])/Media/Thumbnail/',
+            backendFileUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])/Media/File/',
+            editTitle: '@ViewBag.Title',
+            backendReportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]',
+            serviceUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/sample2/',
+            printUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/sampleorderoverviewrpt/',
+            token: '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]',
+            supportServiceUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/support/',
+            userId: @userInfo.Data.UserId,
+            profileUrl: '@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/'
+        };
+
+        @if (!string.IsNullOrEmpty(param))
+        {
+            @Html.Raw("context.initParam = { " + param + "};")
+        }
+    </script>
+    <script src="~/Angular/app/sample2Mng/edit.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/jsonService2.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}

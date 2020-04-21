@@ -1,0 +1,359 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    var backendReportUrl = @System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"];
+    var pageSize = System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"];
+
+    ViewBag.Title = "Export Inventory Report";
+    ViewBag.Module = "Inventory Report";
+
+    Frontend.APIDTO.APIUserInformation userInfo = (Frontend.APIDTO.APIUserInformation)Session[Frontend.Customize.Common.ProjectDefinition.USER_INFO_SESSION];
+}
+
+<div class="row">
+    <article class="col col-sm-12">
+        <div class="jarviswidget" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <ul class="nav nav-tabs pull-left in">
+                    <li class="active">
+                        <a data-toggle="tab" href="#tabOverview" name="gtab"> <span> <i class="fa fa-database"></i> Overview </span> </a>
+                    </li>
+                </ul>
+            </header>
+            <div>
+                <div class="widget-body">
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="tabOverview">
+                            <div class="smart-form">
+                                <div class="row">
+                                    <section class="col col-sm-12">
+                                        <h2><i class="fa fa-filter"></i> General Filter</h2>
+                                        <hr style="margin-top: 5px;" />
+                                    </section>
+                                    <section class="col col-sm-2">
+                                        <label>&nbsp;</label>
+                                        <label class="checkbox">
+                                            <input type="checkbox" ng-disabled="filters.productionTeamID != null" ng-model="isFactoryWarehouse" ng-click="event.selectLoaded(isFactoryWarehouse, isProductionTeam);" /> <i></i>Factory Warehouse
+                                        </label>
+                                    </section>
+                                    <section class="col col-sm-2">
+                                        <label>Production Team</label>
+                                        <select class="select2" style="font-size: 12px; font-family: Arial;" ng-model="filters.productionTeamID" ng-disabled="isFactoryWarehouse" ng-options="productionTeam.productionTeamID as productionTeam.productionTeamNM for productionTeam in support.productionTeams" ng-change="event.changeProductionTeam();">
+                                            <option value=""></option>
+                                        </select>
+                                    </section>
+                                    <section class="col col-sm-2">
+                                        <label>From Date</label>
+                                        <label class="input">
+                                            <input id="startDate" type="text" class="form-control" style="font-size: 12px; font-family: Arial;" avs-date ng-model="filters.startDate" required />
+                                        </label>
+                                    </section>
+                                    <section class="col col-sm-2">
+                                        <label>To Date</label>
+                                        <label class="input">
+                                            <input id="endDate" type="text" class="form-control" style="font-size: 12px; font-family: Arial;" avs-date ng-model="filters.endDate" required />
+                                        </label>
+                                    </section>
+                                    <section class="col col-sm-12" ng-if="isFactoryWarehouse">
+                                        <h2><i class="fa fa-filter"></i> Factory Warehouse Filter</h2>
+                                        <hr style="margin-top: 5px;" />
+                                    </section>
+                                    <section class="col col-sm-2" ng-if="isFactoryWarehouse" ng-repeat="factoryWarehouse in support.factoryWarehouses">
+                                        <label class="checkbox">
+                                            <input type="checkbox" ng-model="factoryWarehouse.isSelected" /> <i></i>{{factoryWarehouse.factoryWarehouseNM}}
+                                        </label>
+                                    </section>
+                                    <section class="col col-sm-12">
+                                        <h2><i class="fa fa-database"></i> Search Result</h2>
+                                        <hr style="margin-top: 5px;" />
+                                    </section>
+                                    <section ng-if="form!=1" class="col col-sm-12">
+                                        <div class="tilsoft-table-wrapper" avs-scrollable-table>
+                                            <div class="tilsoft-table">
+                                                <div class="tilsoft-table-header" style="width: 1555px;">
+                                                    <div style="width: 60px; height: 60px;">Total<br /><b style="color: #4800ff;">{{data.inventory.length|number}}</b></div>
+                                                    <div style="width: 180px; height: 60px;" class="no-padding">
+                                                        <div style="width: 100%; height: 30px; line-height: 30px; border-right: none;" class="no-padding">Production Code</div>
+                                                        <div style="width: 100%; height: 30px; line-height: 30px; border-right: none;" class="no-padding">
+                                                            <div style="width: 90px; height: 30px; line-height: 30px;" class="no-padding">Note Nr.</div>
+                                                            <div style="width: 100%; height: 30px; line-height: 30px;" class="no-padding">Note Date</div>
+                                                        </div>
+                                                    </div>
+                                                    <div style="width: 350px; height: 60px;" class="no-padding">
+                                                        <div style="width: 100%; height: 30px; line-height: 30px; border-right: none;" class="no-padding">Production Name</div>
+                                                        <div style="width: 100%; height: 30px; line-height: 30px; border-right: none;" class="no-padding">Note Description</div>
+                                                    </div>
+                                                    <div style="width: 355px; height: 60px;" class="no-padding">
+                                                        <div style="width: 100%; height: 30px; line-height: 30px; border-right: none;" class="no-padding">
+                                                            <div style="width: 65px; height: 30px; line-height: 30px;" class="no-padding">Unit</div>
+                                                            <div style="width: 120px; height: 30px; line-height: 30px;" class="no-padding">Frame Weight</div>
+                                                            <div style="width: 100%; height: 30px; line-height: 30px;" class="no-padding">Frame Color</div>
+                                                        </div>
+                                                        <div style="width: 100%; height: 30px; line-height: 30px; border-right: none;" class="no-padding">
+                                                            <div style="width: 65px; height: 30px; line-height: 30px;" class="no-padding">PI Nr.</div>
+                                                            <div style="width: 120px; height: 30px; line-height: 30px;" class="no-padding">Work Order</div>
+                                                            <div style="width: 85px; height: 30px; line-height: 30px;" class="no-padding">Client</div>
+                                                            <div style="width: 100%; height: 30px; line-height: 30px;" class="no-padding">Order Qnt</div>
+                                                        </div>
+                                                    </div>
+                                                    <div style="width: 250px; height: 60px;" class="no-padding">
+                                                        <div style="width: 100%; height: 30px; line-height: 30px; border-right: none;" ng-if="isFactoryWarehouse" class="no-padding">Factory Warehouse</div>
+                                                        <div style="width: 100%; height: 30px; line-height: 30px; border-right: none;" ng-if="filters.productionTeamID != null" class="no-padding">Production Team</div>
+                                                        <div style="width: 100%; height: 30px; line-height: 30px; border-right: none;" ng-if="!isFactoryWarehouse && filters.productionTeamID == null" class="no-padding">&nbsp;</div>
+                                                        <div style="width: 100%; height: 30px; line-height: 30px; border-right: none;" class="no-padding">Product</div>
+                                                    </div>
+                                                    <div style="width: 90px; height: 60px;">Stocked<br />Qnt</div>
+                                                    <div style="width: 90px; height: 60px;">Received<br />Qnt</div>
+                                                    <div style="width: 90px; height: 60px;">Deliveried<br />Qnt</div>
+                                                    <div style="width: 90px; height: 60px;">Ended<br />Qnt</div>
+                                                    <div style="border-bottom: none;"></div>
+                                                </div>
+                                                <div class="tilsoft-table-totalrow" style="width: 1555px; margin-top: 60px;">
+                                                    <div style="width: 1195px;">Total</div>
+                                                    <div style="width: 90px;">{{method.totalStocked()|number}}</div>
+                                                    <div style="width: 90px;">{{method.totalReceived()|number}}</div>
+                                                    <div style="width: 90px;">{{method.totalDelivered()|number}}</div>
+                                                    <div style="width: 90px;">{{method.totalEnded()|number}}</div>
+                                                    <div style="border-bottom: none;"></div>
+                                                </div>
+                                                <div class="tilsoft-table-body" style="width: 1555px; margin-top: 90px;">
+                                                    <table>
+                                                        <tr ng-repeat="item in data.inventory">
+                                                            <td style="width: 60px; text-align: center;">{{($index + 1)}}</td>
+                                                            <td style="width: 1494px;">
+                                                                <table style="border: 1px solid #ddd; font-size: 12px!important;">
+                                                                    <tbody>
+                                                                        <tr style="background: #eec;">
+                                                                            <td style="width: 174px; font-size: 12px;" colspan="{{item.isHideDetail ? 2 : 1}}">
+                                                                                <a href="@Url.Action("Edit", "ProductionItem")/{{item.productionItemID}}" target="_blank" title="Show information of item">{{item.productionItemUD}}</a>
+                                                                            </td>
+                                                                            <td style="width: 350px; font-size: 12px;">{{item.productionItemNM}}</td>
+                                                                            <td style="width: 65px; text-align: center; font-size: 12px;">{{item.unitNM}}</td>
+                                                                            <td style="width: 120px; text-align: right; font-size: 12px;">{{item.frameWeight|number}}</td>
+                                                                            <td style="width: 170px; font-size: 12px;" colspan="{{item.isHideDetail ? 2 : 1}}">{{item.frameMaterialColorNM}}</td>
+                                                                            <td style="width: 250px; text-align: center; font-size: 12px;">{{(isFactoryWarehouse) ? item.factoryWarehouseNM : item.productionTeamNM}}</td>
+                                                                            <td style="width: 90px; text-align: right; font-size: 12px;">
+                                                                                <a href="javascript:void(0);" ng-click="event.visibleDetail(item);" title="Show detail import (export) item">{{item.stockedQnt|number}}</a>
+                                                                            </td>
+                                                                            <td style="width: 90px; text-align: right; font-size: 12px;">{{item.receivedQnt|number}}</td>
+                                                                            <td style="width: 90px; text-align: right; font-size: 12px;">{{item.deliveredQnt|number}}</td>
+                                                                            <td style="text-align: right; font-size: 12px;">
+                                                                                <a href="@Url.Action("MoveFromInvetoryOverview", "StorageCardRpt")?productionItemID={{item.productionItemID}}&factoryWarehouseID={{item.factoryWarehouseID}}&startDate={{filters.startDate}}&endDate={{filters.endDate}}" target="_blank" title="Move storage card summary item" ng-if="isFactoryWarehouse">{{(item.stockedQnt + item.receivedQnt - item.deliveredQnt)|number}}</a>
+                                                                                <label ng-if="filters.productionTeamID != null">{{(item.stockedQnt + item.receivedQnt - item.deliveredQnt)|number}}</label>
+                                                                            </td>
+                                                                        </tr>
+                                                                        <tr ng-repeat="dItem in data.inventoryDetail | filter : {productionItemID: item.productionItemID, factoryWarehouseID: item.factoryWarehouseID, productionTeamID: item.productionTeamID} : true" ng-if="item.isHideDetail">
+                                                                            <td style="width: 84px; text-align: center; font-size: 12px;">
+                                                                                <a href="@Url.Action("SaleOrderWithoutWorkOrder", "DeliveryNote2")/{{dItem.documentNoteID}}" target="_blank" ng-if="dItem.documentNoteTypeID == 2 && dItem.viewName == 'SaleOrderWithoutWorkOrder'" title="Move export note sale order">{{dItem.documentNoteUD}}</a>
+                                                                                <a href="@Url.Action("Warehouse2Team", "DeliveryNote2")/{{dItem.documentNoteID}}" target="_blank" ng-if="dItem.documentNoteTypeID == 2 && dItem.viewName == 'Warehouse2Team'" title="Move export note work order">{{dItem.documentNoteUD}}</a>
+                                                                                <a href="@Url.Action("PO2WarehouseWithoutWorkOrder", "ReceivingNote")/{{dItem.documentNoteID}}" target="_blank" ng-if="dItem.documentNoteTypeID == 1 && dItem.viewName == 'PO2WarehouseWithoutWorkOrder'" title="Move import note purchase order">{{dItem.documentNoteUD}}</a>
+                                                                                <a href="@Url.Action("Team2Warehouse", "ReceivingNote")/{{dItem.documentNoteID}}" target="_blank" ng-if="dItem.documentNoteTypeID == 1 && dItem.viewName == 'Team2Warehouse'" title="Move import note work order">{{dItem.documentNoteUD}}</a>
+                                                                            </td>
+                                                                            <td style="width: 90px; text-align: center; font-size: 12px;">{{dItem.documentNoteDate}}</td>
+                                                                            <td style="width: 350px; font-size: 12px;">{{dItem.description}}</td>
+                                                                            <td style="width: 65px; text-align: center; font-size: 12px;">{{dItem.proformaInvoiceNo}}</td>
+                                                                            <td style="width: 120px; text-align: center; font-size: 12px;">{{dItem.workOrderUD}}</td>
+                                                                            <td style="width: 85px; text-align: center; font-size: 12px;">{{item.clientUD}}</td>
+                                                                            <td style="width: 85px; text-align: right; font-size: 12px;">{{dItem.orderQnt|number}}</td>
+                                                                            <td style="width: 250px; font-size: 12px;">{{dItem.articleCode}}</td>
+                                                                            <td style="width: 90px; font-size: 12px;"></td>
+                                                                            <td style="width: 90px; text-align: right; font-size: 12px;">{{(dItem.receivedQnt == 0) ? null : dItem.receivedQnt|number}}</td>
+                                                                            <td style="width: 90px; text-align: right; font-size: 12px;">{{(dItem.deliveredQnt == 0) ? null : dItem.deliveredQnt|number}}</td>
+                                                                            <td></td>
+                                                                        </tr>
+                                                                    </tbody>
+                                                                </table>
+                                                            </td>
+                                                            <td style="border-bottom: none;"></td>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+                                    <section ng-if="form == 1" class="col col-sm-12">
+                                        <div class="tilsoft-table-wrapper" avs-scrollable-table>
+                                            <div class="tilsoft-table">
+                                                <div class="tilsoft-table-header" style="width: 1915px;">
+                                                    <div style="width: 60px; height: 60px;">Total<br /><b style="color: #4800ff;">{{data.inventory.length|number}}</b></div>
+                                                    <div style="width: 180px; height: 60px;" class="no-padding">
+                                                        <div style="width: 100%; height: 30px; line-height: 30px; border-right: none;" class="no-padding">Production Code</div>
+                                                        <div style="width: 100%; height: 30px; line-height: 30px; border-right: none;" class="no-padding">
+                                                            <div style="width: 90px; height: 30px; line-height: 30px;" class="no-padding">Note Nr.</div>
+                                                            <div style="width: 100%; height: 30px; line-height: 30px;" class="no-padding">Note Date</div>
+                                                        </div>
+                                                    </div>
+                                                    <div style="width: 350px; height: 60px;" class="no-padding">
+                                                        <div style="width: 100%; height: 30px; line-height: 30px; border-right: none;" class="no-padding">Production Name</div>
+                                                        <div style="width: 100%; height: 30px; line-height: 30px; border-right: none;" class="no-padding">Note Description</div>
+                                                    </div>
+
+                                                    <div style="width: 65px; height: 60px;" class="no-padding">
+                                                        <div style="width: 100%; height: 30px; line-height: 30px; border-right: none;" class="no-padding">
+                                                            <div style="width: 65px; height: 30px; line-height: 30px;" class="no-padding">Unit</div>
+                                                        </div>
+                                                        <div style="width: 100%; height: 30px; line-height: 30px; border-right: none;" class="no-padding">
+                                                            <div style="width: 65px; height: 30px; line-height: 30px;" class="no-padding">PI Nr.</div>
+                                                        </div>
+                                                    </div>
+                                                    <div style="width: 90px; height: 60px;">Stocked<br />Qnt</div>
+                                                    <div style="width: 90px; height: 60px;">Received<br />Qnt</div>
+                                                    <div style="width: 90px; height: 60px;">Deliveried<br />Qnt</div>
+                                                    <div style="width: 90px; height: 60px;">Ended<br />Qnt</div>
+                                                    <div style="width: 90px; height: 60px;">Stocked<br />Cont</div>
+                                                    <div style="width: 90px; height: 60px;">Received<br />Cont</div>
+                                                    <div style="width: 90px; height: 60px;">Deliveried<br />Cont</div>
+                                                    <div style="width: 90px; height: 60px;">Ended<br />Cont</div>
+                                                    <div style="width: 290px; height: 60px;" class="no-padding">
+                                                        <div style="width: 100%; height: 30px; line-height: 30px; border-right: none;" class="no-padding">
+                                                            <div style="width: 120px; height: 30px; line-height: 30px;" class="no-padding">Frame Weight</div>
+                                                            <div style="width: 100%; height: 30px; line-height: 30px;" class="no-padding">Frame Color</div>
+                                                        </div>
+                                                        <div style="width: 100%; height: 30px; line-height: 30px; border-right: none;" class="no-padding">
+                                                            <div style="width: 120px; height: 30px; line-height: 30px;" class="no-padding">Work Order</div>
+                                                            <div style="width: 85px; height: 30px; line-height: 30px;" class="no-padding">Client</div>
+                                                            <div style="width: 100%; height: 30px; line-height: 30px;" class="no-padding">Order Qnt</div>
+                                                        </div>
+                                                    </div>
+                                                    <div style="width: 250px; height: 60px;" class="no-padding">
+                                                        <div style="width: 100%; height: 30px; line-height: 30px; border-right: none;" ng-if="isFactoryWarehouse" class="no-padding">Factory Warehouse</div>
+                                                        <div style="width: 100%; height: 30px; line-height: 30px; border-right: none;" ng-if="filters.productionTeamID != null" class="no-padding">Production Team</div>
+                                                        <div style="width: 100%; height: 30px; line-height: 30px; border-right: none;" ng-if="!isFactoryWarehouse && filters.productionTeamID == null" class="no-padding">&nbsp;</div>
+                                                        <div style="width: 100%; height: 30px; line-height: 30px; border-right: none;" class="no-padding">Product</div>
+                                                    </div>
+                                                    <div style="border-bottom: none;"></div>
+                                                </div>
+                                                <div class="tilsoft-table-totalrow" style="width: 1915px; margin-top: 60px;">
+                                                    <div style="width: 655px;">Total</div>
+                                                    <div style="width: 90px;">{{method.totalStocked()|number}}</div>
+                                                    <div style="width: 90px;">{{method.totalReceived()|number}}</div>
+                                                    <div style="width: 90px;">{{method.totalDelivered()|number}}</div>
+                                                    <div style="width: 90px;">{{method.totalEnded()|number}}</div>
+                                                    <div style="width: 90px;">{{method.totalStockedCont()|number : 2}}</div>
+                                                    <div style="width: 90px;">{{method.totalReceivedCont()|number : 2}}</div>
+                                                    <div style="width: 90px;">{{method.totalDeliveredCont()|number : 2}}</div>
+                                                    <div style="width: 90px;">{{method.totalEndedCont()|number : 2}}</div>
+                                                    <div style="border-bottom: none;"></div>
+                                                </div>
+                                                <div class="tilsoft-table-body" style="width: 1915px; margin-top: 90px;">
+                                                    <table>
+                                                        <tr ng-repeat="item in data.inventory">
+                                                            <td style="width: 60px; text-align: center;">{{($index + 1)}}</td>
+                                                            <td style="width: 1854px;">
+                                                                <table style="border: 1px solid #ddd; font-size: 12px!important;">
+                                                                    <tbody>
+                                                                        <tr style="background: #eec;">
+                                                                            <td style="width: 174px; font-size: 12px;" colspan="{{item.isHideDetail ? 2 : 1}}">
+                                                                                <a href="@Url.Action("Edit", "ProductionItem")/{{item.productionItemID}}" target="_blank" title="Show information of item">{{item.productionItemUD}}</a>
+                                                                            </td>
+                                                                            <td style="width: 350px; font-size: 12px;">{{item.productionItemNM}}</td>
+                                                                            <td style="width: 65px; text-align: center; font-size: 12px;">{{item.unitNM}}</td>
+                                                                            <td style="width: 90px; text-align: right; font-size: 12px;">
+                                                                                <a href="javascript:void(0);" ng-click="event.visibleDetail(item);" title="Show detail import (export) item">{{item.stockedQnt|number}}</a>
+                                                                            </td>
+                                                                            <td style="width: 90px; text-align: right; font-size: 12px;">{{item.receivedQnt|number}}</td>
+                                                                            <td style="width: 90px; text-align: right; font-size: 12px;">{{item.deliveredQnt|number}}</td>
+                                                                            <td style="text-align: right; width: 90px; font-size: 12px;">
+                                                                                <a href="@Url.Action("MoveFromInvetoryOverview", "StorageCardRpt")?productionItemID={{item.productionItemID}}&factoryWarehouseID={{item.factoryWarehouseID}}&startDate={{filters.startDate}}&endDate={{filters.endDate}}" target="_blank" title="Move storage card summary item" ng-if="isFactoryWarehouse">{{(item.stockedQnt + item.receivedQnt - item.deliveredQnt)|number}}</a>
+                                                                                <label ng-if="filters.productionTeamID != null">{{(item.stockedQnt + item.receivedQnt - item.deliveredQnt)|number}}</label>
+                                                                            </td>
+                                                                            <td style="width: 90px; text-align: right; font-size: 12px;">
+                                                                                <label ng-if="item.stockedCont>0">{{item.stockedCont | number : 2}}</label>
+                                                                                <label ng-if="item.stockedCont==0"></label>
+                                                                            </td>
+                                                                            <td style="width: 90px; text-align: right; font-size: 12px;">
+                                                                                <label ng-if="item.receivedCont>0">{{item.receivedCont | number : 2}}</label>
+                                                                                <label ng-if="item.receivedCont==0"></label>
+                                                                            </td>
+                                                                            <td style="width: 90px; text-align: right; font-size: 12px;">
+                                                                                <label ng-if="item.deliveredCont>0">{{item.deliveredCont | number : 2}}</label>
+                                                                                <label ng-if="item.deliveredCont==0"></label>
+                                                                            </td>
+                                                                            <td style="width:90px; text-align: right; font-size: 12px;">
+                                                                                <label ng-if="item.endedCont>0">{{item.endedCont | number : 2}}</label>
+                                                                                <label ng-if="item.endedCont==0"></label>
+                                                                            </td>
+                                                                            <td style="width: 120px; text-align: right; font-size: 12px;">{{item.frameWeight|number}}</td>
+                                                                            <td style="width: 170px; font-size: 12px;" colspan="{{item.isHideDetail ? 2 : 1}}">{{item.frameMaterialColorNM}}</td>
+                                                                            <td style=" text-align: center; font-size: 12px;">{{(isFactoryWarehouse) ? item.factoryWarehouseNM : item.productionTeamNM}}</td>
+                                                                        </tr>
+                                                                        <tr ng-repeat="dItem in data.inventoryDetail | filter : {productionItemID: item.productionItemID, factoryWarehouseID: item.factoryWarehouseID, productionTeamID: item.productionTeamID} : true" ng-if="item.isHideDetail">
+                                                                            <td style="width: 84px; text-align: center; font-size: 12px;">
+                                                                                <a href="@Url.Action("SaleOrderWithoutWorkOrder", "DeliveryNote2")/{{dItem.documentNoteID}}" target="_blank" ng-if="dItem.documentNoteTypeID == 2 && dItem.viewName == 'SaleOrderWithoutWorkOrder'" title="Move export note sale order">{{dItem.documentNoteUD}}</a>
+                                                                                <a href="@Url.Action("Warehouse2Team", "DeliveryNote2")/{{dItem.documentNoteID}}" target="_blank" ng-if="dItem.documentNoteTypeID == 2 && dItem.viewName == 'Warehouse2Team'" title="Move export note work order">{{dItem.documentNoteUD}}</a>
+                                                                                <a href="@Url.Action("PO2WarehouseWithoutWorkOrder", "ReceivingNote")/{{dItem.documentNoteID}}" target="_blank" ng-if="dItem.documentNoteTypeID == 1 && dItem.viewName == 'PO2WarehouseWithoutWorkOrder'" title="Move import note purchase order">{{dItem.documentNoteUD}}</a>
+                                                                                <a href="@Url.Action("Team2Warehouse", "ReceivingNote")/{{dItem.documentNoteID}}" target="_blank" ng-if="dItem.documentNoteTypeID == 1 && dItem.viewName == 'Team2Warehouse'" title="Move import note work order">{{dItem.documentNoteUD}}</a>
+                                                                            </td>
+                                                                            <td style="width: 90px; text-align: center; font-size: 12px;">{{dItem.documentNoteDate}}</td>
+                                                                            <td style="width: 350px; font-size: 12px;">{{dItem.description}}</td>
+                                                                            <td style="width: 65px; text-align: center; font-size: 12px;">{{dItem.proformaInvoiceNo}}</td>
+                                                                            <td style="width: 120px; text-align: center; font-size: 12px;">{{dItem.workOrderUD}}</td>
+                                                                            <td style="width: 85px; text-align: center; font-size: 12px;">{{item.clientUD}}</td>
+                                                                            <td style="width: 85px; text-align: right; font-size: 12px;">{{dItem.orderQnt|number}}</td>
+                                                                            <td style="width: 250px; font-size: 12px;">{{dItem.articleCode}}</td>
+                                                                            <td style="width: 90px; font-size: 12px;"></td>
+                                                                            <td style="width: 90px; text-align: right; font-size: 12px;">{{(dItem.receivedQnt == 0) ? null : dItem.receivedQnt|number}}</td>
+                                                                            <td style="width: 90px; text-align: right; font-size: 12px;">{{(dItem.deliveredQnt == 0) ? null : dItem.deliveredQnt|number}}</td>
+                                                                            <td></td>
+                                                                        </tr>
+                                                                    </tbody>
+                                                                </table>
+                                                            </td>
+                                                            <td style="border-bottom: none;"></td>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction {
+<ul id="sparks">
+    <li>
+        <a href="javascript:void(0)" class="btn btn-primary btn-sm"  title="QNT+Cont" ng-click="event.search2();">
+            QNT+Cont
+        </a>
+    </li>
+    <li>
+        <a href="javascript:void(0)" class="btn btn-default btn-sm" title="Display by HTML with condition filters" ng-click="event.search();">
+            <i class="fa fa-code"></i>
+        </a>
+    </li>
+    <li>
+        <a href="javascript:void(0)" style="color: #4800ff" class="btn btn-default btn-sm" title="Export base on inventory(not include details)" ng-click="event.exportFile();">
+            <i class="fa fa-file-excel-o"></i>
+        </a>
+    </li>
+    <li class="hide">
+        <a href="javascript:void(0)" style="color: #ff006e" class="btn btn-default btn-sm" title="Export base on inventory(include details)" ng-click="event.reportDetail(filters.factoryWarhouseID, filters.productionTeamID, filters.startDate, filters.endDate)">
+            <i class="fa fa-file-excel-o"></i>
+        </a>
+    </li>
+</ul>
+}
+
+@section pagejs{
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(serviceRoot)/api/inventoryRpt/',
+            token: '@token',
+            backendReportUrl: '@backendReportUrl',
+            errorValid: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED',
+            pageSize: '@pageSize',
+            branchID: @userInfo.Data.BranchID,
+        };
+    </script>
+    <script type="text/javascript" src="~/Views/InventoryRpt/index.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Views/InventoryRpt/service.js?v=@guid"></script>
+}

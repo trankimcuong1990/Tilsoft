@@ -1,0 +1,181 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var supportServiceRoot = (System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"]);
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+
+    ViewBag.Title = "Showroom Transfer An Viet Thinh";
+    ViewBag.Module = "Showroom Transfer Management";
+    ViewBag.Icon = "fa-pencil";
+
+    Frontend.APIDTO.APIUserInformation userInfo = (Frontend.APIDTO.APIUserInformation)Session[Frontend.Customize.Common.ProjectDefinition.USER_INFO_SESSION];
+}
+
+<form class="row" name="editForm">
+    <article class="col col-sm-12">
+        <div class="jarviswidget" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>Showroom Transfer</h2>
+            </header>
+            <div class="no-padding">
+                <div class="widget-body">
+                    <div class="smart-form">
+                        <fieldset>
+                            <div class="row">
+                                <section class="col col-sm-2">
+                                    <label>Showroom Transfer Code</label>
+                                    <label class="input">
+                                        <input class="form-control" style="height: 30px; font-family: Arial, Helvetica, sans-serif" readonly ng-model="data.showroomTransferUD" />
+                                    </label>
+                                </section>
+                                <section class="col col-sm-2">
+                                    <label>Showroom Transfer Date</label>
+                                    <label class="input-group">
+                                        <input ng-disabled="data.showroomTransferID" type="text" class="form-control" style="font-family:Arial" avs-calendar ng-data-source="data.showroomTransferDate" />
+                                        <span class="input-group-addon">
+                                            <i class="fa fa-calendar"></i>
+                                        </span>
+                                    </label>
+                                </section>
+                                <section class="col col-sm-2">
+                                    <label>From Warehouse <span style="color:red" ng-show="editForm.fromWarehouseID.$error.required">(required)</span></label>
+                                    <label class="input" ng-class="{'state-error': editForm.fromWarehouseID.$error.required}">
+                                        <select ng-disabled="data.showroomTransferID" class="form-control" ng-model="data.fromWarehouseID" ng-options="item.factoryWarehouseID as item.factoryWarehouseNM for item in factoryWarehouses" id="fromWarehouseID" name="fromWarehouseID" required>
+                                            <option value=""></option>
+                                        </select>
+                                    </label>
+                                </section>
+                                <section class="col col-sm-2">
+                                    <label>To Warehouse <span style="color:red" ng-show="editForm.toWarehouseID.$error.required">(required)</span></label>
+                                    <label class="input" ng-class="{'state-error': editForm.toWarehouseID.$error.required}">
+                                        <select ng-disabled="data.showroomTransferID" class="form-control" ng-model="data.toWarehouseID" ng-options="item.factoryWarehouseID as item.factoryWarehouseNM for item in factoryWarehouses " id="toWarehouseID" name="toWarehouseID" required>
+                                            <option value=""></option>
+                                        </select>
+                                    </label>
+                                </section>
+                                <section class="col col-sm-4">
+                                    <label>Remark</label>
+                                    <label class="input">
+                                        <input ng-readonly="data.showroomTransferID" class="form-control" style="height: 30px; font-family: Arial, Helvetica, sans-serif" ng-model="data.remark" />
+                                    </label>
+                                </section>
+                            </div>
+                            <div class="row">
+                                <section class="col col-sm-2">
+                                    <label class="label" style="text-align: right">Search Product:</label>
+                                </section>
+                                <section class="col col-sm-10">
+                                    <label class="input-group">
+                                        <input ng-readonly="data.showroomTransferID" id="scanQRCode" type="text" class="form-control" style="font-family:Arial" autocomplete="off" ng-model="searchString" ng-change="event.scan($event)" />
+                                        <span class="input-group-addon">
+                                            <i class="fa fa-search"></i>
+                                        </span>
+                                    </label>
+                                </section>
+                            </div>
+                            <div class="row" style="margin-top:0px">
+                                <section class="col col-sm-12">
+                                    <div avs-scrollable-table class="tilsoft-table-wrapper">
+                                        <div class="tilsoft-table">
+                                            <div class="tilsoft-table-header" style="width:1400px">
+                                                <div style="width:80px">
+                                                    Found(s)
+                                                    <span style="color: maroon"><strong>{{totalRowsScan}}</strong></span>
+                                                </div>
+                                                <div style="width:110px">Code</div>
+                                                <div style="width:300px">Name</div>
+                                                <div style="width:100px">Type</div>
+                                                <div style="width:85px">Quantity</div>
+                                                <div style="width:100px">QNT BarCode</div>
+                                                <div style="width:120px">From pallet</div>
+                                                <div style="width:120px">To pallet</div>
+                                                <div>Remark</div>
+                                            </div>
+                                            <div class="tilsoft-table-body" style="width:1400px">
+                                                <table>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td colspan="4" style="text-align:right;vertical-align:central;">Total:</td>
+                                                            <td style="text-align:right; width: 85px; background-color:yellow">{{event.getTotalQuantity()}}</td>
+                                                            <td colspan="3" width="34px"></td>
+                                                        </tr>
+                                                        <tr ng-repeat="item in data.showroomTransferDetails">
+                                                            <td style="width:80px; text-align:center">
+                                                                <a ng-disabled="data.showroomTransferID" href="javascript:void(0)" class="btn btn-default btn-danger btn-xs" ng-click="event.removeItem($event, item)">
+                                                                    <i class="fa fa-times"></i> Delete
+                                                                </a>
+                                                            </td>
+                                                            <td style="width:110px; text-align: center">{{item.productionItemUD}}</td>
+                                                            <td style="width:300px;">{{item.productionItemNM}}</td>
+                                                            <td style="width:100px; text-align:center">{{item.productionItemTypeNM}}</td>
+                                                            <td style="width:85px; text-align:center">
+                                                                <input ng-readonly="data.showroomTransferID" type="text" class="form-control" avs-number style="text-align:right" ng-data-source="item.quantity" ng-keypress="event.getTotalQuantity()" />
+                                                            </td>
+                                                            <td style="width:100px; text-align:center">
+                                                                <input ng-readonly="data.showroomTransferID" type="text" class="form-control" style="text-align:right" avs-number ng-data-source="item.qntBarCode" value="1" />
+                                                            </td>
+                                                            <td style="width:120px">
+                                                                <select ng-disabled="data.showroomTransferID" class="form-control" ng-model="item.factoryWarehousePalletID" ng-options="item.factoryWarehousePalletID as item.factoryWarehousePalletNM for item in factoryWarehousePallets | filter: {factoryWarehouseID: data.fromWarehouseID}">
+                                                                    <option value=""></option>
+                                                                </select>
+                                                            </td>
+                                                            <td style="width:120px">
+                                                                <select ng-disabled="data.showroomTransferID" class="form-control" ng-model="item.factoryWarehouseToPalletID" ng-options="item.factoryWarehousePalletID as item.factoryWarehousePalletNM for item in factoryWarehousePallets | filter: {factoryWarehouseID: data.toWarehouseID}">
+                                                                    <option value=""></option>
+                                                                </select>
+                                                            </td>
+                                                            <td>
+                                                                <input ng-readonly="data.showroomTransferID" type="text" class="form-control" ng-model="item.description" />
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "ShowroomTransfer")" class="btn btn-default" title="Back">
+                <i class="fa fa-arrow-left"></i>
+            </a>
+        </li>
+        <li class="sparks-info">
+            <a ng-disabled="data.showroomTransferID" href="#" class="btn btn-default btn-sm @Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" ng-click="event.update()" title="Save Showroom Transfer"><i class="fa fa-save"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default btn-sm" title="Delete Showroom Transfer" ng-click="event.remove(data.showroomTransferID)"><i class="fa fa-times"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs{
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(serviceRoot)/api/showroomTransferMng/',
+            refreshUrl: '@Url.Action("Edit", "ShowroomTransfer", new { id = UrlParameter.Optional })/',
+            backUrl: '@Url.Action("Index", "ShowroomTransfer")',
+            supportServiceUrl: '@(supportServiceRoot)/api/support/',
+            token: '@token',
+            branchID: '@userInfo.Data.BranchID',
+            id: '@ViewBag.ID',
+            msgValid: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED'
+        };
+    </script>
+    <script type="text/javascript" src="~/Views/ShowroomTransfer/edit.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Views/ShowroomTransfer/service.js?v=@guid"></script>
+}

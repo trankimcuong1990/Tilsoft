@@ -1,0 +1,227 @@
+﻿@{
+    ViewBag.Title = "Search Client Group";
+    ViewBag.Module = "ClientGroup";
+}
+
+<div class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-0" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Search Result</h2>
+            </header>
+
+            <div>
+                <div class="jarviswidget-editbox"></div>
+
+                <div class="widget-body">
+                    <div class="table-responsive" id="clientGroupTable">
+                        <table class="table table-bordered table-hover custom-table dataTable">
+                            <thead>
+                                <tr>
+                                    <th style="width: 60px;"></th>
+                                    <th class="sorting_asc" data-colname="ClientGroupNM">ClientGroup Name</th>
+                                    <th class="sorting" data-colname="remark">Remark</th>
+                                    <th class="sorting" data-colname="creatorName">CreatorName</th>
+                                    <th class="sorting" data-colname="createdDate">CreatedDate</th>
+                                    <th class="sorting" data-colname="updatorName">UpdatorName</th>
+                                    <th class="sorting" data-colname="updatedDate">UpdatedDate</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="clientGroup in clientGroups">
+                                    <td style="text-align: center;">
+                                        @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current) == "disabled")
+                                        {
+                                            <a href="@Url.Action("Edit", "ClientGroup")/{{clientGroup.clientGroupID}}" title="View (Read Only)"><i class="fa fa-folder-open grid-button"></i></a>
+                                        }
+                                        else
+                                        {
+                                            <a href="@Url.Action("Edit", "ClientGroup")/{{clientGroup.clientGroupID}}" title="Edit"><i class="fa fa-pencil-square grid-button"></i></a>
+                                        }
+
+                                        @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current) != "disabled")
+                                        {
+                                            <a href="#" ng-click="delete(clientGroup.clientGroupID)" title="Delete"><i class="fa fa-times-circle grid-button"></i></a>
+                                        }
+                                    </td>
+                                    <td>{{clientGroup.clientGroupNM}}</td>
+                                    <td>{{clientGroup.remark}}</td>
+                                    <td>{{clientGroup.creatorName}}</td>
+                                    <td>{{clientGroup.createdDate}}</td>
+                                    <td>{{clientGroup.updatorName}}</td>
+                                    <td>{{clientGroup.updatedDate}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default disabled" title="Search"><i class="fa fa-search"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Refresh"><i class="fa fa-refresh"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="@Url.Action("Edit", "ClientGroup")/0" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="New"><i class="fa fa-file-o"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default disabled" title="Print"><i class="fa fa-print"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script src="~/Angular/app/clientGroup/service.js"></script>
+    <script type="text/javascript">
+        //// config data table
+        jQuery('#clientGroupTable').furnindoTable();
+        //// end config data table
+
+        clientGroupService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/clientgroup/';
+        clientGroupService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+        clientGroupService.searchFilter.pageSize = @System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"];
+
+        var clientGroupApp = angular.module('tilsoftApp', []);
+        clientGroupApp.controller('tilsoftController', ['$scope', function ($scope) {
+            $scope.clientGroups = null;
+            $scope.pageIndex = 1;
+            $scope.totalPage = 0;
+
+            //
+            // private function defined
+            //
+            var search = function () {
+                clientGroupService.search(
+                    function (data) {
+                        $scope.clientGroups = data.data;
+                        $scope.totalPage = Math.ceil(data.totalRows / clientGroupService.searchFilter.pageSize);
+                        $scope.$apply();
+
+                        if(data.totalRows < clientGroupService.searchFilter.pageSize) {
+                            jQuery('#clientGroupTable').find('ul').hide();
+                        }
+                        else {
+                            jQuery('#clientGroupTable').find('ul').show();
+                        }
+
+                        jQuery('#content').show();
+                    },
+                    function (error) {
+                        $scope.clientGroups = null;
+                        $scope.pageIndex = 1;
+                        $scope.totalPage = 0;
+                        $scope.$apply();
+                    }
+                );
+            }
+
+            // function define
+            $scope.delete = function (id) {
+                if (confirm('Are you sure ?')) {
+                    clientGroupService.delete(id,
+                        function (data) {
+                            jsHelper.processMessage(data.message);
+
+                            if(data.message.type == 0) {
+                                var j = -1;
+                                for (var i = 0; i < $scope.clientGroups.length; i++) {
+                                    if ($scope.clientGroups[i].clientGroupID == data.data) {
+                                        j = i;
+                                        break;
+                                    }
+                                }
+
+                                if (j >= 0) {
+                                    $scope.clientGroups.splice(j, 1);
+                                }
+
+                                $scope.$apply();
+                            }
+                        },
+                        function (error) {
+                            jsHelper.showMessage('warning', error);
+                        }
+                    );
+                }
+            }
+
+            //
+            // SORTING & PAGING
+            //
+            $scope.goToFirst = function ($event) {
+                $event.preventDefault($event);
+                $scope.pageIndex = 1;
+                clientGroupService.searchFilter.pageIndex = $scope.pageIndex;
+                search();
+            }
+
+            $scope.goToPrev = function ($event) {
+                $event.preventDefault();
+                if ($scope.pageIndex > 1) {
+                    $scope.pageIndex--;
+                    clientGroupService.searchFilter.pageIndex = $scope.pageIndex;
+                    search();
+                }
+            }
+
+            $scope.goToNext = function ($event) {
+                $event.preventDefault();
+                if ($scope.pageIndex < $scope.totalPage) {
+                    $scope.pageIndex++;
+                    clientGroupService.searchFilter.pageIndex = $scope.pageIndex;
+                    search();
+                }
+            }
+
+            $scope.goToLast = function ($event) {
+                $event.preventDefault();
+                $scope.pageIndex = $scope.totalPage;
+                clientGroupService.searchFilter.pageIndex = $scope.pageIndex;
+                search();
+            }
+
+            $scope.goToPage = function ($event) {
+                $event.preventDefault();
+                if (jQuery('#clientGroupTable_pageIndex').val() > 0 && jQuery('#clientGroupTable_pageIndex').val() <= $scope.totalPage) {
+                    $scope.pageIndex = jQuery('#clientGroupTable_pageIndex').val();
+                    clientGroupService.searchFilter.pageIndex = $scope.pageIndex;
+                    search();
+                }
+                else {
+                    alert('Invalid page index!');
+                    jQuery('#clientGroupTable_pageIndex').val($scope.pageIndex);
+                }
+            }
+
+            $scope.sort = function ($event) {
+                $event.preventDefault();
+
+                $scope.pageIndex = 1;
+                clientGroupService.searchFilter.pageIndex = $scope.pageIndex;
+                clientGroupService.searchFilter.sortedBy = jQuery($event.target).data('colname');
+
+                if (jQuery($event.target).hasClass('sorting_asc')) {
+                    clientGroupService.searchFilter.sortedDirection = 'asc';
+                }
+                else if (jQuery($event.target).hasClass('sorting_desc') || jQuery($event.target).hasClass('sorting')) {
+                    clientGroupService.searchFilter.sortedDirection = 'desc';
+                }
+
+                search();
+            }
+
+            //
+            // INIT
+            //
+            search();
+        }]);
+    </script>
+}

@@ -1,0 +1,121 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    var pageSize = System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"];
+    var cookieID = HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString();
+    var supportServiceRoot = (System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"]);
+
+
+    ViewBag.Title = "Edit Outsourcing Cost Type";
+    ViewBag.Module = "Outsourcing Cost Type";
+}
+<form name="editForm" class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>@ViewBag.Title</h2>
+            </header>
+            <div>
+                <div class="jarviswidget-editbox"></div>
+                <div class="widget-body">
+                    <div class="smart-form" style="padding:0px">
+                        <fieldset class="no-padding">
+                            <div class="row">
+                                <section class="col col-sm-2">
+                                    <label class="label">Code</label>
+                                    <label class="input">
+                                        <input class="form-control" type="text" style="min-height: 32px; font-family: Arial" ng-model="data.outsourcingCostTypeUD">
+                                    </label>
+                                </section>
+                                <section class="col col-sm-3">
+                                    <label class="label">
+                                        Name
+                                        <em class="note note-error" ng-show="(data.outsourcingCostTypeNM == null || data.outsourcingCostTypeNM == '')">(Required)</em>
+                                    </label>
+                                    <label class="input">
+                                        <input class="form-control" type="text" id="outsourcingCostTypeNM" style="min-height: 32px; font-family: Arial" ng-model="data.outsourcingCostTypeNM" required>
+                                    </label>
+                                </section>
+                                <section class="col col-sm-3">
+                                    <label class="label">
+                                        Name EN
+                                        <em class="note note-error" ng-show="(data.outsourcingCostTypeNMEN == null || data.outsourcingCostTypeNMEN == '')">(Required)</em>
+                                    </label>
+                                    <label class="input">
+                                        <input class="form-control" type="text" style="min-height: 32px; font-family: Arial" ng-model="data.outsourcingCostTypeNMEN" id="outsourcingCostTypeNMEN" required>
+                                    </label>
+                                </section>
+                                <section class="col col-sm-2">
+                                    <label class="label">
+                                        Material Group
+                                        <em class="note note-error" ng-show="(data.productionItemGroupID == null || data.productionItemGroupID == '')">(Required)</em>
+                                    </label>
+                                    <select class="form-control" id="productionItemGroup" ng-model="data.productionItemGroupID" ng-options="productionItemGroup.productionItemGroupID as productionItemGroup.productionItemGroupNM for productionItemGroup in productionItemGroups">
+                                        <option value=""></option>
+                                    </select>
+                                </section>
+                            </div>
+                            <div class="row">
+                                <section class="col col-sm-10">
+                                    <label class="label">Description</label>
+                                    <label class="input">
+                                        <input class="form-control" type="text" style="min-height: 32px; font-family: Arial" ng-model="data.remark">
+                                    </label>
+                                </section>
+                            </div>
+                        </fieldset>
+                    </div>                  
+                    <div class="row">
+                        <section class="col col-sm-4">
+                            <div class="note">
+                                <strong>Updated By</strong>
+                                <a ng-show="(data.updatedBy != null && data.updaterName != null)" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{data.updatedBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                    <i class="fa fa-user"></i> {{data.updaterName}}
+                                </a>
+                                <span ng-show="(data.updatedBy != null && data.updaterName == null)"> <i class="fa fa-user"></i> {{data.updaterName}}</span>
+                                on {{data.updatedDate}}
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </div>
+    </article>
+</form>
+@section FormAction{
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "OutsourcingCostTypeMng")" class="btn btn-default btn-sm"><i class="fa fa-arrow-left"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default btn-sm" title="Save" ng-click="event.update()">
+                <i class="fa fa-floppy-o"></i>
+            </a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default btn-sm" title="Delete" ng-click="event.deleted(data.outsourcingCostTypeID)"><i class="fa fa-times"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs{
+    <script type="text/javascript">
+        var context = {
+            saleOrderDetailID: '@ViewBag.SaleOrderDetailID',
+            factoryID: '@ViewBag.FactoryID',
+            id: '@ViewBag.ID',
+            backUrl: '@Url.Action("Index", "OutsourcingCostTypeMng")',
+            serviceUrl: '@(serviceRoot)/api/outsourcingcosttypemng/',
+            refreshUrl: '@Url.Action("Edit", "OutsourcingCostTypeMng", new { id = UrlParameter.Optional })/',
+            token: '@token',
+            supportServiceUrl: '@(supportServiceRoot)/api/support/',
+            msgValid: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED'
+        }
+    </script>
+    <script type="text/javascript" src="~/Views/OutSourcingCostTypeMng/edit.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Views/OutSourcingCostTypeMng/service.js?v=@guid"></script>
+}

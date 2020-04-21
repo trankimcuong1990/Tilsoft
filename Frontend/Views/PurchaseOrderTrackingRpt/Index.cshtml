@@ -1,0 +1,191 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var pageSize = System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"];
+    var cookieID = HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString();
+
+    ViewBag.Title = "Purchase Order Tracking Overview";
+    ViewBag.Module = "Purchase Order Tracking Overview";
+    ViewBag.Icon = "fa-database";
+}
+
+<div class="row">
+    <article class="col-xs-12 col-sm-12 col-lg-12 col-md-12">
+        <div class="jarviswidget" id="wid-id-1" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"><i class="fa fa-database"></i></span>
+                <h2>Purchase Order Tracking Overview</h2>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div class="smart-form">
+                        <fieldset>
+                            <section class="col col-sm-2">
+                                <label>From Date</label>
+                                <label class="input-group">
+                                    <input type="text" class="form-control" style="height: 30px;" avs-calendar ng-data-source="filters.fromDate" />
+                                    <span class="input-group-addon">
+                                        <i class="fa fa-calendar"></i>
+                                    </span>
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label>To Date</label>
+                                <label class="input-group">
+                                    <input type="text" class="form-control" style="height: 30px;" avs-calendar ng-data-source="filters.toDate" />
+                                    <span class="input-group-addon">
+                                        <i class="fa fa-calendar"></i>
+                                    </span>
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label>Supplier</label>
+                                <label class="input">
+                                    <select avs-select ng-data-source="filters.supplierID">
+                                        <option value=""></option>
+                                        <option value="{{item.supplierID}}" ng-repeat="item in support.supplier">{{item.supplierShortNM}}</option>
+                                    </select>
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label>Status</label>
+                                <label class="input">
+                                    <select class="form-control" ng-model="filters.status">
+                                        <option value=""></option>
+                                        <option value="Open">Open</option>
+                                        <option value="Confirmed">Confirmed</option>
+                                        <option value="Cancel">Cancel</option>
+                                        <option value="Finished">Finished</option>
+                                    </select>
+                                </label>
+                            </section>
+                        </fieldset>
+                    </div>
+                    <div class="tilsoft-table-wrapper" avs-scrollable-table>
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header" style="width: 1773px;">
+                                <div style="width: 55px; height: 60px;">#</div>
+                                <div class="no-padding" style="width: 100px; height: 60px;"><p style="margin-top: 20px">STATUS</p></div>
+                                <div class="no-padding" style="width: 180px; height: 60px;">
+                                    <div class="no-padding" style="width: 100%; height: 30px; line-height: 30px; border-right: none;">PURCHASING NR.</div>
+                                    <div class="no-padding" style="width: 100%; height: 30px; line-height: 30px; border-right: none;">ITEM CODE</div>
+                                </div>
+                                <div class="no-padding" style="width: 250px; height: 60px;">
+                                    <div class="no-padding" style="width: 100%; height: 30px; line-height: 30px; border-right: none;">PURCHASING DATE</div>
+                                    <div class="no-padding" style="width: 100%; height: 30px; line-height: 30px; border-right: none;">ITEM NAME</div>
+                                </div>
+                                <div class="no-padding" style="width: 160px; height: 60px;">
+                                    <div class="no-padding" style="width: 100%; height: 30px; line-height: 30px; border-right: none;">SUPPLIER</div>
+                                    <div class="no-padding" style="width: 100%; height: 30px; line-height: 30px; border-right: none;">UNIT</div>
+                                </div>
+                                <div class="no-padding" style="width: 1015px; height: 60px;">
+                                    <div class="no-padding" style="width: 100%; height: 30px; line-height: 30px; border-right: none;">DETAIL INFORMATION</div>
+                                    <div class="no-padding" style="width: 100%; height: 30px; line-height: 30px; border-right: none;">
+                                        <div class="no-padding" style="width: 100px; height: 30px; line-height: 30px;">WO NR.</div>
+                                        <div class="no-padding" style="width: 120px; height: 30px; line-height: 30px;">WO DATE</div>
+                                        <div class="no-padding" style="width: 100px; height: 30px; line-height: 30px;">CLIENT</div>
+                                        <div class="no-padding" style="width: 120px; height: 30px; line-height: 30px;">ETA</div>
+                                        <div class="no-padding" style="width: 115px; height: 30px; line-height: 30px;">ORDERED</div>
+                                        <div class="no-padding" style="width: 115px; height: 30px; line-height: 30px;">RECEIVED</div>
+                                        <div class="no-padding" style="width: 115px; height: 30px; line-height: 30px;">BALANCED</div>
+                                        <div class="no-padding" style="width: 115px; height: 30px; line-height: 30px;">PRICE</div>
+                                        <div class="no-padding" style="height: 30px; line-height: 30px;">AMOUNT</div>
+                                    </div>
+                                </div>
+                                <div style="border-bottom: none;"></div>
+                            </div>
+                            <div class="tilsoft-table-totalrow" style="width: 1773px; margin-top: 60px;">
+                                <div style="width: 1185px;">TOTAL</div>
+                                <div class="no-padding" style="width: 115px; height: 30px; line-height: 30px;">{{method.getAllOrderWithItem(data.purchaseOrderTracking) | number : 2}}</div>
+                                <div class="no-padding" style="width: 115px; height: 30px; line-height: 30px;">{{method.getAllReceiveWithItem(data.purchaseOrderTracking) | number : 2}}</div>
+                                <div class="no-padding" style="width: 115px; height: 30px; line-height: 30px;">{{method.getAllBalanceWithItem(data.purchaseOrderTracking) | number : 2}}</div>
+                                <div class="no-padding" style="width: 115px; height: 30px; line-height: 30px;"></div>
+                                <div class="no-padding" style="width: 115px; height: 30px; line-height: 30px;">{{method.getAllAmountWithItem(data.purchaseOrderTracking) | number : 2}}</div>
+                                <div style="width: 100%; border-bottom: none;"></div>
+                            </div>
+                            <div class="tilsoft-table-body" style="width: 1773px; margin-top: 90px;">
+                                <table>
+                                    <tbody ng-repeat="item in data.purchaseOrderTracking">
+                                        @*<tr id="PO" style="background: {{method.getTotalBalanceWithItem(item) > 0 ? '#fbd8d5' : '#bafbce'}};">*@
+                                        <tr id="{{item.purchaseOrderID}}" style="background: {{method.getColorWithStatus(item)}};">
+                                            <td style="width: 55px; text-align: center;">{{($index + 1)}}</td>
+                                            <td style="width: 100px; text-align: center;">
+                                                <div ng-if="item.purchaseOrderStatusID==1">Open</div>
+                                                <div ng-if="item.purchaseOrderStatusID==2">Confirmed</div>
+                                                <div ng-if="item.purchaseOrderStatusID==3">Cancel</div>
+                                                <div ng-if="item.purchaseOrderStatusID==4">Finished</div>
+                                            </td>
+                                            <td style="width: 180px; text-align: center;">
+                                                <a href="javascript:void(0);" ng-click="event.movePurchasingOrder(item.purchaseOrderID);">
+                                                    {{item.purchaseOrderUD}}
+                                                </a>
+                                            </td>
+                                            <td style="width: 250px; text-align: center;">{{item.purchaseOrderDate}}</td>
+                                            <td style="width: 160px; text-align: center;">{{item.factoryRawMaterialShortNM}}</td>
+                                            <td style="width: 440px;" colspan="4">&nbsp;</td>
+                                            <td style="width: 115px; text-align: right;">{{method.getTotalOrderWithItem(item) | number : 2}}</td>
+                                            <td style="width: 115px; text-align: right;">{{method.getTotalReceiveWithItem(item) | number : 2}}</td>
+                                            <td style="width: 115px; text-align: right;">{{method.getTotalBalanceWithItem(item) | number : 2}}</td>
+                                            <td style="width: 115px; text-align: right;"></td>
+                                            <td style="width: 115px; text-align: right;">{{method.getTotalAmountWithItem(item) | number : 2}}</td>
+                                            <td style="border-bottom: none;"></td>
+                                        </tr>
+                                        <tr ng-repeat="wItem in item.purchaseOrderTrackingDetail">
+                                            <td style="width: 55px; text-align: center;">&nbsp;</td>
+                                            <td style="width: 100px; text-align: center;"></td>
+                                            <td style="width: 180px; text-align: center;">{{wItem.productionItemUD}}</td>
+                                            <td style="width: 250px; text-align: left;">{{wItem.productionItemNM}}</td>
+                                            <td style="width: 160px; text-align: center;">{{wItem.unitNM}}</td>
+                                            <td style="width: 100px; text-align: center;"></td>
+                                            <td style="width: 120px; text-align: center;"></td>
+                                            <td style="width: 100px; text-align: center;"></td>
+                                            <td style="width: 120px; text-align: center;">{{wItem.purchaseOrderETA}}</td>
+                                            <td style="width: 115px; text-align: right;">{{wItem.orderQnt | number : 2}}</td>
+                                            <td style="width: 115px; text-align: right;">{{wItem.receiveQnt | number : 2}}</td>
+                                            <td style="width: 115px; text-align: right;">{{wItem.balanceQnt | number : 2}}</td>
+                                            <td style="width: 115px; text-align: right;">{{wItem.unitPrice | number : 2}}</td>
+                                            <td style="width: 115px; text-align: right;">{{wItem.totalAmount | number : 2}}</td>
+                                            <td style="border-bottom: none;"></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction {
+<ul id="sparks">
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default btn-sm" ng-click="event.search()">
+            <i class="fa fa-search"></i> Search
+        </a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default" title="Export Excel" ng-click="event.generateExcel($event)">
+            <i class="fa fa-file-excel-o" style="color: #31B404"></i> Export Excel
+        </a>
+    </li>
+</ul>
+}
+
+@section pagejs {
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(serviceRoot)/api/purchaseOrderTrackingRpt/',
+            token: '@token',
+            pageSize: '@pageSize',
+            cookie: '@cookieID',
+            editPurchaseOrderUrl: '@Url.Action("Edit", "PurchaseOrderMng")/',
+            backendReportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]',
+        }
+    </script>
+    <script type="text/javascript" src="~/Views/PurchaseOrderTrackingRpt/index.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Views/PurchaseOrderTrackingRpt/service.js?=@guid"></script>
+}

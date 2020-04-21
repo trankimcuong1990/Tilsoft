@@ -1,0 +1,109 @@
+﻿@{
+    ViewBag.Title = "Search Production Item Spec";
+    ViewBag.Module = "Production Item Management";
+    ViewBag.Icon = "fa-search";
+
+}
+<style>
+    .select2-arrow {
+        width: 15px !important;
+    }
+
+    .search-text {
+        height: 30px !important;
+        padding: 8px !important;
+        border: 1px solid #ccc !important;
+    }
+</style>
+<div class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" id="wi  d-id-1" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Search Result</h2>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div avs-scroll grid-handler="gridHandler" class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header" style="width: 1000px;">
+                                <div style="width: 70px;"><b>Found </b><b style="color:#a90329;">{{totalRows}} </b></div>
+                                <div style="width: 60px;" class="sorting" data-colname="ProductionItemSpecUD"> Code</div>
+                                <div style="width: 200px;" class="sorting" data-colname="ProductionItemSpecNM"> Name</div>
+                                <div style="width: 120px;" class="sorting" data-colname="ProductionItemSpecTypeID"> Type</div>
+                                <div><i class="fa fa-history"></i> Tracking Information</div>
+                            </div>
+                            <div class="tilsoft-table-filter" style="width: 1000px;">
+                                <div style="width: 70px;">
+                                    <a href="javascript:void(0)" class="btn btn-{{isDefaultFilter?'default':'primary'}} btn-xs" title="Apply Filter" ng-click="event.reload()"><i class="fa fa-filter"></i></a>
+                                    <a href="javascript:void(0)" class="btn btn-default btn-xs" title="Clear Filter" ng-click="event.clearFilter()"><i class="fa fa-ban"></i></a>
+                                </div>
+                                <div style="width: 60px;"><input class="search-filter search-text" type="text" ng-model="filters.ProductionItemSpecUD" /></div>
+                                <div style="width: 200px;"><input class="search-filter search-text" type="text" ng-model="filters.ProductionItemSpecNM" /></div>
+                                <div style="width: 120px;">
+                                    <select class="form-control search-filter" style="width: 100%" ng-model="filters.ProductionItemSpecTypeID" ng-options="productionItemSpecType.productionItemSpecTypeID as productionItemSpecType.productionItemSpecTypeNM for productionItemSpecType in productionItemSpecTypes">
+                                        <option value=""></option>
+                                    </select>
+                                    <i></i>
+                                </div>
+                                <div></div> 
+                            </div>
+                            <div class="tilsoft-table-body" style="width: 1000px; margin-top: 95px;height:700px;">
+                                <table>
+                                    <tr ng-repeat="item in data">
+                                        <td style="text-align: center; width: 70px;"><a href="@Url.Action("Edit", "ProductionItemSpec")/{{item.productionItemSpecID}}" target="_blank" class="btn btn-primary btn-xs">Detail</a></td>
+                                        <td style="width: 60px;text-align:center;">{{item.productionItemSpecUD}}</td>
+                                        <td style="width: 200px;">{{item.productionItemSpecNM}}</td>
+                                        <td style="width: 120px;">
+                                            <select disabled class="form-control search-filter" style="width: 100%" ng-model="item.productionItemSpecTypeID" ng-options="productionItemSpecType.productionItemSpecTypeID as productionItemSpecType.productionItemSpecTypeNM for productionItemSpecType in productionItemSpecTypes">
+                                                <option value=""></option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <span class="box">
+                                                <i class="fa fa-user"></i>
+                                                <strong>Updated By</strong>:
+                                                <a ng-if="item.updatedBy" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.updatedBy}}" dat data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                    {{item.updatorNM}}
+                                                </a>
+                                            </span>
+                                            <span class="box"><i class="fa fa-calendar"></i> <strong>Updated Date</strong>: {{item.updatedDate}}</span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Search" ng-click="event.reload()"><i class="fa fa-search"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Refresh" ng-click="event.reload()"><i class="fa fa-refresh"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="@Url.Action("Edit", "ProductionItemSpec")/0" target="_blank" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="New"><i class="fa fa-file-o"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/productionItemSpec/',
+            token: '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]',
+            pageSize: 50,
+            cookieId: '@HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString()'
+        }
+    </script>
+    <script src="~/Angular/app/productionItemSpec/index.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/jsonService2.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/productionItemSpec/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}

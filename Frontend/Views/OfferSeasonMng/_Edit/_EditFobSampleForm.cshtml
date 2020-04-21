@@ -1,0 +1,703 @@
+﻿@{
+    Frontend.APIDTO.APIUserInformation userInfo = (Frontend.APIDTO.APIUserInformation)Session[Frontend.Customize.Common.ProjectDefinition.USER_INFO_SESSION];
+}
+
+<style>
+    .tilsoft-table-wrapper a, .tilsoft-table-wrapper div, .tilsoft-table-wrapper td, .tilsoft-table-wrapper th, .tilsoft-table-wrapper input, .tilsoft-table-wrapper select option, .tilsoft-table-wrapper select option {
+        font-size: 11px !important;
+    }
+
+    .tilsoft-table-wrapper .tilsoft-table .tilsoft-table-header div {
+        height: 75px;
+    }
+
+    .tilsoft-table-wrapper .tilsoft-table table tr td input.form-control {
+        height: 25px;
+    }
+
+    .tilsoft-table .tilsoft-table-totalrow div {
+        height: 35px;
+    }
+
+    .jarviswidget > header > a {
+        margin-right: 2px;
+        float: right;
+    }
+
+    .smart-form section {
+         margin-bottom: 3px !important;         
+    }
+
+    .smart-form .col {
+        padding-right: 6px !important;
+        padding-left: 6px !important;
+    }
+
+</style>
+<article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+    <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+        <header>
+            <span class="widget-icon">
+                <i class="fa fa-database"></i>
+            </span>
+            <h2>General Info</h2>
+            <a class="btn btn-primary btn-sm" href="javascript:void(0)" ng-click="updateOfferSeason()"><i class="fa fa-save"></i> Update Client Info</a>
+        </header>
+        <div>
+            <div>
+                <div class="smart-form">
+                    <div class="row">
+                        <section class="col col-lg-1">
+                            <label>Offer Type</label>
+                            <label class="input">
+                                <input class="form-control" type="text" ng-model="data.offerSeasonDTO.offerSeasonTypeNM" readonly />
+                            </label>
+                        </section>
+
+                        <section class="col col-lg-1">
+                            <label>Season</label>
+                            <label class="input">
+                                <select class="form-control" ng-disabled="data.offerSeasonDTO.offerSeasonID>0"
+                                        ng-model="data.offerSeasonDTO.season"
+                                        ng-options="gItem.seasonText as gItem.seasonValue for gItem in data.seasons | orderBy:'-seasonValue'">
+                                    <option value=""></option>
+                                </select>
+                                <i></i>
+                            </label>
+                        </section>
+
+                        <section class="col col-lg-2">
+                            <label>Client (Code: <a href="@Url.Action("Overview","Client")/{{data.offerSeasonDTO.clientID}}" target="_blank"><u>{{data.offerSeasonDTO.clientUD}}</u></a></label>)
+                            <label class="input">
+                                <input type="text" class="form-control" avs-remote-auto-complete style="font-family: Arial; font-size: 12px; text-transform: uppercase"
+                                       ng-request-param="clientBox.request"
+                                       data-method="POST"
+                                       ng-init-param="data.offerSeasonDTO.clientNM"
+                                       ng-model="data.offerSeasonDTO.clientNM"
+                                       ng-item-value="clientBox.data"
+                                       ng-item-selected="clientBox.selectedItem(clientBox.data)"
+                                       data-format-function="formatAutcompleteClient"
+                                       ng-readonly="data.offerSeasonDTO.offerSeasonID>0" />
+                            </label>
+                        </section>
+
+                        <section class="col col-lg-1">
+                            <label>Acc Mngr</label>
+                            <label class="input">
+                                <input class="form-control" type="text" ng-model="data.offerSeasonDTO.saleUD" readonly />
+                            </label>
+                        </section>
+
+                        <section class="col col-lg-2">
+                            <label>Offer Code</label>
+                            <label class="input">
+                                <input class="form-control" type="text" ng-model="data.offerSeasonDTO.offerSeasonUD" readonly />
+                            </label>
+                        </section>
+
+                        <section class="col col-lg-2">
+                            <label>Est Sample Cost</label>
+                            <label class="input">
+                                <span class="form-control" style="text-align:right">{{sampleCostUSD() | currency : '$' : 2}}</span>
+                            </label>
+                        </section>
+
+                        <section class="col col-lg-2">
+                            <label>Sample Cost Used</label>
+                            <label class="input">
+                                <span class="form-control" style="text-align:right">{{getTotalRow('sampleAmount') | currency : '$' : 2}}</span>
+                            </label>
+                        </section>
+
+
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+        <header>
+            <ul class="nav nav-tabs pull-left in">
+                <li class="active">
+                    <a data-toggle="tab" ng-click="selectedTab('tabProduct')" href="javascript:void(0)"> <i class="fa fa-database"></i> <span class="hidden-mobile hidden-tablet">Product</span> </a>
+                </li>
+            </ul>
+            <a class="btn btn-primary btn-sm" href="javascript:void(0)" ng-click="updateOfferSeasonDetail2()" ng-disabled="!data.offerSeasonDTO.offerSeasonID>0 || countItemEditing()===0"><i class="fa fa-save"></i> Update All Item</a>
+            @if (userInfo.Data.ModuleSpecialPermissionAccesses.Count(o => o.ModuleSpecialPermissionUD == Frontend.Helper.ConstantIdentifier.SPECIAL_PERMISSION_APPROVE_OFFER) > 0)
+            {
+                <a class="btn btn-success btn-sm" href="javascript:void(0)" ng-click="approveAllItem()" ng-disabled="countItemNeedApprove()===0" title="Approve all item is in NEED APPROVE status"><i class="fa fa-thumbs-o-up"></i> Approve All Item</a>
+            }
+            <a class="btn btn-warning btn-sm" href="javascript:void(0)" ng-click="askForApprovalAllItem()" ng-disabled="!data.offerSeasonDTO.offerSeasonID>0 || countItemAskForApproval()===0"><i class="fa fa-database"></i> Ask Approval All Item</a>
+            <span style="color:red">&nbsp;&nbsp;ExRate: {{getExRate() | number : 2}}</span>
+        </header>
+        <div>
+            <div class="jarviswidget-editbox"></div>
+
+            <div class="widget-body">
+                <div class="tab-content" id="tab-content-detail">
+                    <div class="tab-pane active" id="tabProduct">
+                        <div ng-controller="_SearchModelForm" class="widget-body-toolbar smart-form">
+                            <label class="input">
+                                <input ng-readonly="!data.offerSeasonDTO.offerSeasonID>0" ng-model="searchQuery" type="text" placeholder="type at least 4 chars to search model" autocomplete="off" ng-keyup="event.autoSearch($event)" />
+                                <a ng-click="event.reload()" href="javascript:void(0);"> <i class="icon-append fa fa-search"></i></a>
+                            </label>
+                            @Html.Partial("~/Views/OfferSeasonMng/_Edit/_SearchModelForm.cshtml")
+                        </div>
+                        <div class="smart-form">
+                            <div class="col-sm-12 m-bottom-15">
+                                <table>
+                                    <tr>
+                                        <td>
+                                            <b>Status:</b>
+                                        </td>
+                                        <td style="padding:5px;">
+                                            <select style="height:20px;"
+                                                    ng-model="localFilter.itemStatusSearchQuery"
+                                                    ng-options="gItem.itemStatus as gItem.itemStatusText for gItem in data.offerSeasonItemStatusDTOs"
+                                                    ng-change="localFilterItem()">
+                                                <option value=""></option>
+                                            </select>
+                                        </td>
+                                        <td>&nbsp;</td>
+
+                                        <td><b>Description:</b></td>
+                                        <td style="width:150px; padding:10px">
+                                            <input type="text" ng-model="localFilter.productSearchQuery" style="width:100%" />
+                                        </td>
+                                        <td>&nbsp;</td>
+
+                                        <td>
+                                            <b>Quantity:</b>
+                                        </td>
+                                        <td style="padding:10px">
+                                            <select style="height:20px"
+                                                    ng-model="localFilter.hasQuantity"
+                                                    ng-options="item.id as item.name for item in data.filterBoxYesNo">
+                                                <option value=""></option>
+                                            </select>
+                                        </td>
+                                        <td>&nbsp;</td>
+
+                                        <td>
+                                            <a href="javascript:void(0)" class="btn btn-primary btn-xs" ng-click="localFilterItem()">
+                                                <i class="fa fa-filter"></i> Filter
+                                            </a>
+                                            <a href="javascript:void(0)" class="btn btn-warning btn-xs" ng-click="localClearFilter()">
+                                                <i class="fa fa-ban"></i> Clear Filter
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </table>
+                                <div style="font-size: 11px;">
+                                    Price Source: <font style="display: inline-block; margin-right: 15px;" ng-repeat="item in data.planingPurchasingPriceSourceDTOs">{{item.planingPurchasingPriceSourceID}}: {{item.planingPurchasingPriceSourceNM}}</font>
+                                </div>
+                                <div class="tilsoft-table-wrapper" avs-scrollable-table2 ng-load-next-page="productGrid.loadNextPage()" ng-sort-data="productGrid.sortData(sortedBy, sortedDirection)" ng-get-scroll-top="productGrid.getCurrentScrollTop(topValue, leftValue)">
+                                    <div class="tilsoft-table" id="grdOfferSeasonDetail">
+
+                                        <div class="tilsoft-table-header" style="width:1700px;">
+                                            <div style="width: 95px; padding: 5px 8px;">
+                                                <a href="javascript:void(0)" class="btn btn-default btn-xs" title="unlock" onclick="drag()"><i class="fa fa-unlock"></i></a>
+                                                <a href="javascript:void(0)" class="btn btn-default btn-xs" title="lock" onclick="drop()"><i class="fa fa-lock"></i></a>
+                                                <br />
+                                                @if (userInfo.Data.ModuleSpecialPermissionAccesses.Count(o => o.ModuleSpecialPermissionUD == Frontend.Helper.ConstantIdentifier.SPECIAL_PERMISSION_APPROVE_OFFER) > 0)
+                                                {
+                                                    <a href="javascript:void(0)" ng-click="exportDetail()" style="width: 80px; margin-top: 5px; display: block; text-transform: none;" class="btn btn-default btn-xs font-11"><i class="fa fa-file-excel-o"></i> Export</a>
+                                                }
+                                                #{{offerSeasonDetailDTO_AfterFilter.length}}/{{data.offerSeasonDetailDTOs.length}}
+                                            </div>
+
+                                            <div style="width: 45px" class="sorting" data-colname="rowIndex">In dex</div>
+                                            <div style="width: 40px" class="sorting" data-colname="isNeedFactoryQuotation">Need Quo ta tion</div>
+                                            <div style="width: 80px">Image</div>
+
+                                            @*article code*@
+                                            <div style="width: 350px;" class="sorting" data-colname="description">
+                                                Description
+                                            </div>
+                                            @*qnt*@
+                                            <div style="width: 60px;" class="sorting" data-colname="quantity">Qnt</div>
+
+                                            @*qnt 40HC*@
+                                            <div style="width: 55px;" class="sorting" data-colname="orderQnt40HC">Qnt/ 40HC</div>
+
+                                            @*sale price*@
+                                            <div style="width: 60px;" class="sorting" data-colname="salePrice">Sales Price <br />({{data.offerSeasonDTO.currency}})</div>
+
+                                            @*factory price*@
+                                            <div style="width: 70px;" class="sorting" data-colname="planingPurchasingPrice">Fac Price <br /> ($) <a href="javascript:void(0)" data-toggle="modal" data-target="#PurchasingPriceHelp"><i class="fa fa-question-circle"></i></a></div>
+
+                                            @*purchase amount*@
+                                            <div style="width: 80px;" class="sorting" data-colname="purchasingAmount">Purchase Amount<br />(USD)</div>
+
+                                            @*sale amount USD*@
+                                            <div style="width: 80px;" ng-if="data.offerSeasonDTO.currency=='EUR'" class="sorting" data-colname="saleAmountInUSD">Sale Amount (USD)</div>
+
+                                            @*sale amount on currency*@
+                                            <div style="width: 80px;" class="sorting" data-colname="saleAmount">Sale Amount ({{data.offerSeasonDTO.currency}})</div>
+
+                                            @*Total sale*@
+                                            <div style="width: 80px;" class="sorting" data-colname="saleAmountIncludeVAT">Total ({{data.offerSeasonDTO.currency}})</div>
+
+                                            @*remark*@
+                                            <div style="width: 200px;" class="sorting" data-colname="remark">Remark</div>
+
+                                            @*tracking*@
+                                            <div style="width: 190px;" class="sorting" data-colname="statustorName">Tracking</div>
+
+                                            @*final*@
+                                            <div>&nbsp;</div>
+                                        </div>
+
+                                        <div class="tilsoft-table-totalrow" style="width:1700px; margin-top:75px">
+                                            <div style="width:95px; text-align:center"></div>
+                                            <div style="width:45px"></div>
+                                            @*<div style="width:40px"></div>*@
+                                            <div style="width:40px"></div>
+                                            @*<div style="width:40px"></div>*@
+                                            <div style="width:80px"></div>
+                                            <div style="width:350px; text-align:left !important">
+                                            </div>
+                                            <div style="width:60px">{{getTotalRow('quantity') | number:0}}</div>
+                                            <div style="width:55px">{{getTotalRow('quantity40HC') | number:2}}</div>
+                                            <div style="width:60px"></div>
+                                            <div style="width:70px; padding:1px">
+                                            </div>
+
+                                            <div style="width:80px">{{getTotalRow('purchaseAmount') | currency : '$' : 2}}</div>
+                                            <div style="width:80px" ng-if="data.offerSeasonDTO.currency=='EUR'">{{getTotalRow('saleAmountInUSD') | currency : '$' : 2}}</div>
+                                            <div style="width:80px">{{getTotalRow('saleAmount') | currency : (data.offerSeasonDTO.currency == 'USD' ? '$' : '€') : 2}}</div>
+                                            <div style="width:80px">{{getTotalRow('total') | currency : (data.offerSeasonDTO.currency == 'USD' ? '$' : '€') : 2}}</div>
+
+                                            <div style="width:200px"></div>
+                                            <div style="width:190px"></div>
+                                            <div>&nbsp;</div>
+                                        </div>
+
+                                        <div class="tilsoft-table-body" style="width:1700px; height: auto; margin-top:110px">
+                                            <table id="table-sort">
+                                                <tbody ng-repeat="item in offerSeasonDetailDTO_AfterFilter = (data.offerSeasonDetailDTOs | filterProduct : filter.productSearchQuery : filter.itemStatusSearchQuery : filter.isEditingSearchQuery : filter.hasQuantity : filter.isClientSelected : filter.isRepeatItem)">
+                                                    <tr>
+                                                        <td style="width:95px; text-align: center;">
+                                                            <a ng-if="!isPutInFactoryOrder(item)" title="Edit" style="width: 84px; margin-bottom: 5px; display: block;" class="btn btn-primary btn-xs font-11" href="#/offer-item-properties-form/{{baseRouter}}/{{item.offerSeasonDetailID}}"><i class="fa fa-pencil"></i> Edit</a>
+                                                            <a ng-if="item.isEditing" title="Update" style="width: 84px; margin-bottom: 5px; display: block;" class="btn btn-success btn-xs font-11" href="javascript:void(0)" ng-click="updateOfferSeasonDetail(data.offerSeasonDTO.offerSeasonID, item.offerSeasonDetailID, item)"><i class="fa fa-save"></i> Update</a>
+                                                            <a title="Delete" style="width: 84px; margin-bottom: 5px; display: block;" class="btn btn-danger btn-xs font-11" href="javascript:void(0)" ng-click="deleteOfferSeasonDetail(item)"><i class="fa fa-times"></i> Del</a>
+                                                            <a ng-if="item.offerSeasonDetailID > 0 && item.quantity && item.planingPurchasingPrice && item.itemStatus!==4 && item.itemStatus!==5" style="width: 84px; margin-bottom: 5px; display: block;" class="btn btn-warning btn-xs font-11" href="javascript:void(0)" ng-click="askForApprovalItem(item)" title="Ask for approval"><i class="fa fa-database"></i> Ask Approval</a>
+                                                            @if (userInfo.Data.ModuleSpecialPermissionAccesses.Count(o => o.ModuleSpecialPermissionUD == Frontend.Helper.ConstantIdentifier.SPECIAL_PERMISSION_APPROVE_OFFER) > 0)
+                                                            {
+                                                                <a ng-if="item.offerSeasonDetailID > 0 && item.itemStatus === 4" style="width: 84px; margin-bottom: 5px; display: block;" class="btn btn-success btn-xs font-11" href="javascript:void(0)" ng-click="approveItem(item)" title="Approve"><i class="fa fa-thumbs-o-up"></i> Approve</a>
+                                                                <a ng-if="item.offerSeasonDetailID > 0 && item.itemStatus === 4" style="width: 84px; margin-bottom: 5px; display: block;" class="btn btn-warning btn-xs font-11" href="javascript:void(0)" ng-click="reject(item)" title="Reject"><i class="fa fa-ban"></i> Reject</a>
+
+                                                                <a ng-if="item.itemStatus === 5" class="btn btn-primary btn-xs" title="Admin update sale price" style="width: 84px; margin-bottom: 5px; display: block;" data-toggle="modal" data-target="#AdminUpdateSalePrice" ng-click="getOfferLineByOfferSeasonDetail(item)">
+                                                                    Price Correction
+                                                                </a>
+                                                            }
+                                                            <a ng-if="item.offerSeasonDetailID > 0 && item.itemStatus === 5" style="width: 84px; margin-bottom: 5px; display: block;" class="btn btn-warning btn-xs font-11" href="javascript:void(0)" ng-click="unApproveItem(item)" title="Un-Approve"><i class="fa fa-thumbs-o-down"></i> Un-Approve</a>
+                                                            <a style="width: 84px; margin-bottom: 5px; display: block;" ng-if="item.isInFactoryOrder && @userInfo.Data.ModuleSpecialPermissionAccesses.Count(o => o.ModuleSpecialPermissionUD == Frontend.Helper.ConstantIdentifier.SPECIAL_PERMISSION_CHANGE_OFFER_ITEM_OPTION)" class="btn btn-primary btn-xs font-11" href="#/offer-item-properties-form/{{baseRouter}}/{{item.offerSeasonDetailID}}" title="Admin Edit">
+                                                                <i class="fa fa-pencil"></i> Item Correction
+                                                            </a>
+                                                        </td>
+                                                        <td style="width:45px; text-align: center;">
+                                                            <input class="form-control" type="text" name="rowIndex"
+                                                                   ng-model="item.rowIndex"
+                                                                   avs-number-2 ng-decimal="0"
+                                                                   style="text-align:right"
+                                                                   ng-change="changeItem(item)">
+                                                        </td>
+
+                                                        <td style="width:40px; text-align: center;">
+                                                            <label class="checkbox">
+                                                                <input type="checkbox" ng-model="item.isNeedFactoryQuotation" ng-change="changeItem(item)">
+                                                                <i style="top:0px; margin-left:5px"></i>
+                                                            </label>
+                                                        </td>
+
+
+                                                        <td style="width:80px; text-align: left;">
+                                                            <a href="{{item.productFileLocation}}" data-featherlight="image">
+                                                                <img style="width: 95%;" ng-src="{{item.productThumbnailLocation}}" />
+                                                            </a>
+                                                            <br />
+                                                            <a href="{{getImageGalleryByItem(item.offerSeasonDetailID)}}" data-featherlight="image">
+                                                                Page: {{item.cataloguePageNo}}
+                                                            </a>
+                                                        </td>
+
+                                                        <td style="width:350px; text-align:left;">
+                                                            <a href="@Url.Action("Edit", "Product")/{{item.offerProductID}}" target="_blank"><span style="font-weight:bold;">{{item.articleCode}}</span></a>
+                                                            <br />
+                                                            <a href="@Url.Action("Edit", "Model")/{{item.modelID}}" target="_blank">{{item.description}}</a>
+                                                            <br />
+                                                            <u>Packing:</u> {{item.packagingMethodID===-1?'TBA':item.packagingMethodNM}}
+                                                            <br />
+                                                            <span style="color: #0000ff;">{{getItemStatusText(item.itemStatus)}}</span>
+                                                            <a ng-if="item.itemStatus===5" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.setItemStatusBy}}" data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                                by {{item.statustorName}} at {{item.setItemStatusDate}}
+                                                            </a>
+                                                            <a ng-if="item.itemStatus===4 && item.unApprovedBy" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.unApprovedBy}}" data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                                (Un-Approved by {{item.unApprovedName}} at {{item.unApprovedDate}})
+                                                            </a>
+                                                            <a ng-if="item.isRestorePrice" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.restorePriceBy}}" data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                                Restore price by {{item.restorePriceName}} at {{item.restorePriceDate}}
+                                                            </a>
+                                                        </td>
+
+                                                        @*quantity*@
+                                                        <td style="width:60px; text-align:right">
+                                                            <input class="form-control" type="text" name="quantity"
+                                                                   ng-model="item.quantity"
+                                                                   avs-number-2 ng-decimal="0"
+                                                                   style="text-align:right"
+                                                                   ng-change="changeQnt(item)"
+                                                                   ng-if="item.itemStatus !== 5">
+                                                            <span ng-if="item.itemStatus === 5">{{item.quantity | number : 0}}</span>
+                                                        </td>
+
+                                                        @*qnt/40HC*@
+                                                        <td style="width:55px; text-align: right;">
+                                                            {{item.quantity / item.qnt40HC | number : 2}}
+                                                            <hr style="background-color: #c4b1b1; height: 1px;" />
+                                                            <span title="Loadability 40HC">{{item.qnt40HC | number : 0}}</span>
+                                                        </td>
+
+                                                        @*sale price*@
+                                                        <td style="width:60px; text-align: right;">
+                                                            <input ng-if="item.itemStatus!==5" type="text" class="form-control"
+                                                                   ng-model="item.salePrice"
+                                                                   style="text-align:right"
+                                                                   avs-number-2 ng-decimal="2"
+                                                                   ng-change="needMakeQuotationStatus(item)">
+
+                                                            <span ng-if="!item.itemStatus!==5" style="text-align: right;">{{item.salePrice | currency : (data.offerSeasonDTO.currency == 'USD' ? '$' : '€') : 2}}</span>
+                                                        </td>
+
+                                                        @*factory price*@
+                                                        <td style="width:70px; text-align: right;">
+                                                            <a href="#/planning-purchasing-price-form/{{baseRouter}}/{{item.offerSeasonDetailID}}">
+                                                                {{item.planingPurchasingPrice | currency:'$':2}}
+                                                                <font ng-if="item.planingPurchasingPrice===null">Select</font>
+                                                            </a>
+                                                            <span style="display: block;" ng-if="item.planingPurchasingPrice!==null">
+                                                                Source: {{item.planingPurchasingPriceSourceID}}
+                                                            </span>
+                                                            <br />
+                                                            @if (userInfo.Data.ModuleSpecialPermissionAccesses.Count(o => o.ModuleSpecialPermissionUD == Frontend.Helper.ConstantIdentifier.SPECIAL_PERMISSION_APPROVE_OFFER) > 0)
+                                                            {
+                                                                <a target="_blank" title="compare price repeat item" href="@Url.Action("Index","ProductOverviewRpt")/{{item.modelID}}?oID={{item.offerSeasonDetailID}}"><i class="fa fa-exchange"></i>Compare</a>
+                                                            }
+                                                        </td>
+
+
+                                                        @*purchase amount*@
+                                                        <td style="width:80px; text-align: right">
+                                                            {{purchasingPriceInUSD(item) * item.quantity | currency : '$' : 2}}
+                                                        </td>
+
+                                                        @*sale amount in USD*@
+                                                        <td style="width:80px; text-align: right" ng-if="data.offerSeasonDTO.currency=='EUR'">
+                                                            {{salePriceInUSD(item) * item.quantity | currency : '$' : 2}}
+                                                            <br />
+                                                            {{item.salePrice * item.quantity / getTotalRow('saleAmount') * 100 | number: 1}}%
+                                                        </td>
+
+                                                        @*sale amount in currency*@
+                                                        <td style="width:80px; text-align: right">
+                                                            {{item.salePrice * item.quantity | currency : (data.offerSeasonDTO.currency == 'USD' ? '$' : '€') : 2}}
+                                                            <br />
+                                                            {{item.salePrice * item.quantity / getTotalRow('saleAmount') * 100 | number: 1}}%
+                                                        </td>
+
+                                                        @*total amount include VAT*@
+                                                        <td style="width:80px; text-align: right; ">
+                                                            {{item.salePrice * item.quantity * (1 + data.offerSeasonDTO.vat / 100) | currency : (data.offerSeasonDTO.currency == 'USD' ? '$' : '€') : 2}}
+                                                        </td>
+
+
+                                                        @*remark*@
+                                                        <td style="width:200px; text-align: left">
+                                                            <input type="text" class="form-control" ng-model="item.remark" ng-show="item.itemStatus!==5" ng-change="changeItem(item)" />
+                                                            <span ng-if="item.itemStatus===5">{{item.remark}}</span>
+                                                            <a ng-if="item.offerSeasonDetailRemarkDTOs.length > 0" title="History for change description of item" style="width: 100%; margin-bottom: 5px; display: block; cursor: pointer" data-toggle="modal" data-target="#RemarkHistory" ng-click="showRemarkHistory(item)">
+                                                                History change description
+                                                            </a>
+                                                        </td>
+
+                                                        @*tracking*@
+                                                        <td style="width: 190px;">
+                                                            <span style="display: block;" ng-if="item.planingPurchasingPrice">
+                                                                <u>Pur price source:</u>
+                                                                <a ng-if="item.planingPurchasingPriceSelectedBy" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.planingPurchasingPriceSelectedBy}}" data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                                    {{item.planingPurchasingPriceUpdatorName}} ({{item.planingPurchasingPriceSelectedDate}})
+                                                                </a>
+                                                            </span>
+
+                                                            <br />
+
+                                                            <span style="display: block;" ng-if="item.itemStatus===5">
+                                                                <u>Approved person:</u>
+                                                                <a ng-if="item.itemStatus===5" data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                                    {{item.statustorName}} ({{item.setItemStatusDate}})
+                                                                </a>
+                                                            </span>
+                                                        </td>
+
+
+                                                        @*final*@
+                                                        <td>&nbsp;</td>
+                                                    </tr>
+                                                </tbody>
+
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+</article>
+
+<div class="modal fade" id="PurchasingPriceHelp" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel">Purchasing Price</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    Purchasing price <strong>only appear after you save the offer</strong>, you can manually select the best purchasing price by click on the auto selected purchasing when it's apprear
+                    <br /><br />
+                    The purchasing price source will be retrieved base on the following priority:
+                    <br />
+                    1.Confirmed Price
+                    <br />
+                    2.Configured purchasing price in Model module (already confirmed by factory - Hannah pdf price)
+                    <br />
+                    3.Estimated purchasing price manually input in the offer
+                    <br />
+                    4.Related price in this season
+                    <br />
+                    5.Pending factory price for this season
+                    <br />
+                    6.Related price in last season
+                    <br />
+                    7.Estimated purchasing price in the estimated price module
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Close
+                </button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<div class="modal fade" id="CommissionHelp" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel">Commission Cost</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    COMMISSION = SALE AMOUNT (USD) * % COMMISSION has defined on OFFER
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Close
+                </button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<div class="modal fade" id="LCCostHelp" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel">LC Cost</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    LC COST: two cases:
+                    <br />
+                    1. IF user has defined LCCOST percent on Client module. <b>LC COST = SALEAMOUNT (USD) * LCCOST of Client</b>
+                    <br />
+                    2. IF PaymentType of Offer is "LC". <b>LC COST = SALEAMOUNT (USD) * 1%</b>
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Close
+                </button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<div class="modal fade" id="InterestHelp" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel">Interest Cost</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    INTEREST COST: two cases
+                    <br />
+                    1. IF user has defined INTEREST COST percent on Client module. <b>INTEREST COST = SALEAMOUNT (USD) * INTEREST COST of Client</b>
+                    <br />
+                    2. Based on Payment Term. <b>INTEREST COST = SALEAMOUNT (USD) * (1 - Down Value) * Term of payment in days * 4,5% / 365</b>
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="DamagesHelp" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel">Damages Cost</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    DAMAGE COST = PURCHASE AMOUNT * 1,25%
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="TransportCostHelp" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel">Transport Cost</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    TRANSPORT COST <b>(Only for EUR)</b> = ORDER QNT / LOAD ABILITY OF 40HC * TransportFee/Cont40HC has defined on OFFER * Exchang Rate
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="SalePriceTable" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xs">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel">Sale Price Table Last Season</h4>
+            </div>
+            <div class="modal-body">
+                <ul ng-repeat="item in salePriceTable | orderBy : '-salePrice'">
+                    <li>{{item.salePrice | currency : (data.offerSeasonDTO.currency == 'USD' ? '$' : '€') : 2}}</li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="AdminUpdateSalePrice" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel">Admin update sale price</h4>
+            </div>
+            <div class="modal-body">
+                <table style="width:100%">
+                    <tr style="background-color:azure">
+                        <td style="padding:10px;width:150px">
+                            New Sale Price:
+                        </td>
+                        <td style="padding:10px;width:150px">
+                            <input type="text" class="form-control" ng-model="adminSalePrice" style="text-align:right" avs-number-2 ng-decimal="2"/>
+                        </td>
+                        <td style="padding:10px;text-align:left">
+                            <button type="button" class="btn btn-primary" data-dismiss="modal" ng-click="adminUpdateSalePrice(adminItem)">
+                                Update new sale price
+                            </button>
+                        </td>
+                    </tr>
+                </table>
+                <br />
+                <ul ng-repeat="item in offerLineByItems">
+                    <li>
+                        {{item.offerUD}}: &nbsp;&nbsp;&nbsp;{{item.unitPrice | currency : (data.offerSeasonDTO.currency == 'USD' ? '$' : '€') : 2}}
+                        <ul ng-repeat="pItem in item.saleOrderDetailDTOs">
+                            <li>
+                                {{pItem.proformaInvoiceNo}}: &nbsp;&nbsp;&nbsp;{{pItem.unitPrice | currency : (data.offerSeasonDTO.currency == 'USD' ? '$' : '€') : 2}}
+                            </li>
+
+                        </ul>
+                    </li>
+                    
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Close
+                </button>                
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="RemarkHistory" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel">History for change description</h4>
+            </div>
+            <div class="modal-body">
+                <ul ng-repeat="remarkItem in remarks | orderBy : '-offerSeasonDetailRemarkID'">
+                    <li>
+                        {{remarkItem.remark}}
+                        <br />
+                        <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{remarkItem.remarkBy}}" data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                            Change description by {{remarkItem.remarktor}} at {{remarkItem.remarkDate}}
+                        </a>
+                    </li>
+
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

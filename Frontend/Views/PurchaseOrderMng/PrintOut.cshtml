@@ -1,0 +1,201 @@
+﻿
+@{
+    Layout = "~/Views/Shared/_Print.cshtml";
+    Frontend.Models.ReportDTO.PurchaseOrderPrintOutDTO data = (Frontend.Models.ReportDTO.PurchaseOrderPrintOutDTO)ViewBag.Data;
+    int columns = 0;
+    decimal? totalAmount = 0;
+    decimal? vat = 0;
+    decimal? totalAmountVat = 0;
+    string formatTotalAmount = "";
+    string formatVat = "";
+    string formatTotalAmountVat = "";
+
+    string formatQuantity = "";
+    string formatUnitPrice = "";
+    string formatAmount = "";
+}
+
+<body onload="window.print()" style="font-family:'Times New Roman'; font-size:15px">
+    <div style="width: 1500px">
+        <table style=" max-width:1050px; margin-left: 0px" border="0">
+            <tr>
+                <td width="210" rowspan="2"><img height="100" src="~/img/auvietfur/Logo.png"/></td>
+                <td width="630" rowspan="2" style="text-align:center">
+                    <p style="font-size: 20px"><strong>PURCHASR ORDER</strong></p>
+                    <p style="font-size: 20px"><strong>Đơn Đặt Hàng</strong></p>
+                </td>
+                <td width="100">&nbsp;</td>
+            </tr>
+            <tr>
+                <td width="200"><strong>No</strong> (Số):@data.PurchaseOrderUD</td>
+            </tr>
+            <tr>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td><strong>Date</strong> (Ngày):@data.PurchaseOrderDate</td>
+            </tr>
+        </table>
+        <label>We consist of/ chúng tôi gồm: </label>
+        <div>
+            <table style="width:500px; float: left; height:200px" border="1" align="center">
+                <tr>
+                    <td style="border: 0"><strong>Party A:</strong></td>
+                </tr>
+                <tr>
+                    <td style="border: 0"><strong>CÔNG TY TNHH SẢN XUẤT THƯƠNG MẠI XUẤT NHẬP KHẨU ÂU VIỆT FURNITURE.</strong></td>
+                </tr>
+                <tr>
+                    <td style="border: 0"><strong>Address </strong>(Địa chỉ): 10/14K, Đoàn Nguyên Tuấn, Ấp 2, Xã Tân Quý Tây,  Huyện Bình Chánh, Tp. Hồ Chí Minh, Việt Nam. </td>
+                </tr>
+                <tr>
+                    <td style="border: 0"><strong>Tax code </strong>(MST): 0312 803 877 </td>
+                </tr>
+                <tr>
+                    <td style="border: 0"><strong>Điện thoại </strong>(Tell):</td>
+                </tr>
+                <tr>
+                    <td style="border: 0"><strong>Representative by </strong>(Đại diện bởi): Mr. </td>
+                </tr>
+                <tr>
+                    <td style="border: 0">(Here under called Buyer/sau đây gọi là người mua) </td>
+                </tr>
+            </table>
+            <table style="width:500px; height:200px; margin-left: 550px" border="1">
+                <tr>
+                    <td style="border: 0"><strong>Party B:</strong></td>
+                </tr>
+                <tr>
+                    <td style="border: 0"><strong>@data.FactoryRawMaterialOfficialNM</strong></td>
+                </tr>
+                <tr>
+                    <td style="border: 0"><strong>Address </strong>(Địa chỉ): @data.Address</td>
+                </tr>
+                <tr>
+                    <td style="border: 0"><strong>Tax code </strong>(MST): @data.Fax </td>
+                </tr>
+                <tr>
+                    <td style="border: 0"><strong>Điện thoại </strong>(Tell): @data.Phone</td>
+                </tr>
+                <tr>
+                    <td style="border: 0"><strong>Representative by </strong>(Đại diện bởi): @data.ContactPerson </td>
+                </tr>
+                <tr>
+                    <td style="border: 0">(Here under called Supplier/sau đây gọi là người bán) </td>
+                </tr>
+            </table>
+        </div>
+        <br />
+        <label>Party A agrees to buy and Party B agrees to sell goods/services with terms and conditions mentioned as below:</label><br />
+        <label>(Bên A thông ý mua và bên B đồng ý bán hàng hóa/dịch vụ theo các điều kiện được đề cập như bên dưới):   </label><br /><br />
+        <label><strong>I. Goods/services and price <i>(Hàng hóa/dịch vụ và giá)</i>: </strong></label><br />
+        <label style="margin-left: 930px; font-size: 11px"><i>Currency (Tiền tệ): @data.Currency</i></label> <br />                                                                                            
+        <table style="max-width:1050px;border-collapse: collapse" border="1">
+            <tr style="background-color: cornflowerblue">
+                <th style="width:50px">No.<br /> (STT)</th>
+                <th style="width:80px">Item code <br /> (Mã vật tư)</th>
+                <th style="width:250px">Item's description<br /> (Mô tả vật tư/hàng hóa)</th>
+                <th style="width:80px">ID</th>
+                <th style="width:70px">Unit<br /> (Đơn vị tính)</th>
+                <th style="width:80px">Quantity<br /> (Số lượng)</th>
+                <th style="width:100px">Unit price<br /> (Đơn giá)</th>
+                <th style="width:100px">Amount<br /> (Thành tiền)</th>
+                <th style="width:100px">Delivery date<br /> (ngày giao hàng)</th>
+                <th style="width:200px">Picture<br /> (Hình ảnh)</th>
+                <th style="width:150px">Remark<br /> (Ghi Chú)</th>
+            </tr>
+            @foreach (Frontend.Models.ReportDTO.PurchaseOrderDetailPrintOutDTO dtoDetail in data.PurchaseOrderDetailPrintOutDtos)
+            {
+                columns = columns + 1;
+                totalAmount += dtoDetail.Amount;
+                formatQuantity = string.Format("{0:n4}", dtoDetail.OrderQnt);
+                formatUnitPrice = string.Format("{0:n0}", dtoDetail.UnitPrice);
+                formatAmount = string.Format("{0:n0}", dtoDetail.Amount);
+                <tr>
+                    <td style="width:50px; text-align: center">@columns</td>
+                    <td style="width:80px">@dtoDetail.ProductionItemUD</td>
+                    <td style="width:250px">@dtoDetail.ProductionItemNM</td>
+                    <td style="width:80px">@dtoDetail.ID</td>
+                    <td style="width:70px; text-align: center">@dtoDetail.UnitNM</td>
+                    <td style="width:80px; text-align:right">@formatQuantity</td>
+                    <td style="width:100px; text-align:right">@formatUnitPrice</td>
+                    <td style="width:100px; text-align:right">@formatAmount</td>
+                    <td style="width:100px">@dtoDetail.ETA</td>
+                    <td style="width:200px; text-align: center">
+                        <a href="@dtoDetail.FileLocation" data-featherlight="image"><img style="width: 95%;" src="@dtoDetail.FileLocation" /></a>
+                    </td>
+                    <td style="width:150px">@dtoDetail.Remark</td>
+                </tr>
+
+            }
+            @{
+                vat += ((totalAmount * data.VAT) / 100);
+                totalAmountVat += vat + totalAmount;
+                formatTotalAmount = string.Format("{0:n0}", totalAmount);
+                formatVat = string.Format("{0:n0}", vat);
+                formatTotalAmountVat = string.Format("{0:n0}", totalAmountVat);
+            }
+            <tr>
+                <td colspan="4"><strong>Total (VAT excluded)/ Tổng cộng (chưa bao gồm VAT) </strong></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td style=" text-align:right"><strong>@formatTotalAmount</strong></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td colspan="4"><strong>VAT </strong></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td style=" text-align:right"><strong>@formatVat</strong></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td colspan="4"><strong>Total (VAT included)/ Tổng cộng tiền hàng (bao gồm VAT) </strong></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td style=" text-align:right"><strong>@formatTotalAmountVat</strong></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+        </table> <br />
+        <label><strong>II. Other terms/ các điều kiện khác: </strong></label><br />
+        <label><strong>1. Delivery term/ điều khoản giao hàng: </strong></label><br />
+        <label>&nbsp;&nbsp; - Delivery Address (Địa điểm giao hàng):</label>
+            <label style="margin-left:95px">CTY TNHH SX TM XNK Âu Việt Furniture:Ấp Thành Hóa 1, xã Tân Thành Bình, Huyện Mỏ Cày Bắc, Bến Tre</label><br />
+        <label>&nbsp;&nbsp; - Required documents (Các chứng từ giao hàng):</label>
+            <label style="margin-left:50px">@data.RequiredDocuments</label><br /><br />
+
+        <label><strong>2. Payment terms/ điều khoản thanh toán: </strong></label><br />
+        <label>&nbsp;&nbsp; - Company name (tên công ty):</label>
+            <label style="margin-left:155px">CÔNG TY TNHH SẢN XUẤT THƯƠNG MẠI XUẤT NHẬP KHẨU ÂU VIỆT FURNITURE</label><br />
+        <label>&nbsp;&nbsp; - Tax Code (MST):</label>
+            <label style="margin-left:227px">0312 803 877</label><br />
+        <label>&nbsp;&nbsp; - Billing Address (Nơi nhận chứng từ thanh toán):</label>
+            <label style="margin-left:41px">CTY TNHH SX TM XNK Âu Việt Furniture:Ấp Thành Hóa 1, xã Tân Thành Bình, Huyện Mỏ Cày Bắc, Bến Tre</label><br />
+        <label>&nbsp;&nbsp; - Payment Documents (Bộ hồ sơ yêu cầu thanh toán):</label>
+            <label style="margin-left:22px">@data.PaymentDocuments</label><br />
+        <label>&nbsp;&nbsp; - Payment Period (Thời hạn thanh toán):</label>
+            <label style="margin-left:99px">@data.SupplierPaymentTermNM</label><br /><br />
+
+        <label><strong>3. Warranty terms/ điều khoản bảo hành: </strong></label><br />
+        <label>&nbsp;&nbsp; <i>- The supplier commits to deliver goods/services with commited quality.</i></label><br />
+        <label>&nbsp;&nbsp; <i>(Người bán cam kết cung cấp hàng hóa/dịch vụ đạt chất lượng như đã cam kết)</i></label><br /><br />
+        <label>
+            <i>Both parties affix their authorized signature to agree to the purchase order.</i>
+        </label><br />
+        <label>
+            <i>Cả hai bên ký xác nhận đơn hàng như bên dưới.</i>
+        </label><br />
+        <label style="margin-left: 200px"><strong>Party A's authorized signature </strong></label><label style="margin-left:300px"><strong>Party B's authorized signature </strong></label><br />
+        <label style="margin-left: 160px">Chữ ký của người có thẩm quyền của Bên A</label><label style="margin-left:230px">Chữ ký của người có thẩm quyền của Bên B</label><br />
+        <br /><br /><br /><br /><br /><br /><br /><br />
+</div>
+</body>
+

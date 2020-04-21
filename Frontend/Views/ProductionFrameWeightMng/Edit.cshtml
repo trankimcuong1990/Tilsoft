@@ -1,0 +1,143 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    var supportServiceRoot = (System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"]);
+
+    ViewBag.Title = (ViewBag.ID == 0) ? "Create Frame Weight" : "Edit Frame Weight";
+    ViewBag.SubTitle = (ViewBag.ID == 0) ? "Create" : "Edit";
+    ViewBag.Module = "Frame Weight";
+}
+<form name="editForm" class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+
+        <div class="jarviswidget jarviswidget-color-darken" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>@(ViewBag.ID == 0 ? "Create Frame Weight" : "Edit Frame Weight")</h2>
+            </header>
+            <div>
+                <div class="jarviswidget-editbox"></div>
+                <div class="widget-body">
+                    <div class="smart-form">
+                        <div class="row">
+                            <section class="col col-sm-3">
+                                <label class="label">Code</label>
+                                <label class="input">
+                                    <span class="form-control">{{data.productionItemUD}}</span>
+                                </label>
+                            </section>
+                            <section class="col col-sm-3">
+                                <label class="label">Name</label>
+                                <label class="input">
+                                    <span class="form-control">{{data.productionItemNM}}</span>
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label class="label">Frame Weight</label>
+                                <label class="input">
+                                    <input type="text" class="form-control" style="font-family:Arial; text-align:right" avs-number ng-data-source="data.frameWeight" ng-decimal="3" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-4">
+                                <label class="label">Remark</label>
+                                <label class="input">
+                                    <input type="text" class="form-control" style="font-family:Arial" maxlength="255" ng-model="data.remark" />
+                                </label>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="jarviswidget jarviswidget-color-darken" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>View Frame Weight History</h2>
+            </header>
+            <div>         
+                <div class="widget-body">
+                    <div class="smart-form">
+                        <div class="row">
+                            <section class="col col-sm-12">
+                                <div class="tilsoft-table-wrapper">
+                                    <div class="tilsoft-table">
+                                        <div class="tilsoft-table-header" style="width:800px">
+                                            <div style="width:150px">Frame Weight</div>
+                                            <div style="width:150px">Updated By</div>
+                                            <div style="width:150px">Updated Date</div>
+                                            <div>Remark</div>
+                                        </div>
+                                        <div class="tilsoft-table-body" style="width:800px">
+                                            <table>
+                                                <tbody ng-repeat="item in data.productionFrameWeightHistory| orderBy : '-updatedDate'">
+                                                    <tr>
+
+                                                        <td style="width:150px; text-align:right"><span class="form-control">{{item.frameWeight | number: 3}}</span></td>
+                                                        <td style="width:150px">
+                                                            <span class="form-control">{{item.employeeNM}}</span>
+                                                        </td>
+                                                        <td style="width:150px">
+                                                            <span class="form-control">{{item.updatedDate}}</span>
+                                                        </td>
+                                                        <td>
+                                                            <span class="form-control">{{item.remark}}</span>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "ProductionFrameWeightMng")" class="btn btn-default" title="Back">
+                <i class="fa fa-arrow-left"></i>
+            </a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current))" title="Delete" ng-class="{'disabled': data.productionFrameWeightID == 0}" ng-click="event.remove(data.productionFrameWeightID)">
+                <i class="fa fa-times"></i>
+            </a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="event.update()">
+                <i class="fa fa-floppy-o"></i>
+            </a>
+        </li>
+    </ul>
+}
+
+@section pagejs{
+    <script type="text/javascript">
+        var context = {
+            id: @ViewBag.ID,
+            backUrl: '@Url.Action("Index", "ProductionFrameWeightMng")',
+            refreshUrl: '@Url.Action("Edit", "ProductionFrameWeightMng", new { id = UrlParameter.Optional })/',
+            serviceUrl: '@(serviceRoot)/api/productionFrameWeight/',
+            supportServiceUrl: '@(supportServiceRoot)/api/support/',
+            token: '@token',
+            msgValid: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED'
+        }
+    </script>
+    <script src="~/Views/ProductionFrameWeightMng/edit.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/jsonService2.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/ProductionFrameWeightMng/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}
+
+

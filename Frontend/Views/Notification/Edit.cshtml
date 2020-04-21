@@ -1,0 +1,223 @@
+﻿@{
+    if (ViewBag.ID == 0)
+    {
+        ViewBag.Title = "Create New Notification Group";
+    }
+    else
+    {
+        ViewBag.Title = "Edit Notification Group";
+    }
+
+    ViewBag.Module = "NotificationMng";
+    ViewBag.CurrentSeason = Frontend.Helper.Common.GetCurrentSeason();
+}
+
+<style>
+    .ui-autocomplete {
+        max-height: 150px;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .ui-menu-item > a.ui-corner-all {
+        display: block;
+        padding: 3px 15px;
+        clear: both;
+        /*font-weight: normal;*/
+        line-height: 18px;
+        /*color: #555555;*/
+        white-space: nowrap;
+    }
+</style>
+
+<form class="row" name="editForm" id="main-form">
+    <article class="col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-0" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>Setting Notification Group</h2>
+            </header>
+            <div>
+                <div class="jarviswidget-editbox"></div>
+                <div class="widget-body">
+                    <div class="smart-form">
+                        <div class="row">
+                            <section class="col col-lg-2">
+                                <label class="label">
+                                    <b>Notification Group Code</b>
+                                    <em class="note note-error" ng-show="editForm.notificationGroupUD.$error.required"> (Required)</em>
+                                </label>
+                                <label class="input" ng-class="{'state-error': editForm.notificationGroupUD.$error.required}">
+                                    <input type="text" class="form-control" name="notificationGroupUD" ng-model="data.notificationGroupUD" maxlength="10" ng-readonly="(@ViewBag.ID != 0)" required />
+                                </label>
+                            </section>
+                            <section class="col col-lg-4">
+                                <label class="label">
+                                    <b>Notification Group Name</b>
+                                </label>
+                                <label class="input">
+                                    <input type="text" class="form-control" ng-model="data.notificationGroupNM" maxlength="255" ng-readonly="(@ViewBag.ID != 0)" />
+                                </label>
+                            </section>
+                        </div>
+                        <div class="row">
+                            <section class="col col-lg-6">
+                                <label class="label">
+                                    <b>Other Link</b>
+                                </label>
+                                <label class="textarea">
+                                    <input class="form-control" rows="5" ng-model="data.emailTemplate" maxlength="500" />
+                                </label>
+                            </section>
+                        </div>
+                        <div class="row">
+                            <section class="col col-lg-12">
+                                <label class="label">
+                                    <b>Notification Group Description</b>
+                                </label>
+                                <label class="textarea">
+                                    <textarea class="form-control" rows="5" ng-model="data.description" maxlength="1000"></textarea>
+                                </label>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-0" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>Setting Notification Group Details</h2>
+            </header>
+            <div>
+                <div class="jarviswidget-editbox"></div>
+                <div class="widget-body">
+                    <div class="smart-form">
+                        <div class="row">
+                            <section class="col col-sm-12">
+                                <h2>Status module </h2>
+                                <hr />                                
+                                <label class="input">
+                                    <select class="form-control" style="font-family: Arial; font-size: 12px; height: 30px" ng-model="data.moduleID" ng-change="event.loadModuleStatus(data.moduleID)" ng-options="moduleItem.moduleID as moduleItem.displayText for moduleItem in modules">
+                                        <option value="">--Please choose a module--</option>
+                                    </select>
+                                </label>
+                            </section>
+                        </div>
+                        <div class="row">
+                            <div class="widget-body" style="margin: 5px; margin-top: -5px;">
+                                <div class="padding-10">
+                                    <div class="tilsoft-table-wrapper">
+                                        <div class="tilsoft-table">
+                                            <div class="tilsoft-table-body" style="width:600px; margin-top:0px; height:auto">
+                                                <table>
+                                                    <tr>
+                                                        <th style="width:150px">Module Status Name</th>
+                                                        <th style="width:70px">Check</th>
+                                                        <th></th>
+                                                    </tr>
+                                                    <tr ng-repeat="notificationStatus in data.notificationGroupStatuses" ng-if="data.notificationGroupStatuses.length > 0">
+                                                        <td style="width: 149px">{{notificationStatus.statusNM}}</td>
+                                                        <td style="width: 70px; text-align: center">
+                                                            <input type="checkbox" ng-model="notificationStatus.isSelected" />
+                                                        </td>
+                                                        <td style="border-bottom: none"></td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>           
+            <div>
+                <div class="jarviswidget-editbox"></div>
+                <div class="widget-body">
+                    <div class="smart-form">
+                        <div class="row">
+                            <section class="col col-lg-3">                               
+                                <h2>Choose User </h2>
+                                <hr />                               
+                                <label class="input-group">
+                                    <input class="form-control" placeholder="Search user name ..." id="quickSearchBoxUser" ng-model="filters.SearchUser" ng-change="event.changeSearchUser()" />
+                                    <span class="input-group-btn">
+                                        <a class="btn btn-default btn-primary btn-xs" style="margin-left: 2px;width: 35px;height: 34px" title="Add user" ng-click="event.add()" ng-disabled="!enableAddUser"><i class="fa fa-plus"></i></a>
+                                    </span>
+                                </label>
+                            </section>
+                        </div>
+                        <div class="row">
+                            <div class="widget-body" style="margin: 5px; margin-top: -5px;">
+                                <div class="padding-10">
+                                    <div class="tilsoft-table-wrapper">
+                                        <div class="tilsoft-table">
+                                            <div class="tilsoft-table-body" style="width:600px; margin-top:0px; height:auto">
+                                                <table>
+                                                    <tr>
+                                                        <th style="width:110px"></th>
+                                                        <th style="width:250px">Full Name</th>
+                                                        <th style="width: 220px">Email</th>
+                                                        <th>Remark</th>
+                                                    </tr>
+                                                    <tr ng-repeat="item in data.notificationGroupMemberData">
+                                                        <td style="text-align: center; vertical-align: middle;">
+                                                            <a href="javascript:void(0)" class="btn btn-default btn-danger btn-xs font-11" ng-click="event.remove(item)"><i class="fa fa-times-circle-o"></i> Remove</a>
+                                                        </td>
+                                                        <td style="vertical-align: middle;"><i class="fa fa-user"></i>{{item.userName}}</td>
+                                                        <td style="width: 220px">{{item.email}}</td>
+                                                        <td>
+                                                            <input type="text" class="form-control" ng-model="item.remark" />
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "Notification")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="event.update($event)"><i class="fa fa-save"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script src="~/Angular/app/jsonService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script type="text/javascript">
+        jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/notification/';
+        jsonService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+        var context = {
+            id: @ViewBag.ID,
+            errMsg: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED',
+            backUrl: '@Url.Action("Index", "Notification")',
+            refreshUrl: '@Url.Action("Edit", "Notification", new { id = UrlParameter.Optional })/',
+            supportServiceUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/notification/',
+            token: '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]'
+        }
+    </script>
+    <script src="~/Angular/app/notification/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/notification/edit.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}

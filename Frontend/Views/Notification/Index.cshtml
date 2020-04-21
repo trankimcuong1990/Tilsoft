@@ -1,0 +1,197 @@
+﻿@{
+    ViewBag.Title = "Search Notification Group";
+    ViewBag.Module = "Notification";
+}
+
+
+<div class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+
+
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-0" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Search Result</h2>
+            </header>
+
+            <div>
+                <div class="jarviswidget-editbox"></div>
+
+                <div class="widget-body">
+                    <div id="searchResult" class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header" style="width: 900px;">
+                                <div style="width: 80px;"></div>
+                                <div style="width: 90px;" data-colname="notificationGroupUD">Code</div>
+                                <div style="width: 250px;" data-colname="notificationGroupNM">Name</div>
+                                <div data-colname="description">Description</div>
+                            </div>
+
+                            @*<div class="tilsoft-table-filter" style="width: 900px;">
+                                    <div style="width: 80px;">
+                                        <a href="javascript:void(0)" class="btn btn-{{isDefaultFilter?'default':'primary'}} btn-xs" title="Apply Filter" ng-click="event.reload()"><i class="fa fa-filter"></i></a>
+                                        <a href="javascript:void(0)" class="btn btn-default btn-xs" title="Clear Filter" ng-click="event.clearFilter()"><i class="fa fa-ban"></i></a>
+                                    </div>
+                                    <div style="width: 180px;" data-colname="notificationGroupUD">
+                                        <input type="text" ng-model="filters.notificationGroupUD" placeholder="" />
+                                    </div>
+                                    <div style="width: 180px;" data-colname="notificationGroupNM">
+                                        <input type="text" ng-model="filters.notificationGroupNM" placeholder="" />
+                                    </div>
+                                    <div data-colname="description">
+
+                                    </div>
+                                </div>*@
+
+                            <div class="tilsoft-table-body" style="width: 900px;">
+                                <table>
+                                    <tr ng-repeat="item in data">
+                                        <td style="text-align: center; width: 79px;">
+                                            <a href="@Url.Action("Edit", "Notification")/{{item.notificationGroupID}}" target="_blank" class="btn btn-primary btn-xs font-11" style="width: 60px; margin-bottom: 5px;"><i class="fa fa-pencil"></i> Edit</a>
+                                            @*<a href="javascript:void(0)" class="btn btn-danger btn-xs font-11" style="width: 60px; margin-bottom: 5px;" ng-click="event.delete(item)"><i class="fa fa-times"></i> Delete</a>*@
+                                        </td>
+                                        <td style="width: 90px;">{{item.notificationGroupUD}}</td>
+                                        <td style="width: 250px;">{{item.notificationGroupNM}}</td>
+                                        <td>{{item.description}}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Search" ng-click="event.search()"><i class="fa fa-search"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Refresh" ng-click="event.search()"><i class="fa fa-refresh"></i></a>
+        </li>
+
+        <li class="sparks-info">
+            <a href="@Url.Action("Edit", "Notification")/0" target="_blank" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="New"><i class="fa fa-file-o"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script src="~/Angular/app/jsonService.js?c=@System.Guid.NewGuid().ToString().Replace(" -", "" )"></script>
+    <script src="~/Angular/app/notification/service.js?c=@System.Guid.NewGuid().ToString().Replace(" -", "" )"></script>
+    <script type="text/javascript">
+
+
+
+        jQuery('.search-filter').keypress(function(e){
+            if (e.keyCode == 13) {
+                var scope = angular.element(jQuery('body')).scope();
+                scope.event.search()
+            }
+        });
+
+        jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/notification/';
+        jsonService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+        jsonService.searchFilter.pageSize = @System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"];
+
+
+        var notificationApp = angular.module('tilsoftApp', []);
+        notificationApp.controller('tilsoftController', ['$scope', function ($scope) {
+            //
+            // data
+            //
+            $scope.data = [];
+            $scope.supportModel = null;
+            $scope.filters = {
+                NotificationGroupUD: '',
+                NotificationGroupNM: '',
+                Description : '',
+            };
+            $scope.pageIndex = 1;
+            $scope.totalPage = 0;
+
+            //
+            // event defined
+            //
+            $scope.event = {
+                search: function(){
+                    jsonService.searchFilter.filters = $scope.filters;
+                    $scope.search();
+                },
+                delete: function(item) {
+
+                    if (confirm('Are you sure you want to delete ' + item.notificationGroupNM + ' (' + item.notificationGroupUD + ')' +' ?')) {
+                        notificationService.delete(
+                            item.notificationGroupID,
+                            function (data) {
+                                jsHelper.processMessage(data.message);
+                                if (data.message.type === 0) {
+                                    window.location = context.backUrl;
+                                }
+                            },
+                                function (error) {
+                                    jsHelper.showMessage('warning', error);
+                                }
+                            );
+                    }
+
+                }
+            }
+
+            //
+            // private function defined
+            //
+            $scope.prepareForm = function () {
+                jsonService.getSearchSupport(
+                    function (data) {
+                        $scope.supportModel = data.data;
+                        $scope.$apply();
+                    },
+                    function (error) {
+                        $scope.supportModel = null;
+                        $scope.$apply();
+                    }
+                );
+            }
+
+            $scope.search = function () {
+
+                jsonService.search(
+                    function (data) {
+                        $scope.data = data.data.data;console.log($scope.data);
+                        $scope.totalPage = Math.ceil(data.totalRows / jsonService.searchFilter.pageSize);
+                        $scope.$apply();
+
+                        if(data.totalRows < jsonService.searchFilter.pageSize) {
+                            jQuery('#searchResult').find('ul').hide();
+                        }
+                        else {
+                            jQuery('#searchResult').find('ul').show();
+                        }
+
+                        jQuery('#content').show();
+                        //searchResultGrid.updateLayout();
+                    },
+                    function (error) {
+                        $scope.data = null;
+                        $scope.pageIndex = 1;
+                        $scope.totalPage = 0;
+                        $scope.$apply();
+                    }
+                );
+            }
+
+            //
+            // INIT
+            //
+            //$scope.prepareForm();
+            $scope.search();
+        }]);
+
+
+    </script>
+}

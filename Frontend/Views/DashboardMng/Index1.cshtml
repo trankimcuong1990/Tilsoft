@@ -1,0 +1,79 @@
+﻿@{
+    ViewBag.Title = "Management Info: Tilsoft Overview";
+    ViewBag.Module = "Management Info: Tilsoft Overview";
+    string currentSeason = Library.OMSHelper.Helper.GetCurrentSeason();
+    string nextSeason = Library.OMSHelper.Helper.GetNextSeason(currentSeason);
+    string prevSeason = Library.OMSHelper.Helper.GetPrevSeason(currentSeason);
+
+    string Season = currentSeason;
+    if (DateTime.Now.Month == 8)
+    {
+        Season = nextSeason;
+        //Season = currentSeason;
+    }
+    else
+    {
+        Season = currentSeason;
+    }
+    prevSeason = Library.OMSHelper.Helper.GetPrevSeason(Season);
+}
+<style>
+    .redirect-btns li {
+        display: inline-block;
+        margin: 10px;
+        box-sizing: border-box;
+        border: 1px solid #fff;
+    }
+
+        .redirect-btns li a {
+            width: 281px;
+        }
+
+            .redirect-btns li:hover, .redirect-btns li a:hover {
+                color: #000 !important;
+                background: #fff !important;
+                border: 1px solid #000;
+                font-weight: 700;
+            }
+</style>
+<div class="row" style="margin-top: 15px;">
+    <!-- show report for management level -->
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget well jarviswidget-color-darken" id="wid-id-0" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <div>
+                <div class="widget-body no-padding">
+                    <div class="padding-10">
+                        @*Total Users per week*@
+                        <div>
+                            <div style="border: solid 1px #ddd; margin-top: 15px;">
+                                <div id="chartTotalUser"></div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div style="border: solid 1px #ddd; margin-top: 15px;">
+                                <div id="chartTotalHitCount"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section pagejs {
+    <script src="~/Angular/app/jsonService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script type="text/javascript">
+        jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/dashboardmng/';
+        jsonService.supportServiceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/support/';
+        jsonService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+        var context = {
+            season: '@Season',
+            preSeason : '@prevSeason'
+        }
+    </script>
+    <script src="~/Angular/app/dashboardMng/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/dashboardMng/index.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}

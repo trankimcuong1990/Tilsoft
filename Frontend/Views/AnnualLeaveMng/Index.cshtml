@@ -1,0 +1,162 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    var pageSize = System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"];
+    var cookieID = HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString();
+
+    ViewBag.Title = "Search Leave Request";
+    ViewBag.Module = "Annual Leave";
+
+    string userManualUrl = string.Empty;
+    if (System.IO.File.Exists(Server.MapPath("~/UserManual/" + ViewBag.ModuleCode + ".pdf")))
+    {
+        userManualUrl = "/UserManual/" + ViewBag.ModuleCode + ".pdf";
+    }
+}
+
+<div class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Search Result</h2>
+                <div class="widget-toolbar">
+                    <div class="smart-form">
+                        <div class="inline-group">
+                            <label class="radio">
+                                <input name="hasleft" type="radio" ng-model="filters.HasLeft" value="false" ng-change="event.refreshWorkCenter()">
+                                <i></i>Active
+                            </label>
+                            <label class="radio">
+                                <input name="hasleft" type="radio" ng-model="filters.HasLeft" value="true" ng-change="event.refreshWorkCenter()">
+                                <i></i>Not active
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            <div>
+                <div class="jarviswidget-editbox"></div>
+                <div class="widget-body">
+                    <div class="tilsoft-table-wrapper" avs-scroll grid-handler="gridHandler">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header" style="width:1200px">
+                                <div style="width: 101px">Found(s)<br /><strong style="color:blue">{{totalRows}}</strong>/<strong style="color:maroon">{{totalRows}}</strong></div>
+                                <div style="width: 150px">Full Name</div>
+                                <div style="width: 150px">Department</div>
+                                <div style="width: 150px">From Date</div>
+                                <div style="width: 150px">To Date</div>
+                                <div style="width: 100px" class="sorting" data-colname="NumberOfDays">                                
+                                    Days Off                                                                      
+                                </div>
+                                <div style="width: 150px">Status</div>
+                                <div style="width: 150px">Approver</div>
+                                <div></div>
+                            </div>
+                            <div class="tilsoft-table-filter" style="width:1200px">
+                                <div style="width: 101px">
+                                    <a href="javascript:void(0)" class="btn btn-{{isDefaultFilter ? 'default' : 'primary'}} btn-xs font-11" ng-click="event.refreshWorkCenter()"><i class="fa fa-filter"></i></a>
+                                    <a href="javascript:void(0)" class="btn btn-default btn-xs font-11" ng-click="event.clearFiltersWorkCenter()"><i class="fa fa-ban"></i></a>
+                                </div>
+                                <div style="width: 150px">
+                                    @*<select class="form-control search-filter" style="width: 100%" ng-model="filters.employeeID" ng-options="employee.employeeID as employee.employeeNM for employee in employees">
+                                        <option value=""></option>
+                                    </select>*@
+                                    <input type="text" class="form-control search-filter" ng-model="filters.employeeNM" />
+                                </div>
+                                <div style="width: 150px">
+                                    @*<select class="form-control search-filter" style="width: 100%" ng-model="filters.companyID" ng-options="company.companyID as company.companyNM for company in companies">
+            <option value=""></option>
+        </select>*@
+                                    <input type="text" class="form-control search-filter"  ng-model="filters.companyNM" />
+                                </div>
+                                <div style="width: 150px">
+                                    <label class="input">                                      
+                                        <input class="form-control search-filter" style="font-family: Arial; font-size: 12px" avs-calendar ng-data-source="filters.fromDate" />
+                                    </label>
+                                </div>
+                                <div style="width: 150px">
+                                    <label class="input">
+                                        <input class="form-control search-filter" style="font-family: Arial; font-size: 12px" avs-calendar ng-data-source="filters.toDate" />
+                                    </label>
+                                </div>
+                                <div style="width: 100px">
+                                   
+                                </div>
+                                <div style="width: 150px">
+                                    <select class="form-control search-filter" style="width: 100%" ng-model="filters.statusID" ng-options="statusDTO.annualLeaveStatusID as statusDTO.annualLeaveStatusNM for statusDTO in status">
+                                        <option value=""></option>
+                                    </select>
+                                </div>
+                                <div style="width: 150px">
+                                 
+                                </div>
+                                <div></div>
+                            </div>
+                            <div class="tilsoft-table-body" style="width:1200px">
+                                <table>
+                                    <tr ng-repeat="item in data">
+                                        <td style="width: 100px; text-align:center">
+                                            <a href="@Url.Action("Edit", "AnnualLeaveMng")/{{item.annualLeaveTrackingID}}" class="btn btn-default btn-xs font-11 btn-primary" target="_blank"><i class="fa fa-pencil-square-o"></i> Edit</a>
+                                            @*<a href="javascript:void(0)" class="btn btn-default btn-xs font-11 btn-danger" ng-click="event.deleteWorkCenter(item)"><i class="fa fa-times-circle-o"></i> Del</a>*@
+                                        </td> 
+                                        <td style="width: 150px; text-align: left">{{item.employeeNM}}</td>
+                                        <td style="width: 150px">{{item.companyNM}}</td>
+                                        <td style="width: 150px; text-align:center">{{item.fromDate}}</td>
+                                        <td style="width: 150px; text-align:center">{{item.toDate}}</td>
+                                        <td style="width: 100px; text-align:right">{{item.numberOfDays}}</td>
+                                        <td style="width: 150px">{{item.statusNM}}</td>
+                                        <td style="width: 150px">{{item.updatedNM}}</td>
+                                        <td></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction{
+<ul id="sparks">
+    <li class="sparks-info">
+        <a href="javascript:void(0)" class="btn btn-default" title="Search" ng-click="event.refreshWorkCenter()">
+            <i class="fa fa-search"></i>
+        </a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0)" class="btn btn-default" title="Refresh" ng-click="event.refreshWorkCenter()">
+            <i class="fa fa-refresh"></i>
+        </a>
+    </li>
+    <li class="sparks-info">
+        <a href="@Url.Action("Edit", "AnnualLeaveMng")/0" class="btn btn-default" title="New" target="_blank">
+            <i class="fa fa-file-o"></i>
+        </a>
+    </li>
+    @if (!string.IsNullOrEmpty(userManualUrl))
+    {
+        <li class="sparks-info">
+            <a target="_blank" href="@userManualUrl" class="btn btn-default" title="Help"><i class="fa fa-info"></i></a>
+        </li>
+    }
+</ul>
+}
+
+@section pagejs{
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(serviceRoot)/api/AnnualLeaveMng/',
+            token: '@token',
+            pageSize: '@pageSize',
+            cookieID: '@cookieID',
+            urlNewWorkCenter: '@Url.Action("Edit", "AnnualLeaveMng")/'
+        };
+    </script>
+    <script type="text/javascript" src="~/Views/AnnualLeaveMng/index.js?v=@guid"></script>  
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Views/AnnualLeaveMng/service.js?v=@guid"></script>
+}

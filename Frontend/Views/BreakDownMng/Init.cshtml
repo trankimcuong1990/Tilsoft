@@ -1,0 +1,127 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+
+    var id = ViewBag.ID;
+
+    ViewBag.Title = "Init Breakdown";
+    ViewBag.Module = "Init Breakdown";
+    ViewBag.Icon = "fa-file-o";
+}
+
+<style>
+    .css-inline a {
+        display: inline;
+    }
+
+    .smart-form .inline-group .radio {
+        width: 14% !important;
+    }
+    .ui-autocomplete {
+        max-height: 500px;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+</style>
+
+<div class="row">
+    <article class="col col-sm-12">
+        <div class="jarviswidget" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>Init Breakdown</h2>
+            </header>
+            <div class="no-padding">
+                <div class="widget-body">
+                    <div class="smart-form">
+                        <fieldset>
+                            <section class="col col-sm-12">
+                                <div class="inline-group">
+                                    <label class="radio">
+                                        <input type="radio" name="radio-inline" value="model" ng-model="selectedRadio" ng-change="event.changeInitOption(selectedRadio);">
+                                        <i></i>MODEL
+                                    </label>
+                                    <label class="radio">
+                                        <input type="radio" name="radio-inline" value="sampleProduct" ng-model="selectedRadio" ng-change="event.changeInitOption(selectedRadio);">
+                                        <i></i>SAMPLE PRODUCT
+                                    </label>
+                                    <label class="radio hide">
+                                        <input type="radio" name="radio-inline" value="freeItem" ng-model="selectedRadio" ng-change="event.changeInitOption(selectedRadio);">
+                                        <i></i>FREE ITEM
+                                    </label>
+                                </div>
+                            </section>
+                            <section class="col col-sm-12 no-padding" ng-if="selectedRadio == 'model'">
+                                <div class="col col-sm-2">
+                                    <label>Model UD <em class="note note-error" ng-if="autoModel.initModel == null || autoModel.initModel == ''">(Required)</em></label>
+                                    <label class="input" ng-class="{'state-error': autoModel.initModel == null || autoModel.initModel == ''}">
+                                        <input type="text" class="form-control" style="font-family:Arial;" avs-remote-auto-complete ng-request-param="autoModel.api" ng-init-param="autoModel.initModel" ng-model="autoModel.initModel" ng-item-value="autoModel.selectModel" ng-item-selected="event.getModelID(autoModel.selectModel);" ng-change="event.changeModelUD(autoModel.initModel);" data-method="POST" data-format-function="formatModel" />
+                                    </label>
+                                </div>
+                                <div class="col col-sm-10">
+                                    <label>Model NM</label>
+                                    <label class="input">
+                                        <input type="text" class="form-control" style="font-family:Arial;" readonly ng-model="autoModel.selectModel.description" />
+                                    </label>
+                                </div>
+                            </section>
+                            <section class="col col-sm-12 no-padding" ng-if="selectedRadio == 'sampleProduct'">
+                                <div class="col col-sm-2">
+                                    <label>SampleProduct UD <em class="note note-error" ng-if="autoSampleProduct.initSampleProduct == null || autoSampleProduct.initSampleProduct == ''">(Required)</em></label>
+                                    <label class="input" ng-class="{'state-error': autoSampleProduct.initSampleProduct == null || autoSampleProduct.initSampleProduct == ''}">
+                                        <input type="text" class="form-control" style="font-family:Arial;" avs-remote-auto-complete ng-request-param="autoSampleProduct.api" ng-init-param="autoSampleProduct.initSampleProduct" ng-model="autoSampleProduct.initSampleProduct" ng-item-value="autoSampleProduct.selectSampleProduct" ng-item-selected="event.getSampleProductID(autoSampleProduct.selectSampleProduct);" ng-change="event.changeSampleProductUD(autoSampleProduct.initSampleProduct);" data-method="POST" data-format-function="formatSampleProduct" />
+                                    </label>
+                                </div>
+                                <div class="col col-sm-10">
+                                    <label>Article Description</label>
+                                    <label class="input">
+                                        <input type="text" class="form-control" style="font-family:Arial;" readonly ng-model="autoSampleProduct.selectSampleProduct.description" />
+                                    </label>
+                                </div>
+                            </section>
+                            <section class="col col-sm-12 hide" ng-if="selectedRadio == 'freeItem'">
+                                <label>Description <em class="note note-error" ng-if="initParam.freeItemDescription == null || initParam.freeItemDescription == ''">(Required)</em></label>
+                                <label class="input" ng-class="{'state-error': initParam.freeItemDescription == null || initParam.freeItemDescription == ''}">
+                                    <input type="text" class="form-control" style="font-family:Arial;" ng-model="initParam.freeItemDescription" />
+                                </label>
+                            </section>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction{
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default btn-sm" title="Back" ng-click="event.backUrl();">
+                <i class="fa fa-arrow-left"></i> Back
+            </a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default btn-sm" title="Next" ng-click="event.nextEdit();">
+                <i class="fa fa-arrow-right"></i> Next
+            </a>
+        </li>
+    </ul>
+}
+
+@section pagejs{
+    <script type="text/javascript">
+        var context = {
+            id: '@id',
+            token: '@token',
+            serviceUrl: '@(serviceRoot)/api/breakdown/',
+            backUrl: '@Url.Action("Index", "BreakDownMng")',
+            nextUrl: '@Url.Action("Edit", "BreakDownMng")/'
+        }
+    </script>
+    <script type="text/javascript" src="~/Views/BreakDownMng/init.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Views/BreakDownMng/service.js?v=@guid"></script>
+}

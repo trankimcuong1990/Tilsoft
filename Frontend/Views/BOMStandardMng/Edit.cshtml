@@ -1,0 +1,475 @@
+﻿@{
+    ViewBag.Title = "BOM";
+    ViewBag.Module = "BOM";
+    string productionProcessID = Request.Params["productionProcessID"];   
+}
+
+<style>
+    .modal {
+        top: 110px !important;
+    }
+
+    .piece {
+        background-color: #70eef2
+    }
+
+    .component {
+        background-color: #f8e3d7
+    }
+
+    .tilsoft-table .tilsoft-table-body {
+        height: auto !important;
+        max-height: none
+    }
+
+    .missing-unit {
+        background-color: #f20d0d
+    }
+
+</style>
+
+<form class="row" name="editForm">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-search-filter" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <ul class="nav nav-tabs pull-left in">
+                    <li class="active">
+                        <a data-toggle="tab" href="#tabGeneral" name="gtab"> <span> <i class="fa fa-database"></i> General </span> </a>
+                    </li>
+                    <li>
+                        <a data-toggle="tab" href="#tabSummary" ng-click="event.getWorkOrderByBOMStandardID();"> <span> <i class="fa fa-database"></i> Summary WorkOrder </span> </a>
+                    </li>
+                    <li>
+                        <a data-toggle="tab" href="#tabApply" ng-click="event.loadDataApplyBOMStandardID();"> <span> <i class="fa fa-database"></i> Apply for WorkOrder </span> </a>
+                    </li>
+                </ul>
+            </header>
+            <div>
+                <div class="widget-body">
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="tabGeneral">
+                            <div class="smart-form">
+                                <div class="row">
+                                    <section class="col col-sm-12">
+                                        <h2><i class="fa fa-filter"></i> Filters by Price</h2>
+                                        <hr style="margin-top: 5px;" />
+                                    </section>
+                                    <section class="col col-sm-1">
+                                        <label>
+                                            <label>Year</label>
+                                            <em class="note note-error" ng-show="(selection.yearValue == null || selection.yearValue == '')">(Required)</em>
+                                        </label>
+                                        <label class="input">
+                                            <select id="yearID" name="yearID" style="height: 30px;" class="form-control" ng-model="selection.yearValue" ng-options="item.yearID as item.yearValue for item in supportYear" ng-change="method.getMonth()">
+                                                <option value=""></option>
+                                            </select>
+                                        </label>
+                                    </section>
+                                    <section class="col col-sm-1">
+                                        <label>
+                                            <label>Month</label>
+                                            <em class="note note-error" ng-show="(selection.monthValue == null || selection.monthValue == '')">(Required)</em>
+                                        </label>
+                                        <label class="input">
+                                            <select id="monthID" name="monthID" style="height: 30px;" class="form-control" ng-model="selection.monthValue" ng-options="item.monthID as item.monthValue for item in supportMonth" required>
+                                                <option value=""></option>
+                                            </select>
+                                        </label>
+                                    </section>
+                                    <section class="col col-sm-1">
+                                        <label>
+                                            <label>Price Locked </label>
+                                        </label>
+                                        <label class="input">
+                                            <select class="form-control" style="height: 30px;" ng-model="selection.isLocked" ng-options="lock.isLocked as lock.name for lock in listLock">
+                                                <option value=""></option>
+                                            </select>
+                                        </label>
+                                    </section>
+                                    <section class="col col-sm-2">
+                                        <label>&nbsp;</label>
+                                        <label class="input">
+                                            <a style="text-align: left; height:33px" href="javascript:void(0)" class="btn btn-default btn-sm" ng-click="event.load()"><i class="fa fa-search"></i> Search</a>
+                                        </label>
+                                    </section>
+                                    <section class="col col-lg-12">
+                                        <h2><i class="fa fa-database"></i> BOM Infomation</h2>
+                                        <hr style="margin-top: 5px;" />
+                                    </section>
+                                    <section class="col col-sm-12">
+                                        <label>OP Sequence</label>
+                                        <label class="input">
+                                            <input type="text" class="form-control" style="font-size: 12px; font-family: Arial; height: 30px;" readonly ng-model="data.opSequenceNM" />
+                                        </label>
+                                    </section>
+                                    <section class="col col-sm-12">
+                                        <div class="tilsoft-table">
+                                            <div class="tilsoft-table-body" style="margin-top:0px;width:100%;">
+                                                <table>
+                                                    <tr>
+                                                        <th style="width:30px"></th>
+                                                        <th style="width:105px"></th>
+                                                        <th style="width:70px">Type</th>
+                                                        <th style="width:210px">Code</th>
+                                                        <th>Name</th>
+                                                        <th style="width:70px">Norm</th>
+                                                        <th style="width:80px">Price</th>
+                                                        <th style="width:80px">Total Price</th>
+                                                        <th style="width:70px">Actual Qnt</th>
+                                                        <th style="width:60px">Unit</th>
+                                                        <th style="width:70px">Work Center</th>
+                                                        <th style="width:100px">Team</th>
+                                                    </tr>
+                                                    <tr>
+                                                        <td colspan="13" style="font-size: 12px;"><b>{{data.productArticleCode}} ({{data.productDescription}}) </b></td>
+                                                    </tr>
+                                                    <tbody ng-repeat="pItem in bomList | filter : {isDeleted : false}">
+                                                        <tr class="{{pItem.productionItemTypeID==1?'component':''}} {{pItem.productionItemTypeID==3?'piece':''}}">
+                                                            <td style="font-size: 12px;">{{pItem.pieceIndex}}</td>
+                                                            <td style="font-size: 12px;text-align:right">
+                                                                <span ng-show="pItem.productionItemTypeID!=2&&pItem.opSequenceDetailID">
+                                                                    <a ng-click="event.addNodeByBOMID(pItem.bomStandardID)" href="#" class="btn btn-primary btn-xs">Add</a>
+                                                                    <a ng-click="event.editNodeByBOMID(pItem.bomStandardID)" href="#" class="btn btn-warning btn-xs">Edit</a>
+                                                                    <a ng-click="event.deleteNodeByBOMID(pItem.bomStandardID)" href="#" class="btn btn-danger btn-xs">Del</a>
+                                                                </span>
+                                                                <span ng-show="pItem.productionItemTypeID==2">
+                                                                    <a ng-click="event.editNodeByBOMID(pItem.bomStandardID)" href="#" class="btn btn-warning btn-xs">Edit</a>
+                                                                    <a ng-click="event.deleteNodeByBOMID(pItem.bomStandardID)" href="#" class="btn btn-danger btn-xs">Del</a>
+                                                                </span>
+                                                            </td>
+                                                            <td style="font-size: 12px;text-align:{{pItem.productionItemTypeNM=='Material'?'right':'left'}}">{{pItem.productionItemTypeNM}}</td>
+                                                            <td style="font-size: 12px;">{{pItem.productionItemUD}}</td>
+                                                            <td style="font-size: 12px;">
+                                                                {{pItem.productionItemNM}}
+                                                                <div class="note" ng-if="pItem.productionItemTypeID==2">
+                                                                    {{pItem.description}}
+                                                                </div>
+                                                            </td>
+                                                            <td style="font-size: 12px;text-align:right">{{pItem.qtyByUnit | number : 2}}</td>
+                                                            <td style="font-size: 12px;text-align: right">{{pItem.price | number : 2}}</td>
+                                                            <td style="font-size: 12px;text-align:right">
+                                                                <span ng-if="(pItem.price != null && pItem.price != '') && (pItem.qtyByUnit != null && pItem.qtyByUnit != '')">{{pItem.price * pItem.qtyByUnit | number : 2}}</span>
+                                                                <span ng-if="(pItem.price == null || pItem.price == '' ) && (pItem.qtyByUnit == null || pItem.qtyByUnit == '')"></span>
+                                                            </td>
+                                                            <td style="font-size: 12px;text-align:right">{{pItem.issuedQnt | number : 2}}</td>
+                                                            <td style="font-size: 12px;" ng-class="pItem.unitID?'':'missing-unit'">
+                                                                {{pItem.unitNM}}
+                                                            </td>
+                                                            <td style="font-size: 12px;">{{pItem.workCenterNM}}</td>
+                                                            <td style="font-size: 12px;">{{pItem.productionTeamNM}}</td>
+                                                        </tr>
+                                                    </tbody>
+                                                    <tr ng-if="data.bomdtOs.length>0">
+                                                        <td colspan="2" style="font-size: 12px;"><a class="btn btn-primary btn-xs" href="@Url.Action("EditProductionProcess", "BOMStandardMng")/{{data.productionProcessID}}">Edit Production Info</a></td>
+                                                        <td colspan="7" style="font-size: 12px;"></td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </section>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="tabSummary" class="tab-pane">
+                            <div class="smart-form">
+                                <div class="row">
+                                    <section class="col col-sm-2" ng-repeat="wItem in workOrders">
+                                        <h2>Season {{wItem.season}}</h2>
+                                        <hr />
+                                        <label class="label" ng-repeat="dItem in wItem.workOrders">
+                                            <i class="fa fa-square font-11"></i> <a href="@Url.Action("Edit", "WorkOrder")/{{dItem.workOrderID}}" target="_blank">{{dItem.workOrderUD}}</a>
+                                        </label>
+                                    </section>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="tabApply" class="tab-pane">
+                            <div class="smart-form">
+                                <div class="row">
+                                    <section class="col col-sm-6">
+                                        <h2>List WorkOrder(s) (Confirm Frame, Confirm All)</h2>
+                                        <hr />
+                                        <div id="showWorkOrderApply" class="tilsoft-table-wrapper" avs-scrollable-table style="margin-top: 5px;">
+                                            <div class="tilsoft-table">
+                                                <div class="tilsoft-table-header" style="width: 480px;">
+                                                    <div style="width: 50px;"></div>
+                                                    <div style="width: 120px;">Work Order</div>
+                                                    <div style="width: 70px;">Client</div>
+                                                    <div style="width: 70px;">PI</div>
+                                                    <div style="width: 65px;">Qnt</div>
+                                                    <div style="width: 95px;">Status</div>
+                                                    <div style="border-bottom: none;"></div>
+                                                </div>
+                                                <div class="tilsoft-table-body" style="width: 480px;">
+                                                    <table>
+                                                        <tbody>
+                                                            <tr ng-repeat="woaItem in workOrderApplys">
+                                                                <td style="width: 49px; text-align: center;">
+                                                                    <input type="checkbox" ng-model="woaItem.isSelected" />
+                                                                </td>
+                                                                <td style="width: 120px; text-align: center; font-size: 12px;">{{woaItem.workOrderUD}}</td>
+                                                                <td style="width: 70px; text-align: center; font-size: 12px;">{{woaItem.clientUD}}</td>
+                                                                <td style="width: 70px; text-align: center; font-size: 12px;">{{woaItem.proformaInvoiceNo}}</td>
+                                                                <td style="width: 65px; text-align: right; font-size: 12px;">{{woaItem.quantity|number}}</td>
+                                                                <td style="width: 95px; text-align: center; font-size: 12px;">{{woaItem.workOrderStatusNM}}</td>
+                                                                <td style="border-bottom: none;"></td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div id="pendWorkOrderApply">
+                                            <i class="fa fa-spin fa-refresh"></i> LOADING ...
+                                        </div>
+                                    </section>
+                                    <section class="col col-sm-4">
+                                        <h2>List WorkCenter(s) of BOM Standard</h2>
+                                        <hr />
+                                        <div id="showWorkCenter" class="tilsoft-table-wrapper" avs-scrollable-table style="margin-top: 5px;">
+                                            <div class="tilsoft-table">
+                                                <div class="tilsoft-table-header" style="width: 180px;">
+                                                    <div style="width: 50px;"></div>
+                                                    <div style="width: 120px;">Work Center</div>
+                                                    <div style="border-bottom: none;"></div>
+                                                </div>
+                                                <div class="tilsoft-table-body" style="width: 180px;">
+                                                    <table>
+                                                        <tbody>
+                                                            <tr ng-repeat="wcItem in workCenters">
+                                                                <td style="width: 49px; text-align: center;">
+                                                                    <input type="checkbox" ng-model="wcItem.isSelected" />
+                                                                </td>
+                                                                <td style="width: 120px; text-align: center; font-size: 12px;">{{wcItem.workCenterNM}}</td>
+                                                                <td style="border-bottom: none;"></td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div id="pendWorkCenter">
+                                            <i class="fa fa-spin fa-refresh"></i> LOADING ...
+                                        </div>
+                                    </section>
+                                </div>
+                                <div class="row">
+                                    <section class="col col-sm-12 pull-right">
+                                        <a href="javascript:void(0);" class="btn btn-default btn-sm btn-warning" ng-click="event.applyBOMStandard(2);"><i class="fa fa-refresh"></i> Replace</a>
+                                        <a href="javascript:void(0);" class="btn btn-default btn-sm btn-success" ng-click="event.applyBOMStandard(1);"><i class="fa fa-plus"></i> Add(New)</a>
+                                        <a href="javascript:void(0);" class="btn btn-default btn-sm btn-primary" ng-click="event.applyBOMStandard(3);"><i class="fa fa-pencil"></i> Update</a>
+                                    </section>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+
+    <div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="frmEditNodeForm_ListViewFormat" class="modal fade" style="display: none;z-index:50" data-backdrop="static">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button aria-hidden="true" data-dismiss="modal" class="close" type="button">
+                        ×
+                    </button>
+                    <h4 id="myModalLabel" class="modal-title">Edit BOM</h4>
+                </div>
+                <div class="modal-body smart-form">
+                    <fieldset>
+                        <div class="row">
+                            <div class="row">
+                                <section class="col col-lg-12">
+                                    <label>Product Name</label>
+                                    <input id="productItem" type="text" ng-model="editNodeForm_ListViewFormat.copyOfcurrentNode.productionItemNM" style="width:100%" class="form-control" placeholder="Enter text to search product" />
+                                </section>
+                                <section class="col col-lg-6">
+                                    <label>Product Code</label>
+                                    <span class="form-control">{{editNodeForm_ListViewFormat.copyOfcurrentNode.productionItemUD}}</span>
+                                </section>
+                                <section class="col col-lg-2">
+                                    <label>Product Type</label>
+                                    <span class="form-control">{{editNodeForm_ListViewFormat.copyOfcurrentNode.productionItemTypeNM}}</span>
+                                </section>
+                                <section class="col col-lg-2">
+                                    <label>Unit</label>
+                                    <select ng-model="editNodeForm_ListViewFormat.copyOfcurrentNode.unitID" ng-options="unitItem.unitID as unitItem.unitNM for unitItem in editNodeForm_ListViewFormat.copyOfcurrentNode.productionItemUnitDTOs" class="form-control">
+                                        <option value=""></option>
+                                    </select>
+                                </section>
+                                <section class="col col-lg-2">
+                                    <label>Norm</label>
+                                    <input ng-model="editNodeForm_ListViewFormat.copyOfcurrentNode.qtyByUnit" class="form-control" style="text-align:right" />
+                                </section>
+                            </div>
+
+                            <div class="row" ng-show="editNodeForm_ListViewFormat.copyOfcurrentNode.productionItemTypeID==1||editNodeForm_ListViewFormat.copyOfcurrentNode.productionItemTypeID==2">
+                                <section class="col col-lg-12" ng-show="editNodeForm_ListViewFormat.copyOfcurrentNode.productionItemTypeID==2">
+                                    <label>Remark</label>
+                                    <input ng-model="editNodeForm_ListViewFormat.copyOfcurrentNode.description" class="form-control" type="text"/>
+                                </section>
+                            </div>
+
+                            <div class="row" ng-show="editNodeForm_ListViewFormat.copyOfcurrentNode.productionItemTypeID==1||editNodeForm_ListViewFormat.copyOfcurrentNode.productionItemTypeID==3">
+                                <section class="col col-lg-3" >
+                                    <label>Work Center</label>
+                                    <select class="form-control opsequence" ng-model="editNodeForm_ListViewFormat.copyOfcurrentNode.opSequenceDetailID" ng-options="item.opSequenceDetailID as item.opSequenceDetailNM for item in opSequenceDetails | filter : {opSequenceID:data.opSequenceID}" ng-change="editNodeForm_ListViewFormat.event.workCenterSelected(editNodeForm_ListViewFormat.copyOfcurrentNode.opSequenceDetailID)">
+                                        <option value=""></option>
+                                    </select>
+                                </section>
+                                <section class="col col-lg-5">
+                                    <label>Production Team</label>
+                                    <select class="form-control opsequence" ng-model="editNodeForm_ListViewFormat.copyOfcurrentNode.productionTeamID" ng-options="item.productionTeamID as item.productionTeamNM for item in productionTeams | filter : {workCenterID : editNodeForm_ListViewFormat.copyOfcurrentNode.workCenterID}" ng-change="editNodeForm_ListViewFormat.event.productionTeamSelected(editNodeForm_ListViewFormat.copyOfcurrentNode.productionTeamID)">
+                                        <option value=""></option>
+                                    </select>
+                                </section>
+                                <section class="col col-lg-2">
+                                    <label>Operating Time</label>
+                                    <input ng-model="editNodeForm_ListViewFormat.copyOfcurrentNode.operatingTime" class="form-control"  style="text-align:right"/>
+                                </section>
+                                <section class="col col-lg-2">
+                                    <label>Default Cost</label>
+                                    <input ng-model="editNodeForm_ListViewFormat.copyOfcurrentNode.defaultCost" class="form-control"  style="text-align:right"/>
+                                </section>
+                            </div>
+
+                        </div>
+                    </fieldset>
+                </div>
+                <div class="modal-footer">
+                    <button data-dismiss="modal" class="btn btn-default" type="button" ng-click="editNodeForm_ListViewFormat.event.cancel()">
+                        Cancel
+                    </button>
+                    <button class="btn btn-primary" type="button" ng-click="editNodeForm_ListViewFormat.event.ok()">
+                        OK
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="frmProductionProcess" class="modal fade" style="display: none;z-index:50" data-backdrop="static">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button aria-hidden="true" data-dismiss="modal" class="close" type="button">
+                        ×
+                    </button>
+                    <h4 id="myModalLabel" class="modal-title">BOM Standard Same Model</h4>
+                </div>
+                <div class="row">
+                    <div class="col col-lg-12">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-body" style="margin-top:0px;width:100%;height:auto">
+                                <table>
+                                    <tr>
+                                        <th style="width:30px"></th>
+                                        <th style="width:30px">De fault</th>
+                                        <th style="width:50px">Model</th>
+                                        <th style="width:70px">Frame</th>
+                                        <th style="width:110px">ArticleCode</th>
+                                        <th style="">Description</th>
+                                    </tr>
+                                    <tbody ng-repeat="item in productionProcessForm.productionProcesses">
+                                        <tr>
+                                            <td style="text-align:center">
+                                                <a class="btn btn-primary btn-xs" target="_blank" href="@Url.Action("Edit","BOMStandardMng", new { id = UrlParameter.Optional })/{{item.bomStandardID}}">&nbsp;View BOM</a>
+                                                <a class="btn btn-warning btn-xs" target="_blank" href="javascript:void(0)" style="margin-top:3px" ng-click="productionProcessForm.event.copyBOM(item.productionProcessID)">Copy BOM</a>
+                                            </td>
+                                            <td style="text-align:center"><input type="checkbox" ng-model="item.isDefaultOfModel" ng-disabled="true" /></td>
+                                            <td style="text-align:center">{{item.modelUD}}</td>
+                                            <td>{{item.frameMaterialNM}}</td>
+                                            <td>{{item.productArticleCode}}</td>
+                                            <td>{{item.productDescription}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+                <div class="modal-footer">
+                    <button data-dismiss="modal" class="btn btn-default" type="button" ng-click="workOrderForm.event.cancel()">
+                        Cancel
+                    </button>
+                    <button class="btn btn-primary" type="button" ng-click="workOrderForm.event.ok()">
+                        OK
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</form>
+
+@section FormAction {
+<ul id="sparks">
+    <li class="sparks-info">
+        <a href="@Url.Action("Index", "BOMStandardMng")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+    </li>
+
+    <li class="sparks-info">
+        <a href="#" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="event.update()"><i class="fa fa-save"></i></a>
+    </li>
+
+    <li class="sparks-info">
+        <a href="#" class="btn btn-default {{data.bomStandardID>0?'':'disabled'}}" title="Set default" style="color: #141fe6;" ng-click="event.setBOMStandardDefault($event)"><i class="fa fa-check"></i></a>
+    </li>
+
+    <li class="sparks-info">
+        <a href="#" class="btn btn-default" title="Import to from excel" ng-click="importFromExcel.load()" style="color: #2fbf13"><i class="fa fa-file-excel-o"></i></a>
+    </li>
+
+    <li class="sparks-info">
+        <a href="#" class="btn btn-default" title="Create import template" ng-click="event.createImportTemplate()" style="color: #ff0000"><i class="fa fa-file-excel-o"></i></a>
+    </li>
+
+    <li class="sparks-info">
+        <a href="#" class="btn btn-default" title="Create BOM template" ng-click="event.createBOMTemplateData(null)" style="color: #141fe6"><i class="fa fa-database"></i></a>
+    </li>
+
+    <li class="sparks-info">
+        <a href="#" class="btn btn-default" title="Export all bom to excel" ng-click="event.exportBOMStandardToExcel()" style="color: #ff0000"><i class="fa fa-file-excel-o"></i></a>
+    </li>
+
+    <li class="sparks-info">
+        <a href="#" class="btn btn-default" title="Show another BOM" ng-click="productionProcessForm.event.load()" style="color: #ff6a00"><i class="fa fa-plus"></i></a>
+    </li>
+
+    <li class="sparks-info">
+        <a href="#" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="Create Breakdown" ng-click="event.createBreakdown(data.productionProcessID)" ng-disabled="data.checkBreakdown == false"><i class="glyphicon glyphicon-link"></i> Create Breakdown</a>
+    </li>
+</ul>
+}
+@section pagejs {
+    <script src="~/Views/BOMStandardMng/edit.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/bomstandard/',
+            supportServiceUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/support/',
+            token: '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]',
+
+            backendReportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]',
+            refreshUrl: '@Url.Action("Edit", "BOMStandardMng", new { id = UrlParameter.Optional })/',
+            indexUrl: '@Url.Action("Index", "BOMStandardMng")',
+
+            id: @ViewBag.ID,
+            errMsg: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED',
+
+            productionProcessID: '@productionProcessID',
+            getProductionItemUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/support/' + 'getProductionItem',
+            breakdownServiceUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/breakdown/',
+            breakdownURL: '@Url.Action("Edit", "BreakDownMng", new { id = UrlParameter.Optional })'
+        }
+    </script>
+    <script src="~/Angular/app/jsonService2.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/BOMStandardMng/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    
+
+}
+

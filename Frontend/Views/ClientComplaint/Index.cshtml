@@ -1,0 +1,203 @@
+﻿@{
+    ViewBag.Title = "Search Client Complaint";
+    ViewBag.Module = "Search Client Complaint";
+    ViewBag.Icon = "fa-search";
+
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+
+    string userManualUrl = string.Empty;
+    if (System.IO.File.Exists(Server.MapPath("~/UserManual/" + ViewBag.ModuleCode + ".pdf")))
+    {
+        userManualUrl = "/UserManual/" + ViewBag.ModuleCode + ".pdf";
+    }
+}
+
+<div class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <!--BEGIN: search filters -->
+        <div class="jarviswidget jarviswidget-color-darken jarviswidget-sortable" id="wid-id-search-filter" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false" role="widget">
+            <header role="heading">
+                <div class="jarviswidget-ctrls" role="menu">   <a href="javascript:void(0);" class="button-icon jarviswidget-toggle-btn" rel="tooltip" title="" data-placement="bottom" data-original-title="Collapse"><i class="fa fa-minus "></i></a>  </div>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Search Filters</h2>
+                <span class="jarviswidget-loader"><i class="fa fa-refresh fa-spin"></i></span>
+            </header>
+
+            <div role="content">
+                <div class="widget-body">
+                    <div class="smart-form">
+                        <fieldset>
+                            <div class="row">
+                                <section class="col col-3">
+                                    <label class="label">Complaint Number</label>
+                                    <label class="input">
+                                        <input type="text" ng-model="filters.complaintNumber" placeholder="" />
+                                    </label>
+                                </section>
+
+                                <section class="col col-3">
+                                    <label class="label">Client Code</label>
+                                    <label class="input">
+                                        <input type="text" ng-model="filters.clientUD" placeholder="" />
+                                    </label>
+                                </section>
+
+                                <section class="col col-3">
+                                    <label class="label">Client Name</label>
+                                    <label class="input">
+                                        <input type="text" ng-model="filters.clientNM" placeholder="" />
+                                    </label>
+                                </section>
+
+                                <section class="col col-3">
+                                    <label class="label">Sale Manager</label>
+                                    <label class="select">
+                                        <select ng-model="filters.saleID" ng-options="sale.saleID as sale.saleNM for sale in sales">
+                                            <option value=""></option>
+                                        </select>
+                                        <i></i>
+                                    </label>
+                                </section>
+
+                                <section class="col col-3">
+                                    <label class="label">Season</label>
+                                    <label class="select">
+                                        <select ng-model="filters.season" ng-options="season.seasonValue as season.seasonText for season in seasons">
+                                            <option value=""></option>
+                                        </select>
+                                        <i></i>
+                                    </label>
+                                </section>
+
+                                <section class="col col-3">
+                                    <label class="label">Complaint Type</label>
+                                    <label class="select">
+                                        <select ng-model="filters.complaintType" ng-options="complaintType.entryValue as complaintType.entryText for complaintType in complaintTypes">
+                                            <option value=""></option>
+                                        </select>
+                                        <i></i>
+                                    </label>
+                                </section>
+
+                                <section class="col col-3">
+                                    <label class="label">Status</label>
+                                    <label class="select">
+                                        <select ng-model="filters.complaintStatus" ng-options="complaintStatus.entryValue as complaintStatus.entryText for complaintStatus in complaintStatuses">
+                                            <option value=""></option>
+                                        </select>
+                                        <i></i>
+                                    </label>
+                                </section>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--END: search filters -->
+        <!--BEGIN: search results -->
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-1" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Search Result</h2>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div avs-scroll grid-handler="gridHandler" class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header" style="width: 1800px;">
+                                <div style="width: 80px;"></div>
+                                <div style="width: 100px;" data-colname="receivedDate">Date Received</div>
+                                <div style="width: 100px;" data-colname="clientComplaintID">Complaint Number</div>
+                                <div style="width: 100px;" data-colname="yearSeason">Season</div>
+                                <div style="width: 100px;" data-colname="clientUD">Client Code</div>
+                                <div style="width: 220px;" data-colname="clientNM">Client Name</div>
+                                <div style="width: 120px;">Contact Person</div>
+                                <div style="width: 120px;">Sale Manager</div>
+                                <div style="width: 140px;">Status</div>
+                                <div style="width: 300px;">INFO</div>
+                                <div style="width: 120px;">COMPLAINT TYPE</div>
+                                <div style="text-align: center;">Updated By</div>
+                            </div>
+
+                            <div class="tilsoft-table-body" style="width: 1800px;">
+                                <table>
+                                    <tr ng-repeat="item in data">
+                                        <td style="text-align: center; width: 80px; vertical-align: middle;">
+                                            <a href='@Url.Action("Edit", "ClientComplaint")/{{item.clientComplaintID}}?clientId={{item.clientID}}&season={{item.yearSeason}}' title="Edit" target="_blank"><i class="fa fa-pencil-square grid-button"></i></a>
+                                            <a href="javascript:void(0)" ng-click="event.deleteItem(item.clientComplaintID, $event)" title="Delete"><i class="fa fa-times-circle grid-button"></i></a>
+                                        </td>
+                                        <td style="width: 100px; vertical-align: middle;text-align:center;">{{item.receivedDate}}</td>
+                                        <td style="width: 100px; vertical-align: middle;text-align:center;">{{item.complaintNumber}}</td>
+                                        <td style="width: 100px; vertical-align: middle;text-align:center;">{{item.yearSeason}}</td>
+                                        <td style="width: 100px; vertical-align: middle;text-align:center;">{{item.clientUD}}</td>
+                                        <td style="width: 220px; vertical-align: middle;text-align:center;">{{item.clientNM}}</td>
+                                        <td style="width: 120px; vertical-align: middle;text-align:center;">{{item.contactPerson}}</td>
+                                        <td style="width: 120px; vertical-align: middle;text-align:center;">{{item.saleNM}}</td>
+                                        <td style="width: 140px; vertical-align: middle;text-align:center;text-transform:uppercase;">{{event.getComplaintStatus(item.complaintStatus)}}</td>
+                                        <td style="width: 300px; vertical-align: middle;">
+                                            <strong>{{item.article}}</strong>
+                                            <p>{{item.complaintDescription}}</p>
+                                        </td>
+                                        <td style="width: 120px; vertical-align: middle;text-align:center;text-transform:uppercase;">{{event.getComplaintType(item.complaintType)}}</td>
+                                        <td style="vertical-align: middle; text-align: center;">
+                                            <a ng-if="item.updatorID" href='@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.updatorID}}' data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                <i class="fa fa-user"></i> {{item.updatorFullName}}
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <span>Found: {{totalRows}} record(s)</span>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction {
+<ul id="sparks">
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default search-filter" title="Search" ng-click="event.search()"><i class="fa fa-search"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default" title="Refresh" ng-click="event.reload()"><i class="fa fa-refresh"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" href='@Url.Action("Init", "ClientComplaint")' target="_blank" title="New"><i class="fa fa-file-o"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default" title="Export excel" ng-click="event.exportExcel()" style="color: #31B404"><i class="fa fa-file-excel-o"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default disabled" title="Print"><i class="fa fa-print"></i></a>
+    </li>
+    @if (!string.IsNullOrEmpty(userManualUrl))
+    {
+        <li class="sparks-info">
+            <a target="_blank" href="@userManualUrl" class="btn btn-default" title="Help"><i class="fa fa-info"></i></a>
+        </li>
+    }
+</ul>
+}
+
+@section pagejs {
+    <script type="text/javascript">
+        var context = {
+            backUrl: '@Url.Action("Index", "ClientComplaint")',
+            serviceUrl: '@(serviceRoot)api/clientcomplaints/',
+            supportServiceUrl: '@(serviceRoot)api/support/',
+            reportUrl : '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]' ,
+
+            token: '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]',
+            pageSize: 50,
+            cookieId: '@HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString()'
+        };
+    </script>
+    <script src="~/Angular/app/clientComplaint/index.js?v=@guid" type="text/javascript"></script>
+    <script src="~/Angular/app/jsonService2.js?v=@guid" type="text/javascript"></script>
+    <script src="~/Angular/app/clientComplaint/service.js?v=@guid" type="text/javascript"></script>
+}

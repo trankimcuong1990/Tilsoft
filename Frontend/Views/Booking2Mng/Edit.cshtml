@@ -1,0 +1,959 @@
+﻿@{
+    ViewBag.Icon = "fa-pencil-square-o";
+    if (ViewBag.ID == 0)
+    {
+        ViewBag.Title = "Create new booking";
+    }
+    else
+    {
+        ViewBag.Title = "Edit booking";
+    }
+    string userManualUrl = string.Empty;
+    if (System.IO.File.Exists(Server.MapPath("~/UserManual/" + ViewBag.ModuleCode + ".pdf")))
+    {
+        userManualUrl = "/UserManual/" + ViewBag.ModuleCode + ".pdf";
+    }
+    int clientId = 0;
+    int supplierId = 0;
+    string season = string.Empty;
+    if (Request.Params["c"] != null)
+    {
+        clientId = Convert.ToInt32(Request.Params["c"]);
+    }
+    if (Request.Params["s"] != null)
+    {
+        supplierId = Convert.ToInt32(Request.Params["s"]);
+    }
+    if (Request.Params["se"] != null)
+    {
+        season = Request.Params["se"].ToString();
+    }
+    Frontend.APIDTO.APIUserInformation userInfo = (Frontend.APIDTO.APIUserInformation)Session[Frontend.Customize.Common.ProjectDefinition.USER_INFO_SESSION];
+}
+
+<style>
+    .custom-pagination {
+        display: none;
+    }
+</style>
+
+<form class="row" name="editForm" id="main-form">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-0" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <ul class="nav nav-tabs pull-left in">
+                    <li class="active">
+                        <a data-toggle="tab" href="#tabGeneral"> <span class="hidden-mobile hidden-tablet"> General Information </span> </a>
+                    </li>
+                    <li>
+                        <a data-toggle="tab" href="#tabBL"> <span class="hidden-mobile hidden-tablet"> B/L Information </span> </a>
+                    </li>
+                    <li>
+                        <a data-toggle="tab" href="#tabContainer"> <span class="hidden-mobile hidden-tablet"> Container Detail </span> </a>
+                    </li>
+                    <li>
+                        <a data-toggle="tab" href="#tabTracking"> <span class="hidden-mobile hidden-tablet"> Tracking </span> </a>
+                    </li>
+                    <li>
+                        <a data-toggle="tab" href="#tabPlanned"> <span class="hidden-mobile hidden-tablet"> Planned </span> </a>
+                    </li>
+                </ul>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="tabGeneral">
+                            <div class="smart-form">
+                                <fieldset>
+                                    <div class="row" ng-show="data.bookingID <= 0">
+                                        <section class="col col-sm-12">
+                                            <a href="javascript:void(0)" class="btn btn-default btn-xs btn-primary" ng-click="event.setDefaultShippingInstruction()">
+                                                <i class="fa fa-magic"></i> Set default information Shipping Instruction
+                                            </a>
+                                        </section>
+                                    </div>
+                                    <div class="row">
+                                        <section class="col col-3">
+                                            <label class="label">Booking Code</label>
+                                            <label class="input">
+                                                <span class="form-control">{{data.bookingUD}}</span>
+                                            </label>
+                                        </section>
+                                        <section class="col col-3">
+                                            <label class="label">Confirmation No</label>
+                                            <label class="input">
+                                                <input type="text" ng-model="data.confirmationNo" />
+                                            </label>
+                                        </section>
+                                        <section class="col col-2">
+                                            <label class="label">Booking Date</label>
+                                            <label class="input">
+                                                <input type="text" class="datepicker" ng-model="data.bookingDate" data-dateformat="dd/mm/yy" />
+                                                <i class="icon-append fa fa-calendar"></i>
+                                            </label>
+                                        </section>
+                                        <section class="col col-2">
+                                            <label class="label">Season</label>
+                                            <label class="input">
+                                                <span class="form-control">{{data.season}}</span>
+                                            </label>
+                                        </section>
+                                        <section class="col col-2">
+                                            <label class="label">Client</label>
+                                            <label class="input">
+                                                <span class="form-control">{{data.clientUD}}</span>
+                                            </label>
+                                        </section>
+                                    </div>
+                                    <div class="row">
+                                        <section class="col col-6">
+                                            <section>
+                                                <label class="label">Supplier</label>
+                                                <label class="input">
+                                                    <span class="form-control">{{data.supplierNM}}</span>
+                                                </label>
+                                            </section>
+                                            <section>
+                                                <label class="label">Shipper</label>
+                                                <label class="textarea">
+                                                    <textarea rows="5" ng-model="data.shipperInfo"></textarea>
+                                                </label>
+                                            </section>
+                                            <section>
+                                                <label class="label">Notified Party 1</label>
+                                                <label class="textarea">
+                                                    <textarea rows="5" ng-model="data.notifyParty1Info"></textarea>
+                                                </label>
+                                            </section>
+                                            <section>
+                                                <label class="label">Notified Party 2</label>
+                                                <label class="textarea">
+                                                    <textarea rows="5" ng-model="data.notifyParty2Info"></textarea>
+                                                </label>
+                                            </section>
+                                        </section>
+                                        <section class="col col-6">
+                                            <section>
+                                                <label class="label">Forwarder</label>
+                                                <label class="select">
+                                                    <select id="forwarderBox" ng-model="data.forwarderID" ng-options="forwarder.forwarderID as forwarder.forwarderNM for forwarder in forwarders | orderBy : 'forwarderNM'">
+                                                        <option value=""></option>
+                                                    </select>
+                                                </label>
+                                            </section>
+                                            <section>
+                                                <label class="label">Forwarder Info</label>
+                                                <label class="textarea">
+                                                    <textarea rows="5" ng-model="data.forwarderInfo"></textarea>
+                                                </label>
+                                            </section>
+                                            <section>
+                                                <label class="label">Consignee</label>
+                                                <label class="textarea">
+                                                    <textarea rows="5" ng-model="data.consigneeInfo"></textarea>
+                                                </label>
+                                            </section>
+                                            <section>
+                                                <label class="label">&nbsp;</label>
+                                                <div class="note" ng-if="data.updatorName"><strong>Updated By</strong>: {{data.updatorName}} on {{data.updatedDate}}</div>
+                                                <div class="note" ng-if="data.confirmerName"><strong>Confirmed By</strong>: {{data.confirmerName}} on {{data.confirmedDate}}</div>
+                                            </section>
+                                        </section>
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="tabBL">
+                            <div class="smart-form">
+                                <fieldset>
+                                    <div class="row" ng-show="data.bookingID <= 0">
+                                        <section class="col col-sm-12">
+                                            <a href="javascript:void(0)" class="btn btn-default btn-xs btn-primary" ng-click="event.setDefaultShippingInstruction()">
+                                                <i class="fa fa-magic"></i> Set default information Shipping Instruction
+                                            </a>
+                                        </section>
+                                    </div>
+                                    <div class="row">
+                                        <section class="col col-3">
+                                            <label class="label">B/L</label>
+                                            <label class="input">
+                                                <input type="text" ng-model="data.blNo" />
+                                            </label>
+                                        </section>
+                                        <section class="col col-3">
+                                            <label class="label">
+                                                BL File
+                                            </label>
+                                            <label class="input">
+                                                <span class="form-control">
+                                                    {{data.friendlyName}}
+                                                    <div style="position: absolute; right: 5px; top: 5px;">
+                                                        <a ng-disabled="!data.fileLocation" href="javascript:void(0);" class="btn btn-primary btn-xs" style="font-size: 11px;" ng-click="event.downloadFile()">Download</a>
+                                                        <a href="javascript:void(0);" class="btn btn-primary btn-xs" style="font-size: 11px;" ng-click="event.changeFile()">Change</a>
+                                                        <a ng-disabled="!data.fileLocation" href="javascript:void(0);" class="btn btn-danger btn-xs" style="font-size: 11px;" ng-click="event.removeFile()">Remove</a>
+                                                    </div>
+                                                </span>
+                                            </label>
+                                        </section>
+
+                                        <section class="col col-1">
+                                            <label class="label">&nbsp;</label>
+                                            <label class="checkbox">
+                                                <input type="checkbox" ng-model="data.isblFileNA">
+                                                <i></i>N/A
+                                            </label>
+                                        </section>
+
+                                        <section class="col col-3">
+                                            <label class="label">
+                                                EUTR File
+                                            </label>
+                                            <label class="input">
+                                                <span class="form-control">
+                                                    {{data.eutrFriendlyName}}
+                                                    <div style="position: absolute; right: 5px; top: 5px;">
+                                                        <a ng-disabled="!data.eutrFileLocation" href="javascript:void(0);" class="btn btn-primary btn-xs" style="font-size: 11px;" ng-click="event.downloadEUTRFile()">Download</a>
+                                                        <a href="javascript:void(0);" class="btn btn-primary btn-xs" style="font-size: 11px;" ng-click="event.changeEUTRFile()">Change</a>
+                                                        <a ng-disabled="!data.eutrFileLocation" href="javascript:void(0);" class="btn btn-danger btn-xs" style="font-size: 11px;" ng-click="event.removeEUTRFile()">Remove</a>
+                                                    </div>
+                                                </span>
+                                            </label>
+                                        </section>
+
+                                        <section class="col col-1">
+                                            <label class="label">&nbsp;</label>
+                                            <label class="checkbox">
+                                                <input type="checkbox" ng-model="data.iseutrFileNA">
+                                                <i></i>N/A
+                                            </label>
+                                        </section>
+
+                                        <section class="col col-1">
+                                            <label class="label">Status</label>
+                                            <label class="input">
+                                                <span class="form-control">{{data.statusNM}}</span>
+                                            </label>
+                                        </section>
+                                    </div>
+                                    <div class="row">
+                                        <section class="col col-2">
+                                            <label class="label">
+                                                C/O File
+                                            </label>
+                                            <label class="input">
+                                                <span class="form-control">
+                                                    {{data.coFriendlyName}}
+                                                    <div style="position: absolute; right: 5px; top: 5px;">
+                                                        <a ng-disabled="!data.coFileLocation" href="javascript:void(0);" class="btn btn-primary btn-xs" style="font-size: 11px;" ng-click="event.downloadCOFile()">Download</a>
+                                                        <a href="javascript:void(0);" class="btn btn-primary btn-xs" style="font-size: 11px;" ng-click="event.changeCOFile()">Change</a>
+                                                        <a ng-disabled="!data.coFileLocation" href="javascript:void(0);" class="btn btn-danger btn-xs" style="font-size: 11px;" ng-click="event.removeCOFile()">Remove</a>
+                                                    </div>
+                                                </span>
+                                            </label>
+                                        </section>
+
+                                        <section class="col col-1">
+                                            <label class="label">&nbsp;</label>
+                                            <label class="checkbox">
+                                                <input type="checkbox" ng-model="data.iscoFileNA">
+                                                <i></i>N/A
+                                            </label>
+                                        </section>
+
+                                        <section class="col col-2">
+                                            <label class="label">
+                                                Fumigation File
+                                            </label>
+                                            <label class="input">
+                                                <span class="form-control">
+                                                    {{data.fumigationFriendlyName}}
+                                                    <div style="position: absolute; right: 5px; top: 5px;">
+                                                        <a ng-disabled="!data.fumigationFileLocation" href="javascript:void(0);" class="btn btn-primary btn-xs" style="font-size: 11px;" ng-click="event.downloadFumigationFile()">Download</a>
+                                                        <a href="javascript:void(0);" class="btn btn-primary btn-xs" style="font-size: 11px;" ng-click="event.changeFumigationFile()">Change</a>
+                                                        <a ng-disabled="!data.fumigationFileLocation" href="javascript:void(0);" class="btn btn-danger btn-xs" style="font-size: 11px;" ng-click="event.removeFumigationFile()">Remove</a>
+                                                    </div>
+                                                </span>
+                                            </label>
+                                        </section>
+
+                                        <section class="col col-1">
+                                            <label class="label">&nbsp;</label>
+                                            <label class="checkbox">
+                                                <input type="checkbox" ng-model="data.isFumigationFileNA">
+                                                <i></i>N/A
+                                            </label>
+                                        </section>
+
+                                        <section class="col col-2">
+                                            <label class="label">
+                                                Other File
+                                            </label>
+                                            <label class="input">
+                                                <span class="form-control">
+                                                    {{data.otherFriendlyName}}
+                                                    <div style="position: absolute; right: 5px; top: 5px;">
+                                                        <a ng-disabled="!data.otherFileLocation" href="javascript:void(0);" class="btn btn-primary btn-xs" style="font-size: 11px;" ng-click="event.downloadOtherFile()">Download</a>
+                                                        <a href="javascript:void(0);" class="btn btn-primary btn-xs" style="font-size: 11px;" ng-click="event.changeOtherFile()">Change</a>
+                                                        <a ng-disabled="!data.otherFileLocation" href="javascript:void(0);" class="btn btn-danger btn-xs" style="font-size: 11px;" ng-click="event.removeOtherFile()">Remove</a>
+                                                    </div>
+                                                </span>
+                                            </label>
+                                        </section>
+
+                                        <section class="col col-1">
+                                            <label class="label">&nbsp;</label>
+                                            <label class="checkbox">
+                                                <input type="checkbox" ng-model="data.isOtherFileNA">
+                                                <i></i>N/A
+                                            </label>
+                                        </section>
+
+                                        <section class="col col-2">
+                                            <label class="label">
+                                                Confirmation  File
+                                            </label>
+                                            <label class="input">
+                                                <span class="form-control">
+                                                    {{data.confirmationFriendlyName}}
+                                                    <div style="position: absolute; right: 5px; top: 5px;">
+                                                        <a ng-disabled="!data.confirmationFileLocation" href="javascript:void(0);" class="btn btn-primary btn-xs" style="font-size: 11px;" ng-click="event.downloadConfirmationFile()">Download</a>
+                                                        <a href="javascript:void(0);" class="btn btn-primary btn-xs" style="font-size: 11px;" ng-click="event.changeConfirmationFile()">Change</a>
+                                                        <a ng-disabled="!data.confirmationFileLocation" href="javascript:void(0);" class="btn btn-danger btn-xs" style="font-size: 11px;" ng-click="event.removeConfirmationFile()">Remove</a>
+                                                    </div>
+                                                </span>
+                                            </label>
+                                        </section>
+
+                                        <section class="col col-1">
+                                            <label class="label">&nbsp;</label>
+                                            <label class="checkbox">
+                                                <input type="checkbox" ng-model="data.isConfirmationFileNA">
+                                                <i></i>N/A
+                                            </label>
+                                        </section>
+                                    </div>
+                                    <div class="row">
+                                        <section class="col col-3">
+                                            <label class="label">B/L Type</label>
+                                            <label class="input">
+                                                <input type="text" ng-model="data.originalBL" />
+                                            </label>
+                                        </section>
+                                        <section class="col col-3">
+                                            <label class="label">Feeder</label>
+                                            <label class="input">
+                                                <input type="text" ng-model="data.feeder" />
+                                            </label>
+                                        </section>
+                                        <section class="col col-3">
+                                            <label class="label">Vessel</label>
+                                            <label class="input">
+                                                <input type="text" ng-model="data.vessel" />
+                                            </label>
+                                        </section>
+                                        <section class="col col-3">
+                                            <label class="label">Cut off Date</label>
+                                            <label class="input">
+                                                <input type="text" class="datepicker" data-dateformat="dd/mm/yy" ng-model="data.cutOffDate" />
+                                                <i class="icon-append fa fa-calendar"></i>
+                                            </label>
+                                        </section>
+
+                                    </div>
+                                    <div class="row">
+                                        <section class="col col-3">
+                                            <label class="label">ETD</label>
+                                            <label class="input">
+                                                <input type="text" class="datepicker" ng-model="data.etd" data-dateformat="dd/mm/yy" />
+                                                <i class="icon-append fa fa-calendar"></i>
+                                            </label>
+                                        </section>
+                                        <section class="col col-3">
+                                            <label class="label">Port of Loading</label>
+                                            <label class="select">
+                                                <select id="polBox" ng-model="data.polid" ng-options="pol.polid as pol.poLname for pol in poLs | orderBy : 'poLname'">
+                                                    <option value=""></option>
+                                                </select>
+                                            </label>
+                                        </section>
+                                        <section class="col col-6">
+                                            <label class="label">Place of Receipt</label>
+                                            <label class="input">
+                                                <input type="text" ng-model="data.placeOfReceipt" />
+                                            </label>
+                                        </section>
+                                    </div>
+                                    <div class="row">
+                                        <section class="col col-3">
+                                            <label class="label">
+                                                ETA
+                                                <a ng-if="!data.etaConfirmerName" href="javascript:void(0);" class="btn btn-primary btn-xs" style="font-size: 8px;" ng-click="event.confirmETA(1)">Confirm</a>
+                                            </label>
+                                            <label class="input" ng-if="!data.etaConfirmerName">
+                                                <input type="text" class="datepicker" ng-model="data.eta" data-dateformat="dd/mm/yy" />
+                                                <i class="icon-append fa fa-calendar"></i>
+                                            </label>
+                                            <label class="input" ng-if="data.etaConfirmerName">
+                                                <span class="form-control">{{data.eta}}</span>
+                                            </label>
+                                            <div class="note" ng-if="data.etaConfirmerName">Confirmed by {{data.etaConfirmerName}} on {{data.etaConfirmedDate}}</div>
+                                        </section>
+                                        <section class="col col-3">
+                                            <label class="label">Port of Discharge</label>
+                                            <label class="select">
+                                                <select id="podBox" ng-model="data.podid" ng-options="pod.podid as pod.podName for pod in poDs | orderBy : 'podName'">
+                                                    <option value=""></option>
+                                                </select>
+                                            </label>
+                                        </section>
+                                        <section class="col col-6">
+                                            <label class="label">Place of Delivery</label>
+                                            <label class="input">
+                                                <input type="text" ng-model="data.placeOfDelivery" />
+                                            </label>
+                                        </section>
+                                    </div>
+                                    <div class="row">
+                                        <section class="col col-3">
+                                            <label class="label">
+                                                ETA 2
+                                                <a ng-if="!data.etA2ConfirmerName" href="javascript:void(0);" class="btn btn-primary btn-xs" style="font-size: 8px;" ng-click="event.confirmETA(2)">Confirm</a>
+                                            </label>
+                                            <label class="input" ng-if="!data.etA2ConfirmerName">
+                                                <input type="text" class="datepicker" ng-model="data.etA2" data-dateformat="dd/mm/yy" />
+                                                <i class="icon-append fa fa-calendar"></i>
+                                            </label>
+                                            <label class="input" ng-if="data.etA2ConfirmerName">
+                                                <span class="form-control">{{data.etA2}}</span>
+                                            </label>
+                                            <div class="note" ng-if="data.etA2ConfirmerName">Confirmed by {{data.etA2ConfirmerName}} on {{data.etA2ConfirmedDate}}</div>
+                                        </section>
+                                        <section class="col col-3">
+                                            <label class="label">Movement Term</label>
+                                            <label class="select">
+                                                <select id="movementTermBox" ng-model="data.movementTermID" ng-options="movementTerm.movementTermID as movementTerm.movementTermNM for movementTerm in movementTerms">
+                                                    <option value=""></option>
+                                                </select>
+                                            </label>
+                                        </section>
+                                        <section class="col col-3">
+                                            <label class="label">Ocean Freight</label>
+                                            <label class="select">
+                                                <select id="occeanFreightBox" ng-model="data.occeanFreight" ng-options="oceanFrieght.itemValue as oceanFrieght.itemText for oceanFrieght in oceanFreights">
+                                                    <option value=""></option>
+                                                </select>
+                                            </label>
+                                        </section>
+                                        <section class="col col-3">
+                                            <label class="label">Delivery Term</label>
+                                            <label class="select">
+                                                <select id="deliveryTermBox" ng-model="data.deliveryTermID" ng-options="deliveryTerm.deliveryTermID as deliveryTerm.deliveryTermNM for deliveryTerm in deliveryTerms | orderBy : 'deliveryTermNM'">
+                                                    <option value=""></option>
+                                                </select>
+                                            </label>
+                                        </section>
+                                    </div>
+                                    <div class="row">
+                                        <section class="col col-3">
+                                            <label class="label">CNTs</label>
+                                            <label class="input">
+                                                <span class="form-control">{{data.loadinplanCTNs | number:0}}</span>
+                                            </label>
+                                        </section>
+                                        <section class="col col-3">
+                                            <label class="label">NW</label>
+                                            <label class="input">
+                                                <span class="form-control">{{data.loadinplanNettWeight | number:2}}</span>
+                                            </label>
+                                        </section>
+                                        <section class="col col-3">
+                                            <label class="label">GW</label>
+                                            <label class="input">
+                                                <span class="form-control">{{data.loadinplanGrossWeight | number:2}}</span>
+                                            </label>
+                                        </section>
+                                        <section class="col col-3">
+                                            <label class="label">CBMs</label>
+                                            <label class="input">
+                                                <span class="form-control">{{data.loadinplanCBMs | number:3}}</span>
+                                            </label>
+                                        </section>
+
+                                    </div>
+                                    <div class="row">
+                                        <section class="col col-6">
+                                            <label class="label">Shipping Mark</label>
+                                            <label class="textarea">
+                                                <textarea rows="8" ng-model="data.shippingMark"></textarea>
+                                            </label>
+                                        </section>
+                                        <section class="col col-6">
+                                            <label class="label">Description of Goods</label>
+                                            <label class="textarea">
+                                                <textarea rows="8" ng-model="data.descriptionOfGoods"></textarea>
+                                            </label>
+                                        </section>
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="tabContainer">
+                            <div id="grdLoadingPlan" class="tilsoft-table-wrapper">
+                                <div class="tilsoft-table">
+                                    <div class="tilsoft-table-header" style="width: 1000px;">
+                                        <div style="width: 150px">Loading Ref#</div>
+                                        <div style="width: 150px">Container No</div>
+                                        <div style="width: 150px">Seal No</div>
+                                        <div style="width: 150px">Type</div>
+                                        <div style="width: 80px">Loaded</div>
+                                        <div style="width: 80px">Shipped</div>
+                                        <div style="width: 80px">Confir med</div>
+                                        <div style="width: 100px">Product Img Finish</div>
+                                        <div></div>
+                                    </div>
+                                    <div class="tilsoft-table-body" style="width: 1000px;">
+                                        <table>
+                                            <tr ng-repeat="item in data.loadingPlans">
+                                                <td style="width: 150px; text-align: center;">
+                                                    <a href="@Url.Action("Edit", "LoadingPlan")/{{item.loadingPlanID}}" target="_blank">{{item.loadingPlanUD}}</a>
+                                                </td>
+                                                <td style="width: 150px; text-align: center;">{{item.containerNo}}</td>
+                                                <td style="width: 150px; text-align: center;">{{item.sealNo}}</td>
+                                                <td style="width: 150px; text-align: center;">{{item.containerTypeNM}}</td>
+                                                <td style="width: 80px; text-align: center;"><label ng-class="item.isLoaded == true ? 'fa fa-check' : 'label'"></label></td>
+                                                <td style="width: 80px; text-align: center;"><label ng-class="item.isShipped == true ? 'fa fa-check' : 'label'"></label></td>
+                                                <td style="width: 80px; text-align: center;"><label ng-class="item.isConfirmed == true ? 'fa fa-check' : 'label'"></label></td>
+                                                <td style="width: 100px; text-align: center;"><label ng-class="item.isUploadingImageFinish == true ? 'fa fa-check' : 'label'"></label></td>
+                                                <td></td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="tabTracking">
+                            <div class="smart-form">
+                                <fieldset>
+                                    <div class="row">
+                                        <section class="col col-6" ng-show="(data.createdBy!=null && data.creater!=null)">
+                                            <label class="label">Create Infor</label>
+                                            <span class="form-control">
+                                                <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{data.createdBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                    <i class="fa fa-user"></i> {{data.creater}}
+                                                </a>
+                                                <span> - {{data.createdDate}}</span>
+                                            </span>
+                                        </section>
+                                        <section class="col col-6" ng-show="(data.updatedBy!=null && data.updater!=null)">
+                                            <label class="label">Update Infor</label>
+                                            <span class="form-control">
+                                                <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{data.updatedBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                    <i class="fa fa-user"></i> {{data.updater}}
+                                                </a>
+                                                <span> - {{data.updatedDate}}</span>
+                                            </span>
+                                        </section>
+                                        <section class="col col-6" ng-show="(data.confirmAllLoadingBy!=null && data.confirmAllLoadinger!=null)">
+                                            <label class="label">Confirmed All Loading Infor</label>
+                                            <span class="form-control">
+                                                <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{data.confirmAllLoadingBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                    <i class="fa fa-user"></i> {{data.confirmAllLoadinger}}
+                                                </a>
+                                                <span> - {{data.confirmAllLoadingDate}}</span>
+                                            </span>
+                                        </section>
+                                        <section class="col col-6" ng-show="(data.confirmedBy!=null && data.confirmeer!=null)">
+                                            <label class="label">Approved Booking Infor</label>
+                                            <span class="form-control">
+                                                <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{data.confirmedBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                    <i class="fa fa-user"></i> {{data.confirmeer}}
+                                                </a>
+                                                <span> - {{data.confirmedDate}}</span>
+                                            </span>
+                                        </section>
+                                        <section class="col col-6" ng-show="(data.resetBy!=null && data.reseter!=null)">
+                                            <label class="label">Reset Booking Infor</label>
+                                            <span class="form-control">
+                                                <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{data.resetBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                    <i class="fa fa-user"></i> {{data.reseter}}
+                                                </a>
+                                                <span> - {{data.resetDate}}</span>
+                                            </span>
+                                        </section>
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+                        <div id="tabPlanned" class="tab-pane">
+                            <div class="smart-form">
+                                <fieldset>
+                                    <div class="row">
+                                        <section class="col col-8">
+                                            <label style="float:left; margin-top: 5px">P/I No</label>&nbsp;&nbsp;&nbsp;
+                                            <label class="input" style="float:left; margin-left: 10px"><input type="text" ng-model="factoryOrder.filterFactoryOrder.pi" /></label>
+                                            &nbsp;&nbsp;&nbsp;<button class="btn btn-primary btn-sm" ng-click="factoryOrder.getFactoryOrder()">Add</button>
+                                        </section>
+                                    </div>
+                                </fieldset>
+                                <fieldset>
+                                    <div class="smart-form">
+                                        <div class="row">
+                                            <section class="col col-6">
+                                                <div class="inline-group">
+                                                    <label class="radio" ng-repeat="item in factoryOrder.viewTypes">
+                                                        <input type="radio" name="radio-inline" ng-model="data.viewTypeID" ng-value="item.id">
+                                                        <i></i>{{item.name}}
+                                                    </label>
+                                                </div>
+                                            </section>
+                                        </div>
+                                        <div class="row" ng-if="data.viewTypeID == 1">
+                                            <div class="tilsoft-table-wrapper">
+                                                <div class="tilsoft-table">
+                                                    <div class="tilsoft-table-header" style="width: 1000px;">
+                                                        <div style="width: 80px"></div>
+                                                        <div style="width: 100px">P/I No.</div>
+                                                        <div style="width: 120px">Order No.</div>
+                                                        <div style="width: 80px">LDS</div>
+                                                        <div style="width: 120px">Factory</div>
+                                                        <div style="width: 80px">Order Qnt</div>
+                                                        <div style="width: 80px">Planned Qnt</div>
+                                                        <div style="width: 80px">Shipped Qnt</div>
+                                                        <div></div>
+                                                    </div>
+                                                    <div class="tilsoft-table-body" style="width: 1000px;">
+                                                        <table>
+                                                            <tr ng-repeat="item in data.bookingPlanFactoryOrderDTOs">
+                                                                <td style="width: 80px; text-align: center;">
+                                                                    <a class="btn btn-danger btn-xs font-11" href="#" title="Delete" ng-click="factoryOrder.removeFactoryOrder(item)" style="width:70px; margin-top: 2px"><i class="fa fa-times"></i> Remove</a>
+                                                                </td>
+                                                                <td style="width: 100px;">{{item.proformaInvoiceNo}}</td>
+                                                                <td style="width: 120px;">{{item.factoryOrderUD}}</td>
+                                                                <td style="width: 80px;">{{item.lds}}</td>
+                                                                <td style="width: 120px;">{{item.factoryUD}}</td>
+                                                                <td style="width: 80px; text-align: right;">{{item.orderQnt | number : 0}}</td>
+                                                                <td style="width: 80px; text-align: right;">{{item.plannedQnt | number : 0}}</td>
+                                                                <td style="width: 80px; text-align: right;">{{item.shippedQnt | number : 0}}</td>
+                                                                <td></td>
+                                                            </tr>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row" ng-if="data.viewTypeID == 2">
+                                            <div class="tilsoft-table-wrapper" avs-scroll grid-handler="gridHandler">
+                                                <div class="tilsoft-table">
+                                                    <div class="tilsoft-table-header" style="width: 1200px;">
+                                                        <div style="width: 70px">Type</div>
+                                                        <div style="width: 100px">P/I No.</div>
+                                                        <div style="width: 120px">Order No.</div>
+                                                        <div style="width: 80px">LDS</div>
+                                                        <div style="width: 120px">Factory</div>
+                                                        <div style="width: 150px">Article Code</div>
+                                                        <div style="width: 250px">Description</div>
+                                                        <div style="width: 80px">Order Qnt</div>
+                                                        <div style="width: 80px">Planned Qnt</div>
+                                                        <div style="width: 80px">Shipped Qnt</div>
+                                                        <div></div>
+                                                    </div>
+                                                    <div class="tilsoft-table-body" style="width: 1200px;">
+                                                        <table>
+                                                            <tr ng-repeat="item in data.bookingPlanFactoryOrderDetailDTOs">
+                                                                <td style="width: 70px;">{{item.typeName}}</td>
+                                                                <td style="width: 100px;">{{item.proformaInvoiceNo}}</td>
+                                                                <td style="width: 120px;">{{item.factoryOrderUD}}</td>
+                                                                <td style="width: 80px;">{{item.lds}}</td>
+                                                                <td style="width: 120px;">{{item.factoryUD}}</td>
+                                                                <td style="width: 150px;">{{item.articleCode}}</td>
+                                                                <td style="width: 250px;">{{item.description}}</td>
+                                                                <td style="width: 80px; text-align: right;">{{item.orderQnt | number : 0}}</td>
+                                                                <td style="width: 80px; text-align: right;"><input type="text" style="text-align: right;" avs-number-2 ng-model="item.plannedQnt" ng-decimal="0" /></td>
+                                                                <td style="width: 80px; text-align: right;">{{item.shippedQnt | number : 0}}</td>
+                                                                <td></td>
+                                                            </tr>
+                                                            <tr ng-repeat="item in data.bookingPlanFactoryOrderSampleDetailDTOs">
+                                                                <td style="width: 70px;">{{item.typeName}}</td>
+                                                                <td style="width: 100px;">{{item.proformaInvoiceNo}}</td>
+                                                                <td style="width: 120px;">{{item.factoryOrderUD}}</td>
+                                                                <td style="width: 80px;">{{item.lds}}</td>
+                                                                <td style="width: 120px;">{{item.factoryUD}}</td>
+                                                                <td style="width: 150px;">{{item.articleCode}}</td>
+                                                                <td style="width: 250px;">{{item.description}}</td>
+                                                                <td style="width: 80px; text-align: right;">{{item.orderQnt | number : 0}}</td>
+                                                                <td style="width: 80px; text-align: right;"><input type="text" style="text-align: right;" avs-number-2 ng-model="item.plannedQnt" ng-decimal="0" /></td>
+                                                                <td style="width: 80px; text-align: right;">{{item.shippedQnt | number : 0}}</td>
+                                                                <td></td>
+                                                            </tr>
+                                                            <tr ng-repeat="item in data.bookingPlanFactoryOrderSparepartDetailDTOs">
+                                                                <td style="width: 70px;">{{item.typeName}}</td>
+                                                                <td style="width: 100px;">{{item.proformaInvoiceNo}}</td>
+                                                                <td style="width: 120px;">{{item.factoryOrderUD}}</td>
+                                                                <td style="width: 80px;">{{item.lds}}</td>
+                                                                <td style="width: 120px;">{{item.factoryUD}}</td>
+                                                                <td style="width: 150px;">{{item.articleCode}}</td>
+                                                                <td style="width: 250px;">{{item.description}}</td>
+                                                                <td style="width: 80px; text-align: right;">{{item.orderQnt | number : 0}}</td>
+                                                                <td style="width: 80px; text-align: right;"><input type="text" style="text-align: right;" avs-number-2 ng-model="item.plannedQnt" ng-decimal="0" /></td>
+                                                                <td style="width: 80px; text-align: right;">{{item.shippedQnt | number : 0}}</td>
+                                                                <td></td>
+                                                            </tr>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+<div id="shippingInstruction" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title" id="">List shipping instruction confirmed</h4>
+            </div>
+            <div class="modal-body no-padding">
+                <div class="smart-form">
+                    <fieldset>
+                        <div class="row">
+                            <div id="warning-msg" style="display:none" class="alert alert-warning"></div>
+                        </div>
+                        <div class="row">
+                            <section class="col col-sm-12">
+                                <div class="jarviswidget-editbox"></div>
+                                <div class="tilsoft-table-wrapper">
+                                    <div class="tilsoft-table">
+                                        <div class="tilsoft-table-header">
+                                            <div style="width:60px"></div>
+                                            <div style="width:100px">Client</div>
+                                            <div style="width:250px">Consignee</div>
+                                            <div style="width:250px">Notified</div>
+                                            <div>Port of Destination</div>
+                                        </div>
+                                        <div class="tilsoft-table-body">
+                                            <table>
+                                                <tbody>
+                                                    <tr ng-repeat="item in defaults">
+                                                        <td style="width:59px; text-align:center">
+                                                            <input type="radio" ng-model="item.isSelected" value="1" ng-click="event.selectItem(item)" />
+                                                        </td>
+                                                        <td style="width:100px; text-align:center">{{item.clientUD}}</td>
+                                                        <td style="width:250px; text-align:center">{{item.consigneeInfo}}</td>
+                                                        <td style="width:250px">{{item.notifyInfo}}</td>
+                                                        <td style="text-align:center">{{item.podName}}</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a href="javascript:void(0)" class="btn btn-primary btn-xs" style="width:80px" ng-click="event.acceptItem()">
+                    <i class="fa fa-check"></i> OK
+                </a>
+                <a href="javascript:void(0)" class="btn btn-danger btn-xs" style="width:80px" ng-click="event.cancelItem()">
+                    <i class="fa fa-times"></i> Cancel
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="frmPrintOption" class="modal fade" style="display: none; z-index:1400;">
+    <div class="modal-dialog" style="margin-top:50px">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button aria-hidden="true" data-dismiss="modal" class="close" type="button">
+                    ×
+                </button>
+                <h4 id="myModalLabel" class="modal-title">Print Option</h4>
+            </div>
+            <div class="modal-body smart-form">
+                <fieldset>
+                    <div class="row">
+                        <section class="col col-12">
+                            <div class="">
+                                <label class="radio">
+                                    <input type="radio" name="print" ng-model="print_type" value="1" /><i></i>COMMERCIAL INVOICE
+                                </label>
+                            </div>
+
+                            <div class="">
+                                <label class="radio">
+                                    <input type="radio" name="print" ng-model="print_type" value="2" /><i></i>PACKING LIST
+                                </label>
+                            </div>
+
+                        </section>
+                    </div>
+                </fieldset>
+            </div>
+            <div class="modal-footer">
+                <button data-dismiss="modal" class="btn btn-default" type="button">
+                    CANCEL
+                </button>
+                <button class="btn btn-primary" type="button" ng-click="printOption(data.purchasingInvoiceID, data.packingListID, data.bookingID, print_type)">
+                    PRINT
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@*FactoryOrder*@
+<div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="frmFactoryOrder" class="modal fade" style="display: none;" data-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button aria-hidden="true" data-dismiss="modal" class="close" type="button">
+                    ×
+                </button>
+                <h4 id="myModalLabel" class="modal-title">List FactoryOrder</h4>
+            </div>
+            <div class="modal-body smart-form">
+                <div class="row">
+                    <div class="col col-lg-12">
+                        <div class="tilsoft-table-wrapper">
+                            <div class="tilsoft-table">
+                                <div class="tilsoft-table-body" style="width: 500px; height:500px; margin-top:0px">
+                                    <table>
+                                        <tr>
+                                            <th style="width: 40px"><input type="checkbox" ng-model="factoryOrder.isSelected" ng-change="factoryOrder.changeSelectedAll()"/></th>
+                                            <th style="width: 80px">P/I No</th>
+                                            <th style="width: 80px">Order No</th>
+                                            <th style="width: 80px">LDS</th>
+                                            <th style="width: 100px">Factory</th>
+                                            <th style="width:80px">Order Qnt</th>
+                                            <th></th>
+                                        </tr>
+                                        <tbody ng-repeat="subItem in factoryOrder.data.factoryOrderDTOs">
+                                            <tr>
+                                                <td style="text-align: center">
+                                                    <input type="checkbox" ng-model="subItem.isSelected" />
+                                                </td>
+
+                                                <td>
+                                                    {{subItem.proformaInvoiceNo}}
+                                                </td>
+                                                <td>
+                                                    {{subItem.factoryOrderUD}}
+                                                </td>
+                                                <td>
+                                                    {{subItem.lds}}
+                                                </td>
+                                                <td>
+                                                    {{subItem.factoryUD}}
+                                                </td>
+                                                <td style="text-align: right">
+                                                    {{subItem.orderQnt | number}}
+                                                </td>
+                                                <td></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" type="button" ng-click="factoryOrder.selectFactoryOrder()">
+                    Ok
+                </button>
+                <button data-dismiss="modal" class="btn btn-default" type="button">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "Booking2Mng")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="event.update()"><i class="fa fa-save"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current))" title="Delete" ng-click="event.delete()" style="color: #ff0000;" ng-disabled="data.isConfirmed"><i class="fa fa-times"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default" title="Print" ng-click="event.print()"><i class="fa fa-print"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="#" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Print, HttpContext.Current))" title="Customs Doc" ng-click="showPrintOption()"><i class="fa fa-print"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default" style="color:aqua" title="CONFIRM ALL LOADING PLAN(s) DONE" ng-disabled="data.bookingID <= 0 || data.isConfirmed || data.isConfirmAllLoading" ng-click="event.confirmAllLoadingEvt()"><i class="fa fa-check-circle"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default" title="Approve" style="color:darkgreen" ng-disabled="!data.isConfirmAllLoading || data.isConfirmed" ng-click="event.approve()"><i class="fa fa-check-square"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default" style="color:deeppink" title="Reset status" ng-disabled="!data.isConfirmed && !data.isConfirmAllLoading" ng-click="event.reset()"><i class="fa fa-undo"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="@Url.Action("Edit", "PurchasingInvoice")/0?invoiceType=1&bookingID={{data.bookingID}}" target="_blank" class="btn btn-default@(ViewBag.ID==0?" disabled":"") @(Frontend.Helper.AuthHelper.GetActionButtonStatus("PurchasingInvoiceMng", Frontend.Helper.ActionEnum.Create, HttpContext.Current))" ng-disabled="!data.statusAllShipped" title="Create Purchasing Invoice" style="color: #06ce20;"><i class="fa fa-file-o"></i></a>
+        </li>
+        @if (!string.IsNullOrEmpty(userManualUrl))
+        {
+            <li class="sparks-info">
+                <a target="_blank" href="@userManualUrl" class="btn btn-default" title="Help"><i class="fa fa-info"></i></a>
+            </li>
+        }
+    </ul>
+}
+
+@section pagejs {
+    <script src="~/Angular/app/jsonService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/purchasingInvoice/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/packinglist/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script type="text/javascript">
+        jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/booking2/';
+        jsonService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+        jsonService.supportServiceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/support/';
+
+        purchasingInvoiceService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/purchasingInvoice/';
+        purchasingInvoiceService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+        packingListService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/packinglist/';
+        packingListService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+        var context = {
+            id: @ViewBag.ID,
+            clientId : @clientId,
+            supplierId : @supplierId,
+            season : '@season',
+            errMsg: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED',
+            backUrl: '@Url.Action("Index", "Booking2Mng")',
+            refreshUrl: '@Url.Action("Edit", "Booking2Mng", new { id = UrlParameter.Optional })/',
+            editTitle: '@ViewBag.Title',
+            userId: @userInfo.Data.UserId,
+            userName: '@userInfo.Data.FullName',
+            officeId: @userInfo.Data.OfficeID,
+            backendReportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]'
+        }
+    </script>
+    <script src="~/Angular/app/booking2Mng/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/booking2Mng/edit.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}
+

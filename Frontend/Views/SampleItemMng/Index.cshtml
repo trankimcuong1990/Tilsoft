@@ -1,0 +1,139 @@
+﻿@{
+    ViewBag.Title = "Search Sample Item";
+    ViewBag.Module = "SampleItemMng";
+    ViewBag.Icon = "fa-search";
+    var backendReportUrl = @System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"];
+}
+<style>
+    .select2-arrow {
+        width: 15px !important;
+    }
+
+    .search-text {
+        height: 29px !important;
+        padding: 8px !important;
+        border: 1px solid #ddd !important;
+    }
+</style>
+<div class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-search-filter" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"><i class="fa fa-table"></i></span>
+                <h2>Search Results</h2>             
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div avs-scroll grid-handler="gridHandler" class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header" style="width: 1050px">
+                                <div style="width: 80px"><span style="font-size: 12px; font-weight: bold; text-transform: none; color: #a90329;">Found {{totalRows}} row(s)</span></div>
+                                <div class="sorting" style="width: 100px" data-colname="Season">Season</div>
+                                <div style="width: 100px">Image</div>
+                                <div style="width: 100px">Item Status</div>
+                                <div class="sorting" style="width: 80px" data-colname="SampleOrderUD">Order Code</div>
+                                <div class="sorting" style="width: 80px" data-colname="ClientUD">Client Code</div>
+                                <div class="sorting" style="width: 120px" data-colname="SampleProductUD">Item Code</div>
+                                <div class="sorting" style="width: 250px" data-colname="SampleProductUD">Item Name</div>
+                                <div class="sorting" style="width: 80px" data-colname="Quantity">Quantity</div>
+                                <div class="sorting"  data-colname="FactoryDeadline">Deadline</div>
+                            </div>
+                            <div class="tilsoft-table-filter" style="width: 1050px; top: 50px">
+                                <div style="width: 80px">
+                                    <a href="javascript:void(0)" class="btn btn-{{isDefaultFilter?'default':'primary'}} btn-xs" title="Apply Filter" ng-click="event.reload()"><i class="fa fa-filter"></i></a>
+                                    <a href="javascript:void(0)" class="btn btn-default btn-xs" title="Clear Filter" ng-click="event.clearFilter()"><i class="fa fa-ban"></i></a>
+                                </div>
+                                <div style="width: 100px">
+                                    <select class="form-control search-filter" style="width: 100%" ng-model="filters.Season" ng-options="season.seasonValue as season.seasonText for season in seasonDTOs">
+                                        <option value=""></option>
+                                    </select>
+                                    <i></i>
+                                </div>
+                                <div style="width: 100px"></div>
+                                <div style="width: 100px">
+                                    <select class="form-control search-filter" style="width: 100%" ng-model="filters.SampleProductStatusID" ng-options="sampleProductStatus.sampleProductStatusID as sampleProductStatus.sampleProductStatusNM for sampleProductStatus in sampleProductStatusDTOs">
+                                        <option value=""></option>
+                                    </select>
+                                    <i></i>
+                                </div>
+                                <div style="width: 80px">
+                                    <input class="form-control search-filter" style="width: 100%" ng-model="filters.SampleOrderUD">
+                                </div>
+                                <div style="width: 80px">
+                                    <input class="form-control search-filter" style="width: 100%" ng-model="filters.ClientUD">
+                                </div>
+                                <div style="width: 120px">
+                                    <input class="form-control search-filter" style="width: 100%" ng-model="filters.SampleItemCode">
+                                </div>
+                                <div style="width: 250px">
+                                    <input class="form-control search-filter" style="width: 100%" ng-model="filters.SampleItemName">
+                                </div>
+                                <div style="width: 80px"></div>
+                                <div></div>
+                            </div>
+                            <div class="tilsoft-table-body" style="margin-top: 95px; width: 1050px;">
+                                <table>
+                                    <tr ng-repeat="item in data">
+                                        <td style="text-align: center; width: 80px;">
+                                            <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "SampleItemMng")/{{item.sampleProductID}}" title="Edit" target="_blank" style="margin-top: 5px; width: 60px;"><i class="fa fa-pencil"></i> Edit</a>
+                                        </td>
+                                        <td style="width: 100px; text-align: center">{{item.season}}</td>
+                                        <td style="width: 100px; text-align: center; vertical-align: middle">
+                                            <a href="{{item.fileLocation}}" data-featherlight="image">
+                                                <img style="width: 95%" ng-src="{{item.thumbnailLocation}}" />
+                                            </a>
+                                        </td>
+                                        <td style="width: 100px; text-align: center">{{item.sampleProductStatusNM}}</td>
+                                        <td style="width: 80px; text-align: center">{{item.sampleOrderUD}}</td>
+                                        <td style="width: 80px; text-align: center">{{item.clientUD}}</td>
+                                        <td style="width: 120px; text-align: center">{{item.sampleProductUD}}</td>
+                                        <td style="width: 250px; text-align: center">{{item.sampleProductNM}}</td>
+                                        <td style="width: 80px; text-align: center; text-align:right">{{item.quantity  | currency : '' : 0}}</td>
+                                        <td > {{item.factoryDeadline}}</td>
+
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>       
+    </article>
+</div>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Search" ng-click="event.reload()"><i class="fa fa-search"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Refresh" ng-click="event.reload()"><i class="fa fa-refresh"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="@Url.Action("Edit", "Model")/0" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="New"><i class="fa fa-file-o"></i></a>
+        </li>
+        @*<li class="sparks-info">
+                <a href="javascript:void(0);" class="btn btn-default" title="Report season" ng-click="event.open()">
+                <i class="fa fa-print"></i></a>
+            </li>*@
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Export Excel" style="color: #31B404" ng-click="event.exportExcel($event)"><i class="fa fa-file-excel-o"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script src="~/Angular/app/jsonService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script type="text/javascript">
+        var context = {
+            token: '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]',
+            pageSize: @System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"],
+            cookieID: '@HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString()',
+            urlService: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/sampleitemmng/',
+            backendReportUrl: '@backendReportUrl',
+        }
+    </script>
+    <script src="~/Views/SampleItemMng/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/SampleItemMng/index.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}

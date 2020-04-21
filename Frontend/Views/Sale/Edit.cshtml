@@ -1,0 +1,88 @@
+﻿@{
+    if (ViewBag.ID == 0)
+    {
+        ViewBag.Title = "Create sale";
+    }
+    else
+    {
+        ViewBag.Title = "Edit sale";
+    }
+
+    ViewBag.Module = "Sale";
+}
+
+<form class="row" name="editForm">
+
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>General</h2>
+            </header>
+            <div>
+                <div class="widget-body">
+                    <div class="smart-form">
+                        <div class="row">
+                            <section class="col col-2">
+                                <label>Code</label>
+                                <input type="text" class="form-control" ng-model="data.saleUD" />
+                            </section>
+
+                            <section class="col col-6">
+                                <label>Name</label>
+                                <input type="text" class="form-control" ng-model="data.saleNM" />
+                            </section>
+                        </div>
+                        <div class="row">
+                            <section class="col col-2">
+                                <label><input type="checkbox" ng-model="data.visible" /> Visible </label>
+
+                            </section>
+                            <section class="col col-2">
+                                <label><input type="checkbox" ng-model="data.includedInDDC" />Include In DDC </label>
+                            </section>
+
+                            <section class="col col-2" ng-if="data.companyID!=4">
+                                <label><input type="checkbox" ng-model="data.isAccountManager" />Account Manager</label>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+
+</form>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "Sale")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="#"  class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="event.update($event)"><i class="fa fa-save"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="#"  class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="Delete" style="color: #ff0000;" ng-click="event.delete($event)"><i class="fa fa-times"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script src="~/Angular/app/jsonService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script type="text/javascript">
+        jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/sale/';
+        jsonService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+        var context = {
+            id: '@ViewBag.ID',
+            backUrl: '@Url.Action("Index", "Sale")',
+            refreshUrl: '@Url.Action("Edit", "Sale", new { id = UrlParameter.Optional })/',
+            errMsg: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED',
+        }
+    </script>
+    <script src="~/Angular/app/sale/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/sale/edit.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}
+

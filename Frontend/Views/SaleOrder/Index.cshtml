@@ -1,0 +1,583 @@
+﻿@{
+    ViewBag.Title = "Search Offer containt PI";
+    ViewBag.Module = "Proforma Invoice";
+
+    string userManualUrl = string.Empty;
+    if (System.IO.File.Exists(Server.MapPath("~/UserManual/" + ViewBag.ModuleCode + ".pdf")))
+    {
+        userManualUrl = "/UserManual/" + ViewBag.ModuleCode + ".pdf";
+    }
+}
+
+<div class="row">
+
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+
+        <div ng-show="forms.currentForm===forms.search">
+            <div class="jarviswidget jarviswidget-color-darken" id="wid-id-0" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+                <header>
+                    <span class="widget-icon"> <i class="fa fa-search"></i> </span>
+                    <h2>Search Filters</h2>
+                </header>
+
+                <div>
+                    <div class="jarviswidget-editbox"></div>
+                    <div class="widget-body">
+                        <div class="row">
+                            <div class="col-sm-2">
+                                <label>Proforma Invoice No</label>
+                                <input class="form-control search-filter" type="text" id="ProformaInvoiceNo" ng-model="filters.ProformaInvoiceNo">
+                            </div>
+                            @*<div class="col-sm-2">
+                                <label>V4 P/I</label>
+                                <input class="form-control search-filter" type="text" id="V4PINo" ng-model="filters.V4PINo">
+                            </div>*@
+                            <div class="col-sm-2">
+                                <label>Client Code</label>
+                                <input class="form-control search-filter" type="text" id="ClientUD" ng-model="filters.ClientUD">
+                            </div>
+                            <div class="col-sm-2">
+                                <label>Client Name</label>
+                                <input class="form-control search-filter" type="text" id="ClientNM" ng-model="filters.ClientNM">
+                            </div>
+                            <div class="col-sm-2">
+                                <label>Season</label>
+                                <select class="form-control search-filter" ng-model="filters.Season" ng-options="season.seasonValue as season.seasonText for season in searchDataContainer.seasons">
+                                    <option value=""></option>
+                                </select>
+                            </div>
+                            <div class="col-sm-2">
+                                <label>Account Manager</label>
+                                <select class="form-control search-filter" ng-model="filters.SaleID" ng-options="item.saleID as item.saleNM for item in searchDataContainer.salers">
+                                    <option value=""></option>
+                                </select>
+                            </div>
+                            <div class="col-sm-2">
+                                <label>Order Type</label>
+                                <select class="form-control search-filter" ng-model="filters.OrderType" ng-options="item.orderTypeValue as item.orderTypeText for item in searchDataContainer.orderTypes">
+                                    <option value=""></option>
+                                </select>
+                            </div>
+                            <div class="col-sm-2">
+                                <label>ArticleCode</label>
+                                <input class="form-control search-filter" type="text" id="ArticleCode" ng-model="filters.ArticleCode">
+                            </div>
+                            <div class="col-sm-2">
+                                <label>Description</label>
+                                <input class="form-control search-filter" type="text" id="Description" ng-model="filters.Description">
+                            </div>
+                            <div class="col-sm-2">
+                                <label>Client ArticleCode</label>
+                                <input class="form-control search-filter" type="text" id="ClientArticleCode" ng-model="filters.ClientArticleCode">
+                            </div>
+                            <div class="col-sm-2">
+                                <label>Client ArticleName</label>
+                                <input class="form-control search-filter" type="text" id="ClientArticleName" ng-model="filters.ClientArticleName">
+                            </div>
+                            <div class="col-sm-2">
+                                <label>Client OrderNumber</label>
+                                <input class="form-control search-filter" type="text" id="ClientOrderNumber" ng-model="filters.ClientOrderNumber">
+                            </div>
+                            <div class="col-sm-2">
+                                <label>Client EANCode</label>
+                                <input class="form-control search-filter" type="text" id="ClientEANCode" ng-model="filters.ClientEANCode">
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="jarviswidget jarviswidget-color-darken" id="wid-id-search-result" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+                <header>
+                    <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                    <h2>Offers result</h2>
+                </header>
+                <div>
+                    <div class="jarviswidget-editbox"></div>
+                    <div class="widget-body">
+                        <div id="offer" class="tilsoft-table-wrapper">
+                            <div class="tilsoft-table">
+                                <div class="tilsoft-table-header" style="width: 4000px;">
+                                    <div style="width: 140px;"></div>
+                                    <div style="width: 350px;" class="sorting" data-colname="OfferUD">Offer</div>
+                                    <div style="width: 90px;" class="sorting_desc" data-colname="OfferDate">Offer Date</div>
+                                    <div style="width: 70px;" class="sorting" data-colname="OfferVersion">Ver sion</div>
+                                    <div style="width: 90px;" class="sorting" data-colname="Season">Season</div>
+                                    <div style="width: 90px;" class="sorting" data-colname="ValidUntil">Valid Until</div>
+                                    <div style="width: 80px;" class="sorting" data-colname="ClientUD">Client Code</div>
+                                    <div style="width: 350px;" class="sorting" data-colname="ClientNM">Client Name</div>
+                                    <div style="width: 150px;" class="sorting" data-colname="PaymentTermNM">Payment Term</div>
+                                    <div style="width: 150px;" class="sorting" data-colname="DeliveryTermNM">Delivery Term</div>
+                                    <div style="width: 60px;" class="sorting" data-colname="Currency">Curr ency</div>
+                                    <div style="width: 90px;" class="sorting" data-colname="LDS">LDS</div>
+                                    <div style="width: 250px;" class="sorting" data-colname="ForwarderNM">Forwarder</div>
+                                    <div style="width: 150px;" class="sorting" data-colname="PODNM">POD</div>
+                                    <div style="width: 150px;" class="sorting" data-colname="UpdatorName">Updated By</div>
+                                    <div style="width: 90px;" class="sorting" data-colname="UpdatedDate">Updated Date</div>
+                                    <div class="sorting" data-colname="Remark">Remark</div>
+                                </div>
+                                <div class="tilsoft-table-body" style="width: 4000px;">
+                                    <table>
+                                        <tbody ng-repeat="item in searchDataContainer.offerSearchs">
+                                            <tr>
+                                                <td style="text-align: center; width: 140px; ">
+                                                    <a class="btn btn-primary btn-xs font-11" href="@Url.Action("PI", "SaleOrder")/{{item.offerID}}" title="Search offer of this PI" target="_blank"><i class="fa fa-folder-open">Open</i></a>
+                                                    <a href="#" class="btn btn-primary btn-xs font-11" title="View PIs" ng-click="searchPIs($event,item.offerID)"><i id="icon-view-pi-{{item.offerID}}" class="fa fa-plus-square-o"></i> View ({{item.numOfPIs}} PI)</a>
+
+                                                </td>
+                                                <td style="width: 350px;">{{item.offerUD}}</td>
+                                                <td style="width: 90px; text-align: center">{{item.offerDateFormated}}</td>
+                                                <td style="width: 70px; text-align:center">{{item.offerVersion}}</td>
+                                                <td style="width: 90px;">{{item.season}}</td>
+                                                <td style="width: 90px; text-align: center">{{item.validUntilFormated}}</td>
+                                                <td style="width: 80px; text-align: center">{{item.clientUD}}</td>
+                                                <td style="width: 350px;">{{item.clientNM}}</td>
+                                                <td style="width: 150px;">{{item.paymentTermNM}}</td>
+                                                <td style="width: 150px;">{{item.deliveryTermNM}}</td>
+                                                <td style="width: 60px; text-align: center">{{item.currency}}</td>
+                                                <td style="width: 90px; text-align: center">{{item.ldsFormated}}</td>
+                                                <td style="width: 250px;">{{item.forwarderNM}}</td>
+                                                <td style="width: 150px;">{{item.podNM}}</td>
+                                                <td style="width: 150px;">
+                                                    <a ng-show="(item.updatedBy != null && item.updatorName != null)" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.updatedBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                        <i class="fa fa-user"></i> {{item.updatorName}}
+                                                    </a>
+                                                    <span ng-show="(item.updatedBy != null && item.updatorName == null && item.fullName != null)">{{item.fullName}}</span>
+                                                </td>
+                                                <td style="width: 90px;">
+                                                    {{item.updatedDateFormatted}}
+                                                </td>
+                                                <td>{{item.remark}}</td>
+                                            </tr>
+
+                                            <tr style="display:none" id="{{item.offerID}}">
+                                                <td style="width: 150px;"></td>
+                                                <td colspan="16">
+                                                    <div class="tilsoft-table">
+                                                        <div class="tilsoft-table-body" style="width: 2100px; height: auto; margin-top:0px">
+                                                            <table>
+                                                                <tr>
+                                                                    <th style="width: 120px;"></th>
+                                                                    <th style="width: 130px;" class="sorting" data-colname="orderType">Order Type</th>
+                                                                    <th style="width: 90px;" class="sorting" data-colname="season">Season</th>
+                                                                    <th style="width: 80px;" class="sorting" data-colname="proformaInvoiceNo">PI NO</th>
+                                                                    <th style="width: 100px;" class="sorting" data-colname="invoiceDateFormated">Invoice Date</th>
+                                                                    <th style="width: 180px;" class="sorting" data-colname="trackingStatusNM">Status</th>
+                                                                    <th style="width: 150px;" class="sorting" data-colname="ispiReceived">Signed PI Received</th>
+                                                                    <th style="width: 180px;" class="sorting" data-colname="piReceiver">Signed PI Received By</th>
+                                                                    <th style="width: 130px;" class="sorting" data-colname="piReceivedDateFormated">Date Received</th>
+                                                                    <th class="sorting" data-colname="piReceivedRemark">PI Received Remark</th>
+                                                                    <th style="width: 90px;" class="sorting" data-colname="ldsFormated">LDS</th>
+                                                                    <th style="width: 300px;" class="sorting" data-colname="reference">Reference</th>
+                                                                    <th style="width: 300px;" class="sorting" data-colname="conditions">Conditions</th>
+                                                                    <th style="width: 130px;" class="sorting" data-colname="deliveryDateFormated">Delivery Date</th>
+                                                                    <th style="width: 180px;" class="sorting" data-colname="deliveryDateInternalFormated">Delivery Date Internal</th>
+                                                                    <th style="width: 250px;" class="sorting" data-colname="paymentTermNM">Payment Term</th>
+                                                                    <th style="width: 150px;" class="sorting" data-colname="paymentTypeNM">Payment Type</th>
+                                                                    <th style="width: 250px;" class="sorting" data-colname="deliveryTermNM">Delivery Term</th>
+                                                                    <th style="width: 250px;" class="sorting" data-colname="deliveryTypeNM">Delivery Type</th>
+                                                                    <th style="width: 150px;" class="sorting" data-colname="creatorName">Created By</th>
+                                                                    <th style="width: 120px;" class="sorting" data-colname="createdDateFormated">Created Date</th>
+                                                                    <th style="width: 150px;" class="sorting" data-colname="updatorName">Updated By</th>
+                                                                    <th style="width: 120px;" class="sorting" data-colname="updatedDateFormated">Updated Date</th>
+                                                                </tr>
+                                                                <tbody ng-repeat="item_pi in item.saleOrderSearchs">
+                                                                    <tr>
+                                                                        <td style="text-align: center; ">
+                                                                            @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current) == "disabled")
+                                                                            {
+                                                                                <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "SaleOrder")/{{item_pi.saleOrderID}}/item.offerID" title="View (Read Only)" target="_blank"><i class="fa fa-folder-open"></i>View</a>
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "SaleOrder")/{{item_pi.saleOrderID}}/{{item.offerID}}" title="Edit" target="_blank"><i class="fa fa-pencil"></i>Edit</a>
+                                                                            }
+                                                                            <a href="#" class="btn btn-primary btn-xs font-11" title="View product detail" ng-click="searchSaleOrderDetail($event,item.offerID,item_pi.saleOrderID)"><i id="icon-view-detail-{{item_pi.saleOrderID}}" class="fa fa-plus-square-o"></i> View</a>
+                                                                            <a class="btn btn-default btn-xs font-11" href="@Url.Action("Overview", "SaleOrder")/{{item_pi.saleOrderID}}/{{item.offerID}}" title="Edit" target="_blank" style="margin-top:3px"><i class="fa fa-eye"></i>OverView</a>
+                                                                        </td>
+                                                                        <td>{{item_pi.orderType}}</td>
+                                                                        <td>{{item_pi.season}}</td>
+                                                                        <td>{{item_pi.proformaInvoiceNo}}</td>
+                                                                        <td>{{item_pi.invoiceDateFormated}}</td>
+                                                                        <td>{{item_pi.trackingStatusNM}}</td>
+                                                                        <td align="center"><input type="checkbox" ng-model="item_pi.ispiReceived" /></td>
+                                                                        <td>{{item_pi.piReceiver}}</td>
+                                                                        <td>{{item_pi.piReceivedDateFormated}}</td>
+                                                                        <td>{{item_pi.piReceivedRemark}}</td>
+                                                                        <td>{{item_pi.ldsFormated}}</td>
+                                                                        <td>{{item_pi.reference}}</td>
+                                                                        <td>{{item_pi.conditions}}</td>
+                                                                        <td>{{item_pi.deliveryDateFormated}}</td>
+                                                                        <td>{{item_pi.deliveryDateInternalFormated}}</td>
+                                                                        <td>{{item_pi.paymentTermNM}}</td>
+                                                                        <td>{{item_pi.paymentTypeNM}}</td>
+                                                                        <td>{{item_pi.deliveryTermNM}}</td>
+                                                                        <td>{{item_pi.deliveryTypeNM}}</td>
+                                                                        <td>
+                                                                            <a ng-show="(item_pi.createdBy != null && item_pi.createdEmpName != null)" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item_pi.createdBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                                                <i class="fa fa-user"></i> {{item_pi.createdEmpName}}
+                                                                            </a>
+                                                                            <span ng-show="item_pi.createdBy != null && item_pi.createdEmpName == null && item_pi.createdFullName">{{item_pi.createdFullName}}</span>
+                                                                        </td>
+                                                                        <td>{{item_pi.createdDateFormated}}</td>
+                                                                        <td>
+                                                                            <a ng-show="(item_pi.updatedBy != null && item_pi.updatedEmpName != null)" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item_pi.updatedBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                                                <i class="fa fa-user"></i> {{item_pi.updatedEmpName}}
+                                                                            </a>
+                                                                            <span ng-show="item_pi.updatedBy != null && item_pi.updatedEmpName == null && item_pi.updatedFullName">{{item_pi.updatedFullName}}</span>
+                                                                        </td>
+                                                                        <td>{{item_pi.updatedDateFormated}}</td>
+                                                                    </tr>
+                                                                    <tr style="display:none" id="{{item_pi.saleOrderID}}">
+                                                                        <td></td>
+                                                                        <td colspan="23">
+                                                                            <div class="tilsoft-table">
+                                                                                <div class="tilsoft-table-body" style="width: 2000px; height:auto; margin-top:0px">
+                                                                                    <table>
+                                                                                        <tr>
+                                                                                            <th style="width: 220px;" class="sorting" data-colname="articleCode">Article Code</th>
+                                                                                            <th style="text-align:left" class="sorting" data-colname="description">Desciption</th>
+                                                                                            <th style="width: 120px; " class="sorting" data-colname="quantity">Offer Qnt</th>
+                                                                                            <th style="width: 100px; " class="sorting" data-colname="physicalQnt">Physical</th>
+                                                                                            <th style="width: 100px; " class="sorting" data-colname="onSeaQnt">On Sea</th>
+                                                                                            <th style="width: 150px; " class="sorting" data-colname="tobeShippedQnt">tobe Shipped</th>
+                                                                                            <th style="width: 150px; " class="sorting" data-colname="reservationQnt">reser vation</th>
+                                                                                            <th style="width: 70px; " class="sorting" data-colname="ftsQnt">FTS</th>
+                                                                                            <th style="width: 150px;" class="sorting" data-colname="orderQnt">Order Qnt</th>
+                                                                                            <th style="width: 100px; " class="sorting" data-colname="unitPrice">Unit Price</th>
+                                                                                            <th style="width: 250px;" class="sorting" data-colname="clientArticleCode">Client Article Code</th>
+                                                                                            <th style="width: 250px; " class="sorting" data-colname="clientArticleName">Client Article Name</th>
+                                                                                            <th style="width: 250px;" class="sorting" data-colname="clientEANCode">Client EAN Code</th>
+                                                                                            <th style="width: 250px;" class="sorting" data-colname="reference">Reference</th>
+                                                                                        </tr>
+                                                                                        <tr ng-repeat="item_detail in item_pi.saleOrderDetailSearchs">
+                                                                                            <td style="text-align:left">{{item_detail.articleCode}}</td>
+                                                                                            <td style="text-align:left">{{item_detail.description}}</td>
+                                                                                            <td style="text-align:right; ">{{item_detail.quantity | number}}</td>
+                                                                                            <td style="text-align:right; ">{{item_detail.physicalQnt | number}}</td>
+                                                                                            <td style="text-align:right; ">{{item_detail.onSeaQnt | number}}</td>
+                                                                                            <td style="text-align:right; ">{{item_detail.tobeShippedQnt | number}}</td>
+                                                                                            <td style="text-align:right; ">{{item_detail.reservationQnt | number}}</td>
+                                                                                            <td style="text-align:right; ">{{item_detail.ftsQnt | number}}</td>
+                                                                                            <td style="text-align:right; ">{{item_detail.orderQnt | number}}</td>
+                                                                                            <td style="text-align:right; ">{{item_detail.unitPrice | number:2}}</td>
+                                                                                            <td style="text-align:left">{{item_detail.clientArticleCode}}</td>
+                                                                                            <td style="text-align:left">{{item_detail.clientArticleName}}</td>
+                                                                                            <td style="text-align:left">{{item_detail.clientEANCode}}</td>
+                                                                                            <td style="text-align:left">{{item_detail.reference}}</td>
+                                                                                        </tr>
+                                                                                    </table>
+                                                                                </div>
+                                                                            </div>
+                                                                        </td>
+                                                                    </tr>
+
+                                                                </tbody>
+
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @Html.Partial("~/Views/SaleOrder/PartialView/BizBloqsImporter.cshtml")
+    </article>
+</div>
+
+
+@section pagepopup
+{
+    <div id="printOrderOverviewForm" class="popup-container">
+        <div class="content" style="padding-top: 0px;">
+            <form name="frmInit">
+                <header>
+                    <h2>Print Order Overview</h2>
+                </header>
+                <div style="overflow-y: scroll; height: 83%;">
+
+                    <div class="form-group">
+
+                        <label>Season</label>
+                        <select class="form-control" ng-model="printOrderOverviewForm.inputData.season" ng-options="season.seasonValue as season.seasonText for season in searchDataContainer.seasons">
+                            <option value=""></option>
+                        </select>
+
+                        <label>Order Type</label>
+                        <select class="form-control" ng-model="printOrderOverviewForm.inputData.orderType" ng-options="item.orderTypeValue as item.orderTypeText for item in searchDataContainer.orderTypes">
+                            <option value=""></option>
+                        </select>
+
+                    </div>
+                </div>
+                <button ng-click="printOrderOverviewForm.event.ok($event)">OK</button>
+                <button ng-click="printOrderOverviewForm.event.cancel($event)">Cancel</button>
+            </form>
+        </div>
+    </div>
+}
+
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Search" ng-click="search()"><i class=" fa fa-search"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Refresh" ng-click="search()"><i class="fa fa-refresh"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Print PI overview" ng-click="printOrderOverviewForm.event.load()"><i class="fa fa-print"></i></a>
+        </li>
+        @if (!string.IsNullOrEmpty(userManualUrl))
+        {
+            <li class="sparks-info">
+                <a target="_blank" href="@userManualUrl" class="btn btn-default" title="Help"><i class="fa fa-info"></i></a>
+            </li>
+        }
+
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Bizbloq Import" style="color: #31B404" ng-click="showBizBloqsForm()"><i class="fa fa-file-code-o"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script src="~/Angular/app/saleorder/service.js"></script>
+    <script type="text/javascript">
+
+        var offerGrid = jQuery('#offer').scrollableTable(
+            function(currentPage){
+                var scope = angular.element(jQuery('body')).scope();
+                scope.$apply(function(){
+                    scope.pageIndex = currentPage;
+                    saleOrderService.searchFilter.pageIndex = scope.pageIndex;
+                    scope.search();
+                });
+            },
+            function(sortedBy, sortedDirection){
+                var scope = angular.element(jQuery('body')).scope();
+                scope.$apply(function(){
+                    saleOrderService.searchFilter.sortedDirection = sortedDirection;
+                    scope.pageIndex = 1;
+                    saleOrderService.searchFilter.pageIndex = scope.pageIndex;
+                    saleOrderService.searchFilter.sortedBy = sortedBy;
+                    scope.search();
+                });
+            }
+        );
+
+        jQuery('.search-filter').keypress(function(e){
+            if (e.keyCode == 13) {
+                var scope = angular.element(jQuery('body')).scope();
+                scope.search();
+            }
+        });
+
+        saleOrderService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/saleOrder/';
+        saleOrderService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+        saleOrderService.searchFilter.pageSize = @System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"];
+
+        var modelApp = angular.module('tilsoftApp', []);
+        modelApp.controller('tilsoftController', ['$scope', '$rootScope', function ($scope, $rootScope) {
+            $scope.forms = {
+                currentForm: 'Search result form',
+                search: 'Search result form',
+                bizBloqsImporter: 'Import invoice from BizBloqs'
+            };
+            $scope.searchDataContainer = null;
+            $scope.saleOrderData = null;
+            $scope.pageIndex = 1;
+            $scope.totalPage = 0;
+            $scope.filters = {
+                Season : '',
+                OfferUD : '',
+                ClientUD : '',
+                ClientNM : '',
+                SaleID : 0,
+                ProformaInvoiceNo : '',
+                V4PINo: '',
+                OrderType : '',
+
+                ArticleCode : '',
+                Description : '',
+                ClientArticleCode : '',
+                ClientArticleName : '',
+                ClientOrderNumber : '',
+                ClientEANCode : '',
+            };
+
+            $scope.offerUD = '';
+
+            //
+            // private function defined
+            //
+            $scope.search = function () {
+                saleOrderService.searchFilter.filters = $scope.filters;
+                saleOrderService.search(
+                    function (data) {
+                        $scope.searchDataContainer = data.data;
+                        console.log(data.data);
+                        $scope.totalPage = Math.ceil(data.totalRows / saleOrderService.searchFilter.pageSize);
+
+                        //not show offer not have PI
+                        var offerSearchs = [];
+                        angular.forEach($scope.searchDataContainer.offerSearchs, function (item) {
+                            if (item.numOfPIs !== 0 && item.numOfPIs !== null) {
+                                offerSearchs.push(item);
+                            }
+                        });
+                        $scope.searchDataContainer.offerSearchs = [];
+                        $scope.searchDataContainer.offerSearchs = offerSearchs;
+                        $scope.$apply();
+
+                        if(data.totalRows < saleOrderService.searchFilter.pageSize) {
+                            jQuery('#offerTable').find('ul').hide();
+                        }
+                        else {
+                            jQuery('#offerTable').find('ul').show();
+                        }
+
+                        jQuery('#content').show();
+                        offerGrid.updateLayout();
+
+                    },
+                    function (error) {
+                        $scope.searchDataContainer = null;
+                        $scope.pageIndex = 1;
+                        $scope.totalPage = 0;
+                        $scope.$apply();
+                    }
+                );
+            }
+
+            $scope.searchPIs = function ($event,offerID) {
+                $event.preventDefault();
+
+                if ($("#icon-view-pi-" + offerID).hasClass('fa-plus-square-o'))
+                {
+                    //load data
+                    var arr = $scope.searchDataContainer.offerSearchs.filter(function(o){ return o.offerID == offerID});
+                    saleOrderService.search_saleOrder(offerID,
+                        function (data) {
+                            arr[0].saleOrderSearchs = data.data.data;
+                            console.log(data.data);
+                            $scope.$apply();
+
+                            //show on view
+                            $("#"+ offerID).toggle();
+                            $("#icon-view-pi-" + offerID).removeClass('fa-plus-square-o');
+                            $("#icon-view-pi-" + offerID).addClass('fa-minus-square-o');
+                        },
+                        function (error) {
+                            arr[0].saleOrderSearchs = null;
+                            $scope.$apply();
+                        }
+                    );
+                }
+                else  if ($("#icon-view-pi-" + offerID).hasClass('fa-minus-square-o'))
+                {
+                    $("#"+ offerID).toggle();
+                    $("#icon-view-pi-" + offerID).removeClass('fa-minus-square-o');
+                    $("#icon-view-pi-" + offerID).addClass('fa-plus-square-o');
+                }
+            }
+
+            $scope.searchSaleOrderDetail = function ($event,offerID,saleOrderID) {
+                $event.preventDefault();
+
+                if ($("#icon-view-detail-" + saleOrderID).hasClass('fa-plus-square-o'))
+                {
+                    //load data
+                    var arr_offer = $scope.searchDataContainer.offerSearchs.filter(function(o){ return o.offerID == offerID});
+                    var arr = arr_offer[0].saleOrderSearchs.filter(function(o){ return o.saleOrderID == saleOrderID});
+                    saleOrderService.search_saleOrderDetail(saleOrderID,
+                        function (data) {
+                            arr[0].saleOrderDetailSearchs = data.data;
+                            $scope.$apply();
+
+                            //show on view
+                            $("#"+ saleOrderID).toggle();
+                            $("#icon-view-detail-" + saleOrderID).removeClass('fa-plus-square-o');
+                            $("#icon-view-detail-" + saleOrderID).addClass('fa-minus-square-o');
+                        },
+                        function (error) {
+                            $arr[0].saleOrderDetailSearchs = null;
+                            $scope.$apply();
+                        }
+                    );
+                }
+                else  if ($("#icon-view-detail-" + saleOrderID).hasClass('fa-minus-square-o'))
+                {
+                    $("#"+ saleOrderID).toggle();
+                    $("#icon-view-detail-" + saleOrderID).removeClass('fa-minus-square-o');
+                    $("#icon-view-detail-" + saleOrderID).addClass('fa-plus-square-o');
+                }
+            }
+
+
+            $scope.printOrderOverviewForm = {
+
+                inputData : {
+                    season : '',
+                    orderType:''
+                },
+
+                event :{
+                    load : function(){
+                        jQuery('#printOrderOverviewForm').show();
+                    },
+                    ok : function($event){
+                        $event.preventDefault();
+
+                        $scope.printOrderOverviewForm.method.printOrderOverview($event,$scope.printOrderOverviewForm.inputData.season,$scope.printOrderOverviewForm.inputData.orderType)
+                    },
+                    cancel : function($event)
+                    {
+                        $event.preventDefault();
+                        jQuery('#printOrderOverviewForm').hide();
+                    },
+                },
+                method:{
+                    printOrderOverview: function($event,season,orderType){
+                        $event.preventDefault();
+                        saleOrderService.printOrderOverview(season,orderType,
+                            function (data) {
+                                window.location = '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]' + data.data + '.xlsm';
+                                jQuery('#printOrderOverviewForm').hide();
+                                jsHelper.showMessage('success', 'The report has been generated');
+                            },
+                            function (error) {
+                                jsHelper.showMessage('warning', error);
+                                $scope.$apply();
+                            }
+                        );
+                    },
+
+                }
+            }
+
+
+            $scope.showBizBloqsForm = function () {
+                $rootScope.$emit('bizBloqForm');
+            }
+
+            //
+            // INIT
+            //
+            $scope.search();
+        }]);
+    </script>
+    <script src="~/Views/SaleOrder/PartialView/BizBloqsImporter.js?c=@System.Guid.NewGuid().ToString().Replace("-","")"></script>
+}

@@ -1,0 +1,142 @@
+﻿@{
+    ViewBag.Title = "Online File";
+    ViewBag.Module = "Online File";
+    ViewBag.Icon = "fa-folder-open-o";
+    Frontend.APIDTO.APIUserInformation userInfo = (Frontend.APIDTO.APIUserInformation)Session[Frontend.Customize.Common.ProjectDefinition.USER_INFO_SESSION];
+}
+
+<div id="main-form" class="row">
+    <div class="col-sm-12">
+        <ul class="tile cols-3">
+            <li ng-repeat="item in data">
+                <div style="height: 110px;">
+                    <div class="hover-content" style="display: none;">
+                        <a href="javascript:void(0)" style="text-align: right; display: block;" onclick="jQuery(this).parent().hide()" title="Close"><i class="fa fa-times fa-2x"></i></a>
+                        <ul style="padding-left: 10px;">
+                            <li ng-repeat="permission in item.onlineFilePermissions">
+                                <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{permission.userID}}" data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                    <i class="fa fa-user"></i> {{permission.employeeNM}}
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <strong>
+                        {{item.friendlyName}} 
+                        <a ng-if="item.onlineFilePermissions.length > 0" href="javascript:void(0)" style="float: right;" onclick="jQuery(this).parent().parent().find('.hover-content').show()" title="View list of user have access"><i class="fa fa-group"></i></a>
+                    </strong>
+                    <p>
+                        Owner: 
+                        <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.updatedBy}}" data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                            <i class="fa fa-user"></i> {{item.employeeNM}}
+                        </a> on {{item.updatedDate}}
+                        <br/>
+                        {{item.description}}
+                    </p>
+                    <a href="{{item.fileLocation}}" target="_blank" class="btn btn-default btn-xs"><i class="fa fa-download"></i> Download</a>
+                    <a ng-if="item.updatedBy == $parent.userId" href="javascript:void(0)" class="btn btn-default btn-xs" ng-click="editService.openForm(item)"><i class="fa fa-pencil"></i> Edit</a>
+                    <a ng-if="item.updatedBy == $parent.userId" href="javascript:void(0)" class="btn btn-danger btn-xs" ng-click="event.removeFile(item)"><i class="fa fa-times"></i> Delete</a>
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<div id="frmEdit" class="row" style="display: none;">
+    <form name="frmEdit">
+        <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+            <div class="jarviswidget" id="wid-permission-form" data-widget-colorbutton="false" data-widget-togglebutton="false" data-widget-editbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false" role="widget">
+                <header role="heading">
+                    <h2>Edit: {{editService.data.friendlyName}}</h2>
+                </header>
+                <div role="content">
+                    <div class="widget-body no-padding">
+                        <div class="smart-form">
+                            <fieldset>
+                                <section>
+                                    <label class="label">Description</label>
+                                    <label class="textarea">
+                                        <textarea ng-model="editService.data.description" rows="6"></textarea>
+                                    </label>
+                                </section>
+                                <section>
+                                    <label class="label">Shared</label>
+                                    <div>
+                                        <div class="tilsoft-table-wrapper">
+                                            <div class="tilsoft-table">
+                                                <div class="tilsoft-table-body" style="width: 100%; overflow-y: hidden; height: auto; margin-top: 0px;">
+                                                    <table>
+                                                        <tbody>
+                                                            <tr>
+                                                                <td colspan="2" style="border-right: none;">
+                                                                    <select ui-select2 ng-model="selectedUserId" class="select2">
+                                                                        <option value=""></option>
+                                                                        <option ng-repeat="user in users" value="{{user.userID}}">{{user.employeeNM}} - {{user.internalCompanyNM}}</option>
+                                                                    </select>
+                                                                </td>
+                                                                <td>
+                                                                    <a href="javascript:void(0)" class="btn btn-primary btn-sm" ng-click="editService.addPermission()"><i class="fa fa-plus"></i> Add</a>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th style="width: 120px;"></th>
+                                                                <th>Full name</th>
+                                                                <th>Company</th>
+                                                            </tr>
+                                                            <tr ng-if="!editService.data.onlineFilePermissions.length">
+                                                                <td colspan="3" style="text-align: center;">not shared</td>
+                                                            </tr>
+                                                            <tr ng-repeat="permission in editService.data.onlineFilePermissions">
+                                                                <td>
+                                                                    <a href="javascript:void(0)" class="btn btn-danger btn-xs" ng-click="editService.removePermission(permission)"><i class="fa fa-times"></i> Remove</a>
+                                                                </td>
+                                                                <td>
+                                                                    <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{permission.userID}}" data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                                        <i class="fa fa-user"></i> {{permission.employeeNM}}
+                                                                    </a>
+                                                                </td>
+                                                                <td>
+                                                                    {{permission.internalCompanyNM}}
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+                            </fieldset>
+                        </div>
+                        <div class="widget-footer">
+                            <a href="javascript:void(0)" class="btn btn-primary btn-sm" ng-click="editService.update()"><i class="fa fa-check"></i> Save</a>
+                            <a href="javascript:void(0)" class="btn btn-default btn-sm" ng-click="editService.closeForm()"><i class="fa fa-times"></i> Cancel</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </article>
+    </form>
+</div>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Upload" ng-click="event.addFile()"><i class="fa fa-upload"></i> Upload</a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script type="text/javascript">
+        var context = {
+            serviceUrl : '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/onlinefilemng/',
+            token : '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]',
+            userId: @userInfo.Data.UserId,
+            title: 'file'
+        }
+    </script>
+    <script src="~/Angular/app/onlineFileMng/index.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/jsonService2.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/onlineFileMng/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/onlineFileMng/index/editService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}

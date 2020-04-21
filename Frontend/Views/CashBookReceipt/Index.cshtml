@@ -1,0 +1,239 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var urlEdit = Url.Action("Edit", "CashBookReceipt", new { id = UrlParameter.Optional });
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    var cookieID = HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString();
+    var pageSize = System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"];
+    var backendReportUrl = @System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"];
+
+    var canCreate = Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current);
+    var canRead = Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Read, HttpContext.Current);
+    var canPrint = Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Print, HttpContext.Current);
+
+    ViewBag.Title = "Cash Book Receipt";
+    ViewBag.Module = "Cash Book Receipt";
+
+    var currentYear = DateTime.Now.Year;
+    var currentMonth = DateTime.Now.Month;
+
+    var firstMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+    var lastMonth = firstMonth.AddMonths(1).AddDays(-1);
+}
+<div class="row">
+    <div>
+        <div class="col col-sm-1">
+            <label>
+                <i class="icon-append fa fa-calendar"></i> From Date
+            </label>
+            <label class="input">
+                <input name="bookDate" type="text" class="form-control datepicker" data-dateformat="dd/mm/yy" ng-model="filters.FromDate" />
+            </label>
+        </div>
+        <div class="col col-sm-1">
+            <label>
+                <i class="icon-append fa fa-calendar"></i> To Date
+            </label>
+            <label class="input">
+                <input name="bookDate" type="text" class="form-control datepicker" data-dateformat="dd/mm/yy" ng-model="filters.ToDate" />
+            </label>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Search Result(s)</h2>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div avs-scroll grid-handler="gridHandler" class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table">
+                            <div style="width:2140px" class="tilsoft-table-header">
+                                <div style="width:85px">Found(s)<br><strong style="color:blue">{{currentRows}}</strong>/<strong style="color:maroon">{{totalRows}}</strong></div>
+                                <div style="width:200px">Image(s)</div>
+                                <div style="width:120px" class="sorting_desc">Code</div>
+                                <div style="width:105px" class="sorting">Book<br>Date</div>
+                                <div style="width:120px" class="sorting">Type</div>
+                                <div style="width:120px" class="sorting">Source<br>Of Flow</div>
+                                <div style="width:100px" class="sorting">Location</div>
+                                <div style="width:200px" class="sorting">Paid<br>By</div>
+                                <div style="width:150px" class="sorting">Post<br>Cost</div>
+                                <div style="width:150px" class="sorting">Cost<br>Item</div>
+                                <div style="width:150px" class="sorting">Cost Item<br>Detail</div>
+                                <div style="width:150px" class="sorting">Receiver<br>Name</div>
+                                <div style="width:95px" class="sorting">VND<br>Amount</div>
+                                <div style="width:95px" class="sorting">VND USD<br>Ex. Rate</div>
+                                <div style="width:150px">Other Cost Item<br>Detail</div>
+                                <div>More<br>Information</div>
+                            </div>
+                            <div style="width:2140px" class="tilsoft-table-filter">
+                                <div style="width:85px">
+                                    <a href="javascript:void(0)" class="btn btn-{{isDefaultFilter ? 'default' : 'primary'}} btn-xs font-11" title="Filter" ng-click="event.research()"> <i class="fa fa-filter"></i> </a>
+                                    <a href="javascript:void(0)" class="btn btn-default btn-xs font-11" title="Clear" ng-click="event.clear()"> <i class="fa fa-ban"></i> </a>
+                                </div>
+                                <div style="width:200px"></div>
+                                <div style="width:120px">
+                                    <input type="text" style="width:100%; height:32px" class="form-control search-filter" ng-model="filters.Code">
+                                </div>
+                                <div style="width:105px">
+                                    @*<input type="text" style="width:100%" class="form-control datepicker search-filter" data-dateformat="dd/mm/yy" ng-model="filters.BookDate">*@
+                                </div>
+                                <div style="width:120px">
+                                    <select style="width:100%" class="form-control search-filter" ng-model="filters.Type" ng-options="type.cashBookTypeID as type.cashBookTypeNM for type in supportType">
+                                        <option value=""></option>
+                                    </select>
+                                </div>
+                                <div style="width:120px">
+                                    <select style="width:100%" class="form-control search-filter" ng-model="filters.SourceOfFlow" ng-options="sourceOfFlow.cashBookSourceOfFlowID as sourceOfFlow.cashBookSourceOfFlowNM for sourceOfFlow in supportSourceOfFlow">
+                                        <option value=""></option>
+                                    </select>
+                                </div>
+                                <div style="width:100px">
+                                    <select style="width:100%" class="form-control search-filter" ng-model="filters.Location" ng-options="location.cashBookLocationID as location.cashBookLocationNM for location in supportLocation">
+                                        <option value=""></option>
+                                    </select>
+                                </div>
+                                <div style="width:200px">
+                                    <select style="width:100%" class="form-control search-filter" ng-model="filters.PaidBy" ng-options="paidBy.cashBookPaidByID as paidBy.displayName for paidBy in supportPaidBy">
+                                        <option value=""></option>
+                                    </select>
+                                </div>
+                                <div style="width:150px">
+                                    <select style="width:100%" class="form-control search-filter" ng-model="filters.PostCost" ng-options="postCost.cashBookPostCostID as postCost.postCostNM for postCost in supportPostCost">
+                                        <option value=""></option>
+                                    </select>
+                                </div>
+                                <div style="width:150px">
+                                    <select style="width:100%" class="form-control search-filter" ng-model="filters.CostItem" ng-options="costItem.cashBookCostItemID as costItem.costItemNM for costItem in supportCostItem | filter: { cashBookPostCostID : filters.PostCost }">
+                                        <option value=""></option>
+                                    </select>
+                                </div>
+                                <div style="width:150px">
+                                    <select style="width:100%" class="form-control search-filter" ng-model="filters.CostItemDetail" ng-options="costItemDetail.cashBookCostItemDetailID as costItemDetail.costItemDetailNM for costItemDetail in supportCostItemDetail | filter: { cashBookCostItemID : filters.CostItem }">
+                                        <option value=""></option>
+                                    </select>
+                                </div>
+                                <div style="width:150px"></div>
+                                <div style="width:95px"></div>
+                                <div style="width:95px"></div>
+                                <div style="width:150px"></div>
+                                <div></div>
+                            </div>
+                            <div style="width:2140px" class="tilsoft-table-body">
+                                <table>
+                                    <tbody>
+                                        <tr ng-repeat="item in data">
+                                            <td style="width:84px; text-align:center">
+                                                <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "CashBookReceipt")/{{item.cashBookID}}" target="_blank" ng-show="!item.isPastTime"><i class="fa fa-pencil"></i></a>
+                                                <a class="btn btn-danger btn-xs font-11" href="javascript:void(0)" ng-click="event.remove(item.cashBookID, $index)" ng-show="!item.isPastTime"><i class="fa fa-times"></i></a>
+                                                <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "CashBookReceipt")/{{item.cashBookID}}" target="_blank" ng-show="item.isPastTime"><i class="fa fa-folder-open"></i></a>
+                                            </td>
+                                            <td style="width:200px; text-align:center">
+                                                <div ng-repeat="subItem in item.cashBookDocuments" class="float-img-list">
+                                                    <a href="{{subItem.fileLocation}}" data-featherlight="image">
+                                                        <img ng-src="{{subItem.thumbnailLocation}}" width="50" height="50" />
+                                                    </a>
+                                                </div>
+                                            </td>
+                                            <td style="width:120px">{{item.cashBookUD}}</td>
+                                            <td style="width:105px; text-align:center">{{item.bookDate}}</td>
+                                            <td style="width:120px">{{item.cashBookTypeNM}}</td>
+                                            <td style="width:120px">{{item.cashBookSourceOfFlowNM}}</td>
+                                            <td style="width:100px">{{item.cashBookLocationNM}}</td>
+                                            <td style="width:200px">{{item.displayName}}</td>
+                                            <td style="width:150px">{{item.postCostNM}}</td>
+                                            <td style="width:150px">{{item.costItemNM}}</td>
+                                            <td style="width:150px">{{item.costItemDetailNM}}</td>
+                                            <td style="width:150px">{{item.cashBookReceiverName}}</td>
+                                            <td style="width:95px; text-align:right">{{item.vndAmount | number}}</td>
+                                            <td style="width:95px; text-align:right">{{item.vndusdExRate | number}}</td>
+                                            <td style="width:150px">{{item.cashBookOtherCostItemDetail}}</td>
+                                            <td>
+                                                <div>
+                                                    <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.updatedBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600" ng-if="item.updatedBy != null">
+                                                        <i class="fa fa-user"></i> {{item.updatorName}}
+                                                    </a>
+                                                </div>
+                                                <div>
+                                                    <i class="fa fa-calendar"></i> {{item.updatedDate}}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+<div id="frmExportCashBook" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+    <form name="costItemDetailForm" class="row">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <a class="close" data-dismiss="modal" aria-hidden="true"> &times; </a>
+                    <h4 class="modal-title">Export CashBook</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col col-sm-2">
+                            Month
+                            <input type="number" class="form-control" min="1" max="12" maxlength="2" ng-model="exports.withMonth" />
+                        </div>
+                        <div class="col col-sm-2">
+                            Year
+                            <input type="number" class="form-control" min="1900" max="@currentYear" maxlength="4" ng-model="exports.withYear" />
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <a href="javascript:void(0)" class="btn btn-primary btn-xs" ng-click="event.exportFile()"><i class="fa fa-download"></i> Get file excel</a>
+                    <a href="javascript:void(0)" class="btn btn-danger btn-xs" ng-click="event.close()"><i class="fa fa-times"></i> Cancel</a>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section FormAction{
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @canRead" title="Search" ng-click="event.research()"><i class="fa fa-search"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @canRead" title="Refresh" ng-click="event.research()"><i class="fa fa-refresh"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="@urlEdit/0" class="btn btn-default @canCreate" title="New" target="_blank"><i class="fa fa-file-o"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @canPrint" title="Excel" ng-click="event.open()"><i class="fa fa-file-excel-o"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs{
+    <script type="text/javascript" src="~/Angular/app/cashBookReceiptMng/index.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/cashBookReceiptMng/service.js?v=@guid"></script>
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(serviceRoot)/api/CashBookReceipt/',
+            token: '@token',
+            cookieID: '@cookieID',
+            pageSize: '@pageSize',
+            month: '@currentMonth',
+            year: '@currentYear',
+            backendReportUrl: '@backendReportUrl',
+            firstMonth: '@firstMonth.ToString("dd/MM/yyyy")',
+            lastMonth: '@lastMonth.ToString("dd/MM/yyyy")'
+        }
+    </script>
+}

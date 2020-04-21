@@ -1,0 +1,638 @@
+﻿@{
+    if (ViewBag.ID == 0)
+    {
+        ViewBag.Title = "Create BOM Order";
+    }
+    else
+    {
+        ViewBag.Title = "Edit BOM Order";
+    }
+
+    ViewBag.Module = "BOM Order";
+}
+
+<form class="row" name="editForm">
+
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+
+        <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>General</h2>
+            </header>
+            <div>
+                <div class="widget-body">
+                    <div class="smart-form">
+
+                        <div class="row" ng-show="isCreatingNewComponent==false">
+                            <section class="col col-sm-1">
+                                <label>Season</label>
+                                <select class="form-control" ng-model="data.season" ng-options="season.seasonValue as season.seasonText for season in seasons" name="season" required>
+                                    <option value=""></option>
+                                </select>
+                                <span class="help-block" ng-show="editForm.season.$error.required"><i class="fa fa-warning"></i>Season is required.</span>
+                            </section>
+
+                            <section class="col col-sm-1">
+                                <label>Client</label>
+                                <span class="form-control">{{data.clientUD}}</span>
+                            </section>
+
+                            <section class="col col-sm-2">
+                                <label>Model Code</label>
+                                <span class="form-control">{{data.modelUD}}</span>
+                            </section>
+                            <section class="col col-sm-8">
+                                <label>Model Name</label>
+                                <span class="form-control">{{data.modelNM}}</span>
+                            </section>
+                        </div>
+
+                        <div class="row" ng-show="isCreatingNewComponent==false">
+                            <section class="col col-sm-4">
+                                <label>ArticleCode</label>
+                                <span class="form-control">{{data.articleCode}}</span>
+                            </section>
+                            <section class="col col-sm-8">
+                                <label>Description</label>
+                                <span class="form-control">{{data.description}}</span>
+                            </section>
+                        </div>
+                        
+                        
+                        <div class="row" ng-show="isCreatingNewComponent==true && parentComponent==null">
+                            <section class="col col-lg-2">
+                                <label>Model Code</label>
+                                <span class="form-control">{{data.modelUD}}</span>
+                            </section>
+
+                            <section class="col col-lg-10">
+                                <label>Model Name</label>
+                                <span class="form-control">{{data.modelNM}}</span>
+                            </section>
+                        </div>
+
+                        <div class="row" ng-show="isCreatingNewComponent==true && parentComponent!=null">
+                            <section class="col col-lg-2">
+                                <label>Parent Component Code</label>
+                                <span class="form-control">{{parentComponent.factoryFinishedProductUD}}</span>
+                            </section>
+
+                            <section class="col col-lg-10">
+                                <label>Parent Component Name</label>
+                                <span class="form-control">{{parentComponent.factoryFinishedProductNM}}</span>
+                            </section>
+                        </div>
+
+                        <div class="row" ng-show="isCreatingNewComponent==true">
+                            <section class="col col-lg-2">
+                                <label>Component Code</label>
+                                <input class="form-control" ng-model="component.factoryFinishedProductUD" />
+                            </section>
+                            <section class="col col-lg-10">
+                                <label>Component Name</label>
+                                <input class="form-control" ng-model="component.factoryFinishedProductNM" />
+                            </section>
+                        </div>
+
+                        <div class="row" ng-show="isCreatingNewComponent==true">
+                            <section class="col col-lg-2">
+                                <a class="btn btn-primary btn-xs" href="javascript:void(0);" ng-click="event.saveComponent($event)"><i class="fa fa-save"></i> Save</a>
+                                <a class="btn btn-warning btn-xs" href="javascript:void(0);" ng-click="event.cancelComponent($event)"><i class="fa fa-undo"></i> Back</a>
+                            </section>
+                        </div>
+
+                        @*begin edit buttons and edit table*@
+
+                        <div class="row" ng-show="isCreatingNewComponent==false && data.factoryOrderNormID>0">
+                            <section class="col col-lg-6">
+                                <a class="btn btn-warning btn-xs" href="javascript:void(0);" ng-click="event.editMode($event,true)" ng-show="isEditMode==false"><i class="fa fa-check-circle"></i> Edit Mode</a>
+
+                                <a class="btn btn-primary btn-xs" href="javascript:void(0);" ng-click="event.addComponentNorm($event)" ng-show="isEditMode==true"><i class="fa fa-plus"></i> Add Component Norm</a>
+                                <a class="btn btn-success btn-xs" href="javascript:void(0);" ng-click="event.newComponent($event)" ng-show="isEditMode==true"><i class="fa fa-plus"></i> Create New Component</a>
+                                <a class="btn btn-danger btn-xs" href="javascript:void(0);" ng-click="event.editMode($event,false)" ng-show="isEditMode==true"><i class="fa fa-database"></i> View Mode</a>
+                            </section>
+                        </div>
+
+                        @*edit mode*@
+                        <div class="row" ng-if="isEditMode==true && isCreatingNewComponent==false && data.factoryOrderNormID>0">
+                            <section class="col col-lg-12">
+                                <div id="grdFinishedProductNorm" class="tilsoft-table-wrapper">
+                                    <div class="tilsoft-table" style="height:600px">
+                                        <div class="tilsoft-table-header" style="width: 1600px;">
+                                            <div style="width:110px"></div>
+                                            <div style="width:700px">Component Name</div>
+                                            <div style="width:300px">Component Code</div>
+                                            <div style="width:80px">Norm</div>
+                                            <div style="width:100px">Wicker Type</div>
+                                            <div>Procedure</div>
+                                        </div>
+
+                                        <div class="tilsoft-table-body" style="width: 1600px;">
+                                            <table>
+                                                <tbody ng-repeat="item in data.factoryFinishedProductOrderNorms | orderBy : 'factoryFinishedProductOrderNormID'">
+
+                                                    @*component table*@
+
+                                                    <tr>
+                                                        <td style="text-align:center; vertical-align:middle;width:109px">
+                                                            <a ng-click="event.removeComponentNorm($event,item.factoryFinishedProductOrderNormID)" class="btn btn-danger btn-xs font-11" href="javascript:void(0);"><i class="fa fa-times"></i>Del</a>
+                                                            <a ng-click="event.updateComponentNorm($event,item)" class="btn btn-{{item.isEditing==true?'warning' : 'primary'}} btn-xs font-11" href="javascript:void(0);"><i class="fa fa-save"></i> Save</a>
+                                                        </td>
+
+                                                        <td style="vertical-align:middle;width:700px">
+                                                            <input type="text" ng-model="item.factoryFinishedProductNM" style="width: 100%;text-align:left" ng-keyup="quickSearchFinishedProduct.event.onKeyUp($event,item)" />
+                                                        </td>
+
+                                                        <td style="vertical-align:middle;width:300px">
+                                                            <input type="text" ng-model="item.factoryFinishedProductUD" style="width: 100%;text-align:left" disabled />
+                                                        </td>
+
+                                                        <td style="vertical-align:middle; width: 80px; text-align:center;">
+                                                            <input type="text" ng-model="item.normValue" style="width: 100%;text-align:center" />
+                                                        </td>
+
+                                                        <td style="vertical-align:middle;text-align:center;width:100px">
+                                                            <select class="form-control" ng-model="item.materialGroupTypeID" ng-options="x.materialGroupTypeID as x.materialGroupTypeNM for x in materialGroupTypes">
+                                                                <option value=""></option>
+                                                            </select>
+                                                        </td>
+
+                                                        <td style="vertical-align:middle;text-align:left;">
+                                                            <a ng-click="event.addGoodsProcedureToComponent($event,item)" class="btn btn-success btn-xs font-11" href="javascript:void(0);"><i class="fa fa-plus"></i>Add</a>
+                                                            <table>
+                                                                <tr ng-repeat="pItem in item.factoryFinishedProductOrderNormFactoryGoodsProcedures">
+                                                                    <td style="vertical-align:middle">
+                                                                        <a href="#" title="Remove" ng-click="event.removeGoodsProcedureToComponent($event,item,pItem.factoryFinishedProductOrderNormFactoryGoodsProcedureID)" style="color: #ff0000;"><i class="fa fa-times"></i></a>
+                                                                    </td>
+                                                                    <td style="vertical-align:middle"><input type="checkbox" ng-model="pItem.isDefault" /></td>
+                                                                    <td>
+                                                                        <select class="form-control" ng-model="pItem.factoryGoodsProcedureID" ng-options="x.factoryGoodsProcedureID as x.factoryGoodsProcedureNM for x in factoryGoodsProcedures">
+                                                                            <option value=""></option>
+                                                                        </select>
+                                                                    </td>
+                                                                </tr>
+                                                            </table>
+                                                        </td>
+                                                    </tr>
+
+                                                    <tr ng-if="item.factoryFinishedProductOrderNormID > 0">
+                                                        <td></td>
+                                                        <td colspan="5">
+                                                            <div id="grdSubFinishedProductNorm" class="tilsoft-table-wrapper">
+                                                                <a class="btn btn-primary btn-xs font-11 m-bottom-15" href="javascript:void(0);" ng-click="event.addSubComponentNorm($event,item)"><i class="fa fa-plus"></i> Add Sub Component Norm</a>
+                                                                <a class="btn btn-success btn-xs font-11 m-bottom-15" href="javascript:void(0);" ng-click="event.newSubComponent($event,item)"><i class="fa fa-plus"></i> Create New Sub Component</a>
+                                                                <div ng-if="item.factoryFinishedProductOrderNorms.length > 0">
+                                                                    <div class="tilsoft-table-body" style="width: 1200px; height:auto; margin-top:0px">
+                                                                        <table>
+                                                                            <tr>
+                                                                                <th style="width:100px"></th>
+                                                                                <th>Sub Component Name</th>
+                                                                                <th style="width:200px">Sub Component Code</th>
+                                                                                <th style="width:100px">Norm</th>
+                                                                                <th style="width:100px">Wicker Type</th>
+                                                                                <th style="width:300px">Procedure</th>
+                                                                            </tr>
+                                                                            <tbody ng-repeat="sItem in item.factoryFinishedProductOrderNorms | orderBy : 'factoryFinishedProductOrderNormID'">
+
+                                                                                @*sub component table*@
+
+                                                                                <tr>
+                                                                                    <td style="text-align:center; vertical-align:middle">
+                                                                                        <a ng-click="event.removeSubComponentNorm($event,item,sItem.factoryFinishedProductOrderNormID)" class="btn btn-danger btn-xs font-11" href="javascript:void(0);"><i class=" fa fa-times"></i>Del</a>
+                                                                                        <a ng-click="event.updateSubComponentNorm($event,item,sItem)" class="btn btn-{{sItem.isEditing==true?'warning' : 'primary'}} btn-xs font-11" href="javascript:void(0);"><i class="fa fa-save"></i> Save</a>
+                                                                                    </td>
+                                                                                    <td style="vertical-align:middle">
+                                                                                        <input type="text" ng-model="sItem.factoryFinishedProductNM" ng-keyup="quickSearchFinishedProduct.event.onKeyUp($event,sItem)" />
+                                                                                    </td>
+                                                                                    <td style="vertical-align:middle">
+                                                                                        <input type="text" ng-model="sItem.factoryFinishedProductUD" disabled />
+                                                                                    </td>
+                                                                                    <td style="vertical-align:middle;text-align:center">
+                                                                                        <input type="text" ng-model="sItem.normValue" style="width: 100%;text-align:right" />
+                                                                                    </td>
+
+                                                                                    <td style="vertical-align:middle;text-align:center;">
+                                                                                        <select class="form-control" ng-model="sItem.materialGroupTypeID" ng-options="x.materialGroupTypeID as x.materialGroupTypeNM for x in materialGroupTypes">
+                                                                                            <option value=""></option>
+                                                                                        </select>
+                                                                                    </td>
+
+                                                                                    <td style="vertical-align:middle;text-align:left;">
+                                                                                        <a ng-click="event.addGoodsProcedureToComponent($event,sItem)" class="btn btn-success btn-xs font-11" href="javascript:void(0);"><i class="fa fa-plus"></i>Add</a>
+                                                                                        <table>
+                                                                                            <tr ng-repeat="pItem in sItem.factoryFinishedProductOrderNormFactoryGoodsProcedures">
+                                                                                                <td style="vertical-align:middle">
+                                                                                                    <a href="#" title="Remove" ng-click="event.removeGoodsProcedureToComponent($event,sItem,pItem.factoryFinishedProductOrderNormFactoryGoodsProcedureID)" style="color: #ff0000;"><i class="fa fa-times"></i></a>
+                                                                                                </td>
+                                                                                                <td style="vertical-align:middle"><input type="checkbox" ng-model="pItem.isDefault" /></td>
+                                                                                                <td>
+                                                                                                    <select class="form-control" ng-model="pItem.factoryGoodsProcedureID" ng-options="x.factoryGoodsProcedureID as x.factoryGoodsProcedureNM for x in factoryGoodsProcedures">
+                                                                                                        <option value=""></option>
+                                                                                                    </select>
+                                                                                                </td>
+                                                                                            </tr>
+                                                                                        </table>
+                                                                                    </td>
+                                                                                </tr>
+
+                                                                                @*material norm table*@
+
+                                                                                <tr ng-if="sItem.factoryFinishedProductOrderNormID > 0">
+                                                                                    <td></td>
+                                                                                    <td colspan="5">
+                                                                                        <div id="grdSubMaterialNorm" class="tilsoft-table-wrapper">
+                                                                                            <a class="btn btn-primary btn-xs font-11 m-bottom-15" href="javascript:void(0);" ng-click="event.addMaterialNorm($event,sItem)"><i class="fa fa-plus"></i> Add Material Norm</a>
+                                                                                            <div ng-if="sItem.factoryMaterialOrderNorms.length > 0">
+                                                                                                <div class="tilsoft-table-body" style="width: 1000px; height:auto; margin-top:0px">
+                                                                                                    <table>
+                                                                                                        <tr>
+                                                                                                            <th style="width:100px"></th>
+                                                                                                            <th>Material Name</th>
+                                                                                                            <th style="width:200px">Material Code</th>
+                                                                                                            <th style="width:100px">Unit</th>
+                                                                                                            <th style="width:100px">Norm</th>
+                                                                                                        </tr>
+                                                                                                        <tr ng-repeat="mItem in sItem.factoryMaterialOrderNorms | orderBy : 'factoryMaterialOrderNormID'">
+                                                                                                            <td style="text-align:center; vertical-align:middle">
+                                                                                                                <a ng-click="event.removeMaterialNorm($event,sItem,mItem.factoryMaterialOrderNormID)" class="btn btn-danger btn-xs font-11" href="javascript:void(0);"><i class=" fa fa-times"></i>Del</a>
+                                                                                                                <a ng-click="event.updateMaterialNorm($event,sItem,mItem)" class="btn btn-{{mItem.isEditing==true?'warning' : 'primary'}} btn-xs font-11" href="javascript:void(0);"><i class="fa fa-save"></i> Save</a>
+                                                                                                            </td>
+                                                                                                            <td style="vertical-align:middle">
+                                                                                                                <input type="text" ng-model="mItem.factoryMaterialNM" ng-keyup="quickSearchMaterial.event.onKeyUp($event,mItem)" />
+                                                                                                            </td>
+                                                                                                            <td style="vertical-align:middle">
+                                                                                                                <input type="text" ng-model="mItem.factoryMaterialUD" disabled />
+                                                                                                            </td>
+                                                                                                            <td style="vertical-align:middle">
+                                                                                                                <input type="text" ng-model="mItem.unitNM" disabled />
+                                                                                                            </td>
+                                                                                                            <td style="vertical-align:middle;text-align:center">
+                                                                                                                <input type="text" ng-model="mItem.normValue" style="width: 100%;text-align:right" />
+                                                                                                            </td>
+                                                                                                        </tr>
+                                                                                                    </table>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </td>
+                                                                                </tr>
+
+                                                                            </tbody>
+                                                                        </table>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+
+                                                    <tr ng-if="item.factoryFinishedProductOrderNormID > 0">
+                                                        <td></td>
+                                                        <td colspan="5">
+                                                            <div id="grdMaterialNorm" class="tilsoft-table-wrapper">
+                                                                <a class="btn btn-primary btn-xs font-11 m-bottom-15" href="javascript:void(0);" ng-click="event.addMaterialNorm($event,item)"><i class="fa fa-plus"></i> Add Material Norm</a>
+                                                                <div ng-if="item.factoryMaterialOrderNorms.length > 0">
+                                                                    <div class="tilsoft-table-body" style="width: 1000px; height:auto; margin-top:0px">
+                                                                        <table>
+                                                                            <tr>
+                                                                                <th style="width:100px"></th>
+                                                                                <th>Material Name</th>
+                                                                                <th style="width:200px">Material Code</th>
+                                                                                <th style="width:100px">Unit</th>
+                                                                                <th style="width:100px">Norm</th>
+                                                                            </tr>
+                                                                            <tr ng-repeat="mItem in item.factoryMaterialOrderNorms | orderBy :'factoryMaterialOrderNormID'">
+                                                                                <td style="text-align:center; vertical-align:middle">
+                                                                                    <a ng-click="event.removeMaterialNorm($event,item,mItem.factoryMaterialOrderNormID)" class="btn btn-danger btn-xs font-11" href="javascript:void(0);"><i class=" fa fa-times"></i>Del</a>
+                                                                                    <a ng-click="event.updateMaterialNorm($event,item,mItem)" class="btn btn-{{mItem.isEditing==true?'warning' : 'primary'}} btn-xs font-11" href="javascript:void(0);"><i class="fa fa-save"></i> Save</a>
+                                                                                </td>
+                                                                                <td style="vertical-align:middle">
+                                                                                    <input type="text" ng-model="mItem.factoryMaterialNM" ng-keyup="quickSearchMaterial.event.onKeyUp($event,mItem)" />
+                                                                                </td>
+                                                                                <td style="vertical-align:middle">
+                                                                                    <input type="text" ng-model="mItem.factoryMaterialUD" disabled />
+                                                                                </td>
+                                                                                <td style="vertical-align:middle">
+                                                                                    <input type="text" ng-model="mItem.unitNM" disabled />
+                                                                                </td>
+                                                                                <td style="vertical-align:middle;text-align:center">
+                                                                                    <input type="text" ng-model="mItem.normValue" style="width: 100%;text-align:right" />
+                                                                                </td>
+                                                                            </tr>
+                                                                        </table>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+
+                        @*view mode*@
+                        <div class="row" ng-if="isEditMode==false && isCreatingNewComponent==false && data.factoryOrderNormID>0">
+                            <section class="col col-lg-12">
+                                <div id="grdFinishedProductNorm" class="tilsoft-table-wrapper">
+
+                                    <div class="tilsoft-table" style="height:600px">
+                                        <div class="tilsoft-table-header" style="width: 1600px;">
+                                            <div style="width:200px">Component Code</div>
+                                            <div style="width:700px">Component Name</div>
+                                            <div style="width:80px">Norm</div>
+                                            <div style="width:100px">Wicker Type</div>
+                                            <div>Procedure</div>
+                                        </div>
+
+                                        <div class="tilsoft-table-body" style="width: 1600px;">
+                                            <table>
+                                                <tbody ng-repeat="item in data.factoryFinishedProductOrderNorms | orderBy : 'factoryFinishedProductOrderNormID'">
+
+                                                    @*component table*@
+
+                                                    <tr>
+                                                        <td style="vertical-align:middle;width:199px">
+                                                            <span>{{item.factoryFinishedProductUD}}</span>
+                                                        </td>
+
+                                                        <td style="vertical-align:middle;width:700px">
+                                                            <span>{{item.factoryFinishedProductNM}}</span>
+                                                        </td>
+
+                                                        <td style="vertical-align:middle;text-align:center;width:80px">
+                                                            <span>{{item.normValue}}</span>
+                                                        </td>
+
+                                                        <td style="vertical-align:middle;text-align:center;width:100px">
+                                                            <span>{{method.getMaterialGroupTypeName(item.materialGroupTypeID)}}</span>
+                                                        </td>
+
+                                                        <td style="vertical-align:middle;text-align:center;">
+                                                            <table>
+                                                                <tr ng-repeat="pItem in item.factoryFinishedProductOrderNormFactoryGoodsProcedures">
+                                                                    <td style="vertical-align:middle"><input type="checkbox" ng-model="pItem.isDefault"  disabled/></td>
+                                                                    <td>
+                                                                        <select class="form-control" ng-model="pItem.factoryGoodsProcedureID" ng-options="x.factoryGoodsProcedureID as x.factoryGoodsProcedureNM for x in factoryGoodsProcedures" disabled>
+                                                                            <option value=""></option>
+                                                                        </select>
+                                                                    </td>
+                                                                </tr>
+                                                            </table>
+                                                        </td>
+                                                    </tr>
+
+                                                    <tr ng-if="item.factoryFinishedProductOrderNormID > 0 && item.factoryFinishedProductOrderNorms.length > 0">
+                                                        <td></td>
+                                                        <td colspan="4">
+                                                            <div id="grdSubFinishedProductNorm" class="tilsoft-table-wrapper">
+                                                                <div ng-if="item.factoryFinishedProductOrderNorms.length > 0">
+                                                                    <div class="tilsoft-table-body" style="width: 1200px; height:auto; margin-top:0px">
+                                                                        <table>
+                                                                            <tr>
+                                                                                <th style="width:200px">Sub Component Code</th>
+                                                                                <th>Sub Component Name</th>
+                                                                                <th style="width:80px">Norm</th>
+                                                                                <th style="width:100px">Wicker Type</th>
+                                                                                <th style="width:300px">Procedure</th>
+                                                                            </tr>
+                                                                            <tbody ng-repeat="sItem in item.factoryFinishedProductOrderNorms | orderBy : 'factoryFinishedProductOrderNormID'">
+
+                                                                                @*sub component table*@
+
+                                                                                <tr>
+                                                                                    <td style="vertical-align:middle">
+                                                                                        <span>{{sItem.factoryFinishedProductUD}}</span>
+                                                                                    </td>
+                                                                                    <td style="vertical-align:middle">
+                                                                                        <span>{{sItem.factoryFinishedProductNM}}</span>
+                                                                                    </td>
+                                                                                    <td style="vertical-align:middle;text-align:center">
+                                                                                        <span>{{sItem.normValue}}</span>
+                                                                                    </td>
+                                                                                    <td style="vertical-align:middle;text-align:center;">
+                                                                                        <span>{{method.getMaterialGroupTypeName(sItem.materialGroupTypeID)}}</span>
+                                                                                    </td>
+                                                                                    <td style="vertical-align:middle;text-align:center">
+                                                                                        <table>
+                                                                                            <tr ng-repeat="pItem in sItem.factoryFinishedProductOrderNormFactoryGoodsProcedures">
+                                                                                                <td style="vertical-align:middle"><input type="checkbox" ng-model="pItem.isDefault"  disabled/></td>
+                                                                                                <td>
+                                                                                                    <select class="form-control" ng-model="pItem.factoryGoodsProcedureID" ng-options="x.factoryGoodsProcedureID as x.factoryGoodsProcedureNM for x in factoryGoodsProcedures" disabled>
+                                                                                                        <option value=""></option>
+                                                                                                    </select>
+                                                                                                </td>
+                                                                                            </tr>
+                                                                                        </table>
+                                                                                    </td>
+                                                                                </tr>
+
+                                                                                @*material norm table*@
+
+                                                                                <tr ng-if="sItem.factoryFinishedProductOrderNormID > 0 && sItem.factoryMaterialOrderNorms.length > 0">
+                                                                                    <td></td>
+                                                                                    <td colspan="4">
+                                                                                        <div id="grdSubMaterialNorm" class="tilsoft-table-wrapper">
+                                                                                            <div ng-if="sItem.factoryMaterialOrderNorms.length > 0">
+                                                                                                <div class="tilsoft-table-body" style="width: 1000px; height:auto; margin-top:0px">
+                                                                                                    <table>
+                                                                                                        <tr>
+                                                                                                            <th style="width:200px">Material Code</th>
+                                                                                                            <th>Material Name</th>
+                                                                                                            <th style="width:100px">Unit</th>
+                                                                                                            <th style="width:100px">Norm</th>
+                                                                                                        </tr>
+                                                                                                        <tr ng-repeat="mItem in sItem.factoryMaterialOrderNorms | orderBy : 'factoryMaterialOrderNormID'">
+                                                                                                            <td style="vertical-align:middle">
+                                                                                                                <span>{{mItem.factoryMaterialUD}}</span>
+                                                                                                            </td>
+
+                                                                                                            <td style="vertical-align:middle">
+                                                                                                                <span>{{mItem.factoryMaterialNM}}</span>
+                                                                                                            </td>
+
+                                                                                                            <td style="vertical-align:middle">
+                                                                                                                <span>{{mItem.unitNM}}</span>
+                                                                                                            </td>
+                                                                                                            <td style="vertical-align:middle;text-align:center">
+                                                                                                                <span>{{mItem.normValue}}</span>
+                                                                                                            </td>
+                                                                                                        </tr>
+                                                                                                    </table>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </td>
+                                                                                </tr>
+
+                                                                            </tbody>
+                                                                        </table>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+
+                                                    <tr ng-if="item.factoryFinishedProductOrderNormID > 0 && item.factoryMaterialOrderNorms.length > 0">
+                                                        <td></td>
+                                                        <td colspan="4">
+                                                            <div id="grdMaterialNorm" class="tilsoft-table-wrapper">
+                                                                <div ng-if="item.factoryMaterialOrderNorms.length > 0">
+                                                                    <div class="tilsoft-table-body" style="width: 1000px; height:auto; margin-top:0px">
+                                                                        <table>
+                                                                            <tr>
+                                                                                <th style="width:200px">Material Code</th>
+                                                                                <th>Material Name</th>
+                                                                                <th style="width:100px">Unit</th>
+                                                                                <th style="width:100px">Norm</th>
+                                                                            </tr>
+                                                                            <tr ng-repeat="mItem in item.factoryMaterialOrderNorms | orderBy :'factoryMaterialOrderNormID'">
+                                                                                <td style="vertical-align:middle">
+                                                                                    <span>{{mItem.factoryMaterialUD}}</span>
+                                                                                </td>
+
+                                                                                <td style="vertical-align:middle">
+                                                                                    <span>{{mItem.factoryMaterialNM}}</span>
+                                                                                </td>
+
+                                                                                <td style="vertical-align:middle">
+                                                                                    <span>{{mItem.unitNM}}</span>
+                                                                                </td>
+
+                                                                                <td style="vertical-align:middle;text-align:center">
+                                                                                    <span>{{mItem.normValue}}</span>
+                                                                                </td>
+                                                                            </tr>
+                                                                        </table>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+
+
+    <div id="popup-material" class="popup-container-2" style="display: none; left: 0px;">
+        <div style="float: right; margin-bottom: 8px;">
+            <a href="javascript:void(0);" ng-click="quickSearchMaterial.event.close($event)" class="btn btn-danger btn-xs">Close</a>
+        </div>
+        <div class="clear"></div>
+        <div id="quickSearchResultGrid-material" class="tilsoft-table-wrapper">
+            <div class="tilsoft-table">
+                @*<div class="tilsoft-table-header" style="width: 700px;">
+                    <div style="width: 60px; text-align: center"></div>
+                    <div style="width: 200px" class="sorting" data-colname="FactoryMaterialUD">Material Code</div>
+                    <div style="width: 150px" class="sorting" data-colname="factoryMaterialGroupNM">Group</div>
+                    <div style="width: 100px" class="sorting" data-colname="factoryMaterialTypeNM">Type</div>
+                    <div style="width: 100px" class="sorting" data-colname="factoryMaterialColorNM">Color</div>
+                    <div style="width: 70px" class="sorting" data-colname="unitNM">Unit</div>
+                    <div class="sorting" data-colname="FactoryMaterialNM">Material Name</div>
+                </div>*@
+
+                <div class="tilsoft-table-body" style="width: 700px; height:auto; margin-top:0px;">
+                    <table>
+                        <tr ng-repeat="item in quickSearchMaterial.data">
+                            <td style="width: 60px; text-align: center; vertical-align:middle">
+                                <a class="btn btn-primary btn-xs font-11" href="javascript:void(0);" ng-click="quickSearchMaterial.event.onSelectedItem($event,item)">Select</a>
+                            </td>
+                            <td style="width: 200px; vertical-align:middle">{{item.factoryMaterialUD}}</td>
+                            <td style="width: 150px; vertical-align:middle">{{item.factoryMaterialGroupNM}}</td>
+                            <td style="width: 100px; vertical-align:middle">{{item.factoryMaterialTypeNM}}</td>
+                            <td style="width: 100px; vertical-align:middle">{{item.factoryMaterialColorNM}}</td>
+                            <td style="width: 70px; vertical-align:middle">{{item.unitNM}}</td>
+                            <td vertical-align:middle">{{item.factoryMaterialNM}}</td>
+                            @*<td style="text-align: center; vertical-align: middle;">
+                                <div ng-repeat="item_image in item.factoryMaterialImages" class="float-img-list">
+                                    <a href="{{item_image.fileLocation}}" data-featherlight="image">
+                                        <img ng-src="{{item_image.thumbnailLocation}}" width="50" height="50" />
+                                    </a>
+                                </div>
+                            </td>*@
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="popup-finishedproduct" class="popup-container-2" style="display: none; left: 0px;">
+        <div style="float: right; margin-bottom: 8px;">
+            <a href="javascript:void(0);" ng-click="quickSearchFinishedProduct.event.close($event)" class="btn btn-danger btn-xs">Close</a>
+        </div>
+        <div class="clear"></div>
+        <div id="quickSearchResultGrid-finishedproduct" class="tilsoft-table-wrapper">
+            <div class="tilsoft-table">
+                @*<div class="tilsoft-table-header" style="width: 700px;">
+                        <div style="width: 60px; text-align: center"></div>
+                        <div style="width: 200px" class="sorting" data-colname="FactoryMaterialUD">Material Code</div>
+                        <div class="sorting" data-colname="FactoryMaterialNM">Material Name</div>
+                    </div>*@
+
+                <div class="tilsoft-table-body" style="width: 700px; height:auto; margin-top:0px;">
+                    <table>
+                        <tr ng-repeat="item in quickSearchFinishedProduct.data">
+                            <td style="width: 60px; text-align: center; vertical-align:middle">
+                                <a class="btn btn-primary btn-xs font-11" href="javascript:void(0);" ng-click="quickSearchFinishedProduct.event.onSelectedItem($event,item)">Select</a>
+                            </td>
+                            <td style="width: 200px; vertical-align:middle">{{item.factoryFinishedProductUD}}</td>
+                            <td vertical-align:middle">{{item.factoryFinishedProductNM}}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</form>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "FactoryNorm")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="#" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="event.update($event)"><i class="fa fa-save"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="#" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="Delete" style="color: #ff0000;" ng-click="event.delete($event)"><i class="fa fa-times"></i></a>
+        </li>
+    </ul>
+}
+
+
+@section pagejs {
+    <script src="~/Angular/app/jsonService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/support/service.js?c=@System.Guid.NewGuid().ToString().Replace("-","")"></script>
+    <script type="text/javascript">
+        jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/factoryOrderNorm/';
+        jsonService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+        supportService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/support/';
+        supportService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+        var context = {
+            id: '@ViewBag.ID',
+            backUrl: '@Url.Action("Index", "FactoryOrderNorm")',
+            refreshUrl: '@Url.Action("Edit", "FactoryOrderNorm", new { id = UrlParameter.Optional })/',
+            errMsg: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED',
+        }
+    </script>
+    <script src="~/Angular/app/factoryOrderNorm/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/factoryOrderNorm/edit.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}

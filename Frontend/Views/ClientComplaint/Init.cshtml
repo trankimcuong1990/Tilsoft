@@ -1,0 +1,114 @@
+﻿@{
+    ViewBag.Icon = "fa-pencil-square-o";
+    ViewBag.Title = "Create new Client Complaint";
+    ViewBag.Module = "Client Complaint";
+
+    var guid = System.Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+
+    string userManualUrl = string.Empty;
+    if (System.IO.File.Exists(Server.MapPath("~/UserManual/" + ViewBag.ModuleCode + ".pdf")))
+    {
+        userManualUrl = "/UserManual/" + ViewBag.ModuleCode + ".pdf";
+    }
+
+}
+
+<form class="row" name="editForm">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <h2>Please provide more information to create client complaint</h2>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div class="smart-form">
+                        <fieldset>
+                            <div class="row">
+                                <section class="col col-6">
+                                    <label class="label">Season</label>
+                                    <label class="select">
+                                        <select ng-model="data.season" ng-options="season.seasonValue as season.seasonText for season in seasons">
+                                            <option value=""></option>
+                                        </select>
+                                        <i></i>
+                                    </label>
+                                </section>
+
+                                <section class="col col-6">
+                                    <label class="label">Client Code/Name</label>
+                                    <label class="input">
+                                        <input type="text" ng-model="data.clientNM" placeholder="Provide at least 3 chars to search for the client" autocomplete="off" ng-keyup="quickSearchClient.event.searchBoxKeyUp()" id="txtClient" />
+                                        <input type="hidden" ng-model="data.clientID" name="clientID" required />
+                                        <i class="icon-append fa fa-search"></i>
+                                    </label>
+                                    <!--// BEGIN: Client quick search dialog -->
+                                    <div id="client-popup" class="popup-container-2">
+                                        <div style="float: right; margin-bottom: 8px;">
+                                            <a ng-click="quickSearchClient.event.close($event, true)" class="btn btn-primary btn-xs" href="javascript:void(0);"><i class="fa fa-remove"></i> Close</a>
+                                        </div>
+                                        <div class="clear"></div>
+                                        <div id="quickSearchClientTable" class="tilsoft-table-wrapper">
+                                            <div class="tilsoft-table">
+                                                <div class="tilsoft-table-header" style="width: 360px;">
+                                                    <div style="width: 70px;"></div>
+                                                    <div style="width: 150px;">Client UD</div>
+                                                    <div>Client NM</div>
+                                                </div>
+                                                <div class="tilsoft-table-body" style="width: 360px;">
+                                                    <table>
+                                                        <tr ng-repeat="item in quickSearchClient.data">
+                                                            <td style="width: 70px; text-align: center;"><a ng-click="quickSearchClient.event.ok($event, item.clientID)" class="btn btn-primary btn-xs" href="javascript:void(0);"><i class="fa fa-check"></i> Select</a></td>
+                                                            <td style="width: 150px;">{{item.clientUD}}</td>
+                                                            <td>{{item.clientNM}}</td>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!--// END: Client quick search dialog -->
+                                </section>
+                            </div>
+                        </fieldset>
+                        <footer>
+                            <button class="btn btn-primary" type="button" ng-click="event.goNext()">
+                                Next
+                            </button>
+                            <button class="btn btn-default" type="button" ng-click="event.goBack()">
+                                Cancel
+                            </button>
+                        </footer>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+@section FormAction {
+    <ul id="sparks">       
+        @if (!string.IsNullOrEmpty(userManualUrl))
+        {
+            <li class="sparks-info">
+                <a target="_blank" href="@userManualUrl" class="btn btn-default" title="Help"><i class="fa fa-info"></i></a>
+            </li>
+        }
+    </ul>
+}
+@section pagejs {
+    <script type="text/javascript">
+        var context = {
+            backURL: '@Url.Action("Index", "ClientComplaint")',
+            nextURL: '@Url.Action("Edit", "ClientComplaint")/0?',
+            serviceUrl: '@(serviceRoot)api/clientcomplaints/',
+            supportServiceUrl: '@(serviceRoot)api/support/',
+            token: '@token'
+        };
+    </script>
+    <script src="~/Angular/app/clientComplaint/module.config.js?v=@guid" type="text/javascript"></script>
+    <script src="~/Angular/app/jsonService2.js?v=@guid" type="text/javascript"></script>
+    <script src="~/Angular/app/clientComplaint/service.js?v=@guid" type="text/javascript"></script>
+    <script src="~/Angular/app/clientComplaint/init.js?v=@guid" type="text/javascript"></script>
+}
+

@@ -1,0 +1,595 @@
+﻿@{
+    if (ViewBag.ID == 0)
+    {
+        ViewBag.Title = "Create New Factory Invoice";
+    }
+    else
+    {
+        ViewBag.Title = "Edit Factory Invoice";
+    }
+
+    int bookingId = 0;
+    int supplierId = 0;
+    string season = "";
+    if (Request.Params["b"] != null)
+    {
+        bookingId = Convert.ToInt32(Request.Params["b"]);
+    }
+    if (Request.Params["s"] != null)
+    {
+        supplierId = Convert.ToInt32(Request.Params["s"]);
+    }
+    if (Request.Params["se"] != null)
+    {
+        season = Request.Params["se"].ToString();
+    }
+}
+<style>
+    .custom-pagination {
+        display: none !important;
+    }
+</style>
+
+<form class="row" name="editForm" id="main-form">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-0" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>General Information</h2>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div class="smart-form">
+                        <fieldset>
+                            <div class="row">
+                                <section class="col col-2">
+                                    <label class="label">Invoice No</label>
+                                    <label class="input" ng-if="!data.isConfirmed">
+                                        <input type="text" ng-model="data.invoiceNo" ng-if="!data.isConfirmed" />
+                                    </label>
+                                    <label class="input" ng-if="data.isConfirmed">
+                                        <span class="form-control">{{data.invoiceNo}}</span>
+                                    </label>
+                                </section>
+                                <section class="col col-2">
+                                    <label class="label">Invoice Date</label>
+                                    <label class="input" ng-if="!data.isConfirmed">
+                                        <input type="text" class="datepicker" ng-model="data.invoiceDate" data-dateformat="dd/mm/yy" />
+                                        <i class="icon-append fa fa-calendar"></i>
+                                    </label>
+                                    <label class="input" ng-if="data.isConfirmed">
+                                        <span class="form-control">{{data.invoiceDate}}</span>
+                                    </label>
+                                </section>
+                                <section class="col col-2">
+                                    <label class="label">Season</label>
+                                    <label class="input">
+                                        <span class="form-control">{{data.season}}</span>
+                                    </label>
+                                </section>
+                                <section class="col col-3">
+                                    <label class="label">Booking No</label>
+                                    <label class="input">
+                                        <span class="form-control">{{data.bookingUD}}</span>
+                                    </label>
+                                </section>
+                                <section class="col col-3">
+                                    <label class="label">B/L</label>
+                                    <label class="input">
+                                        <span class="form-control">{{data.blNo}}</span>
+                                    </label>
+                                </section>
+                            </div>
+                            <section>
+                                <label class="label">Supplier</label>
+                                <label class="input">
+                                    <span class="form-control">
+                                        <strong>{{data.supplierUD}}</strong> - {{data.supplierNM}}
+                                    </span>
+                                </label>
+                            </section>
+                            <div class="row">  
+                                <div class="col col-8">
+                                    <section class="no-padding">
+                                        <label class="label">
+                                            Attached File
+                                        </label>
+                                        <label class="input">
+                                            <span class="form-control">
+                                                {{data.friendlyName}}
+                                                <div style="position: absolute; right: 5px; top: 5px;">
+                                                    <a href="javascript:void(0);" class="btn btn-primary btn-xs" style="font-size: 11px;" ng-click="event.downloadFile()">Download</a>
+                                                    <a href="javascript:void(0);" class="btn btn-primary btn-xs" style="font-size: 11px;" ng-click="event.changeFile()" ng-if="!data.isConfirmed">Change</a>
+                                                    <a href="javascript:void(0);" class="btn btn-primary btn-xs" style="font-size: 11px;" ng-click="event.removeFile()" ng-if="!data.isConfirmed">Remove</a>
+                                                </div>
+                                            </span>
+                                        </label>
+                                    </section>
+                                    <div class="row no-padding">
+                                        <section class="col col-4">
+                                            <label class="label">Deducted Amount</label>
+                                            <label class="input" ng-if="!data.isConfirmed">
+                                                <input type="text" ng-model="data.deductedAmount" />
+                                            </label>
+                                            <label class="input" ng-if="data.isConfirmed">
+                                                <span class="form-control">{{data.deductedAmount | currency:'$':2}}</span>
+                                            </label>
+                                        </section>
+                                        <section class="col col-8">
+                                            <label class="label">Remark</label>
+                                            <label class="input" ng-if="!data.isConfirmed">
+                                                <input type="text" ng-model="data.remark" />
+                                            </label>
+                                            <label class="input" ng-if="data.isConfirmed">
+                                                <span class="form-control">{{data.remark}}</span>
+                                            </label>
+                                        </section>
+                                    </div>
+                                </div>
+                                <section class="col col-4">
+                                    <div class="font-md">
+                                        <div>
+                                            <strong>STATUS :</strong>
+                                            <span class="pull-right" ng-if="!data.isConfirmed"> PENDING </span>
+                                            <span class="pull-right" ng-if="data.isConfirmed"> CONFIRMED </span>
+                                        </div>
+                                    </div>
+                                    <div class="font-md">
+                                        <div>
+                                            <strong>&nbsp;</strong>
+                                            <span class="pull-right">&nbsp;</span>
+                                        </div>
+                                    </div>
+                                    <div class="font-md">
+                                        <div>
+                                            <strong>SUB-TOTAL :</strong>
+                                            <span class="pull-right"> {{method.getSubTotal() | currency:'$':2}} </span>
+                                        </div>
+                                    </div>
+                                    <div class="font-md">
+                                        <div>
+                                            <strong>DEDUCTION :</strong>
+                                            <span class="pull-right"> {{data.deductedAmount | currency:'$':2}} </span>
+                                        </div>
+                                    </div>
+                                    <div class="font-md">
+                                        <div>
+                                            <strong>TOTAL :</strong>
+                                            <span class="pull-right"> {{method.getTotal() | currency:'$':2}} </span>
+                                        </div>
+                                    </div>
+                                </section>
+                            </div>
+                            <section>
+                                <div class="note" ng-if="data.updatorName"><strong>Updated By</strong>: {{data.updatorName}} on {{data.updatedDate}}</div>
+                                <div class="note" ng-if="data.confirmerName"><strong>Confirmed By</strong>: {{data.confirmerName}} on {{data.confirmedDate}}</div>
+                            </section>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="jarviswidget" id="wid-id-1" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <ul class="nav nav-tabs pull-left in">
+                    <li class="active" ng-if="data.bookingID">
+                        <a data-toggle="tab" href="#tabProduct"> <span> Product </span> </a>
+                    </li>
+                    <li ng-if="data.bookingID">
+                        <a data-toggle="tab" href="#tabSparepart"> <span> Sparepart </span> </a>
+                    </li>
+                    <li class="{{data.bookingID == null ? 'active' : ''}}">
+                        <a data-toggle="tab" href="#tabExtra"> <span> Extra </span> </a>
+                    </li>
+                </ul>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="tabProduct" ng-if="data.bookingID">
+                            <div class="smart-form">
+                                <fieldset>
+                                    <div class="row" ng-if="!data.isConfirmed">
+                                        <section class="col col-10 furnindo-search-box">
+                                            <label class="select">
+                                                <select ui-select2 ng-model="selectedFactoryOrderDetailID" style="width:100%" class="select2" id="factoryOrderDetailSelector">
+                                                    <option value="">-- SELECT --</option>
+                                                    <option ng-repeat="item in factoryOrderDetails | orderBy: 'description'" value="{{item.factoryOrderDetailID}}">{{item.itemName}}</option>
+                                                </select>
+                                            </label>
+                                        </section>
+                                        <section class="col col-2 furnindo-search-button">
+                                            <a href="javascript:void(0)" class="btn btn-primary btn-sm" ng-click="event.addProduct()"><i class="fa fa-plus"></i> Add</a>
+                                            <a href="javascript:void(0)" class="btn btn-primary btn-sm" ng-click="event.addAllProduct()"><i class="fa fa-plus"></i> Add all</a>
+                                        </section>
+                                    </div>
+
+                                    <section>
+                                        <div id="grdProduct" class="tilsoft-table-wrapper">
+                                            <div class="tilsoft-table">
+                                                <div class="tilsoft-table-header" style="width: 1000px;">
+                                                    <div style="width: 80px;">&nbsp;</div>
+                                                    <div style="width: 300px;">Description</div>
+                                                    <div style="width: 80px;">Qnt</div>
+                                                    <div style="width: 80px;">U.Price</div>
+                                                    <div style="width: 120px;">Sub-Total</div>
+                                                    <div>Remark</div>
+                                                </div>
+                                                <div class="tilsoft-table-body" style="width: 1000px;">
+                                                    <table>
+                                                        <tr ng-repeat="item in data.factoryInvoiceDetails">
+                                                            <td style="width: 80px; text-align: center;">
+                                                                <a ng-click="event.removeProduct(item)" class="btn btn-danger btn-xs font-11 {{data.isConfirmed==true?'disabled' : ''}}" href="javascript:void(0);"><i class=" fa fa-times"></i> Remove</a>
+                                                            </td>
+                                                            <td style="width: 300px;">
+                                                                <strong>Order: {{item.factoryOrderUD}} (Client: {{item.clientUD}})</strong>
+                                                                <br />
+                                                                <strong>{{item.articleCode}}</strong>
+                                                                <br />
+                                                                {{item.description}}
+                                                            </td>
+
+                                                            <td style="width: 80px; text-align: right;" ng-if="!data.isConfirmed"><input type="text" ng-model="item.quantity" style="width: 100%; text-align: right;" /></td>
+                                                            <td style="width: 80px; text-align: right;" ng-if="data.isConfirmed">{{item.quantity | currency:'':0}}</td>
+
+                                                            <td style="width: 80px; text-align: right;" ng-if="!data.isConfirmed"><input type="text" ng-model="item.unitPrice" style="width: 100%; text-align: right;" /></td>
+                                                            <td style="width: 80px; text-align: right;" ng-if="data.isConfirmed">{{item.unitPrice | currency:'$':2}}</td>
+
+                                                            <td style="width: 120px; text-align:right">{{$parent.method.getProductSubTotal(item) | currency:'$':2}}</td>
+
+                                                            <td ng-if="!data.isConfirmed"><input type="text" ng-model="item.remark" style="width: 100%;" /></td>
+                                                            <td ng-if="data.isConfirmed">{{item.remark}}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td style="width: 80px; text-align:right">&nbsp;</td>
+                                                            <td style="text-align: right; width: 300px; font-weight: bold;">TOTAL</td>
+                                                            <td style="width: 80px; text-align:right; font-weight: bold;">{{method.getProductSumQnt() | currency:'':0}}</td>
+                                                            <td style="width: 80px; text-align:right">&nbsp;</td>
+                                                            <td style="width: 120px; text-align:right; font-weight: bold;">{{method.getProductSumSubTotal() | currency:'$':2}}</td>
+                                                            <td>&nbsp;</td>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+                                </fieldset>
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="tabSparepart" ng-if="data.bookingID">
+                            <div class="smart-form">
+                                <fieldset>
+                                    <div class="row" ng-if="!data.isConfirmed">
+                                        <section class="col col-10 furnindo-search-box">
+                                            <label class="select">
+                                                <select ui-select2 ng-model="selectedFactoryOrderSparepartDetailID" style="width:100%" class="select2" id="factoryOrderSparepartDetailSelector">
+                                                    <option value="">-- SELECT --</option>
+                                                    <option ng-repeat="item in factoryOrderSparepartDetails | orderBy: 'description'" value="{{item.factoryOrderSparepartDetailID}}">{{item.itemName}}</option>
+                                                </select>
+                                            </label>
+                                        </section>
+                                        <section class="col col-2 furnindo-search-button">
+                                            <a href="javascript:void(0)" class="btn btn-primary btn-sm" ng-click="event.addSparepart()"><i class="fa fa-plus"></i> Add</a>
+                                            <a href="javascript:void(0)" class="btn btn-primary btn-sm" ng-click="event.addAllSparepart()"><i class="fa fa-plus"></i> Add all</a>
+                                        </section>
+                                    </div>
+                                    <section>
+                                        <div id="grdSparepart" class="tilsoft-table-wrapper">
+                                            <div class="tilsoft-table">
+                                                <div class="tilsoft-table-header" style="width: 1000px;">
+                                                    <div style="width: 80px;">&nbsp;</div>
+                                                    <div style="width: 300px;">Description</div>
+                                                    <div style="width: 80px;">Qnt</div>
+                                                    <div style="width: 80px;">U.Price</div>
+                                                    <div style="width: 120px;">Sub-Total</div>
+                                                    <div>Remark</div>
+                                                </div>
+                                                <div class="tilsoft-table-body" style="width: 1000px;">
+                                                    <table>
+                                                        <tr ng-repeat="item in data.factoryInvoiceSparepartDetails">
+                                                            <td style="width: 80px; text-align: center;">
+                                                                <a ng-click="event.removeProduct(item)" class="btn btn-danger btn-xs font-11 {{data.isConfirmed==true?'disabled' : ''}}" href="javascript:void(0);"><i class=" fa fa-times"></i> Remove</a>
+                                                            </td>
+                                                            <td style="width: 300px;">
+                                                                <strong>Order: {{item.factoryOrderUD}} (Client: {{item.clientUD}})</strong>
+                                                                <br />
+                                                                <strong>{{item.articleCode}}</strong>
+                                                                <br />
+                                                                {{item.description}}
+                                                            </td>
+                                                            <td style="width: 80px; text-align: right;" ng-if="!data.isConfirmed"><input type="text" ng-model="item.quantity" style="width: 100%; text-align: right;" /></td>
+                                                            <td style="width: 80px; text-align: right;" ng-if="data.isConfirmed">{{item.quantity | currency:'':0}}</td>
+
+                                                            <td style="width: 80px; text-align: right;" ng-if="!data.isConfirmed"><input type="text" ng-model="item.unitPrice" style="width: 100%; text-align: right;" /></td>
+                                                            <td style="width: 80px; text-align: right;" ng-if="data.isConfirmed">{{item.unitPrice | currency:'$':2}}</td>
+
+                                                            <td style="width: 120px; text-align:right">{{$parent.method.getSparepartSubTotal(item) | currency:'$':2}}</td>
+
+                                                            <td ng-if="!data.isConfirmed"><input type="text" ng-model="item.remark" style="width: 100%;" /></td>
+                                                            <td ng-if="data.isConfirmed">{{item.remark}}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td style="width: 80px; text-align:right">&nbsp;</td>
+                                                            <td style="text-align: right; width: 300px; font-weight: bold;">TOTAL</td>
+                                                            <td style="width: 80px; text-align:right; font-weight: bold;">{{method.getSparepartSumQnt() | currency:'':0}}</td>
+                                                            <td style="width: 80px; text-align:right">&nbsp;</td>
+                                                            <td style="width: 120px; text-align:right; font-weight: bold;">{{method.getSparepartSumSubTotal() | currency:'$':2}}</td>
+                                                            <td>&nbsp;</td>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+                                </fieldset>
+                            </div>
+                        </div>
+                        <div class="tab-pane {{data.bookingID == null ? 'active' : ''}}" id="tabExtra">
+                            <div class="smart-form">
+                                <fieldset>
+                                    <section ng-if="!data.isConfirmed">
+                                        <a href="javascript:void(0)" class="btn btn-primary btn-sm" ng-click="event.addExtra()"><i class="fa fa-plus"></i> Add</a>
+                                    </section>
+                                    <section>
+                                        <div id="grdExtra" class="tilsoft-table-wrapper">
+                                            <div class="tilsoft-table">
+                                                <div class="tilsoft-table-header" style="width: 1000px;">
+                                                    <div style="width: 80px;">&nbsp;</div>
+                                                    <div style="width: 300px;">Description</div>
+                                                    <div style="width: 80px;">Qnt</div>
+                                                    <div style="width: 80px;">U.Price</div>
+                                                    <div style="width: 120px;">Sub-Total</div>
+                                                    <div>Remark</div>
+                                                </div>
+                                                <div class="tilsoft-table-body" style="width: 1000px;">
+                                                    <table>
+                                                        <tr ng-repeat="item in data.factoryInvoiceExtras">
+                                                            <td style="width: 80px; text-align: center;">
+                                                                <a ng-click="event.removeExtra(item)" class="btn btn-danger btn-xs font-11 {{data.isConfirmed==true?'disabled' : ''}}" href="javascript:void(0);"><i class=" fa fa-times"></i> Remove</a>
+                                                            </td>
+
+                                                            <td style="width: 300px;" ng-if="!data.isConfirmed"><input type="text" ng-model="item.description" style="width: 100%;" /></td>
+                                                            <td style="width: 300px;" ng-if="data.isConfirmed">{{item.description}}</td>
+
+                                                            <td style="width: 80px; text-align: right;" ng-if="!data.isConfirmed"><input type="text" ng-model="item.quantity" style="width: 100%; text-align: right;" /></td>
+                                                            <td style="width: 80px; text-align: right;" ng-if="data.isConfirmed">{{item.quantity | currency:'':0}}</td>
+
+                                                            <td style="width: 80px; text-align: right;" ng-if="!data.isConfirmed"><input type="text" ng-model="item.unitPrice" style="width: 100%; text-align: right;" /></td>
+                                                            <td style="width: 80px; text-align: right;" ng-if="data.isConfirmed">{{item.unitPrice | currency:'$':2}}</td>
+
+                                                            <td style="width: 120px; text-align:right">{{$parent.method.getExtraSubTotal(item) | currency:'$':2}}</td>
+
+                                                            <td ng-if="!data.isConfirmed"><input type="text" ng-model="item.remark" style="width: 100%;" /></td>
+                                                            <td ng-if="data.isConfirmed">{{item.remark}}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td style="width: 80px; text-align:right">&nbsp;</td>
+                                                            <td style="text-align: right; width: 300px; font-weight: bold;">TOTAL</td>
+                                                            <td style="width: 80px; text-align:right; font-weight: bold;">{{method.getExtraSumQnt() | currency:'':0}}</td>
+                                                            <td style="width: 80px; text-align:right">&nbsp;</td>
+                                                            <td style="width: 120px; text-align:right; font-weight: bold;">{{method.getExtraSumSubTotal() | currency:'$':2}}</td>
+                                                            <td>&nbsp;</td>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+                                </fieldset>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+<div id="productDetail" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title" id="myModalLabel">Product: {{product.product.description}}</h4>
+            </div>
+            <div class="modal-body no-padding">
+                <div class="smart-form">
+                    <fieldset>
+                        <div class="row">
+                            <section class="col col-3">
+                                <label class="label">Factory</label>
+                                <label class="input">
+                                    <span class="form-control">{{product.product.factoryUD}}</span>
+                                </label>
+                            </section>
+
+                            <section class="col col-3">
+                                <label class="label">Client</label>
+                                <label class="input">
+                                    <span class="form-control">{{product.product.clientUD}}</span>
+                                </label>
+                            </section>
+                            <section class="col col-3">
+                                <label class="label">Factory Order</label>
+                                <label class="input">
+                                    <span class="form-control">{{product.product.factoryOrderUD}}</span>
+                                </label>
+                            </section>
+                            <section class="col col-3">
+                                <label class="label">LDS</label>
+                                <label class="input">
+                                    <span class="form-control">{{product.product.lds}}</span>
+                                </label>
+                            </section>
+                        </div>
+                        <section>
+                            <label class="label">Art.Code</label>
+                            <label class="input">
+                                <span class="form-control">{{product.product.articleCode}}</span>
+                            </label>
+                        </section>
+                        <section>
+                            <label class="label">Description</label>
+                            <label class="input">
+                                <span class="form-control">{{product.product.description}}</span>
+                            </label>
+                        </section>
+                        <div class="row">
+                            <section class="col col-3">
+                                <label class="label">Ordered qnt</label>
+                                <label class="input">
+                                    <span class="form-control" style="text-align: right;">{{product.product.orderQnt | currency:'':0}}</span>
+                                </label>
+                            </section>
+                            <section class="col col-3">
+                                <label class="label">Load ability (40HC)</label>
+                                <label class="input">
+                                    <span class="form-control" style="text-align: right;">{{product.product.qnt40HC | currency:'':0}}</span>
+                                </label>
+                            </section>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" ng-click="event.addProduct()">
+                    Add
+                </button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="sparepartDetail" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title" id="myModalLabel">Sparepart: {{sparepart.sparepart.description}}</h4>
+            </div>
+            <div class="modal-body no-padding">
+                <div class="smart-form">
+                    <fieldset>
+                        <div class="row">
+                            <section class="col col-3">
+                                <label class="label">Factory</label>
+                                <label class="input">
+                                    <span class="form-control">{{sparepart.sparepart.factoryUD}}</span>
+                                </label>
+                            </section>
+
+                            <section class="col col-3">
+                                <label class="label">Client</label>
+                                <label class="input">
+                                    <span class="form-control">{{sparepart.sparepart.clientUD}}</span>
+                                </label>
+                            </section>
+                            <section class="col col-3">
+                                <label class="label">Factory Order</label>
+                                <label class="input">
+                                    <span class="form-control">{{sparepart.sparepart.factoryOrderUD}}</span>
+                                </label>
+                            </section>
+                            <section class="col col-3">
+                                <label class="label">LDS</label>
+                                <label class="input">
+                                    <span class="form-control">{{sparepart.sparepart.lds}}</span>
+                                </label>
+                            </section>
+                        </div>
+                        <section>
+                            <label class="label">Art.Code</label>
+                            <label class="input">
+                                <span class="form-control">{{sparepart.sparepart.articleCode}}</span>
+                            </label>
+                        </section>
+                        <section>
+                            <label class="label">Description</label>
+                            <label class="input">
+                                <span class="form-control">{{sparepart.sparepart.description}}</span>
+                            </label>
+                        </section>
+                        <div class="row">
+                            <section class="col col-3">
+                                <label class="label">Ordered qnt</label>
+                                <label class="input">
+                                    <span class="form-control" style="text-align: right;">{{sparepart.sparepart.orderQnt | currency:'':0}}</span>
+                                </label>
+                            </section>
+                            <section class="col col-3">
+                                <label class="label">Load ability (40HC)</label>
+                                <label class="input">
+                                    <span class="form-control" style="text-align: right;">{{sparepart.sparepart.qnt40HC | currency:'':0}}</span>
+                                </label>
+                            </section>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" ng-click="event.addSparepart()">
+                    Add
+                </button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "FactoryInvoiceMng")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="event.update()" ng-disabled="data.isConfirmed"><i class="fa fa-save"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current))" title="Delete" ng-click="event.delete()" style="color: #ff0000;" ng-disabled="data.isConfirmed"><i class="fa fa-times"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default disabled" title="Print"><i class="fa fa-print"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Approve, HttpContext.Current))" title="Approve" ng-disabled="data.isConfirmed" ng-click="event.approve()"><i class="fa fa-thumbs-o-up"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Reset, HttpContext.Current))" title="Reset approval status" ng-disabled="!data.isConfirmed" ng-click="event.reset()"><i class="fa fa-thumbs-o-down"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script src="~/TemplateResource/js/plugin/jquery.autocomplete.min.js"></script>
+    <script src="~/Angular/app/jsonService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script type="text/javascript">
+        jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/factoryinvoice/';
+        jsonService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+        jsonService.supportServiceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/support/';
+        var context = {
+            id: @ViewBag.ID,
+            bookingId : @bookingId,
+            supplierId : @supplierId,
+            season: '@season',
+            errMsg: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED',
+            backUrl: '@Url.Action("Index", "FactoryInvoiceMng")',
+            refreshUrl: '@Url.Action("Edit", "FactoryInvoiceMng", new { id = UrlParameter.Optional })/',
+            editTitle: '@ViewBag.Title'
+        }
+    </script>
+    <script src="~/Angular/app/factoryInvoiceMng/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/factoryInvoiceMng/edit.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}
+

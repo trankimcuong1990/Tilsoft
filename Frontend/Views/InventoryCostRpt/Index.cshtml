@@ -1,0 +1,130 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    var backendReportUrl = @System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"];
+
+    ViewBag.Title = "Export Inventory Cost Report";
+    ViewBag.Module = "Inventory Cost Report";
+}
+
+<div name="indexForm" class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-search-filter" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <ul class="nav nav-tabs pull-left in">
+                    <li class="active">
+                        <a data-toggle="tab" href="#tabGeneral" name="gtab"><i class="fa fa-database"></i> General</a>
+                    </li>
+                </ul>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div class="smart-form">
+                        <fieldset>
+                            <div class="row">
+                                <section class="col col-sm-2">
+                                    <label>Factory Warehouse</label>
+                                    <label class="input">
+                                        <select class="select2" style="height: 30px; font-family: Arial; font-size: 12px" ng-model="filters.factoryWarhouseID" ng-options="item.factoryWarehouseID as item.factoryWarehouseNM for item in support.factoryWarehouses">
+                                            <option value=""></option>
+                                        </select>
+                                    </label>
+                                </section>
+                                <section class="col col-sm-2">
+                                    <label>Item Type</label>
+                                    <label class="input">
+                                        <select class="select2" style="height: 30px; font-family: Arial; font-size: 12px" ng-model="filters.productionItemTypeID" ng-options="item.productionItemTypeID as item.productionItemTypeNM for item in support.productionItemTypes">
+                                            <option value=""></option>
+                                        </select>
+                                    </label>
+                                </section>
+                                <section class="col col-sm-2">
+                                    <label>Valid Date</label>
+                                    <label class="input">
+                                        <input id="startDate" class="form-control" type="text" style="font-family: Arial; font-size: 12px" avs-date ng-model="filters.startDate" />
+                                    </label>
+                                </section>
+                            </div>
+                            <div class="row">
+                                <section class="col col-sm-12">
+                                    <div class="tilsoft-table-wrapper" avs-scrollable-table>
+                                        <div class="tilsoft-table">
+                                            <div class="tilsoft-table-header" style="width: 1065px">
+                                                <div style="width: 45px">#</div>
+                                                <div style="width: 350px">Item</div>
+                                                <div style="width: 80px">Unit</div>
+                                                <div style="width: 90px">Beginning<br />Qnt</div>
+                                                <div style="width: 90px">Receiving<br />Qnt</div>
+                                                <div style="width: 90px">Delivering<br />Qnt</div>
+                                                <div style="width: 90px">Ending<br />Qnt</div>
+                                                <div style="width: 100px">Price</div>
+                                                <div style="width: 120px">Total Price<br />Ending</div>
+                                                <div style="border-bottom: none"></div>
+                                            </div>
+                                            <div class="tilsoft-table-totalrow" style="width: 1065px; margin-top: 50px">
+                                                <div style="width: 475px">Total</div>
+                                                <div style="width: 90px; text-align: right">{{method.sumBeginning() | number:2}}</div>
+                                                <div style="width: 90px; text-align: right">{{method.sumReceiving() | number:2}}</div>
+                                                <div style="width: 90px; text-align: right">{{method.sumDelivering() | number:2}}</div>
+                                                <div style="width: 90px; text-align: right">{{method.sumEndingInventory() | number:2}}</div>
+                                                <div style="width: 100px; text-align: right"></div>
+                                                <div style="width: 120px; text-align: right">{{method.sumValue() | number:2}}</div>
+                                                <div style="border-bottom: none"></div>
+                                            </div>
+                                            <div class="tilsoft-table-body" style="width: 1065px; margin-top: 80px">
+                                                <table>
+                                                    <tr ng-repeat="item in data">
+                                                        <td style="width: 45px; text-align: center">{{item.primaryID}}</td>
+                                                        <td style="width: 350px">
+                                                            <a href="@Url.Action("Edit", "ProductionItem")/{{item.productionItemID}}" target="_blank"><b>{{item.productionItemUD}}</b></a>
+                                                            <br />
+                                                            <span>{{item.productionItemNM}}</span>
+                                                        </td>
+                                                        <td style="width: 80px; text-align: center">{{item.unit}}</td>
+                                                        <td style="width: 90px; text-align: right">{{item.totalBeginning | number:2}}</td>
+                                                        <td style="width: 90px; text-align: right">{{item.totalReceiving | number:2}}</td>
+                                                        <td style="width: 90px; text-align: right">{{item.totalDelivering | number:2}}</td>
+                                                        <td style="width: 90px; text-align: right">{{item.totalEndingInventory | number:2}}</td>
+                                                        <td style="width: 100px; text-align: right">{{item.price | number:2}}</td>
+                                                        <td style="width: 120px; text-align: right">{{item.value | number:2}}</td>
+                                                        <td style="border-bottom: none"></td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-primary" style="float: none;" ng-click="event.search(filters.factoryWarhouseID, filters.productionItemTypeID, filters.startDate)"><i class="fa fa-code"></i> Export HTML</a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-success" ng-click="event.report(filters.factoryWarhouseID, filters.productionItemTypeID, filters.startDate)" style="float: none;"><i class="fa fa-file-excel-o"></i> Export Excel</a>
+        </li>
+    </ul>
+}
+
+@section pagejs{
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(serviceRoot)/api/inventorycostrpt/',
+            token: '@token',
+            backendReportUrl: '@backendReportUrl',
+            errorValid: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED',
+        };
+    </script>
+    <script type="text/javascript" src="~/Views/InventoryCostRpt/index.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Views/InventoryCostRpt/service.js?v=@guid"></script>
+}

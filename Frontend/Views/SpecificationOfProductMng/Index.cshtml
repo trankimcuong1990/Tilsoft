@@ -1,0 +1,126 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var pageSize = System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"];
+    var cookieID = HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString();
+
+
+    ViewBag.Title = "Specification Of Product";
+    ViewBag.Module = "Specification Of Product";
+    ViewBag.Icon = "fa-bar-chart-o";
+}
+
+<div class="row">
+    <article class="col-xs-12 col-sm-12 col-lg-12 col-md-12">
+        <div class="jarviswidget" id="wid-id-1" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Search Result</h2>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div avs-scroll grid-handler="gridHandler" class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header" style="width:1000px">
+                                <div style="width:80px; font-weight:bold">Found(s)  <font style="color:deeppink; text-transform:none">{{totalRows}}</font></div>
+                                <div style="width:180px;">Product Code</div>
+                                <div style="width:350px;">Name Of product</div>
+                                <div style="width:80px;">Client Code</div>
+                                <div>Remark</div>
+                            </div>
+                            <div class="tilsoft-table-filter" style="width:1000px">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>
+                                                <div style="width:80px; border-right:1px solid #ccc">
+                                                    <a href="javascript:void(0)" class="btn btn-default btn-xs" title="Apply Filter" ng-click="event.refresh()"><i class="fa fa-filter"></i></a>
+                                                    <a href="javascript:void(0)" class="btn btn-default btn-xs" title="Clear Filter" ng-click="event.clear()"><i class="fa fa-ban"></i></a>
+                                                </div>
+                                            </th>
+                                            <th>
+                                                <div style="width:180px; border-right:1px solid #ccc">
+                                                    <input class=" search-filter" type="text" ng-model="filters.ProductUD" />
+                                                </div>
+                                            </th>
+                                            <th>
+                                                <div style="width:350px; border-right:1px solid #ccc">
+                                                    <input type="text" class=" search-filter" ng-model="filters.ArticleDescription" />
+                                                </div>
+                                            </th>
+                                            <th>
+                                                <div style="width:80px; border-right:1px solid #ccc">
+                                                    <input type="text" class="search-filter" ng-model="filters.ClientUD" />
+                                                </div>
+                                            </th>
+                                            <th style="width:100%;">
+                                                <div >
+                                                    <input type="text" class="search-filter" ng-model="filters.Remark" />
+                                                </div>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                            <div class="tilsoft-table-body" style="width:1000px">
+                                <table>
+                                    <tbody>
+                                        <tr ng-repeat="item in data">
+                                            <td style="width:79px">
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current) == "disabled")
+                                                {
+                                                    <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "SpecificationOfProductMng")/{{item.productSpecificationID}}" title="View (Read Only)" target="_blank"><i class="fa fa-folder-open"></i> View</a>
+                                                }
+                                                else
+                                                {
+                                                    <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "SpecificationOfProductMng")/{{item.productSpecificationID}}" title="Edit" target="_blank" style="width: 60px"><i class="fa fa-pencil-square-o"></i> Edit</a>
+                                                }
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current) != "disabled")
+                                                {
+                                                    <a class="btn btn-danger btn-xs font-11" href="#" title="Delete" style="width: 60px; margin-top: 3px" ng-click="event.remove(item)"><i class="fa fa-times"></i> Del</a>
+                                                }
+                                            </td>
+                                            <td style="width:180px;  text-align:center">{{item.productUD}}</td>
+                                            <td style="width:350px;">{{item.articleDescription}}</td>
+                                            <td style="width:80px; text-align:center">{{item.clientUD}}</td>
+                                            <td>{{item.remark}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" ng-click="event.refresh()" title="Search"><i class="fa fa-search"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" ng-click="event.clear()" title="Refresh Page"><i class="fa fa-refresh"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="@Url.Action("Init", "SpecificationOfProductMng", new { id = UrlParameter.Optional })/0" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="Create new " target="_blank"><i class="fa fa-file-o"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(serviceRoot)/api/SpecificationOfProductMng/',
+            token: '@token',
+            pageSize: '@pageSize',
+            cookieID: '@cookieID'
+        }
+    </script>
+    <script type="text/javascript" src="~/Views/SpecificationOfProductMng/index.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Views/SpecificationOfProductMng/service.js?=@guid"></script>
+}

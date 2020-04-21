@@ -1,0 +1,150 @@
+﻿@{
+    if (ViewBag.ID == 0)
+    {
+        ViewBag.Title = "Create New Delivery Term";
+    }
+    else
+    {
+        ViewBag.Title = "Edit Delivery Term";
+    }
+
+    ViewBag.Module = "DeliveryTerm";
+}
+
+<div class="row">
+    <article class="col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-0" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>Delivery Term Information</h2>
+            </header>
+            <div>
+                <div class="jarviswidget-editbox"></div>
+
+                <div class="widget-body">
+                    <form name="editForm">
+                        <fieldset>
+                            <div class="form-group">
+                                <label>Delivery Type</label>
+                                <input class="form-control" type="text" name="deliveryType" ng-model="deliveryTerm.deliveryType" required>
+                                <span class="help-block" ng-show="editForm.deliveryType.$error.required"><i class="fa fa-warning"></i> Delivery Term Code is required!</span>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Delivery Term Name</label>
+                                <input class="form-control" type="text" name="deliveryTermNM" ng-model="deliveryTerm.deliveryTermNM" required>
+                                <span class="help-block" ng-show="editForm.deliveryTermNM.$error.required"><i class="fa fa-warning"></i> Delivery Term Name is required!</span>
+                            </div>
+
+                            <div class="form-group">
+                                <label>IsActive</label>
+                                <input class="form-control" type="text" name="IsActive" ng-model="deliveryTerm.isActive" required />
+                                <span class="help-block" ng-show="editForm.isActive.$error.required"><i class="fa fa-warning"></i> IsActive is required!</span>
+                            </div>
+                        </fieldset>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="#" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="update($event)"><i class="fa fa-save"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "DeliveryTerm")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default@(ViewBag.ID==0?" disabled":"") @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="Delete" style="color: #ff0000;" ng-click="delete($event)"><i class="fa fa-times"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default disabled" title="Print"><i class="fa fa-print"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default disabled" title="Approve"><i class="fa fa-thumbs-o-up"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default disabled" title="Reset Approval status"><i class="fa fa-thumbs-o-down"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script src="~/Angular/app/deliveryTerm/service.js"></script>
+    <script type="text/javascript">
+        deliveryTermService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/deliveryTerm/';
+        deliveryTermService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+        var deliveryTermApp = angular.module('tilsoftApp', []);
+        deliveryTermApp.controller('tilsoftController', ['$scope', function ($scope) {
+            $scope.deliveryTerm = null;
+            deliveryTermService.load(
+                @ViewBag.ID,
+                    function (data) {
+                        $scope.deliveryTerm = data.data;
+                        $scope.$apply();
+                        jQuery('#content').show();
+
+                        // monitor changes
+                        $scope.$watch('deliveryTerm', function() {
+                            jQuery('#changeNotification').html('<i class="fa fa-save blink_me"></i>');
+                        });
+                    },
+                    function (error) {
+                        jsHelper.showMessage('warning', error);
+
+                        $scope.deliveryTerm = null;
+                        $scope.$apply();
+                    }
+                );
+            
+            // function defined
+            $scope.update = function ($event) {
+                $event.preventDefault();
+
+                if($scope.editForm.$valid)
+                {
+                    deliveryTermService.update(@ViewBag.ID, $scope.deliveryTerm,
+                    function (data) {
+                        jsHelper.processMessage(data.message);
+                        if(data.message.type == 0) {
+                            window.location = '@Url.Action("Index", "deliveryTerm")';
+                        }
+                    },
+                        function (error) {
+                            jsHelper.showMessage('warning', error);
+                        }
+                    );
+                }
+                else
+                {
+                    jsHelper.showMessage('warning', '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED');
+                }
+            }
+
+            $scope.delete = function ($event) {
+                $event.preventDefault();
+
+                if (confirm('Are you sure ?')) {
+                    deliveryTermService.delete(@ViewBag.ID,
+                    function (data) {
+                        jsHelper.processMessage(data.message);
+                        if(data.message.type == 0) {
+                            window.location = '@Url.Action("Index", "DeliveryTerm")';
+                        }
+                    },
+                    function (error) {
+                        jsHelper.showMessage('warning', error);
+                    }
+                );
+                }
+            }
+        }]);
+    </script>
+}
+

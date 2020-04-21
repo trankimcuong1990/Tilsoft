@@ -1,0 +1,118 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    var supportServiceRoot = (System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"]);
+
+    ViewBag.Title = (ViewBag.ID == 0) ? "Create Quality Document" : "Edit Quality Document";
+    ViewBag.SubTitle = (ViewBag.ID == 0) ? "Create" : "Edit";
+    ViewBag.Module = "Quality Document";
+}
+
+<form name="editForm" class="row">
+    <article class="col-xs-12 col-sm-12 col-lg-12 col-md-12">
+        <div class="jarviswidget" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>@ViewBag.Title</h2>
+            </header>
+            <div>
+                <div class="jarviswidget-editbox"></div>
+                <div class="widget-body">
+                    <div class="smart-form">
+                        <fieldset>
+                            <div class="row">
+                                <section class="col col-3">
+                                    <label class="label">Doc Type</label>
+                                    <label class="input">
+                                        <select id="qualityDocumentType" name="qualityDocumentType" class="form-control" ng-model="data.qualityDocumentTypeID" ng-options="qdt.qualityDocumentTypeID as qdt.qualityDocumentTypeNM for qdt in supportQualityDocumentType">
+                                            <option value=""></option>
+                                        </select>
+                                        <i></i>
+                                    </label>
+                                </section>
+                                <section class="col col-3">
+                                    <label class="label">Doc Code</label>
+                                    <label class="input">
+                                        <input type="text" class="form-control" ng-model="data.qualityDocumentUD"  maxlength="50"/>
+                                    </label>
+                                </section>
+                                <section class="col col-2">
+                                    <label class="label">Issue Date</label>
+                                    <label class="input-group">
+                                        <input type="text" class="form-control" avs-calendar ng-data-source="data.issuedDate" />
+                                        <span class="input-group-addon">
+                                            <i class="fa fa-calendar"></i>
+                                        </span>
+                                    </label>
+                                </section>
+                                <section class="col col-4">
+                                    <label class="label">File</label>
+                                    <label class="input">
+                                        <span class="form-control">
+                                            {{data.friendlyName}}
+                                            <div style="position: absolute; right: 5px; top: 5px;">
+                                                <a ng-disabled="!data.fileLocation || data.friendlyName==null" href="javascript:void(0);" class="btn btn-primary btn-xs" style="font-size: 11px;" ng-click="event.downloadFile()">Download</a>
+                                                <a href="javascript:void(0);" class="btn btn-primary btn-xs" style="font-size: 11px;" ng-click="event.changeFile()">Change</a>
+                                                <a ng-disabled="!data.fileLocation || data.friendlyName==null" href="javascript:void(0);" class="btn btn-danger btn-xs" style="font-size: 11px;" ng-click="event.removeFile()">Remove</a>
+                                            </div>
+                                        </span>
+                                    </label>
+                                </section>
+                            </div>
+                            <div class="row">
+                                <section class="col col-8">
+                                    <label class="label">Description</label>
+                                    <label class="input">
+                                        <input class="form-control" type="text" ng-model="data.description" maxlength="255" />
+                                    </label>
+                                </section>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "QualityDocumentMng")" class="btn btn-default" title="Back">
+                <i class="fa fa-arrow-left"></i>
+            </a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default" title="Delete" ng-class="{'disabled': data.qualityDocumentID == 0}" ng-click="event.remove(data.qualityDocumentID)">
+                <i class="fa fa-times"></i>
+            </a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default" title="Save" ng-click="event.update()">
+                <i class="fa fa-floppy-o"></i>
+            </a>
+        </li>
+    </ul>
+}
+
+@section pagejs{
+
+    <script type="text/javascript" src="~/Views/QualityDocumentMng/edit.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Views/QualityDocumentMng/service.js?v=@guid"></script>
+
+    <script type="text/javascript">
+        var context = {
+            id: @ViewBag.ID,
+            backUrl: '@Url.Action("Index", "QualityDocumentMng")',
+            refreshUrl: '@Url.Action("Edit", "QualityDocumentMng", new { id = UrlParameter.Optional })/',
+            serviceUrl: '@(serviceRoot)/api/qualitydocumentmng/',
+            token: '@token',
+            msgValid: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED' ,
+
+        }
+    </script>
+
+}

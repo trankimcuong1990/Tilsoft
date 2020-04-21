@@ -1,0 +1,121 @@
+﻿@{
+    ViewBag.Title = "Search Factory Warehouse";
+    ViewBag.Module = "Factory Warehouse";
+    ViewBag.Icon = "fa-search";
+    Frontend.APIDTO.APIUserInformation userInfo = (Frontend.APIDTO.APIUserInformation)Session[Frontend.Customize.Common.ProjectDefinition.USER_INFO_SESSION];
+}
+<style>
+    .select2-arrow {
+        width: 15px !important;
+    }
+
+    .search-text {
+        height: 29px !important;
+        padding: 8px !important;
+        border: 1px solid #ddd !important;
+    }
+</style>
+<div class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-1" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Search Result</h2>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div avs-scroll grid-handler="gridHandler" class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header" style="width: 1270px;">
+                                <div style="width: 80px;"><b>Found </b><br /><b style="color:#a90329;">{{totalRows}} </b></div>
+                                <div style="width: 120px;" class="sorting" data-colname="factoryWarehouseUD"> Code</div>
+                                <div style="width: 150px;" class="sorting" data-colname="factoryWarehouseNM"> Name</div>
+                                <div style="width: 300px;" class="sorting" data-colname="description"> Description</div>
+                                <div style="width: 150px;" class="sorting" data-colname="companyID"> Company</div>
+                                <div style="width: 100px;" class="sorting" data-colname="branchID"> Branch</div>
+                                <div style="width: 170px;" class="sorting" data-colname="responsibleNM">Person<br />Responsible</div>
+                                <div><i class="fa fa-history"></i> Tracking Information</div>
+                            </div>
+                            <div class="tilsoft-table-filter" style="width: 1270px;">
+                                <div style="width: 80px;">
+                                    <a href="javascript:void(0)" class="btn btn-{{isDefaultFilter?'default':'primary'}} btn-xs" title="Apply Filter" ng-click="event.reload()"><i class="fa fa-filter"></i></a>
+                                    <a href="javascript:void(0)" class="btn btn-default btn-xs" title="Clear Filter" ng-click="event.clearFilter()"><i class="fa fa-ban"></i></a>
+                                </div>
+                                <div style="width: 120px;"><input class="search-filter search-text" type="text" ng-model="filters.FactoryWarehouseUD" /></div>
+                                <div style="width: 150px;"><input class="search-filter search-text" type="text" ng-model="filters.FactoryWarehouseNM" /></div>
+                                <div style="width: 300px;"><input class="search-filter search-text" type="text" ng-model="filters.Description" /></div>
+                                <div style="width: 150px;"></div>
+                                <div style="width: 100px;">
+                                    <select class="form-control" ng-model="filters.BranchID" ng-options="branch.branchID as branch.branchUD for branch in branches">
+                                        <option value=""></option>
+                                    </select>
+                                </div>
+                                <div style="width: 170px">
+                                    <select class="form-control search-filter" style="width: 100%" ng-model="filters.responsibleBy" ng-options="employee.employeeID as employee.employeeNM for employee in employees">
+                                        <option value=""></option>
+                                    </select>
+                                </div>
+                                <div></div>
+                            </div>
+                            <div class="tilsoft-table-body" style="width: 1270px; margin-top: 95px;height:700px;">
+                                <table>
+                                    <tr ng-repeat="item in data">
+                                        <td style="text-align: center; width: 80px;"><a href="@Url.Action("Edit", "FactoryWarehouse")/{{item.factoryWarehouseID}}" target="_blank" class="btn btn-primary btn-xs">Detail</a></td>
+                                        <td style="width: 120px;">{{item.factoryWarehouseUD}}</td>
+                                        <td style="width: 150px;">{{item.factoryWarehouseNM}}</td>
+                                        <td style="width: 300px;">{{item.description}}</td>
+                                        <td style="width: 150px;">{{item.shortName}}</td>
+                                        <td style="width: 100px;">{{item.branchUD}}</td>
+                                        <td style="width: 170px">{{item.responsibleNM}}</td>
+                                        <td>
+                                            <span class="box">
+                                                <i class="fa fa-user"></i>
+                                                <strong>Updated By</strong>:
+                                                <a ng-if="item.updatedBy" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.updatedBy}}" dat data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                    {{item.updatorNM}}
+                                                </a>
+                                            </span>
+                                            <span class="box"><i class="fa fa-calendar"></i> <strong>Updated Date</strong>: {{item.updatedDate}}</span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <span>Found: {{totalRows}} record(s)</span>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Search" ng-click="event.reload()"><i class="fa fa-search"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Refresh" ng-click="event.reload()"><i class="fa fa-refresh"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="@Url.Action("Edit", "FactoryWarehouse")/0" target="_blank" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="New"><i class="fa fa-file-o"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/factorywarehouse/',
+            token: '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]',
+            pageSize: 50,
+            cookieId: '@HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString()',
+            branchID: '@userInfo.Data.BranchID',
+            companyID: '@userInfo.Data.CompanyID',
+            factoryID: '@userInfo.Data.FactoryID',
+        }
+    </script>
+    <script src="~/Angular/app/factoryWarehouse/index.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/jsonService2.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/factoryWarehouse/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}

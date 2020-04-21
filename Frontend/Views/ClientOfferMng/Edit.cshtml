@@ -1,0 +1,519 @@
+﻿@{
+    ViewBag.Title = "Client Offer";
+    ViewBag.Module = "Client Offer";
+
+    //get param
+    string IsCopy = "false";
+    if (Request.Params["isCopy"] != null)
+    {
+        IsCopy = Request.Params["isCopy"];
+    }
+
+    string userManualUrl = string.Empty;
+    if (System.IO.File.Exists(Server.MapPath("~/UserManual/" + ViewBag.ModuleCode + ".pdf")))
+    {
+        userManualUrl = "/UserManual/" + ViewBag.ModuleCode + ".pdf";
+    }
+
+}
+<style>
+    .tilsoft-table .select2-container {
+        width: 89% !important;
+        display: inline-block;
+    }
+</style>
+
+<form class="row" name="editForm">
+
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>General</h2>
+            </header>
+            <div>
+                <div class="widget-body">
+                    <div class="smart-form">
+                        <div class="row">
+
+                            <section class="col col-lg-8">
+                                <label>Client</label>
+                                <select id="clientID" name="clientID" ng-model="data.clientID" ng-options="item.clientID as item.clientNM for item in clients" required>
+                                    <option value=""></option>
+                                </select>
+                                <span class="help-block" ng-show="editForm.clientID.$error.required"><i class="fa fa-warning"></i>Client is required.</span>
+                            </section>
+
+                            <section class="col col-lg-2">
+                                <label>Valid From</label>
+                                <label class="input">
+                                    <input name="validFrom" type="text" class="datepicker" ng-model="data.validFrom" data-dateformat="dd/mm/yy" required />
+                                    <i class="icon-append fa fa-calendar"></i>
+                                </label>
+                                <span class="help-block" ng-show="editForm.validFrom.$error.required"><i class="fa fa-warning"></i>Valid from date is required.</span>
+                            </section>
+
+                            <section class="col col-lg-2">
+                                <label>Valid To</label>
+                                <label class="input">
+                                    <input name="validTo" type="text" class="datepicker" ng-model="data.validTo" data-dateformat="dd/mm/yy" required />
+                                    <i class="icon-append fa fa-calendar"></i>
+                                </label>
+                                <span class="help-block" ng-show="editForm.validTo.$error.required"><i class="fa fa-warning"></i>Valid to date is required.</span>
+                            </section>
+
+                            <section class="col col-3">
+                                <label>Description</label>
+                                <input name="description" type="text" class="form-control" ng-model="data.description" />
+                            </section>
+
+                            <section class="col col-5">
+                                <label>Terms of Payment</label>
+                                <label class="input">
+                                    <select class="form-control" ng-model="data.paymentTermID" ng-options="item.paymentTermID as item.paymentTermNM for item in paymentTerms">
+                                        <option value=""></option>
+                                    </select>
+                                </label>
+                            </section>
+                        </div>
+                        <div class="row">
+                            <section class="col col-8">
+                                <label class="label">
+                                    Client File
+                                </label>
+                                <label class="input">
+                                    <span class="form-control">
+                                        {{data.friendlyName}}
+                                        <div style="position: absolute; right: 5px; top: 5px;">
+                                            <a ng-disabled="!data.fileLocation" href="javascript:void(0);" class="btn btn-primary btn-xs" style="font-size: 11px;" ng-click="event.downloadFile()">Download</a>
+                                            <a href="javascript:void(0);" class="btn btn-primary btn-xs" style="font-size: 11px;" ng-click="event.changeFile()">Change</a>
+                                            <a ng-disabled="!data.fileLocation" href="javascript:void(0);" class="btn btn-danger btn-xs" style="font-size: 11px;" ng-click="event.removeFile()">Remove</a>
+                                        </div>
+                                    </span>
+                                </label>
+                            </section>
+                        </div>
+                        <div class="row">
+                            <section class="col col-lg-8">
+                                <div class="note">
+                                    <strong>Last updated By</strong>
+                                    <i class="fa fa-user" ng-show="data.updatedBy != null"> </i>
+                                    <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{data.updatedBy}}" data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600" ng-show="data.updatedBy != null && data.updatorName != null">
+                                        {{data.updatorName}}
+                                    </a>
+                                    on
+                                    {{data.updatedDate}}
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <ul class="nav nav-tabs pull-left in">
+                    <li class="active">
+                        <a data-toggle="tab" href="#tabCostDetail"> <i class="fa fa-database"></i> <span class="hidden-mobile hidden-tablet">Cost</span> </a>
+                    </li>
+                    <li>
+                        <a data-toggle="tab" href="#tabConditionDetail"> <i class="fa fa-database"></i> <span class="hidden-mobile hidden-tablet">Condtion</span> </a>
+                    </li>
+                    <li>
+                        <a data-toggle="tab" href="#tabAdditionalDetail"> <i class="fa fa-database"></i> <span class="hidden-mobile hidden-tablet">Additional</span> </a>
+                    </li>
+                </ul>
+            </header>
+            <div>
+                <div class="jarviswidget-editbox"></div>
+                <div class="widget-body">
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="tabCostDetail">
+                            <div class="row">
+                                <div class="col col-lg-12">
+                                    <div id="grdCost" class="tilsoft-table-wrapper">
+                                        <div class="tilsoft-table">
+                                            <div class="tilsoft-table-header" style="width: 1050px;">
+                                                <div style="width:50px"></div>
+                                                <div style="width:250px" class="sorting" data-colname="clientCostItemID">Cost Item</div>
+                                                <div style="width:110px" class="sorting" data-colname="currency">Currency</div>
+                                                <div style="width:80px" class="sorting" data-colname="cost20DC">20DC</div>
+                                                <div style="width:80px" class="sorting" data-colname="cost40DC">40DC</div>
+                                                <div style="width:80px" class="sorting" data-colname="cost40HC">40HC</div>
+                                                <div class="sorting" data-colname="remark">Remark</div>
+                                            </div>
+                                            <div class="tilsoft-table-body" style="width: 1050px;">
+                                                <table>
+                                                    <tbody ng-repeat="item in data.clientOfferCostDetailDTOs">
+                                                        <tr>
+                                                            <td style="text-align:center; vertical-align:middle; width:49px">
+                                                                <a ng-click="event.removeCostDetail($event,$index)" class="btn btn-danger btn-xs font-11" href="javascript:void(0);"><i class=" fa fa-times"></i>Del</a>
+                                                            </td>
+                                                            <td style="width:250px;vertical-align:middle">
+                                                                <select ng-model="item.clientCostItemID" id="costitem{{item.clientOfferCostDetailID}}" ng-options="costItem.clientCostItemID as costItem.clientCostItemNM for costItem in $parent.clientCostItemDTOs" ng-focus="event.addNewCostDetailLine($event, $index,item)" ng-click="event.addNewCostDetailLine($event,$index,item)" ng-change="event.clientCostItemChange(item)">
+                                                                    <option></option>
+                                                                </select>
+                                                                <a class="btn btn-primary btn-xs" ng-click="clientCostItemForm.event.load(item.clientCostItemID,item)">...</a>
+                                                            </td>
+                                                            <td style="width:110px;text-align:center;vertical-align:middle">
+                                                                <select ng-model="item.currency" id="currency{{item.clientOfferCostDetailID}}" ng-focus="event.addNewCostDetailLine($event, $index,item)" ng-click="event.addNewCostDetailLine($event,$index,item)" ng-options="currencyItem.currencyID as currencyItem.currencyNM for currencyItem in $parent.currencies">
+                                                                    <option></option>
+                                                                </select>
+                                                            </td>
+                                                            <td style="width:80px">
+                                                                <input type="text" avs-number ng-data-source="item.cost20DC" ng-decimal="2" class="form-control" style="text-align:right" ng-focus="event.addNewCostDetailLine($event, $index,item)" ng-click="event.addNewCostDetailLine($event,$index,item)" />
+                                                            </td>
+                                                            <td style="width:80px">
+                                                                <input type="text" avs-number ng-data-source="item.cost40DC" ng-decimal="2" class="form-control" style="text-align:right" ng-focus="event.addNewCostDetailLine($event, $index,item)" ng-click="event.addNewCostDetailLine($event,$index,item)" />
+                                                            </td>
+                                                            <td style="width:80px">
+                                                                <input type="text" avs-number ng-data-source="item.cost40HC" ng-decimal="2" class="form-control" style="text-align:right" ng-focus="event.addNewCostDetailLine($event, $index,item)" ng-click="event.addNewCostDetailLine($event,$index,item)" />
+                                                            </td>
+                                                            <td style="text-align:left">
+                                                                <input type="text" ng-model="item.remark" ng-focus="event.addNewCostDetailLine($event, $index,item)" ng-click="event.addNewCostDetailLine($event,$index,item)" />
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="tabConditionDetail">
+                            <div class="row">
+                                <div class="col col-lg-12">
+                                    <div id="grdCondition" class="tilsoft-table-wrapper">
+                                        <div class="tilsoft-table">
+                                            <div class="tilsoft-table-header" style="width: 1050px;">
+                                                <div style="width:50px"></div>
+                                                <div class="sorting" data-colname="clientConditionItemID">Condition Item</div>
+                                                <!--<div class="sorting" data-colname="remark">Remark</div>-->
+                                            </div>
+                                            <div class="tilsoft-table-body" style="width: 1050px;">
+                                                <table>
+                                                    <tbody ng-repeat="item in data.clientOfferConditionDetailDTOs">
+                                                        <tr>
+                                                            <td style="text-align:center; vertical-align:middle; width:49px">
+                                                                <a ng-click="event.removeConditionDetail($event,$index)" class="btn btn-danger btn-xs font-11" href="javascript:void(0);"><i class=" fa fa-times"></i>Del</a>
+                                                            </td>
+                                                            <td style="vertical-align:middle">
+                                                                <select ng-model="item.clientConditionItemID" id="conditionitem{{item.clientOfferConditionDetailID}}" ng-options="conditionItem.clientConditionItemID as conditionItem.clientConditionItemNM for conditionItem in $parent.clientConditionItemDTOs" ng-focus="event.addNewConditionDetailLine($event, $index,item)" ng-click="event.addNewConditionDetailLine($event,$index,item)">
+                                                                    <option></option>
+                                                                </select>
+                                                                <a class="btn btn-primary btn-xs" ng-click="clientConditionItemForm.event.load(item.clientConditionItemID,item)">...</a>
+                                                            </td>
+                                                            <!--
+                                                            <td style="text-align:left">
+                                                                <input type="text" ng-model="item.remark" ng-focus="event.addNewConditionDetailLine($event, $index,item)" ng-click="event.addNewConditionDetailLine($event,$index,item)" />
+                                                            </td>
+                                                            -->
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="tabAdditionalDetail">
+                            <div class="row">
+                                <div class="col col-lg-12">
+                                    <div id="grdCondition" class="tilsoft-table-wrapper">
+                                        <div class="tilsoft-table">
+                                            <div class="tilsoft-table-header" style="width: 1050px;">
+                                                <div style="width:70%" class="sorting" data-colname="clientAdditionalDetailID">DEMURRAGE/DETENTION CHARGES</div>
+                                                <div style="width:10%" class="sorting" data-colname="condition20DC">20DC</div>
+                                                <div style="width:10%" class="sorting" data-colname="condition40DC">40DC</div>
+                                                <div class="sorting" data-colname="condition40HC">40HC</div>
+                                            </div>
+                                            <div class="tilsoft-table-body" style="width: 1050px;">
+                                                <table>
+                                                    <tbody ng-repeat="item in data.clientOfferAdditionalDetailDTOs">
+                                                        <tr>
+                                                            <td style="width:70%;vertical-align:middle">
+                                                                <span class="form-control">{{item.clientAdditionalItemNM}} </span>
+                                                            </td>
+                                                            <td style="width:10%">
+                                                                <input type="text" avs-number ng-data-source="item.additional20DC" ng-decimal="2" class="form-control" style="text-align:right" />
+                                                            </td>
+                                                            <td style="width:10%">
+                                                                <input type="text" avs-number ng-data-source="item.additional40DC" ng-decimal="2" class="form-control" style="text-align:right" />
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" avs-number ng-data-source="item.additional40HC   " ng-decimal="2" class="form-control" style="text-align:right" />
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+
+    <div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="frmClientCostItemInfo" class="modal fade" style="display: none;">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button aria-hidden="true" data-dismiss="modal" class="close" type="button">
+                        ×
+                    </button>
+                    <h4 id="myModalLabel" class="modal-title">{{clientCostItemForm.clientCostItemID==0?'Create New Client Cost Item':'Client Cost Item Infomation'}}</h4>
+                </div>
+                <div class="modal-body smart-form">
+                    <fieldset>
+                        <div class="row" ng-show="clientCostItemForm.data!=null">
+                            <div class="row">
+                                <section class="col col-lg-4">
+                                    <label>Cost Name</label>
+                                    <input type="text" ng-model="clientCostItemForm.data.clientCostItemNM" class="form-control" />
+                                </section>
+                                <section class="col col-lg-2">
+                                    <label>Cost Type</label>
+                                    <select id="clientCostTypeID" name="clientCostTypeID" class="form-control" ng-model="clientCostItemForm.data.clientCostTypeID" ng-options="item.transportCostTypeID as item.transportCostTypeNM for item in clientCostTypes">
+                                        <option value=""></option>
+                                    </select>
+                                </section>
+                                <section class="col col-lg-2">
+                                    <label>Charge Type</label>
+                                    <select id="clientCostChargeTypeID" name="ClientCostChargeTypeID" class="form-control" ng-model="clientCostItemForm.data.clientCostChargeTypeID" ng-options="item.transportCostChargeTypeID as item.transportCostChargeTypeNM for item in clientCostChargeTypes">
+                                        <option value=""></option>
+                                    </select>
+                                </section>
+                                <section class="col col-lg-1">
+                                    <label>Currency</label>
+                                    <select id="currency1" name="currency1" class="form-control" ng-model="clientCostItemForm.data.currency" ng-options="item.currencyID as item.currencyNM for item in currencies">
+                                        <option value=""></option>
+                                    </select>
+                                </section>
+                                <section class="col col-lg-2">
+                                    <label>POL</label>
+                                    <select id="pol" name="pol" class="form-control" ng-model="clientCostItemForm.data.polid" ng-options="item.polid as item.poLname for item in poLs">
+                                        <option value=""></option>
+                                    </select>
+                                </section>
+                                <section class="col col-lg-1">
+                                    <label class="label">&nbsp;</label>
+                                    <label class="checkbox">
+                                        <input type="checkbox" ng-model="clientCostItemForm.data.isDefault">
+                                        <i></i>Default
+                                    </label>
+                                </section>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="row">
+                                <section class="col col-lg-12">
+                                    <a class="btn btn-primary btn-xs" ng-click="clientCostItemForm.event.newCostItem()"><i class="fa fa-file-o"></i> New</a>
+                                    <a class="btn btn-success btn-xs" ng-click="clientCostItemForm.event.updateClientCostItem()"><i class="fa fa-save"></i> Save</a>
+                                </section>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="tilsoft-table">
+                                <div class="tilsoft-table-body" style="margin-top:0px; height:280px">
+                                    <table>
+                                        <tr>
+                                            <th style="width:80px"></th>
+                                            <th>Cost Name</th>
+                                            <th style="width:130px">Cost Type</th>
+                                            <th style="width:160px">Charge Type</th>
+                                            <th style="width:100px">Currency</th>
+                                            <th style="width:100px">POL</th>
+                                            <th style="width:50px">Default</th>
+                                        </tr>
+                                        <tr ng-repeat="item in clientCostItemDTOs">
+                                            <td>
+                                                <a class="btn btn-primary btn-xs" ng-click="clientCostItemForm.event.selectItem(item)">Select</a>
+                                                <a class="btn btn-danger btn-xs" ng-click="clientCostItemForm.event.deleteCostItem(item.clientCostItemID)">Del</a>
+                                            </td>
+                                            <td style="text-align:left">{{item.clientCostItemNM}}</td>
+                                            <td style="text-align:left">{{item.clientCostTypeNM}}</td>
+                                            <td style="text-align:left">{{item.clientCostChargeTypeNM}}</td>
+                                            <td style="text-align:center">{{item.currency}}</td>
+                                            <td style="text-align:center">{{item.poLname}}</td>
+                                            <td style="text-align:center"><input type="checkbox" ng-model="item.isDefault" disabled /></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+                <div class="modal-footer">
+                    <button data-dismiss="modal" class="btn btn-default" type="button" ng-click="clientCostItemForm.event.cancel()">
+                        Cancel
+                    </button>
+                    <button class="btn btn-primary" type="button" ng-click="clientCostItemForm.event.ok()">
+                        OK
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="frmClientConditionItemInfo" class="modal fade" style="display: none;">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button aria-hidden="true" data-dismiss="modal" class="close" type="button">
+                        ×
+                    </button>
+                    <h4 id="myModalLabel" class="modal-title">{{clientConditionItemForm.clientConditionItemID==0?'Create New Client Condition Item':'Client Condition Item Infomation'}}</h4>
+                </div>
+                <div class="modal-body smart-form">
+                    <fieldset>
+                        <div class="row" ng-show="clientConditionItemForm.data!=null">
+                            <div class="row">
+                                <section class="col col-lg-10">
+                                    <label>Condition Name</label>
+                                    <input type="text" ng-model="clientConditionItemForm.data.clientConditionItemNM" class="form-control" />
+                                </section>
+                                <section class="col col-2">
+                                    <label class="label">&nbsp;</label>
+                                    <label class="checkbox">
+                                        <input type="checkbox" ng-model="clientConditionItemForm.data.isDefault">
+                                        <i></i>Default
+                                    </label>
+                                </section>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="row">
+                                <section class="col col-lg-12">
+                                    <a class="btn btn-primary btn-xs" ng-click="clientConditionItemForm.event.newConditionItem()"><i class="fa fa-file-o"></i> New</a>
+                                    <a class="btn btn-success btn-xs" ng-click="clientConditionItemForm.event.updateClientConditionItem()"><i class="fa fa-save"></i> Save</a>
+                                </section>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="tilsoft-table">
+                                <div class="tilsoft-table-body" style="margin-top:0px; height:280px">
+                                    <table>
+                                        <tr>
+                                            <th style="width:80px"></th>
+                                            <th>Condition Name</th>
+                                            <th style="width:50px">Default</th>
+                                        </tr>
+                                        <tr ng-repeat="item in clientConditionItemDTOs">
+                                            <td>
+                                                <a class="btn btn-primary btn-xs" ng-click="clientConditionItemForm.event.selectItem(item)">Select</a>
+                                                <a class="btn btn-danger btn-xs" ng-click="clientConditionItemForm.event.deleteConditionItem(item.clientConditionItemID)">Del</a>
+                                            </td>
+                                            <td style="text-align:left">{{item.clientConditionItemNM}}</td>
+                                            <td style="text-align:center"><input type="checkbox" ng-model="item.isDefault" disabled /></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                    </fieldset>
+                </div>
+                <div class="modal-footer">
+                    <button data-dismiss="modal" class="btn btn-default" type="button" ng-click="clientConditionItemForm.event.cancel()">
+                        Cancel
+                    </button>
+                    <button class="btn btn-primary" type="button" ng-click="clientConditionItemForm.event.ok()">
+                        OK
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="frmPrintOption" class="modal fade" style="display:none" data-backdrop="none">
+        <div class="modal-dialog">
+            <div class="modal-content" style="margin-top:90px !important">
+                <div class="modal-header">
+                    <h4 id="myModalLabel" class="modal-title">Print Client Offer</h4>
+                </div>
+                <div class="modal-body smart-form">
+                    <div>
+                        <div class="widget-body no-padding">
+                            <div class="row">
+                                <div class="col col-lg-12">
+                                    <ul style="padding: 0px;">
+                                        <li style="display:block" ng-repeat="item in printOptions">
+                                            <input type="radio" name="radio-print" id="print-option-{{item.printOptionValue}}" ng-value="item.printOptionValue" ng-model="$parent.printOptionValue" /><i> {{item.printOptionText}}</i>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" type="button" ng-click="event.printout()">
+                        Print
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</form>
+
+@section FormAction {
+<ul id="sparks">
+    <li class="sparks-info">
+        <a href="@Url.Action("Index", "ClientOfferMng")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="#" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="event.update()"><i class="fa fa-save"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="#" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="Delete" style="color: #ff0000;" ng-click="event.delete($event)"><i class="fa fa-times"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="#" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Read, HttpContext.Current))" title="Print" @*style="color: #ff0000;"*@ ng-click="event.showPrintOptionForm()"><i class="fa fa-print"></i></a>
+    </li>
+    @if (!string.IsNullOrEmpty(userManualUrl))
+        {
+            <li class="sparks-info">
+                <a target="_blank" href="@userManualUrl" class="btn btn-default" title="Help"><i class="fa fa-info"></i></a>
+            </li>
+        }
+</ul>
+}
+@section pagejs {
+    <script src="~/Angular/app/jsonService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/support/service.js?c=@System.Guid.NewGuid().ToString().Replace("-","")"></script>
+
+    <script src="~/Angular/app/clientOfferMng/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/clientOfferMng/edit.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+
+    <script type="text/javascript">
+        jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/clientOfferMng/';
+        jsonService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+        supportService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/support/';
+        supportService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+        var context = {
+            id: '@ViewBag.ID',
+            backUrl: '@Url.Action("Index", "ClientOfferMng")',
+            refreshUrl: '@Url.Action("Edit", "ClientOfferMng", new { id = UrlParameter.Optional })/',
+            errMsg: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED',
+            reportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]',
+
+            token: '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]',
+            isCopy : '@IsCopy'
+        }
+    </script>
+}
+

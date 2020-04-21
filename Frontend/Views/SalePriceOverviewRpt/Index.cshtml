@@ -1,0 +1,116 @@
+﻿
+@{
+    ViewBag.Title = "Search Sale Price Overview";
+    ViewBag.Module = "Sale Price Overview Rpt";
+}
+
+<div class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-search-filter" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Search Filters</h2>
+            </header>
+            <div>
+                <div class="widget-body">
+                    <div class="smart-form">
+                        <fieldset>
+                            <div class="row">
+                                <section class="col col-3">
+                                    <label class="label">Client</label>
+                                    <label class="input">
+                                        <input class="search-filter" type="text" ng-model="filters.ClientUD" />
+                                    </label>
+                                </section>
+                                <section class="col col-3">
+                                    <label class="label">Season</label>
+                                    <label class="select">
+                                        <select class="form-control search-filter" ng-model="filters.Season" ng-options="season.seasonValue as season.seasonText for season in seasons">
+                                            <option value=""></option>
+                                        </select>
+                                        <i></i>
+                                    </label>
+                                </section>
+                                <section class="col col-4">
+                                    <label class="label">Model Name</label>
+                                    <label class="input">
+                                        <input class="search-filter" type="text" ng-model="filters.ModelNM" />
+                                    </label>
+                                </section>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-0" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Search Result</h2>
+            </header>
+
+            <div>
+                <div class="widget-body">
+                    <div id="searchResult" class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header" style="width: 700px;">   
+                                <div style="width: 80px;" class="sorting">P/I</div>
+                                <div style="width: 80px;">Season</div>
+                                <div style="width: 70px;">Client</div>
+                                <div style="width: 550px;">Model Name</div>
+                                <div style="width: 80px;">Unit Price</div>
+                                <div style="width: 80px;">Currency</div>
+                                <div>Order Qty</div>
+                            </div>
+                            <div class="tilsoft-table-body" style="width: 700px;height:100%;">
+                                <table>
+                                    <tr ng-repeat="item in data">
+                                        <td style=" width: 79px;">{{item.proformaInvoiceNo}}</td>
+                                        <td style=" width: 80px;">{{item.season}}</td>
+                                        <td style=" width: 70px;">{{item.clientUD}}</td>
+                                        <td style=" width: 550px;">{{item.modelNM}}</td>
+                                        <td style="text-align:right;width: 80px;">{{item.unitPrice | number : 2}}</td>
+                                        <td style=" width: 80px;text-align:center;">{{item.currency}}</td>
+                                        <td>{{item.totalOrderQty}}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Search" ng-click="event.reload()"><i class="fa fa-search"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Refresh" ng-click="event.reload()"><i class="fa fa-refresh"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Print"><i class="fa fa-print"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Export Excel" style="color: #31B404" ng-click="event.generateExcel($event)"><i class="fa fa-file-excel-o"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script src="~/Angular/app/jsonService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script type="text/javascript">
+        jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/salepriceoverviewrpt/';
+        jsonService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+        jsonService.searchFilter.pageSize = @System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"];
+        var context = {
+            backendReportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]'
+        }
+    </script>
+    <script src="~/Angular/app/salePriceOverviewRpt/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/salePriceOverviewRpt/index.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}

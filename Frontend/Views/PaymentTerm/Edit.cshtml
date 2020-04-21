@@ -1,0 +1,134 @@
+﻿@{
+    ViewBag.Title = "Edit Payment Term";
+    ViewBag.Module = "PaymentTerm";
+}
+
+<form class="row" name="editForm" id="main-form">
+    <article class="col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-0" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>Payment Term Information</h2>
+            </header>
+            <div>
+                <div class="row">
+                    <div class="widget-body">
+                        <div class="smart-form">
+                            <fieldset>
+                                <section class="col col-3">
+                                    <label class="label">
+                                        Name
+                                        <em class="note note-error" ng-show="(data.paymentTermNM == null || data.paymentTermNM == '')"> (Required)</em>
+                                    </label>
+                                    <label class="input">
+                                        <input type="text" id="paymentTermNM" ng-model="data.paymentTermNM" required />
+                                    </label>
+                                </section>
+                                <section class="col col-3">
+                                    <label class="label">Type</label>
+                                    <label class="select">
+                                        <select ng-model="data.paymentTypeID" ng-change="event.onOptionChange(0)" ng-options="paymentType.paymentTypeID as paymentType.paymentTypeNM for paymentType in paymentTypes">
+                                            <option value=""></option>
+                                        </select>
+                                        <i></i>
+                                    </label>
+                                </section>
+                                <section class="col col-3">
+                                    <label class="label">Method</label>
+                                    <label class="select" ng-show="data.paymentTypeID != 4">
+                                        <select ng-model="data.paymentMethod" ng-change="event.onOptionChange(1)" ng-options="type.paymentMethodNM as type.paymentMethodNM for type in paymentMethods">
+                                            <option value=""></option>
+                                        </select>
+                                        <i></i>
+                                    </label>
+                                    <label class="select" ng-show="data.paymentTypeID == 4">
+                                        <select ng-model="data.paymentMethod" ng-change="event.onOptionChange(1)" ng-options="type.paymentMethodNM as type.paymentMethodNM for type in paymentMethods" disabled="disabled">
+                                            <option value=""></option>
+                                        </select>
+                                        <i></i>
+                                    </label>
+                                </section>
+                                <section class="col col-3">
+                                    <label class="label" ng-show="data.paymentMethod == 'DP-PERCENT'">
+                                        Down Value
+                                        <em class="note note-error" ng-show="(data.downValue == null || data.downValue == '')"> (Required)</em>
+                                    </label>
+                                    <label class="input" ng-show="data.paymentMethod == 'DP-PERCENT'">
+                                        <input type="number" id="downValue" min="1" max="100" ng-model="data.downValue" />
+                                    </label>
+                                </section>                            
+                            </fieldset>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="widget-body">
+                        <div class="smart-form">
+                            <fieldset>
+                                <section class="col col-3">
+                                    <label class="label">Term of payment in days</label>
+                                    <label class="input">
+                                        <input type="number" ng-model="data.inDays" />
+                                    </label>
+                                </section>
+                                <section class="col col-3">
+                                    <label class="label">&nbsp;</label>
+                                    <label class="checkbox">
+                                        <input type="checkbox" ng-model="data.isActive">
+                                        <i></i> Activated
+                                    </label>
+                                </section>
+                            </fieldset>
+                        </div>
+                    </div>             
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "PaymentTerm")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="event.update($event)"><i class="fa fa-save"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default@(ViewBag.ID==0?" disabled":"") @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="Delete" style="color: #ff0000;" ng-click="event.delete($event)"><i class="fa fa-times"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default disabled" title="Print"><i class="fa fa-print"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default disabled" title="Approve"><i class="fa fa-thumbs-o-up"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default disabled" title="Reset Approval status"><i class="fa fa-thumbs-o-down"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script type="text/javascript">
+        var context = {
+            id: @ViewBag.ID,
+            serviceUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/paymentTerm/',
+            token: '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]',
+            pageSize: 50,
+            cookieId: '@HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString()',
+            backUrl: '@Url.Action("Index", "PaymentTerm")',
+            refreshUrl: '@Url.Action("Edit", "PaymentTerm", new { id = UrlParameter.Optional })/',
+            supportServiceUrl:'@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/support/',
+            validationErrMsg: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED'
+        }
+    </script>
+    <script src="~/Views/PaymentTerm/edit.js"></script>
+    <script src="~/Angular/app/jsonService.js"></script>
+    <script src="~/Views/PaymentTerm/service.js"></script>
+    
+}
+

@@ -1,0 +1,1715 @@
+﻿@{
+    if (ViewBag.ID == 0)
+    {
+        ViewBag.Title = "Create New Factory Order";
+    }
+    else
+    {
+        ViewBag.Title = "Edit Factory Order";
+    }
+
+    ViewBag.Module = "Factory Order";
+
+    string userManualUrl = string.Empty;
+    if (System.IO.File.Exists(Server.MapPath("~/UserManual/" + ViewBag.ModuleCode + ".pdf")))
+    {
+        userManualUrl = "/UserManual/" + ViewBag.ModuleCode + ".pdf";
+    }
+
+    ViewBag.FactoryOrderDetailID = -1;
+    if (Request.QueryString["factoryOrderDetailID"] != null)
+    {
+        ViewBag.FactoryOrderDetailID = Convert.ToInt32(Request.QueryString["factoryOrderDetailID"]);
+    }
+    var serviceReportRoot = System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"];
+    ViewBag.IsDisable = Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current);
+}
+
+<div class="row">
+    <form name="editForm">
+        <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12" ng-if="currentForm=='receipt-form'">
+            <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+                <header>
+                    <ul class="nav nav-tabs pull-left in">
+                        <li class="active">
+                            <a data-toggle="tab" href="#hb1"> <i class="fa fa-database"></i> <span class="hidden-mobile hidden-tablet"> General Information </span> </a>
+                        </li>
+                        <li>
+                            <a data-toggle="tab" href="#hb2"> <i class="fa fa-database"></i> <span class="hidden-mobile hidden-tablet">Tracking</span> </a>
+                        </li>
+                    </ul>
+                </header>
+                <div>
+                    <div class="jarviswidget-editbox"></div>
+
+                    <div class="widget-body">
+                        <div class="tab-content">
+
+                            <div class="tab-pane active" id="hb1">
+                                <div class="row">
+                                    <div class="col-sm-2 ">
+                                        <label>Proforma InvoiceNo</label>
+                                        <span class="form-control">{{factoryOrderDataContainer.factoryOrderData.proformaInvoiceNo}}</span>
+                                    </div>
+
+                                    <div class="col-sm-1">
+                                        <label>Client No</label>
+                                        <span class="form-control">{{factoryOrderDataContainer.factoryOrderData.clientUD}}</span>
+                                    </div>
+
+                                    <div class="col-sm-1">
+                                        <label>Status</label>
+                                        <input type="text" readonly class="form-control" ng-model="factoryOrderDataContainer.factoryOrderData.trackingStatusNM"/>
+                                    </div>
+
+                                    <div class="col-sm-2 " ng-show="!disabled">
+                                        <label>Factory</label>
+                                        <select name="factoryID" class="form-control" ng-model="factoryOrderDataContainer.factoryOrderData.factoryID" ng-options="item.factoryID as item.factoryUD for item in factoryOrderDataContainer.factories | orderBy : 'factoryUD'" required ng-change="selectedFactory()">
+                                            <option value=""></option>
+                                        </select>
+                                        <span class="help-block" ng-show="editForm.factoryID.$error.required"><i class="fa fa-warning"></i>Factory is required.</span>
+                                    </div>
+                                    <div class="col-sm-2" ng-show="disabled">
+                                        <label>Factory</label>
+                                        <span class="form-control">{{factoryOrderDataContainer.factoryOrderData.factoryUD}}</span>
+                                    </div>
+
+                                    <div class="col-sm-2 " ng-show="!disabled">
+                                        <label>Order Type</label>
+                                        <select class="form-control" ng-model="factoryOrderDataContainer.factoryOrderData.orderTypeID" ng-options="item.orderTypeID as item.orderTypeNM for item in factoryOrderDataContainer.orderTypes">
+                                            <option value=""></option>
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-2 " ng-show="disabled">
+                                        <label>Order Type</label>
+                                        <span class="form-control">{{factoryOrderDataContainer.factoryOrderData.orderTypeNM}}</span>
+                                    </div>
+
+                                    <div class="col-sm-2" ng-show="!disabled">
+                                        <label>Item Standard</label>
+                                        <select class="form-control" ng-model="factoryOrderDataContainer.factoryOrderData.itemStandardID" ng-options="item.itemStandardID as item.itemStandardNM for item in factoryOrderDataContainer.itemStandards">
+                                            <option value=""></option>
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-2" ng-show="disabled">
+                                        <label>Item Standard</label>
+                                        <span class="form-control">{{factoryOrderDataContainer.factoryOrderData.itemStandardNM}}</span>
+                                    </div>
+
+                                    <div class="col-sm-2 " ng-show="!disabled">
+                                        <label>Production Status</label>
+                                        <input class="form-control" type="text" id="productionStatus" ng-model="factoryOrderDataContainer.factoryOrderData.productionStatus">
+                                    </div>
+                                    <div class="col-sm-2 " ng-show="disabled">
+                                        <label>Production Status</label>
+                                        <span class="form-control">{{factoryOrderDataContainer.factoryOrderData.productionStatus}}</span>
+                                    </div>
+
+                                    <div class="col-sm-2 " ng-show="!disabled" style="display:none">
+                                        <label>Rating</label>
+                                        <select class="form-control" ng-model="factoryOrderDataContainer.factoryOrderData.rating" ng-options="item.rateValue as item.rateText for item in factoryOrderDataContainer.rateOrder">
+                                            <option value=""></option>
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-2" ng-show="disabled" style="display:none">
+                                        <label>Rating</label>
+                                        <span class="form-control">{{factoryOrderDataContainer.factoryOrderData.rating}}</span>
+                                    </div>
+                                </div>
+                                <div class="row">
+
+                                    <div class="col-sm-1 " ng-show="!disabled">
+                                        <label>LDS Factory</label>
+                                        <div class="input-group">
+                                            <input name="ldS1Formated" type="text" data-mask="99/99/9999" data-mask-placeholder="-" class="form-control datepicker" data-dateformat="dd/mm/yy" ng-model="factoryOrderDataContainer.factoryOrderData.ldS1Formated" required>
+                                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                        </div>
+                                        <span class="help-block" ng-show="editForm.ldS1Formated.$error.required"><i class="fa fa-warning"></i>LDS Factory is required.</span>
+                                    </div>
+                                    <div class="col-sm-1 " ng-show="disabled">
+                                        <label>LDS Factory</label>
+                                        <div class="input-group">
+                                            <span class="form-control">{{factoryOrderDataContainer.factoryOrderData.ldS1Formated}}</span>
+                                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-1 ">
+                                        <label>Week No</label>
+                                        <span class="form-control" style="text-align:right">{{bindWeekNumber(factoryOrderDataContainer.factoryOrderData.ldS1Formated)}}</span>
+                                    </div>
+                                    <div class="col-sm-2 ">
+                                        <label>Shipper</label>
+                                        <select ng-show="!disabled" name="shippedByFactoryID" class="form-control" ng-model="factoryOrderDataContainer.factoryOrderData.shippedByFactoryID" ng-options="item.factoryID as item.factoryUD for item in shippedByFactories | orderBy : 'factoryUD'" required>
+                                            <option value=""></option>
+                                        </select>
+                                        <span class="help-block" ng-show="editForm.shippedByFactoryID.$error.required"><i class="fa fa-warning"></i>Shipper is required.</span>
+
+                                        <span ng-show="disabled" class="form-control">{{factoryOrderDataContainer.factoryOrderData.shippedByFactoryUD}}</span>
+                                    </div>
+
+                                    <div class="col-sm-1 " ng-show="disabled">
+                                        <label>Inspection</label>
+                                        <span class="form-control">{{factoryOrderDataContainer.factoryOrderData.inspectionOptionNM}}</span>
+                                    </div>
+                                    <div class="col-sm-1" ng-show="!disabled">
+                                        <label>Inspection</label>
+                                        <select class="form-control" ng-model="factoryOrderDataContainer.factoryOrderData.inspectionOptionID" ng-options="item.inspectionOptionID as item.inspectionOptionNM for item in factoryOrderDataContainer.inspectionOptions">
+                                            <option value=""></option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-sm-1" ng-show="!disabled">
+                                        <label>Test Item</label>
+                                        <select class="form-control" ng-model="factoryOrderDataContainer.factoryOrderData.testSamplingOptionID" ng-options="item.testSamplingOptionID as item.testSamplingOptionNM for item in factoryOrderDataContainer.testSamplingOptions">
+                                            <option value=""></option>
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-1" ng-show="disabled">
+                                        <label>Test Item</label>
+                                        <span class="form-control">{{factoryOrderDataContainer.factoryOrderData.testSamplingOptionNM}}</span>
+                                    </div>
+
+                                    <div class="col-sm-2 " ng-show="!disabled">
+                                        <label>Order Date</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control datepicker" data-dateformat="dd/mm/yy" ng-model="factoryOrderDataContainer.factoryOrderData.orderDateFormated">
+                                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-2" ng-show="disabled">
+                                        <label>Order Date</label>
+                                        <div class="input-group">
+                                            <span class="form-control">{{factoryOrderDataContainer.factoryOrderData.orderDateFormated}}</span>
+                                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="col-sm-4" ng-show="!disabled">
+                                        <label>Additional Remark (SCM NL)</label>
+                                        <textarea class="form-control" ng-model="factoryOrderDataContainer.factoryOrderData.additionalRemark" rows="1"></textarea>
+                                    </div>
+                                    <div class="col-sm-6 " ng-show="disabled">
+                                        <label>Additional Remark (SCM NL)</label>
+                                        <span class="form-control">{{factoryOrderDataContainer.factoryOrderData.additionalRemark}}</span>
+                                    </div>
+
+                                </div>
+                                <div class="row">                                                                      
+                                    <div class="col-sm-2 " ng-show="!disabled" style="display: none">
+                                        <label>Supply chain responsible</label>
+                                        <select class="form-control" ng-model="factoryOrderDataContainer.factoryOrderData.supplyChainPersonID" ng-options="item.supplyChainPersonID as item.supplyChainPersonNM for item in factoryOrderDataContainer.supplyChainPersons">
+                                            <option value=""></option>
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-2 " ng-show="disabled" style="display: none">
+                                        <label>Supply chain responsible</label>
+                                        <span class="form-control">{{factoryOrderDataContainer.factoryOrderData.supplyChainPersonNM}}</span>
+                                    </div>
+
+                                    <div class="col-sm-2 " ng-show="!disabled" style="display:none">
+                                        <label>Labeling</label>
+                                        <select class="form-control" ng-model="factoryOrderDataContainer.factoryOrderData.labelingOptionID" ng-options="item.labelingOptionID as item.labelingOptionNM for item in factoryOrderDataContainer.labelingOptions">
+                                            <option value=""></option>
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-2 " ng-show="disabled">
+                                        <label>Labeling</label>
+                                        <span class="form-control">{{factoryOrderDataContainer.factoryOrderData.labelingOptionNM}}</span>
+                                    </div>
+
+                                    <div class="col-sm-2 " ng-show="!disabled" style="display:none">
+                                        <label>Packaging</label>
+                                        <select class="form-control" ng-model="factoryOrderDataContainer.factoryOrderData.packagingOptionID" ng-options="item.packagingOptionID as item.packagingOptionNM for item in factoryOrderDataContainer.packagingOptions">
+                                            <option value=""></option>
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-2 " ng-show="disabled">
+                                        <label>Packaging</label>
+                                        <span class="form-control">{{factoryOrderDataContainer.factoryOrderData.packagingOptionNM}}</span>
+                                    </div>
+
+                                    <div class="col-sm-2 " ng-show="!disabled" style="display:none">
+                                        <label>Shipment To</label>
+                                        <select class="form-control" ng-model="factoryOrderDataContainer.factoryOrderData.shipmentToOptionID" ng-options="item.shipmentToOptionID as item.shipmentToOptionNM for item in factoryOrderDataContainer.shipmentToOptions">
+                                            <option value=""></option>
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-2 " ng-show="disabled" style="display:none">
+                                        <label>Shipment To</label>
+                                        <span class="form-control">{{factoryOrderDataContainer.factoryOrderData.shipmentToOptionNM}}</span>
+                                    </div>
+
+                                    <div class="col-sm-2 " ng-show="!disabled" style="display:none">
+                                        <label>Shipment Type</label>
+                                        <select class="form-control" ng-model="factoryOrderDataContainer.factoryOrderData.shipmentTypeOptionID" ng-options="item.shipmentTypeOptionID as item.shipmentTypeOptionNM for item in factoryOrderDataContainer.shipmentTypeOptions">
+                                            <option value=""></option>
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-2 " ng-show="disabled" style="display:none">
+                                        <label>Shipment Type</label>
+                                        <span class="form-control">{{factoryOrderDataContainer.factoryOrderData.shipmentTypeOptionNM}}</span>
+                                    </div>
+
+                                </div>                                
+                                <div class="row">
+                                    <div class="col-sm-2" ng-if="factoryOrderDataContainer.factoryOrderData.listClientComplaintIDs.length > 0">
+                                        <label>Client Complaint Overview: </label>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-4" ng-repeat="complaint in factoryOrderDataContainer.factoryOrderData.listClientComplaintIDs">
+                                        <a class="btn-link" style="cursor:pointer" ng-click="openComplaintOverview(complaint.clientComplaintID)">{{complaint.clientCode}} - {{complaint.articleCode}}</a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane" id="hb2">
+                                <div class="row">
+                                    <div class="col-sm-2 m-bottom-15">
+                                        <label>Created By</label>
+                                        <span class="form-control" ng-show="factoryOrderDataContainer.factoryOrderData.createdBy != null && factoryOrderDataContainer.factoryOrderData.creatorName2 != null">
+                                            <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{factoryOrderDataContainer.factoryOrderData.createdBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                <i class="fa fa-user"></i> {{factoryOrderDataContainer.factoryOrderData.creatorName2}}
+                                            </a>
+                                        </span>
+                                        <span class="form-control" ng-show="factoryOrderDataContainer.factoryOrderData.createdBy != null && factoryOrderDataContainer.factoryOrderData.creatorName2 == null && factoryOrderDataContainer.factoryOrderData.creatorName != null">
+                                            <i class="fa fa-user"></i> {{factoryOrderDataContainer.factoryOrderData.creatorName}}
+                                        </span>
+                                    </div>
+
+                                    <div class="col-sm-2 m-bottom-15">
+                                        <label>Created Date</label>
+                                        <span class="form-control">{{factoryOrderDataContainer.factoryOrderData.createdDateFormated}}</span>
+                                    </div>
+
+
+                                    <div class="col-sm-2 m-bottom-15">
+                                        <label>Updated By</label>
+                                        <span class="form-control" ng-show="factoryOrderDataContainer.factoryOrderData.updatedBy != null && factoryOrderDataContainer.factoryOrderData.updatorName2 != null">
+                                            <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{factoryOrderDataContainer.factoryOrderData.updatedBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                <i class="fa fa-user"></i> {{factoryOrderDataContainer.factoryOrderData.updatorName2}}
+                                            </a>
+                                        </span>
+                                        <span class="form-control" ng-show="factoryOrderDataContainer.factoryOrderData.updatedBy != null && factoryOrderDataContainer.factoryOrderData.updatorName2 == null && factoryOrderDataContainer.factoryOrderData.updatorName != null">
+                                            <i class="fa fa-user"></i> {{factoryOrderDataContainer.factoryOrderData.updatorName}}
+                                        </span>
+                                    </div>
+
+
+                                    <div class="col-sm-2 m-bottom-15">
+                                        <label>Updated Date</label>
+                                        <span class="form-control">{{factoryOrderDataContainer.factoryOrderData.updatedDateFormated}}</span>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-2 m-bottom-15" ng-show="!disabled">
+                                        <label>OMSv4 ID</label>
+                                        <input class="form-control" type="text" id="f-v4id" ng-model="factoryOrderDataContainer.factoryOrderData.v4id">
+                                    </div>
+                                    <div class="col-sm-2 m-bottom-15" ng-show="disabled">
+                                        <label>OMSv4 ID</label>
+                                        <span class="form-control">{{factoryOrderDataContainer.factoryOrderData.v4id}}</span>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+                <header>
+                    <ul class="nav nav-tabs pull-left in">
+                        <li class="active">
+                            <a data-toggle="tab" href="#hb3"> <i class="fa fa-database"></i> <span class="hidden-mobile hidden-tablet">Product</span> </a>
+                        </li>
+                        <li>
+                            <a data-toggle="tab" href="#hb4"> <i class="fa fa-database"></i> <span class="hidden-mobile hidden-tablet">Sparepart</span> </a>
+                        </li>
+                        <li>
+                            <a data-toggle="tab" href="#hb5"> <i class="fa fa-database"></i> <span class="hidden-mobile hidden-tablet">Sample</span> </a>
+                        </li>
+                    </ul>
+                </header>
+                <div>
+                    <div class="jarviswidget-editbox"></div>
+
+                    <div class="widget-body">
+                        <div class="tab-content">
+
+                            <div class="tab-pane active" id="hb3">
+                                <div class="row">
+                                    <div class="col-sm-12 m-bottom-15">
+                                        <a href="javascript:void(0)" class="btn btn-primary btn-xs" style="margin-bottom: 10px;" ng-click="frmAddProduct_onOpen()">Add Product</a>
+                                        <div id="factoryOrderDetailGrid" class="tilsoft-table-wrapper">
+                                            <div class="tilsoft-table">
+                                                <div class="tilsoft-table-header" style="width: 1500px;">
+                                                    <div style="width: 190px">
+                                                        <a style="float:left" class="btn btn-default" title="Automatically fill in order quantity" ng-click="AutoAddOrderQnt()">
+                                                            <i class="fa fa-bars"></i>
+                                                        </a>
+                                                        <span>AUTOMATICALLY FILL IN ORDER QNT</span>
+                                                    </div>
+                                                    <div class="sorting" style="width: 110px" data-colname="articleCode">ArticleCode</div>
+                                                    <div class="sorting" style="width: 600px" data-colname="description">Description</div>
+                                                    <div class="sorting" style="width: 90px" data-colname="saleOrderQnt">PI Order Qnt</div>
+                                                    <div class="sorting" style="width: 90px" data-colname="orderQnt">
+                                                        Order Qnt
+                                                        <a ng-if="!hasQnt" ng-click="toggFilterQnt()" title="show item has quantity"><i class="fa fa-eye"></i></a>
+                                                        <a ng-if="hasQnt" ng-click="toggFilterQnt()" title="show all item"><i class="fa fa-eye-slash"></i></a>
+                                                    </div>
+                                                    <div class="sorting" style="width: 90px" data-colname="totalQnt">Total Qnt</div>
+                                                    <div class="sorting" style="width: 90px" data-colname="remainQnt">Remain Qnt</div>
+                                                    <div class="sorting" style="width: 90px" data-colname="loadedQnt">Loaded Qnt</div>
+                                                    <div class="sorting" data-colname="remark">Remark</div>
+                                                </div>
+                                                <div class="tilsoft-table-body" style="width: 1500px; ">
+                                                    <table>
+                                                        <tbody ng-repeat="item in factoryOrderDataContainer.factoryOrderData.factoryOrderDetails | filterFactoryOrder : hasQnt">
+                                                            <tr class="{{item.isSelected?'rowselected':''}}">
+                                                                <td style="width: 190px; text-align:center">
+                                                                    <a class="btn btn-primary btn-xs font-11 @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Print, HttpContext.Current))" title="Print PS" ng-click="printPS($event,item.factoryOrderDetailID)"><i class="fa fa-print"></i> Print PS</a>
+                                                                    <a class="btn btn-primary btn-xs font-11" title="QC Report" ng-click="qcReport.getQCReport($event,item.factoryOrderDetailID)"><i class="fa fa-bar-chart-o"></i> QC Report</a>
+                                                                </td>
+                                                                <td style="width: 110px; ">{{item.articleCode}}</td>
+                                                                <td style="width: 600px; ">{{item.description}}</td>
+                                                                <td style="width: 90px; text-align: right"><span class="form-control">{{item.saleOrderQnt | number}}</span></td>
+                                                                <td style="width: 90px; text-align: right; ">
+                                                                    <input class="form-control" type="text" name="orderQnt" ng-model="item.orderQnt" ng-keyup="orderQntKeyUp($event,$index)" id="{{$index}}" ng-show="!disabled" style="text-align:right">
+                                                                    <span class="form-control" ng-show="disabled">{{item.orderQnt}}</span>
+                                                                </td>
+                                                                <td style="width: 90px; text-align: right; "><span class="form-control">{{item.totalQnt}}</span></td>
+                                                                <td style="width: 90px; text-align: right; "><span class="form-control">{{item.remainQnt}}</span></td>
+                                                                <td style="width: 90px; text-align: right; "><span class="form-control">{{item.loadedQnt}}</span></td>
+                                                                <td>
+                                                                    <input class="form-control" type="text" name="remark" ng-model="item.remark" ng-show="!disabled">
+                                                                    <span class="form-control" ng-show="disabled">{{item.remark}}</span>
+                                                                </td>
+                                                            </tr>
+                                                            <tr ng-if="item.factoryOrderColliDetails.length>0">
+                                                                <td></td>
+                                                                <td>Colli EAN Code:</td>
+                                                                <td colspan="7" style="vertical-align:middle">
+                                                                    <ul style="margin-bottom:0px">
+                                                                        <li ng-repeat="xItem in item.factoryOrderColliDetails" style="display:inline"><span class="badge">{{xItem.colliEANCode}}</span> </li>
+                                                                    </ul>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane" id="hb4">
+                                <div class="row">
+                                    <div class="col-sm-12 m-bottom-15">
+                                        <a href="javascript:void(0)" class="btn btn-primary btn-xs" style="margin-bottom: 10px;" ng-click="frmAddSparepart_onOpen()">Add Sparepart</a>
+                                        <div id="factoryOrderSparepartDetailGrid" class="tilsoft-table-wrapper">
+                                            <div class="tilsoft-table">
+                                                <div class="tilsoft-table-header" style="width: 1200px;">
+                                                    <div style="width: 190px">
+                                                        <a style="float:left" class="btn btn-default" title="Automatically fill in order quantity" ng-click="AutoAddOrderQnt_Sparepart()"><i class="fa fa-bars"></i></a>
+                                                        <span>AUTOMATICALLY FILL IN ORDER QNT</span>
+                                                    </div>
+                                                    <div class="sorting" style="width: 150px;" data-colname="articleCode">Article Code</div>
+                                                    <div class="sorting" style="width: 90px;" data-colname="orderQnt">
+                                                        Order Qnt
+                                                        <a ng-if="!hasQntSparepart" ng-click="toggFilterQntSparepart()" title="show item has quantity"><i class="fa fa-eye"></i></a>
+                                                        <a ng-if="hasQntSparepart" ng-click="toggFilterQntSparepart()" title="show all item"><i class="fa fa-eye-slash"></i></a>
+                                                    </div>
+                                                    <div class="sorting" style="width: 70px;" data-colname="totalQnt">Total Qnt</div>
+                                                    <div class="sorting" style="width: 70px;" data-colname="remainQnt">Remaining Qnt</div>
+                                                    <div class="sorting" data-colname="description">description</div>
+                                                </div>
+                                                <div class="tilsoft-table-body" style="width: 1200px;">
+                                                    <table>
+                                                        <tr ng-repeat="item in factoryOrderDataContainer.factoryOrderData.factoryOrderSparepartDetails | filterFactoryOrderSparepart : hasQntSparepart">
+                                                            <td style="width: 190px"></td>
+                                                            <td style="width: 150px; ">{{item.articleCode}}</td>
+                                                            <td style="width: 90px;">
+                                                                <input class="form-control" type="text" name="orderQnt" ng-model="item.orderQnt" style="text-align:right" ng-show="!disabled">
+                                                                <span class="form-control" ng-show="disabled">{{item.orderQnt}}</span>
+                                                            </td>
+                                                            <td style="width: 70px;"><span class="form-control">{{item.totalQnt}}</span></td>
+                                                            <td style="width: 70px;"><span class="form-control">{{item.remainQnt}}</span></td>
+                                                            <td>{{item.description}}</td>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane" id="hb5">
+                                <div class="row">
+                                    <div class="col-sm-12 m-bottom-15">
+                                        <a href="javascript:void(0)" class="btn btn-primary btn-xs" style="margin-bottom: 10px;" ng-click="frmAddSample_onOpen()">Add Sample</a>
+                                        <div id="factoryOrderSampleDetailGrid" class="tilsoft-table-wrapper">
+                                            <div class="tilsoft-table">
+                                                <div class="tilsoft-table-header" style="width: 1500px;">
+                                                    <div style="width: 80px;"></div>
+                                                    <div style="width: 120px;">Image</div>
+                                                    <div style="width: 340px;" class="sorting" data-colname="description">Desciption</div>
+                                                    <div style="width: 90px;" class="sorting" data-colname="orderQnt">Quantity</div>
+                                                    <div style="width: 80px;">QNT/40HC</div>
+                                                    <div style="width: 150px; " class="sorting" data-colname="unitPrice">Sale Price (USD)</div>
+                                                    <div style="width: 150px; " class="sorting" data-colname="unitPrice">Factory Price (USD)</div>
+                                                    <div></div>
+                                                </div>
+                                                <div class="tilsoft-table-body" style="width: 1500px;">
+                                                    <table>
+                                                        <tr ng-repeat="item in factoryOrderDataContainer.factoryOrderData.factoryOrderSampleDetails | filterFactoryOrderSample : hasQntSample">
+                                                            @*<td style="width: 80px;">
+                                                                <a href="javascript:void(0)" class="btn btn-danger btn-xs" ng-if="!item.isFactoryOrderCreated" ng-click="removeSample(item)">Remove</a>
+                                                            </td>*@           
+                                                            <td style="width:80px"></td>
+                                                            <td style="width:120px">
+                                                                <a href="{{item.fileLocation}}" data-featherlight="image">
+                                                                    <img style="width:95%" ng-src="{{item.thumbnailLocation}}" />
+                                                                </a>
+                                                            </td>
+                                                            <td style="width:340px">
+                                                                <span style="font-weight:bold;">{{item.articleCode}}</span>
+                                                                <br />
+                                                                {{item.description}}
+                                                                <br />
+                                                                <u>Packing:</u> {{item.packagingMethodText}}
+                                                                <br />
+                                                                <i style="color: #{{item.offerItemTypeID === 1 ? 'a76318' : '1aa50b'}};">{{item.offerItemTypeNM}}</i>
+                                                                &nbsp;
+                                                                <span style="color: #0000ff;" ng-if="item.offerItemTypeID === 5">APPROVED</span>
+                                                            </td>
+                                                            <td style="width:90px">
+                                                                <input type="text" number ng-model="item.orderQnt" style="text-align: right;width:99%" />
+                                                            </td>
+                                                            <td style="text-align: right; width:80px">
+                                                                {{item.orderQnt / item.qnt40HC | number : 2}}
+                                                            </td>
+                                                            <td style="text-align: right; width:150px"> {{item.salePrice | number:2}} </td>
+                                                            <td style="text-align: right; width: 150px">
+                                                                <span style="text-align: right;">{{item.planingPurchasingPrice | currency:'$':2}}</span>
+                                                                <br />
+                                                                <br />
+                                                                <span style="display: block;" ng-if="item.planingPurchasingPrice">
+                                                                    Source: {{item.planingPurchasingPriceSourceID}}
+                                                                </span>
+                                                            </td>
+                                                            <td></td>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </article>
+
+        <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12" ng-if="currentForm=='assign-colli-form'">
+            <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+                <header>
+                    <ul class="nav nav-tabs pull-left in">
+                        <li class="active">
+                            <a data-toggle="tab" href="#hb1"> <i class="fa fa-database"></i> <span class="hidden-mobile hidden-tablet">Assign Colli</span> </a>
+                        </li>
+                    </ul>
+                </header>
+                <div>
+                    <div class="jarviswidget-editbox"></div>
+
+                    <div class="widget-body">
+                        <div class="tab-content">
+                            <div class="tab-pane active" id="hb1">
+                                <div class="row">
+                                    <div class="col-sm-6 m-bottom-15">
+                                        <a class="btn btn-primary btn-xs" href="#" ng-click="assignColliForm.createFactoryOrderProductColli($event)"><i class="fa fa-plus"></i> Assign Colli</a>
+                                        <a class="btn btn-danger btn-xs" href="#" ng-click="assignColliForm.cancel($event)"><i class="fa fa-times"></i> Cancel</a>
+                                    </div>
+                                </div>
+                                <div class="row"></div>
+                                <div class="row">
+                                    <div class="col-sm-12">
+
+
+                                        <div class="tilsoft-table">
+                                            <div class="tilsoft-table-body" style="width: 100%; overflow-y: hidden; height: auto; margin-top: 0px;">
+                                                <table>
+                                                    <tr>
+                                                        <th style="width: 110px;">Article Code</th>
+                                                        <th>Description</th>
+                                                        <th style="width:90px">Quantity</th>
+                                                    </tr>
+                                                    <tbody ng-repeat="item in assignColliForm.products">
+                                                        <tr class="{{item.isSelected?'rowselected':''}}">
+                                                            <td><a href="@Url.Action("Edit", "Product")/{{item.productID}}" target="_blank">{{item.articleCode}}</a></td>
+                                                            <td><a href="@Url.Action("Edit", "Product")/{{item.productID}}" target="_blank">{{item.description}}</a></td>
+                                                            <td style="text-align:right;vertical-align:middle">{{item.orderQnt}}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td></td>
+                                                            <td colspan="2">
+                                                                <table>
+                                                                    <tbody ng-repeat="eItem in assignColliForm.productSetEANCodes | filter : {factoryOrderDetailID : item.factoryOrderDetailID}">
+                                                                        <tr>
+                                                                            <td style="width:210px">
+                                                                                <input type="checkbox" ng-model="eItem.isSelected" ng-click="assignColliForm.selectedEANCode(eItem.isSelected,item.factoryOrderDetailID,eItem.productSetEANCodeID)" ng-disabled="eItem.productSetEANCodeID<0 || eItem.colliEANCodeCount==0" /> EAN Code : <span class="{{eItem.productEANCode=='NONE'?'text-danger':'text-primary'}}" style="font-weight:bold">{{eItem.productEANCode}}</span>
+                                                                            </td>
+                                                                            <td>
+                                                                                <table>
+                                                                                    <tr>
+                                                                                        <th style="width:30px"></th>
+                                                                                        <th style="width:50px">No.</th>
+                                                                                        <th style="width:150px">Colli EAN Code</th>
+                                                                                        <th style="width:90px">Colli Qnt</th>
+                                                                                        <th></th>
+                                                                                    </tr>
+                                                                                    <tbody ng-repeat="cItem in assignColliForm.productColli | filter : {factoryOrderDetailID : item.factoryOrderDetailID, productSetEANCodeID : eItem.productSetEANCodeID}">
+                                                                                        <tr class="{{cItem.isSelected?'rowselected':''}}">
+                                                                                            <td style="text-align:center"><input type="checkbox" ng-model="cItem.isSelected" disabled="disabled" /></td>
+                                                                                            <td style="text-align:center;vertical-align:middle">{{cItem.rowIndex}}</td>
+                                                                                            <td style="text-align:center;vertical-align:middle"><span class="{{cItem.colliEANCode=='NONE'?'text-danger':'text-primary'}}">{{cItem.colliEANCode}}</span></td>
+                                                                                            <td style="text-align:center;vertical-align:middle">{{item.orderQnt}}</td>
+                                                                                            <td></td>
+                                                                                        </tr>
+                                                                                    </tbody>
+                                                                                </table>
+                                                                            </td>
+                                                                        </tr>
+
+                                                                    </tbody>
+                                                                </table>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </article>
+    </form>
+
+    <div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="frmQCReport" class="modal fade" style="display: none;">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button aria-hidden="true" data-dismiss="modal" class="close" type="button">
+                        ×
+                    </button>
+                    <h4 id="myModalLabel" class="modal-title">QC Report</h4>
+                </div>
+                <div class="modal-body smart-form">
+                    <fieldset>
+                        <div class="row">
+                            <section class="col col-lg-12">
+                                <div class="tilsoft-table">
+                                    <div class="tilsoft-table-body" style="width:520px; height:auto;margin-top:0px">
+                                        <table>
+                                            <tr>
+                                                <th>QC report file</th>
+                                                <th style="width:120px">Updated By</th>
+                                                <th style="width:100px">Updated Date</th>
+                                                <th style="width:180px">Remark</th>
+                                            </tr>
+                                            <tr ng-repeat="item in qcReport.data">
+                                                <td>
+                                                    <a href="{{item.fileLocation}}" target="_blank">{{item.friendlyName}}</a>
+                                                </td>
+                                                <td>{{item.updatorName}}</td>
+                                                <td style="text-align:center">{{item.updatedDate}}</td>
+                                                <td>{{item.remark}}</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* Client Complaint Overview Form *@
+<div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" id="frmClientComplaint" class="modal fade" data-backdrop="static">
+    <div class="modal-dialog" style="width: 1200px">
+        <div class="modal-content">
+            <div class="modal-header" style="padding: 5px;">
+                <button style="margin-top: 2px; margin-right: 5px;" aria-hidden="true" data-dismiss="modal" class="close" type="button">
+                    ×
+                </button>
+                <h4 id="myModalLabel" class="modal-title"><i class="fa fa-cog"></i> Client Complaint Overview </h4>
+            </div>
+            <div class="modal-body no-padding">
+                <form class="row" name="editForm1" id="main-form">
+                    <!--BEGIN: Product Detail section -->
+                    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                        <div class="jarviswidget" id="wid-id-production-details" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false"
+                             data-widget-deletebutton="false">
+                            <header>
+                                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                                <h2>Product details</h2>
+                            </header>
+
+                            <div class="widget-body">
+                                @*BEGIN: add complaint item*@
+                                <div class="smart-form">
+                                    <fieldset>
+                                        <div class="row">
+
+                                            <div id="add-item-section" class="well-sm col-sm-12" style="background: #fff;">
+                                                <div class="row">
+                                                    <div class="col col-lg-12">
+                                                        <div id="grdClientComplaintItems" class="tilsoft-table-wrapper">
+                                                            <div class="tilsoft-table">
+                                                                <div class="tilsoft-table-header">
+                                                                    <div style="width: 30px"></div>
+                                                                    <div style="width: 70px">ID</div>
+                                                                    <div style="width: 190px">ARTICLE CODE</div>
+                                                                    <div style="width: 100px">PROFORMA INVOICE</div>
+                                                                    <div style="width: 100px">FACTORY</div>
+                                                                    <div style="width: 100px">FACTORY ORDER</div>
+                                                                    <div style="width: 100px">LDS</div>
+                                                                    <div>DESCRIPTION</div>
+                                                                </div>
+
+                                                                <div class="tilsoft-table-body auto-height">
+                                                                    <table class="table">
+
+                                                                        <tbody ng-repeat="item in clientComplaintView.clientComplaintItems">
+
+                                                                            <tr ng-class="{'success': item.clientComplaintItemID <= 0}">
+                                                                                <td style="width: 30px; vertical-align: middle; text-align:center">
+                                                                                    <a ng-click="exportExcelItem(item.clientComplaintItemID)" class="btn btn-primary btn-xs font-11" href="javascript:void(0);" title="Export Excel"><i class=" fa fa-file-excel-o"></i></a>
+                                                                                </td>
+                                                                                <td style="width: 70px; vertical-align: middle">{{item.factoryOrderDetailID}}</td>
+                                                                                <td style="width: 190px; vertical-align: middle">{{item.articleCode}}</td>
+                                                                                <td style="width: 100px; vertical-align: middle">{{item.proformaInvoiceNo}}</td>
+                                                                                <td style="width: 100px; vertical-align: middle">{{item.factoryUD}}</td>
+                                                                                <td style="width: 100px; vertical-align: middle">{{item.factoryOrderUD}}</td>
+                                                                                <td style="width: 100px; vertical-align: middle">{{item.lds}}</td>
+                                                                                <td style="vertical-align: middle">{{item.factoryOrderDetailDescription}}</td>
+                                                                            </tr>
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </fieldset>
+                                </div>
+                                @*END: add complaint item*@
+                            </div>
+                        </div>
+                    </article>
+                    <!--END: Product Detail section -->
+                </form>
+            </div>
+            <div class="modal-footer" style="padding: 5px;">
+                <a href="javascript:void(0);" class="btn btn-default btn-sm" data-dismiss="modal"><i class="fa fa-reply"></i> Close</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="frmAddProduct" class="modal fade">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="margin-top:90px !important">
+            <div class="modal-header">
+                <button aria-hidden="true" data-dismiss="modal" class="close" type="button">
+                    ×
+                </button>
+                <h4 class="modal-title">Add Product</h4>
+            </div>
+            <div class="modal-body smart-form" style="padding: 0px;">
+                <div>
+                    <div class="widget-body">
+                        <table class="table table-bordered table-striped" style="box-sizing: border-box;">
+                            <thead>
+                                <tr>
+                                    <th style="width: 70px;">
+                                        <a href="javascript:void(0)" ng-click="frmAddProduct_selectAll()">Select All</a>
+                                        <a href="javascript:void(0)" ng-click="frmAddProduct_unSelectAll()">Un-Select All</a>
+                                    </th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="item in saleOrderDetail" ng-if="!checkHasAdded(item.saleOrderDetailID)">
+                                    <td><input type="checkbox" ng-model="item.isSelected" /></td>
+                                    <td>
+                                        <strong>{{item.articleCode}}</strong>
+                                        <br />
+                                        {{item.description}}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal" ng-click="frmAddProduct_onOK()">
+                    Add
+                </button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="frmAddSparepart" class="modal fade">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="margin-top:90px !important">
+            <div class="modal-header">
+                <button aria-hidden="true" data-dismiss="modal" class="close" type="button">
+                    ×
+                </button>
+                <h4 class="modal-title">Add Sparepart</h4>
+            </div>
+            <div class="modal-body smart-form" style="padding: 0px;">
+                <div>
+                    <div class="widget-body">
+                        <table class="table table-bordered table-striped" style="box-sizing: border-box;">
+                            <thead>
+                                <tr>
+                                    <th style="width: 70px;">
+                                        <a href="javascript:void(0)" ng-click="frmAddSparepart_selectAll()">Select All</a>
+                                        <a href="javascript:void(0)" ng-click="frmAddSparepart_unSelectAll()">Un-Select All</a>
+                                    </th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="item in saleOrderDetailSparepart" @*ng-if="!checkHasAddedSparepart(item.saleOrderDetailSparepartID)"*@>
+                                    <td><input type="checkbox" ng-model="item.isSelected" /></td>
+                                    <td>
+                                        <strong>{{item.articleCode}}</strong>
+                                        <br />
+                                        {{item.description}}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal" ng-click="frmAddSparepart_onOK()">
+                    Add
+                </button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="frmAddSample" class="modal fade">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="margin-top:90px !important">
+            <div class="modal-header">
+                <button aria-hidden="true" data-dismiss="modal" class="close" type="button">
+                    ×
+                </button>
+                <h4 class="modal-title">Add Sample</h4>
+            </div>
+            <div class="modal-body smart-form" style="padding: 0px;">
+                <div>
+                    <div class="widget-body">
+                        <table class="table table-bordered table-striped" style="box-sizing: border-box;">
+                            <thead>
+                                <tr>
+                                    <th style="width: 70px;">
+                                        <a href="javascript:void(0)" ng-click="frmAddSample_selectAll()">Select All</a>
+                                        <a href="javascript:void(0)" ng-click="frmAddSample_unSelectAll()">Un-Select All</a>
+                                    </th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="item in saleOrderDetailSample" @*ng-if="!checkHasAddedSample(item.saleOrderDetailSampleID)"*@>
+                                    <td><input type="checkbox" ng-model="item.isSelected" /></td>
+                                    <td>
+                                        <strong>{{item.articleCode}}</strong>
+                                        <br />
+                                        {{item.description}}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal" ng-click="frmAddSample_onOK()">
+                    Add
+                </button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section FormAction {
+<ul id="sparks">
+    <li class="sparks-info">
+        <a href="#" ng-if="factoryOrderDataContainer.factoryOrderData.trackingStatusID!=3 && factoryOrderDataContainer.factoryOrderData.trackingStatusID!=5" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="update($event)"><i class="fa fa-save"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="@Url.Action("FaO", "FactoryOrder")/@ViewBag.SaleOrderID/{{factoryOrderDataContainer.factoryOrderData.offerID}}" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+    </li>
+
+    <li class="sparks-info">
+        <a href="javascript:void(0);" ng-if="factoryOrderDataContainer.factoryOrderData.trackingStatusID!=3 && factoryOrderDataContainer.factoryOrderData.trackingStatusID!=5" class="btn btn-default@(ViewBag.ID==0?" disabled":"") @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Approve, HttpContext.Current))" title="Confirm" style="color: #0066ff; " ng-click="confirm($event,@ViewBag.ID)"><i class="fa fa-check"></i></a>
+    </li>
+
+    <li class="sparks-info">
+        <a href="javascript:void(0);" ng-if="factoryOrderDataContainer.factoryOrderData.trackingStatusID==3 || factoryOrderDataContainer.factoryOrderData.trackingStatusID==5" class="btn btn-default@(ViewBag.ID==0?" disabled":"") @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Approve, HttpContext.Current))" title="Revise" style="color: #ff0000;" ng-click="revise($event,@ViewBag.ID)"><i class="fa fa-reply"></i></a>
+    </li>
+
+    <li class="sparks-info">
+        <a href="javascript:void(0);" ng-if="factoryOrderDataContainer.factoryOrderData.trackingStatusID!=3 && factoryOrderDataContainer.factoryOrderData.trackingStatusID!=5" class="btn btn-default@(ViewBag.ID==0?" disabled":"") @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current))" title="Delete" style="color: #ff0000;" ng-click="delete($event)"><i class="fa fa-times"></i></a>
+    </li>
+
+    <li class="sparks-info">
+        <a href="@Url.Action("Edit", "SaleOrder")/@ViewBag.SaleOrderID/{{factoryOrderDataContainer.factoryOrderData.offerID}}" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Go to PI" style="color: #0066ff;" target="_blank"><i class="fa fa-arrow-left"></i></a>
+    </li>
+
+    <li class="sparks-info">
+        <a href="#" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Assign Colli EAN Code" ng-click="assignColliForm.load($event)"><i class="fa fa-barcode"></i></a>
+    </li>
+
+    @if (!string.IsNullOrEmpty(userManualUrl))
+    {
+        <li class="sparks-info">
+            <a target="_blank" href="@userManualUrl" class="btn btn-default" title="Help"><i class="fa fa-info"></i></a>
+        </li>
+    }
+</ul>
+}
+
+@section pagejs {
+    <script src="~/Angular/app/factoryorder/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script type="text/javascript">
+
+        //$(".datepicker").datepicker({
+        //    firstDay: 1,
+        //    showWeek: true,
+        //    dateFormat: 'dd/mm/yy',
+        //});
+
+        var factoryOrderDetailGrid = jQuery('#factoryOrderDetailGrid').scrollableTable(null,function(sortedBy, sortedDirection){
+            var scope = angular.element(jQuery('body')).scope();
+            datasource = scope.factoryOrderDataContainer.factoryOrderData.factoryOrderDetails;
+            if (sortedDirection == 'asc') {
+                datasource.sort(function(a,b){
+                    return a[sortedBy] > b[sortedBy] ? 1: -1;
+                });
+            }
+            else if (sortedDirection == 'desc') {
+                datasource.sort(function(a,b){
+                    return a[sortedBy] < b[sortedBy] ? 1: -1;
+                });
+            }
+            scope.$apply();
+        });
+
+        var factoryOrderSparepartDetailGrid = jQuery('#factoryOrderSparepartDetailGrid').scrollableTable(null,function(sortedBy, sortedDirection){
+            var scope = angular.element(jQuery('body')).scope();
+            datasource = scope.factoryOrderDataContainer.factoryOrderData.factoryOrderSparepartDetails;
+            if (sortedDirection == 'asc') {
+                datasource.sort(function(a,b){
+                    return a[sortedBy] > b[sortedBy] ? 1: -1;
+                });
+            }
+            else if (sortedDirection == 'desc') {
+                datasource.sort(function(a,b){
+                    return a[sortedBy] < b[sortedBy] ? 1: -1;
+                });
+            }
+            scope.$apply();
+        });
+
+        var factoryOrderSampleDetailGrid = jQuery('#factoryOrderSampleDetailGrid').scrollableTable(null, function (sortedBy, sortedDirection) {
+            var scope = angular.element(jQuery('body')).scope();
+            datasource = scope.factoryOrderDataContainer.factoryOrderData.factoryOrderSampleDetails;
+            if (sortedDirection == 'asc') {
+                datasource.sort(function (a, b) {
+                    return a[sortedBy] > b[sortedBy] ? 1 : -1;
+                });
+            }
+            else if (sortedDirection == 'desc') {
+                datasource.sort(function (a, b) {
+                    return a[sortedBy] < b[sortedBy] ? 1 : -1;
+                });
+            }
+            scope.$apply();
+        });
+
+        var context = {
+            reportUrl: '@serviceReportRoot',
+            //propDisabled: disabled
+        };
+
+        factoryOrderService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/factoryorder/';
+        factoryOrderService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+        var factoryOrderApp = angular.module('tilsoftApp', []);
+
+        factoryOrderApp.filter('filterFactoryOrder', function () {
+            return function (factoryOrderDetails, hasQnt) {
+                var result = [];
+                if (!hasQnt) return factoryOrderDetails;
+
+                angular.forEach(factoryOrderDetails, function (item) {
+                    if (item.orderQnt) {
+                        result.push(item);
+                    }
+                });
+
+                return result;
+            };
+        });
+
+        factoryOrderApp.filter('filterFactoryOrderSparepart', function () {
+            return function (factoryOrderSparepartDetails, hasQntSparepart) {
+                var result = [];
+                if (!hasQntSparepart) return factoryOrderSparepartDetails;
+
+                angular.forEach(factoryOrderSparepartDetails, function (item) {
+                    if (item.orderQnt) {
+                        result.push(item);
+                    }
+                });
+
+                return result;
+            };
+        });
+
+        factoryOrderApp.filter('filterFactoryOrderSample', function () {
+            return function (factoryOrderSampleDetails, hasQntSample) {
+                var result = [];
+                if (!hasQntSample) return factoryOrderSampleDetails;
+
+                angular.forEach(factoryOrderSampleDetails, function (item) {
+                    if (item.orderQnt) {
+                        result.push(item);
+                    }
+                });
+
+                return result;
+            };
+        });
+
+        factoryOrderApp.controller('tilsoftController', ['$scope', function ($scope) {
+            $scope.factoryOrderDataContainer = null;
+            $scope.shippedByFactories = [];
+            $scope.clientComplaintView = [];
+            $scope.complaintTypes = [];
+            $scope.ComplaintStatuses = [];
+
+            $scope.saleOrderDetail = null;
+            $scope.isSaleOrderDetailLoaded = false;
+            $scope.saleOrderDetailSparepart = null;
+            $scope.isSaleOrderDetailSparepartLoaded = false;
+            $scope.saleOrderDetailSample = null;
+            $scope.isSaleOrderDetailSampleLoaded = false;
+
+            $scope.currentForm = 'receipt-form';
+
+            $scope.newId = 0;
+            $scope.getNewId = function () {
+                $scope.newId--;
+                return $scope.newId;
+            };
+
+            $scope.hasQnt = false;
+            $scope.toggFilterQnt = function () {
+                $scope.hasQnt = !$scope.hasQnt;
+            };
+
+            $scope.hasQntSparepart = false;
+            $scope.toggFilterQntSparepart = function () {
+                $scope.hasQntSparepart = !$scope.hasQntSparepart;
+            };
+
+            $scope.hasQntSample = false;
+            $scope.toggFilterQntSample = function () {
+                $scope.hasQntSample = !$scope.hasQntSample;
+            };
+
+            $scope.frmAddProduct_onOpen = function () {
+                //if (!$scope.isSaleOrderDetailLoaded) {
+                    factoryOrderService.getSaleOrderDetail(
+                        @ViewBag.SaleOrderID,
+                        function (data) {
+                            if (data.message.type === 0) {
+                                $scope.saleOrderDetail = data.data;
+
+                                for (var i = $scope.saleOrderDetail.length - 1; i >= 0; i--) {
+                                    var keepGoing = true;
+                                    angular.forEach($scope.factoryOrderDataContainer.factoryOrderData.factoryOrderDetails, function (item) {
+                                        if (keepGoing) {
+                                            if ($scope.saleOrderDetail[i].saleOrderDetailID === item.saleOrderDetailID) {
+                                                $scope.saleOrderDetail.splice(i, 1);
+                                                keepGoing = false;
+                                            }
+                                        }
+                                    });
+                                }
+
+                                $scope.isSaleOrderDetailLoaded = true;
+                                $scope.$apply();
+                                $('#frmAddProduct').modal('show');
+                            }
+                        },
+                        function (error) {
+                            jsHelper.showMessage('warning', error);
+                            $scope.$apply();
+                        }
+                    );
+                //}
+                //else {
+                //    angular.forEach($scope.saleOrderDetail, function (item) {
+                //        item.isSelected = false;
+                //    });
+                //    $('#frmAddProduct').modal('show');
+                //}
+            }
+
+            $scope.frmAddProduct_onOK = function () {
+                angular.forEach($scope.saleOrderDetail.filter(o => o.isSelected), function (item) {
+                    if ($scope.factoryOrderDataContainer.factoryOrderData.factoryOrderDetails.filter(o => o.saleOrderDetailID === item.saleOrderDetailID).length === 0) {
+                        var itemCloned = angular.copy(item);
+                        itemCloned.factoryOrderDetailID = $scope.getNewId();
+                        itemCloned.orderQnt = null;
+                        $scope.factoryOrderDataContainer.factoryOrderData.factoryOrderDetails.push(itemCloned);
+                    }
+                });
+            }
+            $scope.frmAddProduct_selectAll = function () {
+                angular.forEach($scope.saleOrderDetail, function (item) {
+                    item.isSelected = true;
+                });
+            }
+            $scope.frmAddProduct_unSelectAll = function () {
+                angular.forEach($scope.saleOrderDetail, function (item) {
+                    item.isSelected = false;
+                });
+            }
+
+            $scope.checkHasAdded = function(id){
+                var check = 0;
+                angular.forEach($scope.factoryOrderDataContainer.factoryOrderData.factoryOrderDetails, function (item) {
+                    if (item.saleOrderDetailID === id) {
+                        check = check + 1;
+                    }
+                });
+                if (check === 0) {
+                    return false;
+                }
+                else {
+                    return true;
+                }
+            }
+
+            //$scope.checkHasAddedSparepart = function(id){
+            //    var check = 0;
+            //    angular.forEach($scope.factoryOrderDataContainer.factoryOrderData.factoryOrderSparepartDetails, function (item) {
+            //        if (item.saleOrderDetailSparepartID === id) {
+            //            check = check + 1;
+            //        }
+            //    });
+            //    if (check === 0) {
+            //        return false;
+            //    }
+            //    else {
+            //        return true;
+            //    }
+            //}
+
+            $scope.checkHasAddedSample = function (id) {
+                var check = 0;
+                angular.forEach($scope.factoryOrderDataContainer.factoryOrderData.factoryOrderSampleDetails, function (item) {
+                    if (item.saleOrderDetailSampleID === id) {
+                        check = check + 1;
+                    }
+                });
+                if (check === 0) {
+                    return false;
+                }
+                else {
+                    return true;
+                }
+            }
+
+            $scope.frmAddSparepart_onOpen = function () {
+                //if (!$scope.isSaleOrderDetailSparepartLoaded) {
+                    factoryOrderService.getSaleOrderDetailSparepart(
+                        @ViewBag.SaleOrderID,
+                        function (data) {
+                            if (data.message.type === 0) {
+                                $scope.saleOrderDetailSparepart = data.data;
+                                
+                                for (var i = $scope.saleOrderDetailSparepart.length - 1; i >= 0; i--) {
+                                    var keepGoing = true;
+                                    angular.forEach($scope.factoryOrderDataContainer.factoryOrderData.factoryOrderSparepartDetails, function (item) {
+                                        if (keepGoing) {
+                                            if ($scope.saleOrderDetailSparepart[i].saleOrderDetailSparepartID === item.saleOrderDetailSparepartID) {
+                                                $scope.saleOrderDetailSparepart.splice(i, 1);
+                                                keepGoing = false;
+                                            }
+                                        }
+                                    });
+                                }
+
+                                $scope.isSaleOrderDetailSparepartLoaded = true;
+                                $scope.$apply();
+                                $('#frmAddSparepart').modal('show');
+                            }
+                        },
+                        function (error) {
+                            jsHelper.showMessage('warning', error);
+                            $scope.$apply();
+                        }
+                    );
+                //}
+                //else {
+                //    angular.forEach($scope.saleOrderDetailSparepart, function (item) {
+                //        item.isSelected = false;
+                //    });
+                //    $('#frmAddSparepart').modal('show');
+                //}
+            }
+            $scope.frmAddSparepart_onOK = function () {
+                angular.forEach($scope.saleOrderDetailSparepart.filter(o => o.isSelected), function (item) {
+                    if ($scope.factoryOrderDataContainer.factoryOrderData.factoryOrderSparepartDetails.filter(o => o.saleOrderDetailSparepartID === item.saleOrderDetailSparepartID).length === 0) {
+                        var itemCloned = angular.copy(item);
+                        itemCloned.factoryOrderSparepartDetailID = $scope.getNewId();
+                        itemCloned.orderQnt = null;
+                        $scope.factoryOrderDataContainer.factoryOrderData.factoryOrderSparepartDetails.push(itemCloned);
+                    }
+                });
+            }
+
+            $scope.frmAddSparepart_selectAll = function () {
+            angular.forEach($scope.saleOrderDetailSparepart, function (item) {
+                item.isSelected = true;
+            });
+        }
+            $scope.frmAddSparepart_unSelectAll = function () {
+            angular.forEach($scope.saleOrderDetailSparepart, function (item) {
+                item.isSelected = false;
+            });
+        }
+
+            $scope.frmAddSample_onOpen = function () {
+                //if (!$scope.isSaleOrderDetailSampleLoaded) {
+                        factoryOrderService.getSaleOrderDetailSample(
+                            @ViewBag.SaleOrderID,
+                            function (data) {
+                                if (data.message.type === 0) {
+                                    $scope.saleOrderDetailSample = data.data;
+
+                                    for (var i = $scope.saleOrderDetailSample.length - 1; i >= 0; i--) {
+                                        var keepGoing = true;
+                                        angular.forEach($scope.factoryOrderDataContainer.factoryOrderData.factoryOrderSampleDetails, function (item) {
+                                            if (keepGoing) {
+                                                if ($scope.saleOrderDetailSample[i].saleOrderDetailSampleID === item.saleOrderDetailSampleID) {
+                                                    $scope.saleOrderDetailSample.splice(i, 1);
+                                                    keepGoing = false;
+                                                }
+                                            }
+                                        });
+                                    }
+
+                                    $scope.isSaleOrderDetailSampleLoaded = true;
+                                    $scope.$apply();
+                                    $('#frmAddSample').modal('show');
+                                }
+                            },
+                            function (error) {
+                                jsHelper.showMessage('warning', error);
+                                $scope.$apply();
+                            }
+                        );
+                //}
+                //else {
+                //    angular.forEach($scope.saleOrderDetailSample, function (item) {
+                //        item.isSelected = false;
+                //    });
+                //    $('#frmAddSample').modal('show');
+                //}
+            }
+
+            $scope.frmAddSample_onOK = function () {
+                angular.forEach($scope.saleOrderDetailSample.filter(o => o.isSelected), function (item) {
+                    if ($scope.factoryOrderDataContainer.factoryOrderData.factoryOrderSampleDetails.filter(o => o.saleOrderDetailSampleID === item.saleOrderDetailSampleID).length === 0) {
+                        var itemCloned = angular.copy(item);
+                        itemCloned.factoryOrderSampleDetailID = $scope.getNewId();
+                        itemCloned.orderQnt = null;
+                        $scope.factoryOrderDataContainer.factoryOrderData.factoryOrderSampleDetails.push(itemCloned);
+                    }
+                });
+            }
+
+            $scope.frmAddSample_selectAll = function () {
+                angular.forEach($scope.saleOrderDetailSample, function (item) {
+                    item.isSelected = true;
+                });
+            }
+            $scope.frmAddSample_unSelectAll = function () {
+                angular.forEach($scope.saleOrderDetailSample, function (item) {
+                    item.isSelected = false;
+                });
+            }
+
+            $scope.bindWeekNumber = function (ldsFactory) {
+                if (ldsFactory != null) {     
+                    var arrDate = ldsFactory.split("/");
+                    var temp = arrDate[1] + '/' + arrDate[0] + '/' + arrDate[2];
+                    var newDate = new Date(temp);              
+                    //var dayNr = (newDate.getDay() + 6) % 7;
+                    //var firstThursday = newDate.valueOf();
+
+                    //newDate.setDate(newDate.getDate() - dayNr + 3);
+                    //newDate.setMonth(0, 1);
+
+                    //if (newDate.getDay() != 4) {
+                    //    newDate.setMonth(0, 1 + ((4 - newDate.getDay()) + 7) % 7);
+                    //}
+
+                    //return 1 + Math.ceil((firstThursday - newDate) / 604800000); // 604800000 = 7 * 24 * 3600 * 1000
+
+                    //return weeknum
+
+                    var d = new Date(Date.UTC(newDate.getFullYear(), newDate.getMonth(), newDate.getDate()));
+                    var dayNum = d.getUTCDay() || 7;
+                    d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+                    var yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+                    return Math.ceil((((d - yearStart) / 86400000) + 1) / 7)
+                }
+            }
+
+            $scope.openComplaintOverview = function(ClientComplaintID) {
+                factoryOrderService.getClientComplaintData(
+                    ClientComplaintID,
+                    function (data) {
+                        $scope.clientComplaintView = data.data.data;
+                        $scope.complaintTypes = data.data.complaintTypes;
+                        $scope.complaintStatuses = data.data.complaintStatuses;
+                        $scope.$apply();
+                    },
+                    function (error) {
+                        jsHelper.showMessage('warning', error);
+                    }
+                );
+                jQuery('#frmClientComplaint').modal();
+            };
+
+            $scope.load = function()
+            {
+                $scope.searchdata = null;
+                $scope.factoryorderdata = null;
+                $scope.supportdata = null,
+                $scope.pageIndex = 1;
+                $scope.totalPage = 0;
+                $scope.disabled = false;
+
+                factoryOrderService.load(@ViewBag.ID, @ViewBag.SaleOrderID,
+                    function (data) {
+                        $scope.factoryOrderDataContainer = data.data; console.log(data);
+                        //assing product is selected when naviage from Credit note
+                        angular.forEach($scope.factoryOrderDataContainer.factoryOrderData.factoryOrderDetails,function(item){
+                            item.isSelected=(item.factoryOrderDetailID==@ViewBag.FactoryOrderDetailID);
+                        });
+                        $scope.shippedByFactories = data.data.factories;
+                        if ('@ViewBag.IsDisable' === 'disabled'){
+                            $scope.disabled = true;
+                        } else {
+                            $scope.disabled = false;
+                        }
+
+                        //show html
+                        jQuery('#content').show();
+                        $scope.$watch('factoryorder', function() {
+                            jQuery('#changeNotification').html('<i class="fa fa-save blink_me"></i>');
+                        });
+
+                        $scope.$apply();
+                    },
+                    function (error) {
+                        jsHelper.showMessage('warning', error);
+                        $scope.factoryOrderDataContainer = null;
+                        $scope.$apply();
+                    }
+                );
+            }
+
+            $scope.exportExcelItem = function (clientComplaintItemID) {
+                factoryOrderService.exportExcelClientComplaintItem(clientComplaintItemID,
+                    function (data) {
+                        debugger;
+                        if (data.message.type === 0) {
+                            var result = data.data;
+                            window.location = context.reportUrl + data.data;
+                            $scope.$apply();
+                        }
+                    },
+                    function (error) {
+                        jsHelper.showMessage('warning', error);
+                    }
+                );
+            }
+
+            $scope.update = function ($event) {
+                $event.preventDefault();
+
+                if($scope.editForm.$valid)
+                {
+                    factoryOrderService.update(@ViewBag.ID, $scope.factoryOrderDataContainer.factoryOrderData,
+                    function (data) {
+                        jsHelper.processMessage(data.message);
+                        if(data.message.type == 0) {
+                            window.location = '@Url.Action("Edit", "FactoryOrder", new { id = UrlParameter.Optional, id2 = UrlParameter.Optional })/'+ data.data.factoryOrderID + '/' + @ViewBag.saleOrderID;
+                        }
+                    },
+                        function (error) {
+                            jsHelper.showMessage('warning', error);
+                        }
+                    );
+                }
+                else
+                {
+                    jsHelper.showMessage('warning', '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED');
+                }
+            }
+
+
+            $scope.delete = function ($event) {
+                $event.preventDefault();
+
+                if (confirm('Are you sure ?')) {
+                    factoryOrderService.delete(@ViewBag.ID,
+                        function (data) {
+                            jsHelper.processMessage(data.message);
+                            if(data.message.type == 0) {
+                                window.location = '@Url.Action("FaO", "FactoryOrder")/' + @ViewBag.SaleOrderID;
+                            }
+                        },
+                        function (error) {
+                            jsHelper.showMessage('warning', error);
+                        }
+                    );
+                }
+            }
+
+
+            $scope.confirm = function ($event,id) {
+                $event.preventDefault();
+                if ($scope.editForm.$valid) {
+                    if (id == 0) {
+                        alert('You need save data before confirm !');
+                        return;
+                    }
+                    if (confirm('Are you sure want to confirm ')) {
+                        factoryOrderService.confirm(@ViewBag.ID, $scope.factoryOrderDataContainer.factoryOrderData,
+                            function (data) {
+                                $scope.factoryOrderDataContainer.factoryOrderData.trackingStatusNM = data.data.trackingStatusNM;
+                                $scope.factoryOrderDataContainer.factoryOrderData.concurrencyFlag_String = data.data.concurrencyFlag_String;
+                                jsHelper.processMessage(data.message);
+                                $scope.$apply();
+                                if (data.message.type == 0) {
+                                    location.reload();
+                                }
+                            },
+                            function (error) {
+                                jsHelper.showMessage('warning', error);
+                            }
+                        );
+                    }
+                }
+                else
+                {
+                    jsHelper.showMessage('warning', '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED');
+                }
+            }
+
+
+            $scope.revise = function ($event,id) {
+                $event.preventDefault();
+                if (id == 0)
+                {
+                    alert('You need save data before confirm !');
+                    return;
+                }
+                if (confirm('Are you sure want to revise ?')) {
+                    factoryOrderService.revise('@ViewBag.ID',$scope.factoryOrderDataContainer.factoryOrderData,
+                            function (data) {
+                                $scope.factoryOrderDataContainer.factoryOrderData.trackingStatusNM = data.data.trackingStatusNM;
+                                $scope.factoryOrderDataContainer.factoryOrderData.concurrencyFlag_String = data.data.concurrencyFlag_String;
+                                jsHelper.processMessage(data.message);
+                                $scope.$apply();
+                                if (data.message.type == 0) {
+                                    location.reload();
+                                }
+                            },
+                            function (error) {
+                                jsHelper.showMessage('warning', error);
+                            }
+                        );
+                }
+            }
+
+            $scope.selectedFactory = function(){
+                factory = $scope.factoryOrderDataContainer.factories.filter(function(o){return o.factoryID == $scope.factoryOrderDataContainer.factoryOrderData.factoryID})
+                locationID = factory[0].locationID;
+                if (locationID == 5){ //HCM
+                    $scope.factoryOrderDataContainer.factoryOrderData.supplyChainPersonID = 1; //DAVE
+                }
+                else if (locationID == 6){ //QUY NHON
+                    $scope.factoryOrderDataContainer.factoryOrderData.supplyChainPersonID = 4; //REINHARD
+                }
+                else if (locationID == 7 || locationID == 4){ //DANANG & HUE
+                    $scope.factoryOrderDataContainer.factoryOrderData.supplyChainPersonID = 3; //PEPJN
+                }
+                else{
+                    $scope.factoryOrderDataContainer.factoryOrderData.supplyChainPersonID = null;
+                }
+                if (factory[0].factoryID != null || factory[0].factoryID != 0) {
+                    $scope.factoryOrderDataContainer.factoryOrderData.shippedByFactoryID = factory[0].factoryID;
+                }
+            }
+
+            $scope.printPS = function ($event, factoryOrderDetailID) {
+                $event.preventDefault();
+                factoryOrderService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])';
+                factoryOrderService.printPS(factoryOrderDetailID,
+                    function (data) {
+                        jsHelper.processMessage(data.message);
+                        if (data.message.type != 2)
+                        {
+                            window.location = '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]' + data.data;
+                        }
+                    },
+                    function (error) {
+                        jsHelper.showMessage('warning', error);
+                    }
+                );
+                factoryOrderService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/factoryorder/';
+            }
+
+
+            $scope.orderQntKeyUp = function($event,index){
+                $event.preventDefault();
+                if ($event.keyCode ==13) {
+                    $("#" + (index + 1)).focus();
+                    $("#" + (index + 1)).select();
+                }
+            }
+
+            $scope.qcReport = {
+                data : null,
+                getQCReport : function($event, factoryOrderDetailID) {
+                    factoryOrderService.getQCReport(factoryOrderDetailID
+                        ,function(data){
+                            $scope.qcReport.data = data.data;
+                            $scope.$apply();
+                            $('#frmQCReport').modal('show');
+                        }
+                        ,function(error){
+                            jsHelper.showMessage('warning', error);
+                        })
+                }
+
+            }
+
+            $scope.AutoAddOrderQnt = function () {
+                angular.forEach($scope.factoryOrderDataContainer.factoryOrderData.factoryOrderDetails, function (item) {
+                    if (item.saleOrderQnt > 0 && item.orderQnt == null) {
+                        item.orderQnt = item.remainQnt;
+                    }
+                    else
+                    if (item.saleOrderQnt > 0 && item.orderQnt != null && item.orderQnt.toString().trim() == "") {
+                        item.orderQnt = item.remainQnt;
+                        }
+                    else
+                    if (item.saleOrderQnt == 0 || item.saleOrderQnt == null) {
+                        item.orderQnt = 0;
+                    }
+                });
+            }
+
+            $scope.AutoAddOrderQnt_Sparepart = function () {
+                angular.forEach($scope.factoryOrderDataContainer.factoryOrderData.factoryOrderSparepartDetails, function (item) {
+                    if (item.saleOrderQntSparepart > 0 && item.orderQnt == null) {
+                        item.orderQnt = item.remainQnt;
+                    }
+                    else
+                        if (item.saleOrderQntSparepart > 0 && item.orderQnt != null && item.orderQnt.toString().trim() == "") {
+                            item.orderQnt = item.remainQnt;
+                        }
+                        else
+                            if (item.saleOrderQntSparepart == 0 || item.saleOrderQntSparepart == null) {
+                                item.orderQnt = 0;
+                            }
+                });
+            }
+
+            $scope.assignColliForm = {
+                productColli:[],
+
+                products:[],
+                productSetEANCodes:[],
+
+                load : function($event){
+                    $event.preventDefault();
+                    factoryOrderService.getProductColli(@ViewBag.ID,
+                        function (data) {
+                            if (data.message.type==2)
+                            {
+                                jsHelper.processMessage(data.message);
+                            }
+                            else
+                            {
+                                $scope.assignColliForm.productColli = data.data;
+                                //get distinct factoryOrderDetail (group by factoryOrderDetail <=> productID)
+                                var indexs = [];
+                                $scope.assignColliForm.products = [];
+                                angular.forEach($scope.assignColliForm.productColli, function (value, key) {
+                                    if (indexs.indexOf(value.factoryOrderDetailID) < 0) {
+                                        indexs.push(value.factoryOrderDetailID);
+                                        $scope.assignColliForm.products.push({
+                                            factoryOrderDetailID: value.factoryOrderDetailID
+                                            , productID: value.productID
+                                            , articleCode: value.articleCode
+                                            , description: value.description
+                                            , orderQnt : value.orderQnt
+                                            , isSelected : (value.factoryOrderDetailID==@ViewBag.FactoryOrderDetailID)
+                                        });
+                                    }
+                                }, null);
+                                //get distinct factoryOrderDetail/productSetEANCode
+                                indexs = [];
+                                $scope.assignColliForm.productSetEANCodes = [];
+                                angular.forEach($scope.assignColliForm.productColli, function (value, key) {
+                                    keyID = value.factoryOrderDetailID.toString() + '_' + value.productSetEANCodeID.toString();
+                                    if (indexs.indexOf(keyID) < 0) {
+                                        indexs.push(keyID);
+                                        $scope.assignColliForm.productSetEANCodes.push({
+                                            factoryOrderDetailID: value.factoryOrderDetailID
+                                            , productSetEANCodeID: value.productSetEANCodeID
+                                            , productEANCode: value.productEANCode
+                                            , colliEANCodeCount: $scope.assignColliForm.productColli.filter(function(o){return o.productSetEANCodeID==value.productSetEANCodeID && o.productColliID>0}).length
+                                        });
+                                    }
+                                }, null);
+                                $scope.currentForm = 'assign-colli-form';
+                            }
+                            $scope.$apply();
+                        },
+                        function (error) {
+                            jsHelper.showMessage('warning', error);
+                        }
+                    );
+
+                },
+                cancel : function($event){
+                    $event.preventDefault();
+                    $scope.currentForm = 'receipt-form';
+                },
+
+                selectedEANCode : function (isSelected,factoryOrderDetailID,productSetEANCodeID){
+                    //set one of productSetEANCode is selected
+                    angular.forEach($scope.assignColliForm.productSetEANCodes,function(item){
+                        if (item.factoryOrderDetailID==factoryOrderDetailID)
+                        {
+                            if (item.productSetEANCodeID!=productSetEANCodeID)
+                            {
+                                if (isSelected)
+                                {
+                                    item.isSelected=!isSelected;
+                                }
+                            }
+                        }
+                    });
+
+                    //selected all colli ean code of productSetEANCode is selected
+                    angular.forEach($scope.assignColliForm.productColli,function(item){
+                        if (item.factoryOrderDetailID==factoryOrderDetailID)
+                        {
+                            if (item.productSetEANCodeID==productSetEANCodeID && item.productColliID>0){
+                                item.isSelected=isSelected;
+                            }
+                            else{
+                                if (isSelected)
+                                {
+                                    item.isSelected=!isSelected;
+                                }
+                            }
+                        }
+                    });
+                },
+
+                createFactoryOrderProductColli : function ($event) {
+                    $event.preventDefault();
+                    factoryOrderService.createFactoryOrderProductColli($scope.assignColliForm.productColli,
+                            function (data) {
+                                if (data.message.type==2)
+                                {
+                                    jsHelper.processMessage(data.message);
+                                }
+                                else
+                                {
+                                    window.location = '@Url.Action("Edit", "FactoryOrder", new { id = UrlParameter.Optional})/'+ $scope.factoryOrderDataContainer.factoryOrderData.factoryOrderID + '/' + $scope.factoryOrderDataContainer.factoryOrderData.saleOrderID;
+                                }
+                                $scope.$apply();
+                            },
+                    function (error) {
+                        jsHelper.showMessage('warning', error);
+                    }
+                );
+                }
+
+            }
+
+            //load form
+            $scope.load();
+        }]);
+
+    </script>
+}
+

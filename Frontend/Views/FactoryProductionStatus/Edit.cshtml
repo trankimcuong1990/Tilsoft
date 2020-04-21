@@ -1,0 +1,270 @@
+﻿@{
+    ViewBag.Title = "Factory Production Status";
+    ViewBag.Module = "Factory Production Status";
+
+    //get param
+    string factoryID = "0";
+    string factoryUD = "0";
+    string season = "0";
+    if (Request.Params["factoryID"] != null)
+    {
+        factoryID = Request.Params["factoryID"];
+        factoryUD = Request.Params["factoryUD"];
+    }
+    if (Request.Params["season"] != null)
+    {
+        season = Request.Params["season"];
+    }
+}
+<style>
+    .tilsoft-table .select2-container {
+        width: 89% !important;
+        display: inline-block;
+    }
+</style>
+
+<form class="row" name="editForm">
+
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>General</h2>
+            </header>
+            <div>
+                <div class="widget-body">
+                    <div class="smart-form">
+                        <div class="row">
+
+                            <section class="col col-lg-2">
+                                <label>Factory</label>
+                                <span class="form-control">{{data.factoryUD}}</span>
+                            </section>
+
+                            <section class="col col-lg-2">
+                                <label>Season</label>
+                                <span class="form-control">{{data.season}}</span>
+                            </section>
+
+                            <section class="col col-lg-2">
+                                <label>Week</label>
+                                <select id="weekNo" name="weekNo" ng-model="data.weekNo" ng-options="item.weekNo as item.weekNo + ' (' + item.startDate +' - ' + item.endDate + ')' for item in weekSeasons" required ng-disabled="data.factoryProductionStatusID>0">
+                                    <option value=""></option>
+                                </select>
+                                <span class="help-block" ng-show="editForm.weekNo.$error.required"><i class="fa fa-warning"></i>Week is required.</span>
+                            </section>
+
+                            @*<section class="col col-lg-2">
+                                    <label>Status Date</label>
+                                    <span class="form-control">{{data.statusDate}}</span>
+                                </section>*@
+
+                            <section class="col col-lg-2">
+                                <label>Capacity</label>
+                                <span class="form-control">{{data.factoryCapacity}}</span>
+                            </section>
+
+                            <section class="col col-2">
+                                <label>Updated By</label>
+                                <span class="form-control">{{data.updatorName}}</span>
+                            </section>
+
+                            <section class="col col-2">
+                                <label>Updated Date</label>
+                                <span class="form-control">{{data.updatedDate}}</span>
+                            </section>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <ul class="nav nav-tabs pull-left in">
+                    <li class="active">
+                        <a data-toggle="tab" href="#tabDetail"> <i class="fa fa-database"></i> <span class="hidden-mobile hidden-tablet">Production Status</span> </a>
+                    </li>
+                </ul>
+            </header>
+            <div>
+                <div class="jarviswidget-editbox"></div>
+                <div class="widget-body">
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="tabDetail">
+                            <div class="row">
+                                <div class="col col-lg-2 m-bottom-15">
+                                    <input type="text" ng-model="detailFilter.searchQuery" style="width:100%" placeholder="Enter articlecode or description here to filter"/>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col col-lg-12">
+                                    <div id="grdProductionStatusDetail" class="tilsoft-table-wrapper" avs-scroll grid-handler="gridHandler">
+                                        <div class="tilsoft-table">
+                                            <div class="tilsoft-table-header" style="width: 1000px;">
+                                                <div style="width:165px"></div>
+                                                <div style="width:70px" class="sorting" data-colname="clientUD">Client</div>
+                                                <div style="width:70px" class="sorting" data-colname="proformaInvoiceNo">Order</div>
+                                                <div style="width:80px" class="sorting" data-colname="lds">LDS</div>
+                                                <div style="width:70px" class="sorting" data-colname="totalContOrder">Order Cont</div>
+                                                <div style="width:110px" class="sorting" data-colname="totalContProducedLastWeeks">Packed Last Weeks</div>
+                                                <div style="width:110px" class="sorting" data-colname="producedContainerQnt">Packed This Week</div>
+                                                <div style="width:154px" class="sorting" data-colname="totalOutputProducedLastWeeks">Output Produced Last Weeks</div>
+                                                <div style="width:154px" class="sorting" data-colname="totalOutputProducedThisWeek">Output Produced This Week</div>
+                                                <div class="sorting" data-colname="remark">Remark</div>
+                                            </div>
+
+                                            <div class="tilsoft-table-filter" style="width: 1000px;">
+                                                <div style="width:165px"></div>
+                                                <div style="width: 70px;">
+                                                    <input type="text" ng-model="gridFilter.clientUD" />
+                                                </div>
+                                                <div style="width: 70px; ">
+                                                    <input type="text" ng-model="gridFilter.proformaInvoiceNo" />
+                                                </div>
+                                                <div style="width: 80px;">
+                                                    <input type="text" ng-model="gridFilter.lds" />
+                                                </div>
+                                                <div style="width: 70px;text-align:right;font-weight:bold">
+                                                    @*<input type="text" ng-model="filterResult | sumFunction:'totalContOrder' | number : 1" disabled style="text-align:right;font-weight:bold" />*@
+                                                    {{filterResult | sumFunction:'totalContOrder' | number : 2}}
+                                                </div>
+                                                <div style="width: 110px;text-align:right;font-weight:bold">
+                                                    @*<input type="text" ng-model="filterResult | sumFunction:'totalContProducedLastWeeks' | number : 1" disabled style="text-align:right;font-weight:bold" />*@
+                                                    {{filterResult | sumFunction:'totalContProducedLastWeeks' | number : 2}}
+                                                </div>
+                                                <div style="width: 110px;text-align:right;font-weight:bold">
+                                                    @*<input type="text" ng-model="filterResult | sumFunction:'producedContainerQnt' | number : 1" disabled style="text-align:right;font-weight:bold" />*@
+                                                    {{filterResult | sumFunction:'producedContainerQnt' | number : 2}}
+                                                </div>
+                                                <div style="width: 154px;text-align:right;font-weight:bold">
+                                                    {{filterResult | sumFunction:'totalOutputProducedLastWeeks' | number : 0}}
+                                                </div>
+                                                <div style="width: 154px;text-align:right;font-weight:bold">
+                                                    {{filterResult | sumFunction:'totalOutputProducedThisWeek' | number : 0}}
+                                                </div>
+                                                <div></div>
+                                            </div>
+
+                                            <div class="tilsoft-table-body" style="width: 1000px;">
+                                                <table>
+                                                    <tbody ng-repeat="item in filterResult=(data.factoryProductionStatusDetailDTOs | filter : {clientUD : gridFilter.clientUD, proformaInvoiceNo: gridFilter.proformaInvoiceNo, lds: gridFilter.lds})">
+                                                        <tr>
+                                                            <td style="width:165px">
+                                                                <a href="#" class="btn btn-primary btn-xs font-11" title="Product" ng-click="event.viewDetail($event,item)"><i id="icon-view-pi-{{item.factoryOrderID}}" class="fa fa-minus-square-o"></i> View</a>
+                                                                <a href="#" class="btn btn-primary btn-xs font-11" title="Product" ng-click="event.getOrderDetail($event,item)"><i class="fa fa-refresh"></i> Refresh ({{item.factoryProductionStatusOrderDetailDTOs.length}} Art)</a>
+                                                            </td>
+                                                            <td style="width:69px;vertical-align:middle">{{item.clientUD}}</td>
+                                                            <td style="width:70px;vertical-align:middle">{{item.proformaInvoiceNo}}</td>
+                                                            <td style="width:80px;vertical-align:middle">{{item.lds}}</td>
+                                                            <td style="width:70px;vertical-align:middle;text-align:right;">{{item.totalContOrder | number : 2}}</td>
+                                                            <td style="width:110px;vertical-align:middle;text-align:right">{{item.totalContProducedLastWeeks | number : 2}}</td>
+                                                            <td style="width:110px;vertical-align:middle;text-align:right">{{item.producedContainerQnt | number : 2}}</td>
+                                                            <td style="width:154px;vertical-align:middle;text-align:right">{{item.totalOutputProducedLastWeeks | number : 0}}</td>
+                                                            <td style="width:154px;vertical-align:middle;text-align:right">{{item.totalOutputProducedThisWeek | number : 0}}</td>
+                                                            <td style="">
+                                                                <input ng-model="item.remark" class="form-control" style="height:80%" />
+                                                            </td>
+                                                        </tr>
+                                                        <tr id="{{item.factoryOrderID}}" ng-show="listProduct.length>0">
+                                                            <td></td>
+                                                            <td colspan="10">
+                                                                <div class="tilsoft-table" >
+                                                                    <div>
+                                                                        <table>
+                                                                            <tr>
+                                                                                <th style="width:110px">ArticleCode</th>
+                                                                                <th style="">Description</th>
+                                                                                <th style="width:55px">Order Qnt</th>
+                                                                                <th style="width:60px">Qnt In 40HC</th>
+                                                                                <th style="width:70px">Order In Cont</th>
+                                                                                <th style="width:80px">Packed Last Week</th>
+                                                                                <th style="width:80px">Output Produced Last Week</th>
+                                                                                <th style="width:70px">Packed Qnt</th>
+                                                                                <th style="width:70px">Packed Cont</th>
+                                                                                <th style="width:70px">Output Produced</th>
+                                                                            </tr>
+                                                                            <tr ng-repeat="sItem in listProduct=(item.factoryProductionStatusOrderDetailDTOs | orderDetailFilter : detailFilter.searchQuery : detailFilter.searchQuery)">
+                                                                                <td>{{sItem.articleCode}}</td>
+                                                                                <td>{{sItem.description}}</td>
+                                                                                <td style="text-align:right;vertical-align:middle">{{sItem.orderQnt | number : 0}}</td>
+                                                                                <td style="text-align:right;vertical-align:middle">{{sItem.qnt40HC | number : 0}}</td>
+                                                                                <td style="text-align:right;vertical-align:middle">{{sItem.orderInCont | number : 2}}</td>
+                                                                                <td style="text-align:right;vertical-align:middle">{{sItem.totalProducedLastWeek | number : 0}}</td>
+                                                                                <td style="text-align:right;vertical-align:middle">{{sItem.totalOutputProducedLastWeek | number : 0}}</td>
+                                                                                <td style="vertical-align:middle">
+                                                                                    <input type="text" style="height:80%;text-align:right" ng-change="event.changeProducedQnt(sItem,item)" ng-model="sItem.producedQnt" />
+                                                                                </td>
+                                                                                <td style="vertical-align:middle">
+                                                                                    <input type="text" style="height:80%;text-align:right" avs-number ng-data-source="sItem.producedCont" ng-decimal="2" disabled />
+                                                                                </td>
+                                                                                <td style="vertical-align:middle">
+                                                                                    <input type="text" style="height:80%;text-align:right" ng-change="event.changeOutputProducedQnt(sItem,item)" ng-model="sItem.outputProducedQnt" />
+                                                                                </td>
+                                                                            </tr>
+                                                                        </table>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "FactoryProductionStatus")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="#" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="event.update()"><i class="fa fa-save"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="#" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="Delete" style="color: #ff0000;" ng-click="event.delete($event)"><i class="fa fa-times"></i></a>
+        </li>
+    </ul>
+}
+@section pagejs {
+    <script src="~/Angular/app/jsonService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/support/service.js?c=@System.Guid.NewGuid().ToString().Replace("-","")"></script>
+
+    <script src="~/Angular/app/factoryProductionStatus/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/factoryProductionStatus/edit.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+
+    <script type="text/javascript">
+        jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/factoryProductionStatus/';
+        jsonService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+        supportService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/support/';
+        supportService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+        var context = {
+            id: '@ViewBag.ID',
+            backUrl: '@Url.Action("Index", "FactoryProductionStatus")',
+            refreshUrl: '@Url.Action("Edit", "FactoryProductionStatus", new { id = UrlParameter.Optional })/',
+            errMsg: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED',
+            reportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]',
+
+            token: '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]',
+            factoryID : '@factoryID',
+            factoryUD : '@factoryUD',
+            season : '@season',
+        }
+    </script>
+}
+

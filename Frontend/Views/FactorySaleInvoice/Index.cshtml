@@ -1,0 +1,242 @@
+﻿@{
+    ViewBag.Title = "Factory Sale Invoice";
+    ViewBag.Module = "FactorySaleInvoice";
+
+    string userManualUrl = string.Empty;
+    if (System.IO.File.Exists(Server.MapPath("~/UserManual/" + ViewBag.ModuleCode + ".pdf")))
+    {
+        userManualUrl = "/UserManual/" + ViewBag.ModuleCode + ".pdf";
+    }
+
+}
+@Styles.Render("~/Views/FactorySaleInvoice/css/daterangepicker.css")
+<form class="row" id="main-form">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-search-result" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Search Result</h2>
+            </header>
+            <div class="smart-form">
+                <div class="widget-body no-padding">
+                    <div avs-scroll grid-handler="gridHandler" class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header" style="width: 2350px;">
+                                <div style="width: 70px;"></div>
+                                <div style="width: 100px;" class="sorting" data-colname="Season">Season</div>
+                                <div style="width: 130px;" class="sorting" data-colname="Type">Type</div>
+                                <div style="width: 130px;" class="sorting" data-colname="InvoiceStatus">Status</div>
+                                <div style="width: 100px;" class="sorting" data-colname="DocCode">Doc Code</div>
+                                <div style="width: 120px;" class="sorting" data-colname="InvoiceDate">Invoice Date</div>
+                                <div style="width: 120px;" class="sorting" data-colname="PostingDate">Posting Date</div>
+
+                                <div style="width: 250px;" class="sorting" data-colname="FactoryRawMaterialID">Client</div>
+                                <div style="width:85px">Currency</div>
+                                <div style="width: 100px;" class="sorting" data-colname="VATAmount">VAT amount</div>
+                                <div style="width: 100px;" class="sorting" data-colname="Amount">Amount</div>
+                                <div style="width: 100px;" class="sorting" data-colname="Amount">Amount USD</div>
+                                <div style="width: 150px;">Total VND</div>
+                                <div style="width: 250px;">Remark</div>
+                                <div style="width: 200px;">Created By</div>
+                                <div style="width: 200px;">Updated By</div>
+                                <div></div>
+                            </div>
+
+                            <div class="tilsoft-table-filter" style="width: 2350px;">
+
+                                <div style="text-align: center; width: 70px">
+                                    <a href="javascript:void(0)" class="btn btn-{{isDefaultFilter?'default':'primary'}} btn-xs" title="Apply Filter" ng-click="event.reload()"><i class="fa fa-filter"></i></a>
+                                    <a href="javascript:void(0)" class="btn btn-default btn-xs" title="Clear Filter" ng-click="event.clearFilter()"><i class="fa fa-ban"></i></a>
+                                </div>
+
+                                <div style="text-align:center; width: 100px">
+                                    <select class="form-control" style="height:25px" ng-model="filters.season" ng-options="season.seasonValue as season.seasonText for season in seasons">
+                                        <option value=""></option>
+                                    </select>
+                                </div>
+
+                                <div style="width: 130px; text-align: center">
+                                    <select class="form-control" ng-model="filters.invoiceTypeID" style="height:25px"
+                                            ng-options="gItem.value as gItem.name for gItem in InvoiceTypes">
+                                        <option value=""></option>
+                                    </select>
+                                </div>
+
+                                <div style="width: 130px; text-align: center">
+                                    <select class="form-control" ng-model="filters.invoiceStatusID" style="height:25px"
+                                            ng-options="gItem.factorySaleInvoiceStatusNM as gItem.factorySaleInvoiceStatusNM for gItem in InvoiceStatusDTOs">
+                                        <option value=""></option>
+                                    </select>
+                                </div>
+                                <div style="width: 100px; text-align: center">
+                                    <input type="text" ng-model="filters.docCode" class="form-control search-filter" />
+                                </div>
+                                <div style="width: 120px; padding:0px">
+                                    @*<div class="input-group" style="border:none">
+                <input type="text" class="form-control search-filter" style="width:100%" avs-calendar ng-data-source="filters.invoicedDate" />
+                <span class="input-group-addon">
+                    <i class="fa fa-calendar"></i>
+                </span>
+            </div>*@
+                                    <div class="demo">
+                                        <input style="height:30px;" type="text" name="datefilter" value="" class="search-filter" />
+                                    </div>
+                                </div>
+                                <div style="width: 120px; padding:0px">
+                                    <div class="input-group" style="border:none">
+                                        <input type="text" class="form-control search-filter" style="width:100%" avs-calendar ng-data-source="filters.postingDate" />
+                                        <span class="input-group-addon">
+                                            <i class="fa fa-calendar"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div style="width:250px; padding: 0px">
+                                    <select class="select2" id="subSupplier" style="width: 100%" ng-model="filters.factoryRawMaterialID" ng-options="spFactoryRaw.subSupplierID as spFactoryRaw.subSupplierShortNM for spFactoryRaw in factoryRawMaterialDTOs">
+                                        <option value=""></option>
+                                    </select>
+                                    <i></i>
+                                </div>
+                                <div style="width:85px"></div>
+                                <div style="width: 100px"></div>
+                                <div style="width: 100px"></div>
+                                <div style="width: 100px"></div>
+                                <div style="width: 150px"></div>
+                                <div style="width: 250px"></div>
+                                <div style="width: 200px"></div>
+                                <div style="width: 200px"></div>
+                                <div></div>
+                            </div>
+                            <div class="tilsoft-table-totalrow" style="width: 2350px">
+                                <div style="width:1105px; text-align:right"><b>Total</b></div>
+                                <div style="width: 100px;">{{totalAmountDTO.totalVATAmount | number: 0}}</div>
+                                <div style="width: 100px;">{{totalAmountDTO.totalAmountVND | number: 0}}</div>
+                                <div style="width: 100px">{{totalAmountDTO.totalAMountUSD | number: 2}}</div>
+                                <div style="width: 150px">{{totalAmountDTO.totalAllAmountVND | number: 0}}</div>
+                                <div style="width: 250px;"></div>
+                                <div style="width: 200px;"></div>
+                                <div style="width: 200px;"></div>
+                                <div></div>
+                            </div>
+
+                            <div class="tilsoft-table-body" style="width: 2350px; margin-top: 95px;">
+                                <table>
+                                    <tbody ng-repeat="item in data">
+                                        <tr>
+
+                                            <td style="width:69px;text-align:center">
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current) == "disabled")
+                                                {
+                                                    <a ng-if="item.type == 1" class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "FactorySaleInvoice")/{{item.factorySaleInvoiceID}}#/" title="view (read only)" target="_blank"><i class="fa fa-folder-open"></i>View</a>
+                                                }
+                                                else
+                                                {
+                                                    <a ng-if="item.type == 1 && item.invoiceStatus == 'Open'" class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "FactorySaleInvoice")/{{item.factorySaleInvoiceID}}#/" title="Edit" target="_blank"><i class="fa fa-pencil"></i>Edit</a>
+                                                    <a ng-if="item.type == 1 && item.invoiceStatus != 'Open'" class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "FactorySaleInvoice")/{{item.factorySaleInvoiceID}}#/" title="view (read only)" target="_blank"><i class="fa fa-folder-open"></i>View</a>
+                                                }
+
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus("PurchasingInvoiceMng2", Frontend.Helper.ActionEnum.Read, HttpContext.Current) == "disabled")
+                                                {
+                                                    <a ng-if="item.type == 0" class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "PurchasingInvoice")/{{item.factorySaleInvoiceID}}/" title="view (read only)" target="_blank"><i class="fa fa-folder-open"></i>View</a>
+                                                }
+
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current) != "disabled")
+                                                {
+                                                    <a ng-if="item.type == 1" class="btn btn-danger btn-xs font-11" href="#" ng-click="event.delete(item)" title="Delete" ng-show="item.invoiceStatus == 'Open'" style="margin-top: 3px; width: 43px"><i class="fa fa-times"></i>Del</a>
+                                                }
+                                            </td>
+                                            <td style="text-align:center; width: 100px">{{item.season}}</td>
+                                            <td ng-if="item.type == 1" style="text-align: left; width: 130px">Factory Sale Invoice</td>
+                                            <td ng-if="item.type == 0" style="text-align: left; width: 130px">Purchasing Invoice</td>
+                                            <td style="text-align: center; width: 130px">{{item.invoiceStatus}}</td>
+                                            <td style="text-align: center; width: 100px">{{item.docCode}}</td>
+                                            <td style="text-align: center; width: 120px">{{item.invoiceDate}}</td>
+                                            <td style="text-align: center; width: 120px">{{item.postingDate}}</td>
+
+                                            <td style="text-align: left; width: 250px">{{item.clientNM}}</td>
+                                            <td style="text-align: center; width: 85px">{{item.currency}}</td>
+                                            <td style="text-align: right; width: 100px">{{item.vatAmount | number:0}}</td>
+                                            <td style="text-align: right; width: 100px" ng-if="item.currency == 'VND'">{{item.amount | number:0}}</td>
+                                            <td style="text-align: right; width: 100px" ng-if="item.currency != 'VND'"></td>
+                                            <td style="text-align: right; width: 100px" ng-if="item.currency == 'USD'">{{item.amount | number:2}}</td>
+                                            <td style="text-align: right; width: 100px" ng-if="item.currency != 'USD'"></td>
+                                            <td style="text-align: right; width: 150px" ng-if="item.currency == 'VND'">{{item.vatAmount + item.amount | number: 0}}</td>
+                                            <td style="text-align: right; width: 150px" ng-if="item.currency == 'USD'">{{item.vatAmount + item.amount * item.exchangeRate | number: 0}}</td>
+                                            <td style="text-align: left; width: 250px">{{item.remark}}</td>
+                                            <td style="text-align: left; width: 200px">
+                                                <label>
+                                                    Create By: <a ng-show="(item.createdBy != null && item.creatorNM != null)" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.createdBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                        <i class="fa fa-user"></i> {{item.creatorNM}}
+                                                    </a>
+                                                </label>
+                                                <label>
+                                                    Create Date: {{item.createdDate}}
+                                                </label>
+                                            </td>
+                                            <td style="text-align: left; width: 200px">
+                                                <label>
+                                                    Update By: <a ng-show="(item.updatedBy != null && item.updatorNM != null)" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.updatedBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                        <i class="fa fa-user"></i> {{item.updatorNM}}
+                                                    </a>
+
+                                                </label>
+                                                <label>
+                                                    Update Date: {{item.updatedDate}}
+                                                </label>
+                                            </td>
+                                            <td></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <span>Found: {{totalRows}} record(s)</span>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+@section FormAction {
+<ul id="sparks">
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default" title="Search" ng-click="event.reload()"><i class="fa fa-search"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default" title="Refresh" ng-click="event.reload()"><i class="fa fa-refresh"></i></a>
+    </li>
+    @*<li class="sparks-info">
+            <a href="@Url.Action("Edit", "Delivery")/0" target="_blank" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="New"><i class="fa fa-file-o"></i></a>
+        </li>*@
+
+    <li class="sparks-info">
+        <a href="@Url.Action("Edit", "FactorySaleInvoice")/0#/" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="New" target="_blank"><i class="fa fa-file-o"></i></a>
+    </li>
+    @if (!string.IsNullOrEmpty(userManualUrl))
+    {
+        <li class="sparks-info">
+            <a target="_blank" href="@userManualUrl" class="btn btn-default" title="Help"><i class="fa fa-info"></i></a>
+        </li>
+    }
+
+</ul>
+}
+@section pagepopup2{
+}
+
+@section pagejs {
+    <script src="~/Views/FactorySaleInvoice/js/daterangepicker.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")" type="text/javascript"></script>
+    <script src="~/Views/FactorySaleInvoice/index.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/factorysale-invoice/',
+            token: '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]',
+            pageSize: @System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"],
+            cookieId: '@HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString()',
+            backendReportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]',
+            title:'WorkOrder'
+        }
+    </script>
+    <script src="~/Angular/app/jsonService2.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/FactorySaleInvoice/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}

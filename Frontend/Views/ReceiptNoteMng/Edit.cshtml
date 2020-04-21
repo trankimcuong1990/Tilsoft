@@ -1,0 +1,73 @@
+﻿@{
+    ViewBag.Title = "Receipt Note";
+    ViewBag.Module = "Receipt Note";
+
+    int supplierID = 0;
+    if (!string.IsNullOrEmpty(Request.QueryString["supplierID"]))
+    {
+        supplierID = Convert.ToInt32(Request.QueryString["supplierID"].ToString());
+    }
+
+    string userManualUrl = string.Empty;
+    if (System.IO.File.Exists(Server.MapPath("~/UserManual/" + ViewBag.ModuleCode + ".pdf")))
+    {
+        userManualUrl = "/UserManual/" + ViewBag.ModuleCode + ".pdf";
+    }
+
+}
+
+
+<form class="row" name="editForm">
+    <div ng-view></div>
+</form>
+
+@section FormAction {
+<ul id="sparks">
+    <li class="sparks-info">
+        <a href="@Url.Action("Index", "ReceiptNoteMng")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="event.update()"><i class="fa fa-save"></i></a>
+    </li>
+    @*<li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current))" title="Delete" ng-class="{'disabled': data.receiptNoteID == 0}" ng-click="event.delete(data.receiptNoteID)">
+                <i class="fa fa-times"></i>
+            </a>
+        </li>*@
+    @*<li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Print, HttpContext.Current))" title="Print" ng-click="event.getPrintout()"><i class="fa fa-print"></i></a>
+        </li>*@
+    @if (!string.IsNullOrEmpty(userManualUrl))
+    {
+        <li class="sparks-info">
+            <a target="_blank" href="@userManualUrl" class="btn btn-default" title="Help"><i class="fa fa-info"></i></a>
+        </li>
+    }
+</ul>
+}
+
+@section pagejs {
+    <script src="~/Views/ReceiptNoteMng/Edit.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/ReceiptNoteMng/_Edit/_GeneralCtrl.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/ReceiptNoteMng/_Edit/_PurchasingInvoiceCtrl.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/ReceiptNoteMng/_Edit/_FactorySaleInvoiceCtrl.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/receipt-note/',
+            token: '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]',
+
+            backendReportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]',
+            refreshUrl: '@Url.Action("Edit", "ReceiptNoteMng", new { id = UrlParameter.Optional })/',
+            indexUrl: '@Url.Action("Index", "ReceiptNoteMng")',
+            reportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]',
+
+            id: @ViewBag.ID,
+            errMsg: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED',
+            supplierID: @supplierID,
+            factoryRawMaterialID: null
+        };
+    </script>
+    <script src="~/Angular/app/jsonService2.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/ReceiptNoteMng/Service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+
+}

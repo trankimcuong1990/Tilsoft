@@ -1,0 +1,102 @@
+﻿@{
+    ViewBag.Title = "Search Price List File";
+    ViewBag.Module = "Price List File";
+    ViewBag.Icon = "fa-search";
+}
+<div class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-1" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Search Result</h2>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div avs-scroll grid-handler="gridHandler" class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header" style="width: 900px;">
+                                <div style="width: 70px;"><b>Found </b><b style="color:#a90329;">{{totalRows}} </b></div>
+                                <div style="width: 100px;" class="sorting" data-colname="Season"> Season</div>
+                                <div style="width: 300px;"> File Infomation</div>
+                                <div style="width: 250px;"> Comment</div>
+                                <div><i class="fa fa-history"></i> Tracking Information</div>
+                            </div>
+                            <div class="tilsoft-table-filter" style="width: 1100px;">
+                                <div style="width: 70px;">
+                                    <a href="javascript:void(0)" class="btn btn-{{isDefaultFilter?'default':'primary'}} btn-xs" title="Apply Filter" ng-click="event.reload()"><i class="fa fa-filter"></i></a>
+                                    <a href="javascript:void(0)" class="btn btn-default btn-xs" title="Clear Filter" ng-click="event.clearFilter()"><i class="fa fa-ban"></i></a>
+                                </div>
+                                <div style="width: 100px;">
+                                    <select class="search-filter" ng-model="filters.Season" ng-options="season.seasonValue as season.seasonText for season in seasons">
+                                        <option></option>
+                                    </select>
+                                </div>
+                                <div style="width: 300px;"><input class="search-filter search-text" type="text" ng-model="filters.FileName" /></div>
+                                <div style="width: 250px;"><input class="search-filter search-text" type="text" ng-model="filters.Comment" /></div>
+                                <div></div>
+                            </div>
+                            <div class="tilsoft-table-body" style="width: 1100px; margin-top: 95px;height:700px;">
+                                <table>
+                                    <tr ng-repeat="item in data">
+                                        <td style="text-align: center; width: 69px;"><a href="@Url.Action("Edit", "PriceListFile")/{{item.priceListFileID}}" target="_blank" class="btn btn-primary btn-xs">Detail</a></td>
+                                        <td style="width: 100px; text-align:center;">{{item.season}}</td>
+                                        <td style="width: 300px;">
+                                            <span class="box form-control" style="margin-bottom:10px;">
+                                                <strong>PDF File</strong>: 
+                                                <a href="{{item.pdfFileLocation}}" target="_blank">{{item.pdfFriendlyName}}</a>
+                                            </span>
+                                            <span class="box form-control">
+                                                <strong>Excel File</strong>:
+                                                <a href="{{item.excelFileLocation}}" target="_blank">{{item.excelFriendlyName}}</a>
+                                            </span>
+                                        </td>
+                                        <td style="width: 250px;">{{item.comment}}</td>
+                                        <td>
+                                            <span class="box">
+                                                <i class="fa fa-user"></i>
+                                                <strong>Updated By</strong>:
+                                                <a ng-if="item.updatedBy" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.updatedBy}}" dat data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                    {{item.updatorNM}}
+                                                </a>
+                                            </span>
+                                            <span class="box"><i class="fa fa-calendar"></i> <strong>Updated Date</strong>: {{item.updatedDate}}</span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <span>Found: {{totalRows}} record(s)</span>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Search" ng-click="event.reload()"><i class="fa fa-search"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Refresh" ng-click="event.reload()"><i class="fa fa-refresh"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="@Url.Action("Edit", "PriceListFile")/0" target="_blank" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="New"><i class="fa fa-file-o"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/pricelistfile/',
+            token: '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]',
+            pageSize: 50,
+            cookieId: '@HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString()'
+        }
+    </script>
+    <script src="~/Angular/app/priceListFile/index.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/jsonService2.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/priceListFile/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}

@@ -1,0 +1,654 @@
+﻿@{
+    if (ViewBag.ID == 0)
+    {
+        ViewBag.Title = "Create new QC Report";
+    }
+    else
+    {
+        ViewBag.Title = "Edit QC Report";
+    }
+
+    int factoryOrderDetailID = 0;
+
+    if (Request.Params["f"] != null)
+    {
+        factoryOrderDetailID = Convert.ToInt32(Request.Params["f"]);
+    }
+    Frontend.APIDTO.APIUserInformation userInfo = (Frontend.APIDTO.APIUserInformation)Session[Frontend.Customize.Common.ProjectDefinition.USER_INFO_SESSION];
+}
+<style>
+    .image-wrapper .col-sm-3 {
+        border-left: 1px solid #ddd;
+        border-bottom: 1px solid #ddd;
+        padding: 20px;
+        box-sizing: border-box;
+    }
+
+    .image-wrapper section:last-child {
+        border-right: 1px solid #ddd;
+        box-sizing: border-box;
+    }
+
+    .signature-table input.signature-input {
+        text-align: center;
+        font-style: italic;
+        font-family: cursive;
+        font-size: 40px;
+        min-height: 70px;
+    }
+
+    .form-header {
+        width: 100%;
+        border-bottom: 1px solid #ccc;
+        margin-bottom: 10px;
+    }
+
+        .form-header h1 {
+            padding: 10px;
+        }
+</style>
+<form class="row" name="editForm" id="main-form">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-product-information" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <ul class="nav nav-tabs pull-left in">
+                    <li class="active">
+                        <a data-toggle="tab" href="#tabGeneral"> <span> QC Report</span> </a>
+                    </li>
+                    <li>
+                        <a data-toggle="tab" href="#tabTracking"> <i class="fa fa-history"></i> <span> Tracking </span> </a>
+                    </li>
+                </ul>
+            </header>
+            <div>
+                <div class="widget-body">
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="tabGeneral">
+                            <div class="smart-form">
+                                <div class="form-header">
+                                    <h1>General Information</h1>
+                                </div>
+                                <fieldset style="padding: 0px;">
+                                    <div class="row">
+                                        <section class="col col-3 m-bottom-15">
+                                            <label class="label">P/I No</label>
+                                            <label class="input">
+                                                <span class="form-control">{{data.proformaInvoiceNo}}</span>
+                                            </label>
+                                        </section>
+                                        <section class="col col-3">
+                                            <label class="label">ClientUD</label>
+                                            <label class="input">
+                                                <span class="form-control">{{data.clientUD}}</span>
+                                            </label>
+                                        </section>
+                                        <section class="col col-3">
+                                            <label class="label">Factory</label>
+                                            <label class="input">
+                                                <span class="form-control">{{data.factoryUD}}</span>
+                                            </label>
+                                        </section>
+                                        <section class="col col-3 m-bottom-15">
+                                            <label class="label">Article Code</label>
+                                            <label class="input">
+                                                <span class="form-control">{{data.articleCode}}</span>
+                                            </label>
+                                        </section>
+                                    </div>
+                                    <div class="row">
+                                        <section class="col col-9 m-bottom-15">
+                                            <label class="label">Description</label>
+                                            <label class="input">
+                                                <span class="form-control">{{data.description}}</span>
+                                            </label>
+                                        </section>
+                                        <section class="col col-3 m-bottom-15">
+                                            <label class="label">Order Quantity</label>
+                                            <label class="input">
+                                                <span class="form-control">{{data.orderQnt}}</span>
+                                            </label>
+                                        </section>
+                                    </div>
+                                    <!--
+                                    <div class="row">
+                                        <section class="col col-6">
+                                            <label class="label">
+                                                PDF File Scan
+                                            </label>
+                                            <label class="input">
+                                                <span class="form-control">
+                                                    {{data.friendlyName}}
+                                                    <div style="position: absolute; right: 5px; top: 5px;">
+                                                        <a href="javascript:void(0);" class="btn btn-primary btn-xs" style="font-size: 11px;" ng-click="event.downloadFile()">Download</a>
+                                                        <a href="javascript:void(0);" class="btn btn-primary btn-xs" style="font-size: 11px;" ng-click="event.changeFile()">Change</a>
+                                                        <a href="javascript:void(0);" class="btn btn-primary btn-xs" style="font-size: 11px;" ng-click="event.removeFile()">Remove</a>
+                                                    </div>
+                                                </span>
+                                            </label>
+                                        </section>
+                                    </div>
+                                    -->
+                                </fieldset>
+                                <!--
+                                <fieldset style="padding-top: 0px;">
+                                    <header style="border-bottom:none;">
+                                        <h1>Available Report</h1>
+                                    </header>
+                                    <div class="row">
+                                        <div class="tilsoft-table-wrapper" id="grdImages">
+                                            <div class="tilsoft-table">
+                                                <div style="width: 100%; overflow: auto; min-height: 100px; margin-top: 0px;" class="tilsoft-table-body">
+                                                    <table>
+                                                        <tbody>
+                                                            <tr>
+                                                                <th style="width: 20%; font-weight: bold;">Article Code</th>
+                                                                <th style="width: 15%; font-weight: bold;">Name</th>
+                                                                <th style="width: 10%; font-weight: bold;">P/I No</th>
+                                                                <th style="width: 25%; font-weight: bold;">Remark</th>
+                                                                <th style="width: 20%; font-weight: bold;">File</th>
+                                                            </tr>
+                                                            <tr ng-repeat="availableReport in AvailableReports">
+                                                                <td style="text-align: center;">{{availableReport.articleCode}}</td>
+                                                                <td style="text-align: center;">{{availableReport.qcReportNM}}</td>
+                                                                <td style="text-align: center;">{{availableReport.proformaInvoiceNo}}</td>
+                                                                <td style="text-align: center;">{{availableReport.remark}}</td>
+                                                                <td style="text-align: center;"><a target="_blank" href="{{availableReport.fileLocation}}">{{availableReport.friendlyName}}</a></td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                                -->
+                            </div>
+                            <div class="smart-form">
+                                <div class="form-header">
+                                    <h1>Inspection Information</h1>
+                                </div>
+                                <fieldset style="padding: 0px;">
+                                    <div class="row">
+                                        <section class="col col-2 m-bottom-15">
+                                            <label class="label">Inspected Day</label>
+                                            <label class="input">
+                                                <input type="text" class="datepicker" ng-model="data.inspectedDay" data-dateformat="dd/mm/yy" />
+                                                <i class="icon-append fa fa-calendar"></i>
+                                            </label>
+                                        </section>
+                                        <section class="col col-2 m-bottom-15">
+                                            <label class="label">Location</label>
+                                            <label class="input">
+                                                <input type="text" id="Location" ng-model="data.location" />
+                                            </label>
+                                        </section>
+                                        <section class="col col-2 m-bottom-15">
+                                            <label class="label">Sample Size</label>
+                                            <label class="input">
+                                                <input type="text" id="SampleSize" ng-model="data.sampleSize" />
+                                            </label>
+                                        </section>
+                                        <section class="col col-2 m-bottom-15">
+                                            <label class="label">Assemply Sample Size</label>
+                                            <label class="input">
+                                                <input type="text" id="AssemplySampleSize" ng-model="data.assemplySampleSize" />
+                                            </label>
+                                        </section>
+                                        <section class="col col-2 m-bottom-15">
+                                            <label class="label">QC Name</label>
+                                            <label class="input">
+                                                <input type="text" id="Location" ng-model="data.qcName" />
+                                            </label>
+                                        </section>
+                                    </div>
+                                    <div class="row">
+                                        <section class="col col-4 m-bottom-15">
+                                            <label class="label">Type Of Inspection</label>
+                                            <label class="select">
+                                                <select id="imageTitle" ng-model="data.inspectionTypeID" ng-options="inspectionType.inspectionTypeID as inspectionType.inspectionTypeNM for inspectionType in inspectionTypes">
+                                                    <option value=""></option>
+                                                </select>
+                                                <i></i>
+                                            </label>
+                                        </section>
+                                        <section class="col col-4 m-bottom-15">
+                                            <label class="label">Packaging Type</label>
+                                            <label class="select">
+                                                <select id="imageTitle" ng-model="data.packagingTypeID" ng-options="packagingType.packagingTypeID as packagingType.packagingTypeNM for packagingType in packagingTypes">
+                                                    <option value=""></option>
+                                                </select>
+                                                <i></i>
+                                            </label>
+                                        </section>
+                                    </div>
+                                </fieldset>
+                            </div>
+                            <div class="smart-form">
+                                <div class="form-header">
+                                    <h1>Document Files</h1>
+                                </div>
+                                <fieldset style="padding: 0px;">
+                                    <section class="col col-sm-12 no-padding">
+                                        <a href="javascript:void(0)" class="btn btn-default btn-xs btn-primary" ng-click="event.addDocumentFiles()">
+                                            <i class="fa fa-plus"></i> Add document files
+                                        </a>
+                                    </section>
+                                    <section class="col col-sm-12 no-padding m-top-5">
+                                        <div class="tilsoft-table-wrapper">
+                                            <div class="tilsoft-table">
+                                                <div class="tilsoft-table-body" style="margin-top: 0px; width: auto;">
+                                                    <table>
+                                                        <thead>
+                                                            <tr>
+                                                                <th style="width: 80px;"></th>
+                                                                <th style="width: 150px;">Document<br />Type</th>
+                                                                <th style="width: 150px;">Document<br />No</th>
+                                                                <th style="width: 350px;">Document<br />File</th>
+                                                                <th style="width: 500px;">Document<br />Remark</th>
+                                                                <th>More<br />Information</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr ng-repeat="item in data.qcReportDocuments">
+                                                                <td style="width: 80px; text-align: center;">
+                                                                    <a href="javascript:void(0)" class="btn btn-default btn-xs btn-danger font-11" ng-click="event.removeDocumentFiles(item)">
+                                                                        <i class="fa fa-times"></i> Delete
+                                                                    </a>
+                                                                </td>
+                                                                <td style="width: 150px; text-align: center;">
+                                                                    <select class="form-control" style="height: 30px;" ng-model="item.qcReportDocumentTypeID" ng-options="type.qcReportDocumentTypeID as type.qcReportDocumentTypeNM for type in qcReportDocumentTypes">
+                                                                        <option value=""></option>
+                                                                    </select>
+                                                                </td>
+                                                                <td style="width: 150px;">
+                                                                    <input type="text" class="form-control" style="height: 30px; width: 100%;" maxlength="30" ng-model="item.qcReportDocumentUD" />
+                                                                </td>
+                                                                <td style="width: 350px;">
+                                                                    <a href="{{item.fileLocation}}" target="_blank">
+                                                                        {{item.friendlyName}}
+                                                                    </a>
+                                                                </td>
+                                                                <td style="width: 500px;">
+                                                                    <textarea class="form-control" style="width: 100%; border: solid 1px #ccc;" rows="3" maxlength="500" ng-model="item.remark"></textarea>
+                                                                </td>
+                                                                <td>
+                                                                    <section class="box" ng-show="item.qcReportDocumentID > 0">
+                                                                        <strong>Updated By</strong>: 
+                                                                        <a ng-show="item.hasLink" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.updatedBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                                            {{item.updatorName}}
+                                                                        </a>
+                                                                        <span ng-show="!item.hasLink"> {{item.updatorName}}</span>
+                                                                        on {{item.updatedDate}}
+                                                                    </section>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+                                </fieldset>
+                            </div>
+                            <div class="jarviswidget" id="wid-id-specification" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+                                <header>
+                                    <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                                    <h2>Specification</h2>
+                                </header>
+                                <div class="row">
+                                    <section class="col col-lg-12">
+                                        <div id="grdMaterial" class="tilsoft-table-wrapper">
+                                            <div class="tilsoft-table">
+                                                <div class="tilsoft-table-body" style="width: auto; margin-top:0px">
+                                                    <table>
+                                                        <thead>
+                                                            <tr>
+                                                                <th style="width:40px"></th>
+                                                                <th class="sorting" data-colname="rowIndex" style="width:60px">No</th>
+                                                                <th style="width:250PX"></th>
+                                                                <th style="width:100px">Unit</th>
+                                                                <th style="width:250px">Specification</th>
+                                                                <th style="width:250px;">Actual</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr>
+                                                                <td colspan="8">
+                                                                    <a class="btn btn-primary btn-xs" ng-click="event.addDetail($event)"><i class=" fa fa-plus"></i> Add </a>
+                                                                </td>
+                                                            </tr>
+                                                            <tr ng-repeat="item in data.qcReportDetails">
+                                                                <td style="text-align:center; vertical-align:middle">
+                                                                    <a ng-click="event.removeDetail($event,$index)" class="btn btn-danger btn-xs font-11" href="javascript:void(0);"><i class=" fa fa-times"></i>Del</a>
+                                                                </td>
+                                                                <td style="vertical-align:middle"><span class="form-control" style="text-align:center">{{$index + 1}}</span></td>
+                                                                <td>
+                                                                    <input class="form-control" type="text" name="Name" ng-model="item.name">
+                                                                </td>
+                                                                <td style="vertical-align:middle">
+                                                                    <input class="form-control" type="text" name="unit" ng-model="item.unit">
+                                                                </td>
+                                                                <td>
+                                                                    <input class="form-control" type="text" name="Specification" ng-model="item.specification">
+                                                                </td>
+                                                                <td>
+                                                                    <input class="form-control" type="text" name="Actual" ng-model="item.actual">
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+                                </div>
+                            </div>
+                            <!--
+                            <div class="jarviswidget" id="wid-id-defect-inspection" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+                                <header>
+                                    <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                                    <h2>Defect Inspection</h2>
+                                </header>
+                                <div class="row">
+                                    <section class="col col-lg-12">
+                                        <div id="grdMaterial" class="tilsoft-table-wrapper">
+                                            <div class="tilsoft-table">
+                                                <div class="tilsoft-table-body" style="width: auto; margin-top:0px">
+                                                    <table>
+                                                        <thead>
+                                                            <tr>
+                                                                <th style="width:40px"></th>
+                                                                <th class="sorting" data-colname="rowIndex" style="width:60px">No</th>
+                                                                <th style="width:350px">Defect found</th>
+                                                                <th style="width:100px">Defect Quantiy</th>
+                                                                <th style="width:100px">Fixed</th>
+                                                                <th style="width:100px;">Reject</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr>
+                                                                <td colspan="8">
+                                                                    <a class="btn btn-primary btn-xs" ng-click="event.addDefect($event)"><i class=" fa fa-plus"></i> Add </a>
+                                                                </td>
+                                                            </tr>
+                                                            <tr ng-repeat="item in data.qcReportDefects">
+                                                                <td style="text-align:center; vertical-align:middle">
+                                                                    <a ng-click="event.removeDefect($event,$index)" class="btn btn-danger btn-xs font-11" href="javascript:void(0);"><i class=" fa fa-times"></i>Del</a>
+                                                                </td>
+                                                                <td style="vertical-align:middle"><span class="form-control" style="text-align:center">{{$index + 1}}</span></td>
+                                                                <td>
+                                                                    <input class="form-control" type="text" name="description" ng-model="item.description">
+                                                                </td>
+                                                                <td style="vertical-align:middle">
+                                                                    <input class="form-control" type="text" name="unit" ng-model="item.quantity">
+                                                                </td>
+                                                                <td>
+                                                                    <input style="height:17px; margin-top:10px;" class="form-control" type="checkbox" ng-model="item.isFixed" name="IsFixed">
+                                                                </td>
+                                                                <td>
+                                                                    <input style="height:17px; margin-top:10px;" class="form-control" type="checkbox" ng-model="item.isReject" name="IsReject">
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+                                </div>
+                                <div>
+                                    <div class="widget-body">
+                                        <div class="smart-form">
+                                            <fieldset style="padding: 0px;">
+                                                <section>
+                                                    <label class="label">COMMENT / CORRECTIVE ACTION: </label>
+                                                    <label class="textarea">
+                                                        <textarea rows="5" ng-model="data.remark"></textarea>
+                                                    </label>
+                                                </section>
+                                            </fieldset>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            -->
+                            <div class="jarviswidget" id="wid-id-inspection-photo" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+                                <header>
+                                    <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                                    <h2>Inpsection Photos</h2>
+                                </header>
+                                <div>
+                                    <div class="widget-body">
+                                        <div class="widget-body-toolbar">
+                                            <a href="javascript:void(0)" class="btn btn-primary" ng-click="event.addImage()"><i class="fa fa-plus"></i> Add New Picture</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="widget-body">
+                                        <div id="searchResult" class="tilsoft-table-wrapper">
+                                            <div class="row image-wrapper" style="width: auto;border:1px solid #ddd;">
+                                                <section ng-repeat="item in data.qcReportImages | orderBy: '-updatedDate'" class="col-sm-3">
+                                                    <p style="margin-bottom: 15px;min-height:38px;background-color:#87e687;padding:10px;">{{item.description}}</p>
+                                                    <div style="padding: 10px;">
+                                                        <a data-featherlight="image" href="{{item.fileLocation}}" class="input-group" style="display:block;">
+                                                            @*<img style="max-width:100%;max-height:100%;" ng-src="{{item.thumbnailLocation}}">*@
+                                                            <div class="img m-bottom-15" style="background: url('{{item.thumbnailLocation}}') center center no-repeat;background-size:100%;"></div>
+                                                        </a>
+                                                    </div>
+                                                    <div style="margin-top: 15px;">
+                                                        <a href="javascript:void(0)" class="btn btn-default btn-sm" ng-click="event.editImage(item)"><i class="fa fa-pencil"></i> Edit</a>
+                                                        <a href="javascript:void(0)" class="btn btn-danger btn-sm" ng-click="event.removeImage(item)"><i class="fa fa-times"></i> Remove</a>
+                                                    </div>
+                                                </section>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="jarviswidget" id="wid-id-product-detail" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+                                <header>
+                                    <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                                    <h2>Inspection result</h2>
+                                </header>
+                                <div>
+                                    <div class="widget-body">
+                                        <div class="smart-form">
+                                            <fieldset style="padding: 10px;">
+                                                <div class="row">
+                                                    <div class="col-sm-7">
+                                                        <label class="label" style="font-size:20px;text-align:center;">Inspection result </label>
+                                                    </div>
+                                                    <div class="col col-lg-2">
+                                                        <label class="checkbox" style="font-size:20px;">
+                                                            <input type="checkbox" ng-model="data.isPassed">
+                                                            <i></i> Passed
+                                                        </label>
+                                                    </div>
+                                                    <div class="col col-lg-2">
+                                                        <label class="checkbox" style="font-size:20px;">
+                                                            <input type="checkbox" ng-model="data.isRejected">
+                                                            <i></i> Rejected
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <div class="widget-body">
+                                                        <div class="smart-form">
+                                                            <fieldset style="padding: 0px;">
+                                                                <section>
+                                                                    <label class="label">REASON FOR REJECTED: </label>
+                                                                    <label class="textarea">
+                                                                        <textarea rows="5" ng-model="data.rejectedReason"></textarea>
+                                                                    </label>
+                                                                </section>
+                                                            </fieldset>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <div class="widget-body">
+                                                        <div class="smart-form">
+                                                            <fieldset style="padding: 0px;">
+                                                                <section>
+                                                                    <label class="label">CORRECTIVE ACTION: </label>
+                                                                    <label class="textarea">
+                                                                        <textarea rows="5" ng-model="data.correctiveAction"></textarea>
+                                                                    </label>
+                                                                </section>
+                                                            </fieldset>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </fieldset>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="tabTracking">
+                            <div class="smart-form">
+                                <fieldset>
+                                    <div class="row">
+                                        <section class="col col-3">
+                                            <label class="label">Updated By</label>
+                                            <label class="input">
+                                                <span class="form-control"><a ng-if="data.updatedBy" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{data.updatedBy}}" data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600"><i class="fa fa-user"></i>{{data.updatorName}}</a></span>
+                                            </label>
+                                        </section>
+                                        <section class="col col-3">
+                                            <label class="label">Updated Date</label>
+                                            <label class="input">
+                                                <span class="form-control">{{data.updatedDate}}</span>
+                                            </label>
+                                        </section>
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+<div id="imageForm" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static" style="z-index: 1400;">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title" id="myModalLabel">Picture</h4>
+            </div>
+            <div class="modal-body no-padding">
+                <div class="smart-form">
+                    <fieldset>
+                        <section class="col col-6">
+                            <label class="label">Preview Image</label>
+                            <div class="input" style="text-align: center;">
+                                <div style="width: 100%; height: 300px; border: solid 1px #ddd;">
+                                    <a ng-if="currentImage.fileLocation" data-featherlight="image" href="{{currentImage.fileLocation}}">
+                                        <img style="width: 100%;" ng-src="{{currentImage.fileLocation}}">
+                                    </a>
+                                </div>
+                                <br />
+                                <a ng-click="event.addPreviewImage()" class="btn btn-primary btn-xs font-11" href="javascript:void(0);"><i class="fa fa-pencil"></i> Change</a>
+                            </div>
+                        </section>
+                        <section class="col col-6">
+                            <label class="label">Select remark / <a href="javascript:void(0);" ng-click="event.addTitle($event)"><b>Add New</b></a></label>
+                            <label class="select">
+                                <select id="imageTitle" ng-model="currentImage.description" ng-options="qcReportImageTitle.qcReportImageTitleNM as qcReportImageTitle.qcReportImageTitleNM for qcReportImageTitle in qcReportImageTitles">
+                                    <option value=""></option>
+                                </select>
+                                <i></i>
+                            </label>
+                        </section>
+                    </fieldset>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" ng-click="event.updateImage()">
+                    OK
+                </button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="imageTitleForm" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static" style="z-index: 1600;">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title" id="myModalLabel">New remark</h4>
+            </div>
+            <div class="modal-body no-padding">
+                <div class="smart-form">
+                    <fieldset>
+                        <section class="col col-6">
+                            <div class="form-group">
+                                <label class="input">
+                                    <input type="text" id="Location" ng-model="newImageTitle.qcReportImageTitleNM" />
+                                </label>
+                            </div>
+                        </section>
+                    </fieldset>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" ng-click="event.updateTitle()">
+                    OK
+                </button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "qcReport")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="event.update($event)"><i class="fa fa-save"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default@(ViewBag.ID==0?" disabled":"") @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="Delete" style="color: #ff0000;" ng-click="event.delete($event)"><i class="fa fa-times"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Export Excel" style="color: #31B404" ng-click="event.generateExcel(data.qcReportID)"><i class="fa fa-file-excel-o"></i></a>
+        </li>
+    </ul>
+}
+@section pagejs {
+    <script src="~/Angular/app/jsonService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script type="text/javascript">
+    jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/qcreport/';
+    jsonService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+    jsonService.supportServiceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/support/';
+    var context = {
+        id: @ViewBag.ID,
+        factoryOrderDetailID : @factoryOrderDetailID,
+        errMsg: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED',
+        backUrl: '@Url.Action("Index", "QCReport")',
+        refreshUrl: '@Url.Action("Edit", "QCReport", new { id = UrlParameter.Optional })/',
+        editTitle: '@ViewBag.Title',
+        userId: @userInfo.Data.UserId,
+        userName: '@userInfo.Data.FullName',
+        officeId: @userInfo.Data.OfficeID,
+        backendReportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]'
+    }
+    </script>
+    <script src="~/Angular/app/qcReport/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/qcReport/edit.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}

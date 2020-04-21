@@ -1,0 +1,1086 @@
+﻿@{
+    
+    ViewBag.Module = "DDC report";
+    string Season = Library.OMSHelper.Helper.GetCurrentSeason();
+    ViewBag.Title = "DDC Report";
+
+    string clientOverviewUrl = Url.Action("Overview", "Client", new { id = UrlParameter.Optional });
+}
+
+<style>
+    .tilsoft-table-body {
+        max-height:550px !important
+    }
+</style>
+
+<div class="row">
+
+    <article class="col-sm-12">
+        <div class="jarviswidget" id="pnlDDCReport" data-widget-deletebutton="false" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-togglebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-search txt-color-darken"></i> </span>
+                <h2>DDC Report</h2>
+            </header>
+            <div class="no-padding">
+                <div class="padding-10">
+                    <div class="row" style="margin-top:5px;margin-bottom:5px">
+                        <div class="col col-lg-2">
+                            <select class="form-control" ng-model="selection.season" ng-options="season.seasonValue as season.seasonText for season in seasons"></select>
+                        </div>
+                        <div class="col col-lg-2">
+                            <a href="javascript:void(0)" ng-click="event.load()" class="btn btn-default btn-sm"><i class="fa fa-refresh"></i> Refresh</a>
+                            <a href="javascript:void(0)" ng-click="event.exportToExcel($event)" class="btn btn-default btn-sm"><i class="fa fa-file-excel-o"></i> Export</a>
+                        </div>
+
+                        <span style="padding: 5px; display: inline-block; margin-bottom: 5px; margin-right: 5px; background: rgba(255,255,255,0.7);"><strong>Exchange Rate</strong>: {{data.exchangeRate | number : 2}}</span>
+                        <span style="padding: 5px; display: inline-block; margin-bottom: 5px; margin-right: 5px; background: rgba(255,255,255,0.7);"><strong>Est. Container Value</strong>: $ {{data.usdContainerValue | number : 0}} or &euro; {{data.eurContainerValue | number : 0}}</span>
+                    </div>
+
+                    <div id="pnlHtmlReport" style="display:none;">
+                        <div class="tilsoft-table">
+                            <div id="headerTable" style="width: 4790px; height: 300px; margin-top: 0px;" class="tilsoft-table-body">
+
+                                <table class="table">
+                                    <tr>
+                                        <td colspan="10" rowspan="2" style="text-align:center;vertical-align:middle;background-color:#FFFF00; border:2px solid black"><h2><b>CLIENT DETAILS</b></h2></td>
+
+                                        <td colspan="11" style="text-align:center;vertical-align:middle;background-color:#FFE699; border:2px solid black">{{selection.season}} SALES</td>
+                                        @*<td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>*@
+                                        <td style="border:2px solid black; text-align: center;" rowspan="3">P/I - EXP</td>
+
+                                        <td colspan="15" rowspan="2" style="text-align:center;vertical-align:middle;background-color:#AABAE6;border:2px solid black">EXPECTATIONS SEASON:{{selection.season}}</td>
+                                        @*<td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>*@
+
+                                        <td rowspan="2" style="text-align:center;vertical-align:middle;background-color:#fabf8f;border:2px solid black">Delta of Delta %</td>
+
+                                        <td colspan="10" style="text-align:center;vertical-align:middle;background-color:#CCC0DA;border-top:2px solid black;border-right:2px solid black">LAST SEASON</td>
+                                        @*<td></td>
+                        <td></td>
+                        <td></td>*@
+
+                                        <td colspan="7" rowspan="2" style="text-align:center;vertical-align:middle;background-color:#91D449;border:2px solid black">Container specification manually by accountmanager {{selection.season}}</td>
+                                        @*<td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>*@
+
+                                        <td colspan="6" rowspan="2" style="text-align:center;vertical-align:middle;background-color:#E2EFDA;border:2px solid black">Container specification suggest</td>
+                                        @*<td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>*@
+                                    </tr>
+                                    <tr>
+                                        <td colspan="5" style="text-align:center;vertical-align:middle;background-color:#FFE699 ;border:2px solid black">PRO FORMAS CONFIRMED</td>
+                                        @*<td></td>
+        <td></td>
+        <td></td>*@
+                                        <td colspan="6" style="text-align:center;vertical-align:middle;background-color:#FFE699;border:2px solid black">PRO FORMAS TOTAL</td>
+
+                                        @*<td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>*@
+
+                                        @*<td>EXPECTATIONS SEASON</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>*@
+
+                                        <td colspan="10" style="text-align:center;vertical-align:middle;background-color:#CCC0DA;border:2px solid black">Exchange Rate: {{data.exchangeRateLastSeason}}</td>
+
+                                        @*<td>LAST SEASON</td>
+        <td></td>
+        <td></td>
+        <td></td>*@
+
+                                        @*<td>Container specification manually by accountmanage</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>*@
+
+                                        @*<td>Container specification suggest</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>*@
+                                    </tr>
+
+                                    <tr>
+                                        <td colspan="7" rowspan="3" style="text-align:center;vertical-align:middle;background-color:#FFFF00;border:2px solid black"><h3><b>DDC Clients {{selection.season}}</b></h3></td>
+                                        @*<td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>*@
+
+                                        <td colspan="3" rowspan="3" style="text-align:center;vertical-align:middle;background-color:#FFFF00;border:2px solid black"><h3><b>{{currentDate | date:'dd-MM-yyyy'}}</b></h3></td>
+                                        @*<td></td>*@
+
+                                        <td colspan="5" style="text-align:center;vertical-align:middle;background-color:#FFE699;border:2px solid black">Signed by client</td>
+                                        @*<td></td>
+                        <td></td>
+                        <td></td>*@
+
+                                        <td colspan="6" style="text-align:center;vertical-align:middle;background-color:#FFE699;border:2px solid black">Exchange Rate {{selection.season}}  {{data.exchangeRate | number : 2}}</td>
+
+                                        @*<td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>*@
+
+                                        <td colspan="3" style="text-align:center;vertical-align:middle;background-color:#AABAE6;border:2px solid black">FOB IN $</td>
+                                        @*<td></td>
+                        <td></td>*@
+
+                                        <td colspan="3" style="text-align:center;vertical-align:middle;background-color:#AABAE6;border:2px solid black">Franco IN &euro;</td>
+                                        @*<td></td>
+                        <td></td>*@
+
+                                        <td colspan="6" style="text-align:center;vertical-align:middle;background-color:#AABAE6;border:2px solid black">Total FOB+Franco</td>
+                                        @*<td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>*@
+
+                                        <td colspan="3" style="text-align:center;vertical-align:middle;background-color:#AABAE6;border:2px solid black">Offer</td>
+                                        @*<td></td>
+                        <td></td>
+                        <td></td>*@
+
+                                        <td style="text-align:center;vertical-align:middle;background-color:#fabf8f;border:2px solid black"></td>
+
+                                        <td colspan="4" style="text-align:center;vertical-align:middle;background-color:#CCC0DA;border:2px solid black">PRO FORMAS CONFIRMED</td>
+                                        @*<td></td>
+                        <td></td>
+                        <td></td>*@
+                                        <td colspan="3" style="text-align:center;vertical-align:middle;background-color:#CCC0DA;border:2px solid black">DELTA</td>
+                                        <td colspan="3" style="text-align:center;vertical-align:middle;background-color:#CCC0DA;border:2px solid black">COMMERCIAL INVOICE</td>
+
+                                        <td colspan="7" style="text-align:center;vertical-align:middle;background-color:#91D449;border:2px solid black"></td>
+                                        @*<td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>*@
+
+                                        <td colspan="6" style="text-align:center;vertical-align:middle;background-color:#E2EFDA;border:2px solid black"></td>
+                                        @*<td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>*@
+                                    </tr>
+
+                                    <tr>
+                                        @*<td>DDC Clients</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>*@
+
+                                        @*<td>DATE TIME NOW</td>
+        <td></td>*@
+
+                                        <td style="border-bottom:2px solid black;text-align:right">{{resultValue | sumOfFloatValue:'totalConfirmedCont' | number : 2}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right">${{resultValue | sumOfFloatValue:'totalConfirmedUSD' | number : 0}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right">&euro;{{resultValue | sumOfFloatValue:'totalConfirmedEUR' | number : 0}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right;background-color:yellow"><b>&euro;{{resultValue | sumOfFloatValue:'totalConfirmedConvertToEUR' | number : 0}}</b></td>
+                                        <td style="border-bottom:2px solid black;text-align:right; border-right:2px solid black;background-color:yellow; color:green">{{(resultValue | sumOfFloatValue:'grossMarginAmount')/(resultValue | sumOfFloatValue:'purchasingAmountUSD') * 100 | number : 1}}%</td>
+
+                                        <td style="border-bottom:2px solid black;text-align:right">{{resultValue | sumOfFloatValue:'totalOrderCont' | number : 2}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right">${{resultValue | sumOfFloatValue:'totalOrderUSD' | number : 0}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right">&euro;{{resultValue | sumOfFloatValue:'totalOrderEUR' | number : 0}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right;background-color:yellow"><b>{{resultValue | sumOfFloatValue:'totalOrderConverToEUR' | currency : '&euro;' : 0}}</b></td>
+                                        <td style="border-bottom:2px solid black;text-align:right">&euro;{{resultValue | sumOfFloatValue:'proformasTotalGAP' | number : 0}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right;border-right:2px solid black">{{(resultValue | sumOfFloatValue:'proformasTotalGAP')/(resultValue | sumOfFloatValue:'totalOrderConverToEUR') * 100 | number : 1}}%</td>
+
+                                        <td style="border: 2px solid black; text-align: right; {{((resultValue | sumOfFloatValue:'totalOrderConverToEUR') - (resultValue | sumOfFloatValue:'totalExpected')) < 0 ? 'color: #ff0000;' : ''}}"><b>{{((resultValue | sumOfFloatValue:'totalOrderConverToEUR') - (resultValue | sumOfFloatValue:'totalExpected')) | currency : '&euro;' : 0}}</b></td>
+
+                                        <td style="border-bottom:2px solid black;text-align:right">${{resultValue | sumOfFloatValue:'minUSD' | number : 0}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right">${{resultValue | sumOfFloatValue:'avgUSD' | number : 0}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right; border-right:2px solid black">${{resultValue | sumOfFloatValue:'maxUSD' | number : 0}}</td>
+
+                                        <td style="border-bottom:2px solid black;text-align:right">&euro;{{resultValue | sumOfFloatValue:'minEUR' | number : 0}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right">&euro;{{resultValue | sumOfFloatValue:'avgEUR' | number : 0}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right; border-right:2px solid black">&euro;{{resultValue | sumOfFloatValue:'maxEUR' | number : 0}}</td>
+
+                                        <td style="border-bottom:2px solid black;text-align:right">{{resultValue | sumOfFloatValue:'totalExpectedCont' | number : 1}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right;background-color:yellow"><b>&euro;{{resultValue | sumOfFloatValue:'totalExpected' | number : 0}}</b></td>
+                                        <td style="border-bottom:2px solid black;text-align:right">{{(((resultValue | sumOfFloatValue:'totalExpected')/(resultValue | sumOfFloatValue:'preTotalConverToEUR')) - 1)*100 | number : 1}}%</td>
+                                        <td style="border-bottom:2px solid black;text-align:right">100%</td>
+                                        <td style="border-bottom:2px solid black;text-align:right">{{(((resultValue | sumOfFloatValue:'totalExpected')-(resultValue | sumOfFloatValue:'totalConfirmedConvertToEUR'))/(resultValue | sumOfFloatValue:'totalConfirmedConvertToEUR'))*100 | number : 0}}%</td>
+                                        <td style="border-bottom:2px solid black;text-align:right; border-right:2px solid black">&euro;{{resultValue | sumOfFloatValue:'expectedGAP' | number : 0}}</td>
+
+                                        <td style="border-bottom:2px solid black;text-align:right">${{resultValue | sumOfFloatValue:'osGrossMarginAmount' | number : 0}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right">${{resultValue | sumOfFloatValue:'osPurchasingAmountUSD' | number : 0}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right;border-right:2px solid black">{{(((resultValue | sumOfFloatValue:'osGrossMarginAmount')/(resultValue | sumOfFloatValue:'osPurchasingAmountUSD'))*100) | number : 1}}%</td>
+
+                                        <td style="border-bottom:2px solid black;text-align:right;border-right:2px solid black;background-color:#fabf8f">
+                                            {{((((resultValue | sumOfFloatValue:'osGrossMarginAmount')/(resultValue | sumOfFloatValue:'osPurchasingAmountUSD'))*100)-(((resultValue | sumOfFloatValue:'grossMarginAmount')/(resultValue | sumOfFloatValue:'purchasingAmountUSD'))*100)) | number : 1}}%
+                                        </td>
+
+                                        <td style="border-bottom:2px solid black;text-align:right;background-color:yellow"><b>&euro;{{resultValue | sumOfFloatValue:'preTotalConverToEUR' | number : 0}}</b></td>
+                                        <td style="border-bottom:2px solid black;text-align:right">{{resultValue | sumOfFloatValue:'preTotalCont' | number : 1}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right">${{resultValue | sumOfFloatValue:'preTotalUSD' | number : 0}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right; border-right:2px solid black">&euro;{{resultValue | sumOfFloatValue:'preTotalEUR' | number : 0}}</td>
+
+                                        <td style="border-bottom:2px solid black;text-align:right">${{resultValue | sumOfFloatValue:'grossMarginAmount' | number : 0}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right">${{resultValue | sumOfFloatValue:'purchasingAmountUSD' | number : 0}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right; border-right:2px solid black">{{(((resultValue | sumOfFloatValue:'grossMarginAmount')/(resultValue | sumOfFloatValue:'purchasingAmountUSD'))*100) | number : 1}}%</td>
+
+                                        <td style="border-bottom:2px solid black;text-align:right">${{resultValue | sumOfFloatValue:'totalNetAmountUSD' | number : 0}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right">&euro;{{resultValue | sumOfFloatValue:'totalNetAmountEUR' | number : 0}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right; border-right:2px solid black">${{((resultValue | sumOfFloatValue:'totalNetAmountUSD')+((resultValue | sumOfFloatValue:'totalNetAmountEUR')*data.exchangeRateLastSeason)) | number : 0}}</td>
+
+                                        <td style="border-bottom:2px solid black;text-align:right">{{resultValue | sumOfFloatValue:'wickerContQty' | number : 2}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right">{{resultValue | sumOfFloatValue:'wickerPromoContQty' | number : 2}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right">{{resultValue | sumOfFloatValue:'woodAcaciaContQty' | number : 2}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right">{{resultValue | sumOfFloatValue:'woodTeakContQty' | number : 2}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right">{{resultValue | sumOfFloatValue:'chinaContQty' | number : 2}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right">{{resultValue | sumOfFloatValue:'indoContQty' | number : 2}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right; border-right:2px solid black">{{resultValue | sumOfFloatValue:'totalContSpecification' | number : 2}}</td>
+
+                                        <td style="border-bottom:2px solid black;text-align:right">{{resultValue | sumOfFloatValue:'totalContWickerSuggest' | number : 2}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right">{{resultValue | sumOfFloatValue:'totalContWoodSuggest' | number : 2}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right">{{resultValue | sumOfFloatValue:'totalContOtherSuggest' | number : 2}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right">{{resultValue | sumOfFloatValue:'totalContCNSuggest' | number : 2}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right">{{resultValue | sumOfFloatValue:'totalContINSuggest' | number : 2}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right; border-right:2px solid black">{{resultValue | sumOfFloatValue:'totalContSuggest' | number : 2}}</td>
+                                    </tr>
+                                    <tr>
+                                        @*<td>DDC Clients</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>*@
+
+                                        @*<td>DATE TIME NOW</td>
+        <td></td>*@
+
+                                        <td style="border-bottom:2px solid black;text-align:right">{{resultValue | sumOfFloatValue:'totalConfirmedCont' | number : 2}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right">${{resultValue | sumOfFloatValue:'totalConfirmedUSD' | number : 0}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right">&euro;{{resultValue | sumOfFloatValue:'totalConfirmedEUR' | number : 0}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right;background-color:yellow"><b>&euro;{{resultValue | sumOfFloatValue:'totalConfirmedConvertToEUR' | number : 0}}</b></td>
+                                        <td style="border-bottom:2px solid black;text-align:right; border-right:2px solid black;background-color:yellow; color:green">{{(resultValue | sumOfFloatValue:'grossMarginAmount')/(resultValue | sumOfFloatValue:'purchasingAmountUSD') * 100 | number : 1}}%</td>
+
+                                        <td style="border-bottom:2px solid black;text-align:right">{{resultValue | sumOfFloatValue:'totalOrderCont' | number : 2}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right">${{resultValue | sumOfFloatValue:'totalOrderUSD' | number : 0}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right">&euro;{{resultValue | sumOfFloatValue:'totalOrderEUR' | number : 0}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right;background-color:yellow"><b>&euro;{{resultValue | sumOfFloatValue:'totalOrderConverToEUR' | number : 0}}</b></td>
+                                        <td style="border-bottom:2px solid black;text-align:right">&euro;{{resultValue | sumOfFloatValue:'proformasTotalGAP' | number : 0}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right;border-right:2px solid black">{{(resultValue | sumOfFloatValue:'proformasTotalGAP')/(resultValue | sumOfFloatValue:'totalOrderConverToEUR') * 100 | number : 1}}%</td>
+
+                                        <td style="border:2px solid black; text-align: right; {{((resultValue | sumOfFloatValue:'totalOrderConverToEUR') - (resultValue | sumOfFloatValue:'totalExpected')) < 0 ? 'color: #ff0000;' : ''}}"><b>{{((resultValue | sumOfFloatValue:'totalOrderConverToEUR') - (resultValue | sumOfFloatValue:'totalExpected')) | currency : '&euro;' : 0}}</b></td>
+
+                                        <td style="border-bottom:2px solid black;text-align:right">${{resultValue | sumOfFloatValue:'minUSD' | number : 0}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right">${{resultValue | sumOfFloatValue:'avgUSD' | number : 0}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right; border-right:2px solid black">${{resultValue | sumOfFloatValue:'maxUSD' | number : 0}}</td>
+
+                                        <td style="border-bottom:2px solid black;text-align:right">&euro;{{resultValue | sumOfFloatValue:'minEUR' | number : 0}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right">&euro;{{resultValue | sumOfFloatValue:'avgEUR' | number : 0}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right; border-right:2px solid black">&euro;{{resultValue | sumOfFloatValue:'maxEUR' | number : 0}}</td>
+
+                                        <td style="border-bottom:2px solid black;text-align:right">{{resultValue | sumOfFloatValue:'totalExpectedCont' | number : 1}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right;background-color:yellow"><b>&euro;{{resultValue | sumOfFloatValue:'totalExpected' | number : 0}}</b></td>
+                                        <td style="border-bottom:2px solid black;text-align:right">{{((resultValue | sumOfFloatValue:'totalExpected')/(resultValue | sumOfFloatValue:'preTotalConverToEUR') - 1)*100 | number : 1}}%</td>
+                                        <td style="border-bottom:2px solid black;text-align:right">100%</td>
+                                        <td style="border-bottom:2px solid black;text-align:right">{{(((resultValue | sumOfFloatValue:'totalExpected')-(resultValue | sumOfFloatValue:'totalConfirmedConvertToEUR'))/(resultValue | sumOfFloatValue:'totalConfirmedConvertToEUR'))*100 | number : 0}}%</td>
+                                        <td style="border-bottom:2px solid black;text-align:right; border-right:2px solid black">&euro;{{resultValue | sumOfFloatValue:'expectedGAP' | number : 0}}</td>
+
+                                        <td style="border-bottom:2px solid black;text-align:right">${{resultValue | sumOfFloatValue:'osGrossMarginAmount' | number : 0}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right">${{resultValue | sumOfFloatValue:'osPurchasingAmountUSD' | number : 0}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right;border-right:2px solid black">{{(((resultValue | sumOfFloatValue:'osGrossMarginAmount')/(resultValue | sumOfFloatValue:'osPurchasingAmountUSD'))*100) | number : 1}}%</td>
+
+                                        <td style="border-bottom:2px solid black;text-align:right;border-right:2px solid black;background-color:#fabf8f">{{((((resultValue | sumOfFloatValue:'osGrossMarginAmount')/(resultValue | sumOfFloatValue:'osPurchasingAmountUSD'))*100)-(((resultValue | sumOfFloatValue:'grossMarginAmount')/(resultValue | sumOfFloatValue:'purchasingAmountUSD'))*100)) | number : 1}}%</td>
+
+                                        <td style="border-bottom:2px solid black;text-align:right;background-color:yellow"><b>&euro;{{resultValue | sumOfFloatValue:'preTotalConverToEUR' | number : 0}}</b></td>
+                                        <td style="border-bottom:2px solid black;text-align:right">{{resultValue | sumOfFloatValue:'preTotalCont' | number : 1}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right">${{resultValue | sumOfFloatValue:'preTotalUSD' | number : 0}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right; border-right:2px solid black">&euro;{{resultValue | sumOfFloatValue:'preTotalEUR' | number : 0}}</td>
+
+                                        <td style="border-bottom:2px solid black;text-align:right">${{resultValue | sumOfFloatValue:'grossMarginAmount' | number : 0}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right">${{resultValue | sumOfFloatValue:'purchasingAmountUSD' | number : 0}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right; border-right:2px solid black">{{(((resultValue | sumOfFloatValue:'grossMarginAmount')/(resultValue | sumOfFloatValue:'purchasingAmountUSD'))*100) | number : 1}}%</td>
+
+                                        <td style="border-bottom:2px solid black;text-align:right">${{resultValue | sumOfFloatValue:'totalNetAmountUSD' | number : 0}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right">&euro;{{resultValue | sumOfFloatValue:'totalNetAmountEUR' | number : 0}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right; border-right:2px solid black">${{((resultValue | sumOfFloatValue:'totalNetAmountUSD')+((resultValue | sumOfFloatValue:'totalNetAmountEUR')*data.exchangeRateLastSeason)) | number : 0}}</td>
+
+
+                                        <td style="border-bottom:2px solid black;text-align:right">{{resultValue | sumOfFloatValue:'wickerContQty' | number : 2}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right">{{resultValue | sumOfFloatValue:'wickerPromoContQty' | number : 2}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right">{{resultValue | sumOfFloatValue:'woodAcaciaContQty' | number : 2}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right">{{resultValue | sumOfFloatValue:'woodTeakContQty' | number : 2}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right">{{resultValue | sumOfFloatValue:'chinaContQty' | number : 2}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right">{{resultValue | sumOfFloatValue:'indoContQty' | number : 2}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right; border-right:2px solid black">{{resultValue | sumOfFloatValue:'totalContSpecification' | number : 2}}</td>
+
+                                        <td style="border-bottom:2px solid black;text-align:right">{{resultValue | sumOfFloatValue:'totalContWickerSuggest' | number : 2}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right">{{resultValue | sumOfFloatValue:'totalContWoodSuggest' | number : 2}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right">{{resultValue | sumOfFloatValue:'totalContOtherSuggest' | number : 2}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right">{{resultValue | sumOfFloatValue:'totalContCNSuggest' | number : 2}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right">{{resultValue | sumOfFloatValue:'totalContINSuggest' | number : 2}}</td>
+                                        <td style="border-bottom:2px solid black;text-align:right; border-right:2px solid black">{{resultValue | sumOfFloatValue:'totalContSuggest' | number : 2}}</td>
+
+                                    </tr>
+
+                                    <tr>
+                                        <td colspan="7" style="border:2px solid black"></td>
+                                        @*<td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>*@
+
+                                        <td colspan="3" style="border:2px solid black"></td>
+                                        @*<td></td>*@
+
+                                        <td colspan="5" style="border:2px solid black"></td>
+                                        @*<td></td>
+        <td></td>
+        <td></td>*@
+
+                                        <td colspan="6" style="border:2px solid black"></td>
+
+                                        @*DIFF*@
+                                        <td style="border:2px solid black">&nbsp;</td>
+
+                                        @*<td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>*@
+
+                                        <td colspan="3" style="border:2px solid black"></td>
+                                        @*<td></td>
+        <td></td>*@
+
+                                        <td colspan="3" style="border:2px solid black"></td>
+                                        @*<td></td>
+        <td></td>*@
+
+                                        <td colspan="6" style="border:2px solid black"></td>
+                                        @*<td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>*@
+
+                                        <td colspan="3" style="border:2px solid black"></td>
+
+                                        <td style="border:2px solid black;background-color:#fabf8f"></td>
+
+                                        <td colspan="4" style="border:2px solid black"></td>
+                                        @*<td></td>
+        <td></td>
+        <td></td>*@
+
+                                        <td colspan="3" style="border:2px solid black"></td>
+                                        @*<td></td>
+        <td></td>
+        <td></td>*@
+
+                                        <td colspan="3" style="border:2px solid black"></td>
+                                        @*<td></td>
+        <td></td>
+        <td></td>*@
+
+                                        <td colspan="4" style="border:2px solid black; text-align:center;vertical-align:middle">VIETNAM</td>
+                                        @*<td></td>
+        <td></td>
+        <td></td>*@
+                                        <td style="border:2px solid black;text-align:center;vertical-align:middle">CHINA</td>
+                                        <td style="border:2px solid black;text-align:center;vertical-align:middle">INDO</td>
+                                        <td style="border:2px solid black;text-align:center;vertical-align:middle">TOTAL</td>
+
+                                        <td colspan="3" style="border:2px solid black;text-align:center;vertical-align:middle">VIETNAM</td>
+                                        @*<td></td>
+        <td></td>*@
+                                        <td style="border:2px solid black;text-align:center;vertical-align:middle">CHINA</td>
+                                        <td style="border:2px solid black;text-align:center;vertical-align:middle">INDO</td>
+                                        <td style="border:2px solid black;text-align:center;vertical-align:middle">TOTAL</td>
+                                    </tr>
+
+                                    <tr>
+                                        <th style="width:40px; border-left:2px solid black">#</th>
+                                        <th style="width: 45px;">
+                                            <a href="#" ng-click="sortType = 'saleUD1'; sortReverse = !sortReverse">
+                                                Sa les
+                                                <span ng-show="sortType == 'saleUD1' && sortReverse" class="fa fa-caret-down"></span>
+                                                <span ng-show="sortType == 'saleUD1' && !sortReverse" class="fa fa-caret-up"></span>
+                                            </a>
+                                        </th>
+                                        <th style="width: 45px;">
+                                            <a href="#" ng-click="sortType = 'saleUD2'; sortReverse = !sortReverse">
+                                                Ass ist
+                                                <span ng-show="sortType == 'saleUD2' && sortReverse" class="fa fa-caret-down"></span>
+                                                <span ng-show="sortType == 'saleUD2' && !sortReverse" class="fa fa-caret-up"></span>
+                                            </a>
+                                        </th>
+
+                                        <th style="width: 45px;">
+                                            <a href="#" ng-click="sortType = 'saleVNUD'; sortReverse = !sortReverse">
+                                                VN Ass
+                                                <span ng-show="sortType == 'saleVNUD' && sortReverse" class="fa fa-caret-down"></span>
+                                                <span ng-show="sortType == 'saleVNUD' && !sortReverse" class="fa fa-caret-up"></span>
+                                            </a>
+                                        </th>
+
+
+                                        <th style="width: 45px;">
+                                            <a href="#" ng-click="sortType = 'saleVN2UD'; sortReverse = !sortReverse">
+                                                VN Ass 2
+                                                <span ng-show="sortType == 'saleVN2UD' && sortReverse" class="fa fa-caret-down"></span>
+                                                <span ng-show="sortType == 'saleVN2UD' && !sortReverse" class="fa fa-caret-up"></span>
+                                            </a>
+                                        </th>
+
+                                        <th style="width: 45px;">
+                                            <a href="#" ng-click="sortType = 'agentUD3'; sortReverse = !sortReverse">
+                                                Ag ent
+                                                <span ng-show="sortType == 'agentUD3' && sortReverse" class="fa fa-caret-down"></span>
+                                                <span ng-show="sortType == 'agentUD3' && !sortReverse" class="fa fa-caret-up"></span>
+                                            </a>
+                                        </th>
+                                        <th style="width: 70px;">
+                                            <a href="#" ng-click="sortType = 'haveBizRelationshipFrom'; sortReverse = !sortReverse">
+                                                Year Of Business
+                                                <span ng-show="sortType == 'haveBizRelationshipFrom' && sortReverse" class="fa fa-caret-down"></span>
+                                                <span ng-show="sortType == 'haveBizRelationshipFrom' && !sortReverse" class="fa fa-caret-up"></span>
+                                            </a>
+                                        </th>
+                                        <th style="width: 110px;">
+                                            <a href="#" ng-click="sortType = 'clientCountryNM'; sortReverse = !sortReverse">
+                                                Country
+                                                <span ng-show="sortType == 'clientCountryNM' && sortReverse" class="fa fa-caret-down"></span>
+                                                <span ng-show="sortType == 'clientCountryNM' && !sortReverse" class="fa fa-caret-up"></span>
+                                            </a>
+                                        </th>
+                                        <th style="width: 60px;">
+                                            <a href="#" ng-click="sortType = 'clientUD'; sortReverse = !sortReverse">
+                                                Client Code
+                                                <span ng-show="sortType == 'clientUD' && sortReverse" class="fa fa-caret-down"></span>
+                                                <span ng-show="sortType == 'clientUD' && !sortReverse" class="fa fa-caret-up"></span>
+                                            </a>
+                                        </th>
+                                        <th style="border-right:2px solid black">
+                                            <a href="#" ng-click="sortType = 'clientNM'; sortReverse = !sortReverse">
+                                                Client Name
+                                                <span ng-show="sortType == 'clientNM' && sortReverse" class="fa fa-caret-down"></span>
+                                                <span ng-show="sortType == 'clientNM' && !sortReverse" class="fa fa-caret-up"></span>
+                                            </a>
+                                        </th>
+
+                                        <th style="width: 60px;">
+
+                                            <a href="#" ng-click="sortType = 'totalConfirmedCont'; sortReverse = !sortReverse">
+                                                C. qnt
+                                                <span ng-show="sortType == 'totalConfirmedCont' && sortReverse" class="fa fa-caret-down"></span>
+                                                <span ng-show="sortType == 'totalConfirmedCont' && !sortReverse" class="fa fa-caret-up"></span>
+                                            </a>
+                                        </th>
+                                        <th style="width: 90px;">
+
+                                            <a href="#" ng-click="sortType = 'totalConfirmedUSD'; sortReverse = !sortReverse">
+                                                FOB IN USD
+                                                <span ng-show="sortType == 'totalConfirmedUSD' && sortReverse" class="fa fa-caret-down"></span>
+                                                <span ng-show="sortType == 'totalConfirmedUSD' && !sortReverse" class="fa fa-caret-up"></span>
+                                            </a>
+                                        </th>
+                                        <th style="width: 90px;">
+
+                                            <a href="#" ng-click="sortType = 'totalConfirmedEUR'; sortReverse = !sortReverse">
+                                                FRANCO HUIS IN EURO
+                                                <span ng-show="sortType == 'totalConfirmedEUR' && sortReverse" class="fa fa-caret-down"></span>
+                                                <span ng-show="sortType == 'totalConfirmedEUR' && !sortReverse" class="fa fa-caret-up"></span>
+                                            </a>
+                                        </th>
+                                        <th style="width: 90px; background-color:yellow">
+
+                                            <a href="#" ng-click="sortType = 'totalConfirmedConvertToEUR'; sortReverse = !sortReverse">
+                                                TOTAL SALES {{selection.season}}
+                                                <span ng-show="sortType == 'totalConfirmedConvertToEUR' && sortReverse" class="fa fa-caret-down"></span>
+                                                <span ng-show="sortType == 'totalConfirmedConvertToEUR' && !sortReverse" class="fa fa-caret-up"></span>
+                                            </a>
+                                        </th>
+
+                                        <th style="width: 90px;border-right:2px solid black;background-color:yellow">
+                                            <a href="#" ng-click="sortType = 'grossMarginPercent'; sortReverse = !sortReverse">
+                                                % MARGIN
+                                                <span ng-show="sortType == 'grossMarginPercent' && sortReverse" class="fa fa-caret-down"></span>
+                                                <span ng-show="sortType == 'grossMarginPercent' && !sortReverse" class="fa fa-caret-up"></span>
+                                            </a>
+                                        </th>
+
+                                        <th style="width: 60px;">
+                                            <a href="#" ng-click="sortType = 'totalOrderCont'; sortReverse = !sortReverse">
+                                                C. qnt
+                                                <span ng-show="sortType == 'totalOrderCont' && sortReverse" class="fa fa-caret-down"></span>
+                                                <span ng-show="sortType == 'totalOrderCont' && !sortReverse" class="fa fa-caret-up"></span>
+                                            </a>
+                                        </th>
+                                        <th style="width: 90px;">
+                                            <a href="#" ng-click="sortType = 'totalOrderUSD'; sortReverse = !sortReverse">
+                                                FOB IN USD
+                                                <span ng-show="sortType == 'totalOrderUSD' && sortReverse" class="fa fa-caret-down"></span>
+                                                <span ng-show="sortType == 'totalOrderUSD' && !sortReverse" class="fa fa-caret-up"></span>
+                                            </a>
+                                        </th>
+                                        <th style="width: 90px;">
+                                            <a href="#" ng-click="sortType = 'totalOrderEUR'; sortReverse = !sortReverse">
+                                                FRANCO HUIS IN EURO
+                                                <span ng-show="sortType == 'totalOrderEUR' && sortReverse" class="fa fa-caret-down"></span>
+                                                <span ng-show="sortType == 'totalOrderEUR' && !sortReverse" class="fa fa-caret-up"></span>
+                                            </a>
+                                        </th>
+                                        <th style="width: 90px;background-color:yellow">
+                                            <a href="#" ng-click="sortType = 'totalOrderConverToEUR'; sortReverse = !sortReverse">
+                                                TOTAL SALES {{selection.season}}
+                                                <span ng-show="sortType == 'totalOrderConverToEUR' && sortReverse" class="fa fa-caret-down"></span>
+                                                <span ng-show="sortType == 'totalOrderConverToEUR' && !sortReverse" class="fa fa-caret-up"></span>
+                                            </a>
+                                        </th>
+                                        <th style="width: 90px;">
+                                            <a href="#" ng-click="sortType = 'proformasTotalGAP'; sortReverse = !sortReverse">
+                                                Gap
+                                                <span ng-show="sortType == 'proformasTotalGAP' && sortReverse" class="fa fa-caret-down"></span>
+                                                <span ng-show="sortType == 'proformasTotalGAP' && !sortReverse" class="fa fa-caret-up"></span>
+                                            </a>
+                                        </th>
+                                        <th style="width: 50px;border-right:2px solid black">
+                                            <a href="#" ng-click="sortType = 'proformasTotalRelativeGAP'; sortReverse = !sortReverse">
+                                                Rela tive Gap
+                                                <span ng-show="sortType == 'proformasTotalRelativeGAP' && sortReverse" class="fa fa-caret-down"></span>
+                                                <span ng-show="sortType == 'proformasTotalRelativeGAP' && !sortReverse" class="fa fa-caret-up"></span>
+                                            </a>
+                                        </th>
+
+                                        <th style="width: 90px; border-right:2px solid black;">
+                                            P/I - EXP
+                                        </th>
+
+                                        <th style="width: 90px;">
+                                            <a href="#" ng-click="sortType = 'minUSD'; sortReverse = !sortReverse">
+                                                MIN IN $ INCL T.
+                                                <span ng-show="sortType == 'minUSD' && sortReverse" class="fa fa-caret-down"></span>
+                                                <span ng-show="sortType == 'minUSD' && !sortReverse" class="fa fa-caret-up"></span>
+                                            </a>
+                                        </th>
+                                        <th style="width: 90px;">
+                                            <a href="#" ng-click="sortType = 'avgUSD'; sortReverse = !sortReverse">
+                                                AVG. IN $ INCL. T.
+                                                <span ng-show="sortType == 'avgUSD' && sortReverse" class="fa fa-caret-down"></span>
+                                                <span ng-show="sortType == 'avgUSD' && !sortReverse" class="fa fa-caret-up"></span>
+                                            </a>
+                                        </th>
+                                        <th style="width: 90px;border-right:2px solid black">
+                                            <a href="#" ng-click="sortType = 'maxUSD'; sortReverse = !sortReverse">
+                                                MAX IN $ INCL T.
+                                                <span ng-show="sortType == 'maxUSD' && sortReverse" class="fa fa-caret-down"></span>
+                                                <span ng-show="sortType == 'maxUSD' && !sortReverse" class="fa fa-caret-up"></span>
+                                            </a>
+                                        </th>
+
+                                        <th style="width: 90px;">
+                                            <a href="#" ng-click="sortType = 'minEUR'; sortReverse = !sortReverse">
+                                                MIN IN EURO INCL T.
+                                                <span ng-show="sortType == 'minEUR' && sortReverse" class="fa fa-caret-down"></span>
+                                                <span ng-show="sortType == 'minEUR' && !sortReverse" class="fa fa-caret-up"></span>
+                                            </a>
+                                        </th>
+                                        <th style="width: 90px;">
+                                            <a href="#" ng-click="sortType = 'avgEUR'; sortReverse = !sortReverse">
+                                                AVG. IN EURO INCL. T.
+                                                <span ng-show="sortType == 'avgEUR' && sortReverse" class="fa fa-caret-down"></span>
+                                                <span ng-show="sortType == 'avgEUR' && !sortReverse" class="fa fa-caret-up"></span>
+                                            </a>
+                                        </th>
+                                        <th style="width: 90px;border-right:2px solid black">
+                                            <a href="#" ng-click="sortType = 'maxEUR'; sortReverse = !sortReverse">
+                                                MAX IN EURO INCL T.
+                                                <span ng-show="sortType == 'maxEUR' && sortReverse" class="fa fa-caret-down"></span>
+                                                <span ng-show="sortType == 'maxEUR' && !sortReverse" class="fa fa-caret-up"></span>
+                                            </a>
+                                        </th>
+
+                                        <th style="width: 60px;">
+                                            <a href="#" ng-click="sortType = 'totalExpectedCont'; sortReverse = !sortReverse">
+                                                Total C.qnt
+                                                <span ng-show="sortType == 'totalExpectedCont' && sortReverse" class="fa fa-caret-down"></span>
+                                                <span ng-show="sortType == 'totalExpectedCont' && !sortReverse" class="fa fa-caret-up"></span>
+                                            </a>
+                                        </th>
+                                        <th style="width: 90px;background-color:yellow">
+                                            <a href="#" ng-click="sortType = 'totalExpected'; sortReverse = !sortReverse">
+                                                TOTAL EXPECTED
+                                                <span ng-show="sortType == 'totalExpected' && sortReverse" class="fa fa-caret-down"></span>
+                                                <span ng-show="sortType == 'totalExpected' && !sortReverse" class="fa fa-caret-up"></span>
+                                            </a>
+                                        </th>
+                                        <th style="width: 90px;">
+                                            <a href="#" ng-click="sortType = 'deltaTurnOverLastYear'; sortReverse = !sortReverse">
+                                                % Delta turn over last year
+                                                <span ng-show="sortType == 'deltaTurnOverLastYear' && sortReverse" class="fa fa-caret-down"></span>
+                                                <span ng-show="sortType == 'deltaTurnOverLastYear' && !sortReverse" class="fa fa-caret-up"></span>
+                                            </a>
+                                        </th>
+                                        <th style="width: 50px;">
+                                            <a href="#" ng-click="sortType = 'totalExpected'; sortReverse = !sortReverse">
+                                                % of Total
+                                                <span ng-show="sortType == 'totalExpected' && sortReverse" class="fa fa-caret-down"></span>
+                                                <span ng-show="sortType == 'totalExpected' && !sortReverse" class="fa fa-caret-up"></span>
+                                            </a>
+                                        </th>
+                                        <th style="width: 60px;">
+                                            <a href="#" ng-click="sortType = 'deltaTurnOver'; sortReverse = !sortReverse">
+                                                Delta turn over
+                                                <span ng-show="sortType == 'deltaTurnOver' && sortReverse" class="fa fa-caret-down"></span>
+                                                <span ng-show="sortType == 'deltaTurnOver' && !sortReverse" class="fa fa-caret-up"></span>
+                                            </a>
+                                        </th>
+                                        <th style="width: 90px;border-right:2px solid black">
+                                            <a href="#" ng-click="sortType = 'expectedGAP'; sortReverse = !sortReverse">
+                                                GAP: (EXP - PRO FORMA)
+                                                <span ng-show="sortType == 'expectedGAP' && sortReverse" class="fa fa-caret-down"></span>
+                                                <span ng-show="sortType == 'expectedGAP' && !sortReverse" class="fa fa-caret-up"></span>
+                                            </a>
+                                        </th>
+
+                                        <th style="width: 90px;">
+                                            <a href="#" ng-click="sortType = 'osGrossMarginAmount'; sortReverse = !sortReverse">
+                                                DELTA
+                                                <span ng-show="sortType == 'osGrossMarginAmount' && sortReverse" class="fa fa-caret-down"></span>
+                                                <span ng-show="sortType == 'osGrossMarginAmount' && !sortReverse" class="fa fa-caret-up"></span>
+                                            </a>
+                                        </th>
+                                        <th style="width: 90px;">
+                                            <a href="#" ng-click="sortType = 'osPurchasingAmountUSD'; sortReverse = !sortReverse">
+                                                PURCHASING
+                                                <span ng-show="sortType == 'osPurchasingAmountUSD' && sortReverse" class="fa fa-caret-down"></span>
+                                                <span ng-show="sortType == 'osPurchasingAmountUSD' && !sortReverse" class="fa fa-caret-up"></span>
+                                            </a>
+                                        </th>
+                                        <th style="width: 90px;border-right:2px solid black">
+                                            <a href="#" ng-click="sortType = 'osGrossMarginPercent'; sortReverse = !sortReverse">
+                                                %
+                                                <span ng-show="sortType == 'osGrossMarginPercent' && sortReverse" class="fa fa-caret-down"></span>
+                                                <span ng-show="sortType == 'osGrossMarginPercent' && !sortReverse" class="fa fa-caret-up"></span>
+                                            </a>
+                                        </th>
+
+                                        <th style="width: 90px;border-right:2px solid black;background-color:#fabf8f">
+                                            <a href="#" ng-click="sortType = 'deltaOfDeltaPercent'; sortReverse = !sortReverse">
+                                                Delta of Delta %
+                                                <span ng-show="sortType == 'deltaOfDeltaPercent' && sortReverse" class="fa fa-caret-down"></span>
+                                                <span ng-show="sortType == 'deltaOfDeltaPercent' && !sortReverse" class="fa fa-caret-up"></span>
+                                            </a>
+                                        </th>
+
+                                        <th style="width: 90px;background-color:yellow">
+                                            <a href="#" ng-click="sortType = 'preTotalConverToEUR'; sortReverse = !sortReverse">
+                                                TOTAL SALE
+                                                <span ng-show="sortType == 'preTotalConverToEUR' && sortReverse" class="fa fa-caret-down"></span>
+                                                <span ng-show="sortType == 'preTotalConverToEUR' && !sortReverse" class="fa fa-caret-up"></span>
+                                            </a>
+                                        </th>
+                                        <th style="width: 60px;">
+                                            <a href="#" ng-click="sortType = 'preTotalCont'; sortReverse = !sortReverse">
+                                                C. qnt
+                                                <span ng-show="sortType == 'preTotalCont' && sortReverse" class="fa fa-caret-down"></span>
+                                                <span ng-show="sortType == 'preTotalCont' && !sortReverse" class="fa fa-caret-up"></span>
+                                            </a>
+                                        </th>
+                                        <th style="width: 90px;">
+                                            <a href="#" ng-click="sortType = 'preTotalUSD'; sortReverse = !sortReverse">
+                                                FOB IN USD
+                                                <span ng-show="sortType == 'preTotalUSD' && sortReverse" class="fa fa-caret-down"></span>
+                                                <span ng-show="sortType == 'preTotalUSD' && !sortReverse" class="fa fa-caret-up"></span>
+                                            </a>
+                                        </th>
+                                        <th style="width: 90px;border-right:2px solid black">
+                                            <a href="#" ng-click="sortType = 'preTotalEUR'; sortReverse = !sortReverse">
+                                                FRANCO IN EUR
+                                                <span ng-show="sortType == 'preTotalEUR' && sortReverse" class="fa fa-caret-down"></span>
+                                                <span ng-show="sortType == 'preTotalEUR' && !sortReverse" class="fa fa-caret-up"></span>
+                                            </a>
+                                        </th>
+
+                                        <th style="width: 90px">
+                                            <a href="#" ng-click="sortType = 'grossMarginAmount'; sortReverse = !sortReverse">
+                                                DELTA
+                                                <span ng-show="sortType == 'grossMarginAmount' && sortReverse" class="fa fa-caret-down"></span>
+                                                <span ng-show="sortType == 'grossMarginAmount' && !sortReverse" class="fa fa-caret-up"></span>
+                                            </a>
+                                        </th>
+                                        <th style="width: 90px">
+                                            <a href="#" ng-click="sortType = 'purchasingAmountUSD'; sortReverse = !sortReverse">
+                                                PURCHASING
+                                                <span ng-show="sortType == 'purchasingAmountUSD' && sortReverse" class="fa fa-caret-down"></span>
+                                                <span ng-show="sortType == 'purchasingAmountUSD' && !sortReverse" class="fa fa-caret-up"></span>
+                                            </a>
+                                        </th>
+                                        <th style="width: 90px;border-right:2px solid black">
+                                            <a href="#" ng-click="sortType = 'grossMarginPercent'; sortReverse = !sortReverse">
+                                                %
+                                                <span ng-show="sortType == 'grossMarginPercent' && sortReverse" class="fa fa-caret-down"></span>
+                                                <span ng-show="sortType == 'grossMarginPercent' && !sortReverse" class="fa fa-caret-up"></span>
+                                            </a>
+                                        </th>
+
+                                        <th style="width: 90px;">
+                                            <a href="#" ng-click="sortType = 'totalNetAmountUSD'; sortReverse = !sortReverse">
+                                                USD
+                                                <span ng-show="sortType == 'totalNetAmountUSD' && sortReverse" class="fa fa-caret-down"></span>
+                                                <span ng-show="sortType == 'totalNetAmountUSD' && !sortReverse" class="fa fa-caret-up"></span>
+                                            </a>
+                                        </th>
+                                        <th style="width: 90px;">
+                                            <a href="#" ng-click="sortType = 'totalNetAmountEUR'; sortReverse = !sortReverse">
+                                                EUR
+                                                <span ng-show="sortType == 'totalNetAmountEUR' && sortReverse" class="fa fa-caret-down"></span>
+                                                <span ng-show="sortType == 'totalNetAmountEUR' && !sortReverse" class="fa fa-caret-up"></span>
+                                            </a>
+                                        </th>
+                                        <th style="width: 90px;border-right:2px solid black">
+                                            <a href="#" ng-click="sortType = 'totalNetAmountConvertToUSD'; sortReverse = !sortReverse">
+                                                Total convert to USD
+                                                <span ng-show="sortType == '' && sortReverse" class="fa fa-caret-down"></span>
+                                                <span ng-show="sortType == '' && !sortReverse" class="fa fa-caret-up"></span>
+                                            </a>
+                                        </th>
+
+                                        <th style="width: 60px;">
+                                            <a href="#" ng-click="sortType = 'wickerContQty'; sortReverse = !sortReverse">
+                                                WICKER
+                                                <span ng-show="sortType == 'wickerContQty' && sortReverse" class="fa fa-caret-down"></span>
+                                                <span ng-show="sortType == 'wickerContQty' && !sortReverse" class="fa fa-caret-up"></span>
+                                            </a>
+                                        </th>
+                                        <th style="width: 60px;">
+                                            <a href="#" ng-click="sortType = 'wickerPromoContQty'; sortReverse = !sortReverse">
+                                                WICKER Promo
+                                                <span ng-show="sortType == 'wickerPromoContQty' && sortReverse" class="fa fa-caret-down"></span>
+                                                <span ng-show="sortType == 'wickerPromoContQty' && !sortReverse" class="fa fa-caret-up"></span>
+                                            </a>
+                                        </th>
+                                        <th style="width: 60px;">
+                                            <a href="#" ng-click="sortType = 'woodAcaciaContQty'; sortReverse = !sortReverse">
+                                                WOOD Acacia
+                                                <span ng-show="sortType == 'woodAcaciaContQty' && sortReverse" class="fa fa-caret-down"></span>
+                                                <span ng-show="sortType == 'woodAcaciaContQty' && !sortReverse" class="fa fa-caret-up"></span>
+                                            </a>
+                                        </th>
+                                        <th style="width: 60px;">
+                                            <a href="#" ng-click="sortType = 'woodTeakContQty'; sortReverse = !sortReverse">
+                                                WOOD Teak
+                                                <span ng-show="sortType == 'woodTeakContQty' && sortReverse" class="fa fa-caret-down"></span>
+                                                <span ng-show="sortType == 'woodTeakContQty' && !sortReverse" class="fa fa-caret-up"></span>
+                                            </a>
+                                        </th>
+                                        <th style="width: 60px;">
+                                            <a href="#" ng-click="sortType = 'chinaContQty'; sortReverse = !sortReverse">
+                                                All Mate rials
+                                                <span ng-show="sortType == 'chinaContQty' && sortReverse" class="fa fa-caret-down"></span>
+                                                <span ng-show="sortType == 'chinaContQty' && !sortReverse" class="fa fa-caret-up"></span>
+                                            </a>
+                                        </th>
+                                        <th style="width: 60px;">
+                                            <a href="#" ng-click="sortType = 'indoContQty'; sortReverse = !sortReverse">
+                                                All Mate rials
+                                                <span ng-show="sortType == 'indoContQty' && sortReverse" class="fa fa-caret-down"></span>
+                                                <span ng-show="sortType == 'indoContQty' && !sortReverse" class="fa fa-caret-up"></span>
+                                            </a>
+                                        </th>
+                                        <th style="width: 60px;border-right:2px solid black">
+                                            <a href="#" ng-click="sortType = 'totalContSpecification'; sortReverse = !sortReverse">
+                                                TOTAL CONT. Qnt
+                                                <span ng-show="sortType == 'totalContSpecification' && sortReverse" class="fa fa-caret-down"></span>
+                                                <span ng-show="sortType == 'totalContSpecification' && !sortReverse" class="fa fa-caret-up"></span>
+                                            </a>
+                                        </th>
+
+                                        <th style="width: 60px;">
+                                            <a href="#" ng-click="sortType = 'totalContWickerSuggest'; sortReverse = !sortReverse">
+                                                WICKER
+                                                <span ng-show="sortType == 'totalContWickerSuggest' && sortReverse" class="fa fa-caret-down"></span>
+                                                <span ng-show="sortType == 'totalContWickerSuggest' && !sortReverse" class="fa fa-caret-up"></span>
+                                            </a>
+                                        </th>
+                                        <th style="width: 60px;">
+                                            <a href="#" ng-click="sortType = 'totalContWoodSuggest'; sortReverse = !sortReverse">
+                                                WOOD: Acacia
+                                                <span ng-show="sortType == 'totalContWoodSuggest' && sortReverse" class="fa fa-caret-down"></span>
+                                                <span ng-show="sortType == 'totalContWoodSuggest' && !sortReverse" class="fa fa-caret-up"></span>
+                                            </a>
+                                        </th>
+                                        <th style="width: 60px;">
+                                            <a href="#" ng-click="sortType = 'totalContOtherSuggest'; sortReverse = !sortReverse">
+                                                WOOD: Teak
+                                                <span ng-show="sortType == 'totalContOtherSuggest' && sortReverse" class="fa fa-caret-down"></span>
+                                                <span ng-show="sortType == 'totalContOtherSuggest' && !sortReverse" class="fa fa-caret-up"></span>
+                                            </a>
+                                        </th>
+                                        <th style="width: 60px;">
+                                            <a href="#" ng-click="sortType = 'totalContCNSuggest'; sortReverse = !sortReverse">
+                                                ALL Mate rials
+                                                <span ng-show="sortType == 'totalContCNSuggest' && sortReverse" class="fa fa-caret-down"></span>
+                                                <span ng-show="sortType == 'totalContCNSuggest' && !sortReverse" class="fa fa-caret-up"></span>
+                                            </a>
+                                        </th>
+                                        <th style="width: 60px;">
+                                            <a href="#" ng-click="sortType = 'totalContINSuggest'; sortReverse = !sortReverse">
+                                                ALL Mate rials
+                                                <span ng-show="sortType == 'totalContINSuggest' && sortReverse" class="fa fa-caret-down"></span>
+                                                <span ng-show="sortType == 'totalContINSuggest' && !sortReverse" class="fa fa-caret-up"></span>
+                                            </a>
+                                        </th>
+                                        <th style="width: 60px;border-right:2px solid black">
+                                            <a href="#" ng-click="sortType = 'totalContSuggest'; sortReverse = !sortReverse">
+                                                TOTAL CONT. Qnt.
+                                                <span ng-show="sortType == 'totalContSuggest' && sortReverse" class="fa fa-caret-down"></span>
+                                                <span ng-show="sortType == 'totalContSuggest' && !sortReverse" class="fa fa-caret-up"></span>
+                                            </a>
+                                        </th>
+
+                                    </tr>
+                                    <tr style="height:20px">
+                                        <td style="border-left:2px solid black"></td>
+                                        <td><input type="text" ng-model="filters.saleUD1" style="height:50%" /></td>
+                                        <td><input type="text" ng-model="filters.saleUD2" style="height:50%" /></td>
+                                        <td><input type="text" ng-model="filters.saleVNUD" style="height:50%" /></td>
+                                        <td><input type="text" ng-model="filters.saleVN2UD" style="height:50%" /></td>
+                                        <td><input type="text" ng-model="filters.agentUD3" style="height:50%" /></td>
+                                        <td><input type="text" ng-model="filters.haveBizRelationshipFrom" style="height:50%" /></td>
+                                        <td><input type="text" ng-model="filters.clientCountryNM" style="height:50%" /></td>
+                                        <td><input type="text" ng-model="filters.clientUD" style="height:50%" /></td>
+                                        <td style="border-right:2px solid black"><input type="text" ng-model="filters.clientNM" style="height:50%" /></td>
+
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td style="border-right:2px solid black"></td>
+
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td style="border-right:2px solid black"></td>
+
+                                        @*DIFF*@
+                                        <td style="border-right:2px solid black;">&nbsp;</td>
+
+                                        <td></td>
+                                        <td></td>
+                                        <td style="border-right:2px solid black"></td>
+
+                                        <td></td>
+                                        <td></td>
+                                        <td style="border-right:2px solid black"></td>
+
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td style="border-right:2px solid black"></td>
+
+                                        <td></td>
+                                        <td></td>
+                                        <td style="border-right:2px solid black"></td>
+
+                                        <td style="border-right:2px solid black;background-color:#fabf8f"></td>
+
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td style="border-right:2px solid black"></td>
+
+                                        <td></td>
+                                        <td></td>
+                                        <td style="border-right:2px solid black"></td>
+
+                                        <td></td>
+                                        <td></td>
+                                        <td style="border-right:2px solid black"></td>
+
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td style="border-right:2px solid black"></td>
+
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td style="border-right:2px solid black"></td>
+
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="tilsoft-table">
+                            <div id="ddcDataTable" style="width: 4790px; height: 600px; margin-top: 0px;" class="tilsoft-table-body">
+                                <table class="table">
+                                    <tr ng-repeat="item in resultValue = (data.clientInfos | orderBy:sortType:sortReverse | filter : {saleUD1 : filters.saleUD1, saleUD2: filters.saleUD2,saleVNUD: filters.saleVNUD, saleVN2UD: filters.saleVN2UD, agentUD3: filters.agentUD3, haveBizRelationshipFrom: filters.haveBizRelationshipFrom, clientCountryNM: filters.clientCountryNM, clientUD: filters.clientUD, clientNM: filters.clientNM  })">
+                                        <td style="width:40px; text-align: center;border-left:2px solid black">{{$index+1}}</td>
+                                        <td style="width:45px; text-align: left">{{item.saleUD1}}</td>
+                                        <td style="width:45px; text-align: left">{{item.saleUD2}}</td>
+                                        <td style="width:45px; text-align: left">{{item.saleVNUD}}</td>
+                                        <td style="width:45px; text-align: left">{{item.saleVN2UD}}</td>
+                                        <td style="width:45px; text-align: left">{{item.agentUD3}}</td>
+                                        <td style="width:70px; text-align: left">{{item.haveBizRelationshipFrom}}</td>
+                                        <td style="width:110px; text-align: left">{{item.clientCountryNM}}</td>
+                                        <td style="width:60px; text-align: left">{{item.clientUD}}</td>
+                                        <td style="text-align: left;border-right:2px solid black">
+                                            <a target="_blank" href="@clientOverviewUrl/{{item.clientID}}">{{item.clientNM}}</a>
+                                        </td>
+
+                                        @*PROFORMAS CONFIRMED*@
+                                        <td style="width:60px; text-align: right">{{item.totalConfirmedCont==0?'': (item.totalConfirmedCont| number : 2)}}</td>
+                                        <td style="width:90px; text-align: right">${{item.totalConfirmedUSD==0?'':(item.totalConfirmedUSD | number : 0)}}</td>
+                                        <td style="width:90px; text-align: right">&euro;{{item.totalConfirmedEUR==0?'':(item.totalConfirmedEUR | number : 0)}}</td>
+                                        <td style="width:90px; text-align: right">&euro;{{item.totalConfirmedConvertToEUR==0?'':(item.totalConfirmedConvertToEUR | number : 0)}}</td>
+                                        <td style="width:90px; text-align: right;border-right:2px solid black;color:green">{{item.grossMarginPercent==0?'':(item.grossMarginPercent | number: 1)}}%</td>
+
+                                        @*PROFORMAS TOTAL*@
+                                        <td style="width:60px; text-align: right">{{item.totalOrderCont==0?'':(item.totalOrderCont | number : 2)}}</td>
+                                        <td style="width:90px; text-align: right">${{item.totalOrderUSD==0?'':(item.totalOrderUSD | number : 0)}}</td>
+                                        <td style="width:90px; text-align: right">&euro;{{item.totalOrderEUR==0?'':(item.totalOrderEUR | number : 0)}}</td>
+                                        <td style="width:90px; text-align: right">&euro;{{item.totalOrderConverToEUR==0?'':(item.totalOrderConverToEUR | number : 0)}}</td>
+                                        <td style="width:90px; text-align: right">&euro;{{item.proformasTotalGAP==0?'':(item.proformasTotalGAP | number : 0)}}</td>
+                                        <td style="width:50px; text-align: right;border-right:2px solid black">{{item.proformasTotalRelativeGAP==0?'':(item.proformasTotalRelativeGAP | number : 1)}}%</td>
+
+                                        <td style="width:90px; text-align: right; border-right: solid 2px #000; {{item.totalOrderConverToEUR - item.totalExpected < 0 ? 'color: #ff0000;' : ''}}">
+                                            {{item.totalOrderConverToEUR - item.totalExpected | currency : '&euro;' : 0}}
+                                        </td>
+
+                                        @*FOB EXPECTED IS USD*@
+                                        <td style="width:90px; text-align: right">${{item.minUSD==0?'':(item.minUSD | number : 0)}}</td>
+                                        <td style="width:90px; text-align: right">${{item.avgUSD==0?'':(item.avgUSD | number : 0)}}</td>
+                                        <td style="width:90px; text-align: right;border-right:2px solid black">${{item.maxUSD==0?'':(item.maxUSD | number : 0)}}</td>
+
+                                        @*FRANCO EXPECTED IN EUR*@
+                                        <td style="width:90px; text-align: right">&euro;{{item.minEUR==0?'':(item.minEUR | number : 0)}}</td>
+                                        <td style="width:90px; text-align: right">&euro;{{item.avgEUR==0?'':(item.avgEUR | number : 0)}}</td>
+                                        <td style="width:90px; text-align: right;border-right:2px solid black">&euro;{{item.maxEUR==0?'':(item.maxEUR | number : 0)}}</td>
+
+                                        @*TOTAL FOB+Franco*@
+                                        <td style="width:60px; text-align: right">{{item.totalExpectedCont==0?'':(item.totalExpectedCont | number : 2)}}</td>
+                                        <td style="width:90px; text-align: right">&euro;{{item.totalExpected==0?'':(item.totalExpected | number : 0)}}</td>
+                                        <td style="width:90px; text-align: right">{{item.deltaTurnOverLastYear==0?'':(item.deltaTurnOverLastYear | number : 1)}}%</td>
+                                        <td style="width:50px; text-align: right">{{item.totalExpected/method.getTotalExpected()*100==0?'':(item.totalExpected/method.getTotalExpected()*100 | number : 1)}}%</td>
+                                        <td style="width:60px; text-align: right">{{item.deltaTurnOver==0?'':(item.deltaTurnOver | number : 0)}}%</td>
+                                        <td style="width:90px; text-align: right;border-right:2px solid black">&euro;{{item.expectedGAP==0?'':(item.expectedGAP | number : 0)}}</td>
+
+                                        @* Offer *@
+                                        <td style="width:90px; text-align: right">${{item.osGrossMarginAmount==0?'':(item.osGrossMarginAmount | number : 0)}}</td>
+                                        <td style="width:90px; text-align: right">${{item.osPurchasingAmountUSD==0?'':(item.osPurchasingAmountUSD | number : 0)}}</td>
+                                        <td style="width:90px; text-align: right;border-right:2px solid black">{{item.osGrossMarginPercent==0?'':(item.osGrossMarginPercent | number : 1)}}%</td>
+
+                                        @* Delta of Delta % *@
+                                        <td style="width:90px; text-align: right;border-right:2px solid black;background-color:#fabf8f">{{item.deltaOfDeltaPercent | number : 1}}%</td>
+
+                                        @* PRO FORMAS CONFIRMED *@
+                                        <td style="width:90px; text-align: right">&euro;{{item.preTotalConverToEUR==0?'':(item.preTotalConverToEUR | number : 0)}}</td>
+                                        <td style="width:60px; text-align: right">{{item.preTotalCont==0?'':(item.preTotalCont | number : 2)}}</td>
+                                        <td style="width:90px; text-align: right">${{item.preTotalUSD==0?'':(item.preTotalUSD | number : 0)}}</td>
+                                        <td style="width:90px; text-align: right;border-right:2px solid black">&euro;{{item.preTotalEUR==0?'':(item.preTotalEUR | number : 0)}}</td>
+
+                                        @* DELTA *@
+                                        <td style="width:90px; text-align: right">${{item.grossMarginAmount==0?'':(item.grossMarginAmount | number : 0)}}</td>
+                                        <td style="width:90px; text-align: right">${{item.purchasingAmountUSD==0?'':(item.purchasingAmountUSD | number : 0)}}</td>
+                                        <td style="width:90px; text-align: right;border-right:2px solid black">{{item.grossMarginPercent==0?'':(item.grossMarginPercent | number : 1)}}%</td>
+
+                                        @* COMMERCIAL INVOICE *@
+                                        <td style="width:90px; text-align: right">${{item.totalNetAmountUSD==0?'':(item.totalNetAmountUSD | number : 0)}}</td>
+                                        <td style="width:90px; text-align: right">&euro;{{item.totalNetAmountEUR==0?'':(item.totalNetAmountEUR | number : 0)}}</td>
+                                        <td style="width:90px; text-align: right;border-right:2px solid black">${{(item.totalNetAmountConvertToUSD) | number : 0}}</td>
+
+                                        @* Container specification manually by accountmanager *@
+                                        <td style="width:60px; text-align: right">{{item.wickerContQty==0?'':(item.wickerContQty | number : 2)}}</td>
+                                        <td style="width:60px; text-align: right">{{item.wickerPromoContQty==0?'':(item.wickerPromoContQty | number : 2)}}</td>
+                                        <td style="width:60px; text-align: right">{{item.woodAcaciaContQty==0?'':(item.woodAcaciaContQty | number : 2)}}</td>
+                                        <td style="width:60px; text-align: right">{{item.woodTeakContQty==0?'':(item.woodTeakContQty | number : 2)}}</td>
+                                        <td style="width:60px; text-align: right">{{item.chinaContQty==0?'':(item.chinaContQty | number : 2)}}</td>
+                                        <td style="width:60px; text-align: right">{{item.indoContQty==0?'':(item.indoContQty | number : 2)}}</td>
+                                        <td style="width:60px; text-align: right;border-right:2px solid black">{{item.totalContSpecification==0?'':(item.totalContSpecification | number : 2)}}</td>
+
+                                        @* Container specification suggest *@
+                                        <td style="width:60px; text-align: right">{{item.totalContWickerSuggest==0?'':(item.totalContWickerSuggest | number : 2)}}</td>
+                                        <td style="width:60px; text-align: right">{{item.totalContWoodSuggest==0?'':(item.totalContWoodSuggest | number : 2)}}</td>
+                                        <td style="width:60px; text-align: right">{{item.totalContOtherSuggest==0?'':(item.totalContOtherSuggest | number : 2)}}</td>
+                                        <td style="width:60px; text-align: right">{{item.totalContCNSuggest==0?'':(item.totalContCNSuggest | number : 2)}}</td>
+                                        <td style="width:60px; text-align: right">{{item.totalContINSuggest==0?'':(item.totalContINSuggest  | number : 2)}}</td>
+                                        <td style="width:60px; text-align: right;border-right:2px solid black">{{item.totalContSuggest==0?'':(item.totalContSuggest | number : 2)}}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>                  
+
+                </div>
+            </div>
+        </div>
+    </article>
+
+</div>
+
+@section pagejs {
+    <script src="~/Angular/app/jsonService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script type="text/javascript">
+        jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/reportddc/';
+        jsonService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+        var context = {
+            backendReportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]'
+        }
+    </script>
+    <script src="~/Angular/app/reportDDC/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/reportDDC/index.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}

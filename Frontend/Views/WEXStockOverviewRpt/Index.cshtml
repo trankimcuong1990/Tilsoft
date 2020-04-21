@@ -1,0 +1,224 @@
+﻿@{
+    ViewBag.Title = "Bizbloqs Stock Overview";
+    ViewBag.Module = "Bizbloqs Stock Overview";
+    ViewBag.Icon = "fa-bar-chart-o";
+
+    Frontend.APIDTO.APIUserInformation userInfo = (Frontend.APIDTO.APIUserInformation)Session[Frontend.Customize.Common.ProjectDefinition.USER_INFO_SESSION];
+}
+
+<style>
+    .tilsoft-table-header div {
+        height: 75px !important;
+    }
+</style>
+
+<div class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-1" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>@ViewBag.Title</h2>
+                <div class="widget-toolbar">
+                    <div class="smart-form">
+                        <div class="inline-group">
+                            <label class="radio">
+                                <input name="archive" type="radio" ng-model="filters.NoImage" value="true" ng-change="event.reload()">
+                                <i></i>Item with no image
+                            </label>
+                            <label class="radio">
+                                <input name="archive" type="radio" ng-model="filters.NoImage" value="false" ng-change="event.reload()">
+                                <i></i>All items
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div class="avs-table-wrapper" avs-table grid-handler="gridHandler">
+                        <div class="avs-table-header">
+                            <div class="avs-table-header-container">
+                                <table>
+                                    <tr class="header-row" style="height: 75px;">
+                                        <td style="width: 80px; font-weight: bold;">{{totalRows}} row(s)</td>
+                                        <td style="width: 40px;"></td>
+                                        <td style="width: 40px;">Ena bled</td>
+                                        <td style="width: 60px;" class="sorting" data-colname="ProductTypeNM">Type</td>
+                                        <td style="width: 80px;" class="sorting" data-colname="ArticleCode">Art.Code</td>
+                                        <td style="width: 80px;" class="sorting" data-colname="EANCode">EAN Code</td>
+                                        <td style="width: 200px;" class="sorting" data-colname="Description">Description</td>
+                                        <td style="width: 50px;" class="sorting" data-colname="Qnt40HC">Qnt / 40HC</td>
+                                        <td style="width: 80px;" class="sorting_desc" data-colname="StockQnt">Stock / FTS Qnt</td>
+                                        <td style="width: 50px;">Stock Qnt / 40HC</td>
+                                        <td style="width: 70px;" class="sorting" data-colname="UnitPrice">Selling Price</td>
+                                        <td style="width: 85px;">Selling Amount</td>
+                                        <td style="width: 85px;" class="sorting" data-colname="obsolete">Std Cost Price</td>
+                                        <td style="width: 70px;" class="sorting" data-colname="obsolete" title="% obsolescence">% obs</td>
+                                        <td style="width: 70px;" title="Unit value including obsolescence">Unit value inc obs</td>
+                                        <td style="width: 85px;" title="Value including obsolescence">Value inc obs</td>
+                                        <td style="width: 50px;">Item Scr</td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <a href="javascript:void(0)" class="btn btn-{{isDefaultFilter?'default':'primary'}} btn-xs" title="Apply Filter" ng-click="event.reload()"><i class="fa fa-filter"></i></a>
+                                            <a href="javascript:void(0)" class="btn btn-default btn-xs" title="Clear Filter" ng-click="event.clearFilter()"><i class="fa fa-ban"></i></a>
+                                        </td>
+                                        <td></td>
+                                        <td></td>
+                                        <td><input class="search-filter" type="text" ng-model="filters.ProductTypeNM" /></td>
+                                        <td><input class="search-filter" type="text" ng-model="filters.ArticleCode" /></td>
+                                        <td><input class="search-filter" type="text" ng-model="filters.SubEANCode" /></td>
+                                        <td><input class="search-filter" type="text" ng-model="filters.Description" /></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td>
+                                            <a href="javascript:void(0)" class="btn btn-default btn-xs" ng-show="!isEditSellingPrice" ng-click="event.editSellingPrice()" title="Edit"><i class="fa fa-pencil"></i></a>
+                                            <a href="javascript:void(0)" class="btn btn-default btn-xs" ng-show="isEditSellingPrice" ng-click="event.updateSellingPrice()" title="Save"><i class="fa fa-floppy-o"></i></a>
+                                            <a href="javascript:void(0)" class="btn btn-default btn-xs" ng-show="isEditSellingPrice" ng-click="event.cancelEditSellingPrice()" title="Cancel"><i class="fa fa-times"></i></a>
+                                        </td>
+                                        <td></td>
+                                        <td></td>
+                                        <td>
+                                            <a href="javascript:void(0)" class="btn btn-default btn-xs" ng-show="!isEditObsolete" ng-click="event.editObsolete()" title="Edit"><i class="fa fa-pencil"></i></a>
+                                            <a href="javascript:void(0)" class="btn btn-default btn-xs" ng-show="isEditObsolete" ng-click="event.updateObsolete()" title="Update"><i class="fa fa-floppy-o"></i></a>
+                                            <a href="javascript:void(0)" class="btn btn-default btn-xs" ng-show="isEditObsolete" ng-click="event.cancelEditObsolete()" title="Cancel"><i class="fa fa-times"></i></a>
+                                        </td>
+                                        <td>
+                                            <a href="javascript:void(0)" class="btn btn-default btn-xs" ng-show="!isEditValueObsolescence" ng-click="event.editValueObsolescence()" title="Edit"><i class="fa fa-pencil"></i></a>
+                                            <a href="javascript:void(0)" class="btn btn-default btn-xs" ng-show="isEditValueObsolescence" ng-click="event.updateValueObsolescence()" title="Update"><i class="fa fa-floppy-o"></i></a>
+                                            <a href="javascript:void(0)" class="btn btn-default btn-xs" ng-show="isEditValueObsolescence" ng-click="event.cancelEditValueObsolescence()" title="Cancel"><i class="fa fa-times"></i></a>
+                                        </td>
+                                        <td></td>
+                                        <td>
+                                            <select class="select search-filter" ng-model="filters.ItemSourceID" ng-options="xxx.itemSourceID as xxx.name for xxx in wexItemSource">
+                                                <option value=""></option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                    <tr class="total-row">
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td>TOTAL</td>
+                                        <td>{{method.getTotalStockQnt() | number:0}}/
+                                            {{method.getTotalFTSQnt() | number:0}}</td>
+                                        <td>{{method.getTotalStockQnt40HC() | number:2}}</td>
+                                        <td></td>
+                                        <td>{{method.getTotalSellingAmount() | currency:'&euro;':2}}</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td>{{method.getTotalPurchasingAmount() | currency:'&euro;':2}}</td>
+                                        <td></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="avs-table-body">
+                            <table>
+                                <tr ng-repeat="item in data">
+                                    <td>
+                                        <a href="{{item.fileLocation}}" data-featherlight="image">
+                                            <img style="width: 95%;" ng-src="{{item.thumbnailLocation}}" />
+                                        </a>
+                                    </td>
+                                    <td style="text-align: center;"><label for="chk-{{$index}}"><input id="chk-{{$index}}" type="checkbox" ng-model="item.isSelected" /></label></td>
+                                    <td style="text-align: center;"><i class="fa fa-check-square-o" ng-if="item.isEnabled"></i></td>
+                                    <td style="text-align: center;">{{item.productTypeNM}}</td>
+                                    <td style="text-align: center;">
+                                        <a ng-if="'@(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Approve, HttpContext.Current))' !== 'disabled'" target="_blank" href="@Url.Action("Edit", "Product", new { id = UrlParameter.Optional })/{{item.productID}}">{{item.articleCode}}</a>
+                                        <span ng-if="'@(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Approve, HttpContext.Current))' === 'disabled'">{{item.articleCode}}</span>
+                                    </td>
+                                    <td style="text-align: center;">{{item.subEANCode}}</td>
+                                    <td>{{item.description}}</td>
+                                    <td style="text-align: right;">{{item.qnt40HC | number:0}}</td>
+                                    <td style="text-align: right;">{{item.stockQnt | number:0}}/{{item.freeToSaleQnt | number:0}}</td>
+                                    <td style="text-align: right;">{{item.qnt40HC && item.stockQnt ? item.stockQnt / item.qnt40HC : null | number:2}}</td>
+                                    <td style="text-align: right;">
+                                        <span ng-show="!isEditSellingPrice">{{item.unitPrice | currency:'&euro;':2}}</span>
+                                        <div class="input-group" ng-show="isEditSellingPrice">
+                                            <span class="input-group-addon">&euro;</span>
+                                            <input type="text" class="form-control" style="font-family:Arial; text-align:right" avs-number ng-data-source="item.unitPrice" ng-decimal="2" ng-on-change="event.onUnitPriceChange(item)" />
+                                        </div>
+                                    </td>
+                                    <td style="text-align: right;">{{item.unitPrice && item.stockQnt ? item.unitPrice * item.stockQnt : null | currency:'&euro;':2}}</td>
+                                    <td style="text-align: right;">
+                                        <div class="col col-sm-4 no-padding" style="text-align: left">
+                                            <a href="javascript:void(0)" class="btn btn-default btn-xs" ng-show="!item.isEditValueSalePrice && (item.salePriceTemp == null || item.salePriceTemp == 0)" ng-click="event.editValueSalePrice(item)" title="Edit"><i class="fa fa-pencil"></i></a>
+                                            <a href="javascript:void(0)" class="btn btn-default btn-xs" ng-show="item.isEditValueSalePrice" ng-click="event.updateValueSalePrice(item)" title="Update"><i class="fa fa-floppy-o"></i></a>
+                                            <a href="javascript:void(0)" class="btn btn-default btn-xs" ng-show="item.isEditValueSalePrice" ng-click="event.cancelEditValueSalePrice(item)" title="Cancel"><i class="fa fa-times"></i></a>
+                                        </div>
+                                        <div class="col col-sm-8 no-padding" style="text-align: right">
+                                            <span ng-show="(item.salePrice != null && item.salePrice != 0) && !item.isEditValueSalePrice">{{item.salePrice | currency:'&euro;':2}}</span>
+                                            <span ng-show="(item.salePrice == null || item.salePrice == 0) && !item.isEditValueSalePrice" style="text-align: right; background-color:yellow">{{item.costPrice | currency:'&euro;':2}}</span>
+                                            <div class="input-group" ng-show="item.isEditValueSalePrice">
+                                                <span class="input-group-addon">&euro;</span>
+                                                <input type="text" class="form-control" style="font-family:Arial; text-align:right" avs-number ng-data-source="item.costPrice" ng-decimal="2" ng-on-change="event.onUnitValueSalePrice(item)" />
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td style="text-align: right; ">
+                                        <span ng-show="!isEditObsolete">{{item.obsolete}}<i ng-if="item.obsolete != null"> %</i></span>
+                                        <div class="input-group" ng-show="isEditObsolete">
+                                            <input type="text" class="form-control" style="font-family:Arial; text-align:right" avs-number ng-data-source="item.obsolete" ng-on-change="event.onUnitObsolete(item)" />
+                                            <span class="input-group-addon">%</span>
+                                        </div>
+                                    </td>
+                                    <td style="text-align: right;">
+                                        <span ng-show="!isEditValueObsolescence">{{item.valueObsolescence | currency:'&euro;':2}}</span>
+                                        <div class="input-group" ng-show="isEditValueObsolescence">
+                                            <span class="input-group-addon">&euro;</span>
+                                            <input type="text" class="form-control" style="font-family:Arial; text-align:right" avs-number ng-data-source="item.valueObsolescence" ng-decimal="2" ng-on-change="event.onUnitValueObsolescence(item)" />
+                                        </div>
+                                    </td>
+                                    <td style="text-align: right;">{{method.getValueIncludeObsolesence(item) | currency:'&euro;':2}}</td>
+                                    <td style="text-align: center">{{item.itemSource}}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction {
+<ul id="sparks">
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default" title="Search" ng-click="event.reload()"><i class="fa fa-search"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default" title="Refresh" ng-click="event.reload()"><i class="fa fa-refresh"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default" title="Enable item in magento" ng-click="event.updateEnableStatus(true)"><i class="fa fa-check-circle-o"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default" title="Disable item in magento" ng-click="event.updateEnableStatus(false)"><i class="fa fa-circle-o"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default" title="Export Excel" ng-click="event.exportExcel()"><i class="fa fa-file-excel-o"></i></a>
+    </li>
+</ul>
+}
+
+@section pagejs {
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/wexstockoverviewrpt/',
+            token : '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]',
+            pageSize : 50,
+            cookieId: '@HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString()',
+            backendReportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]'
+        }
+    </script>
+    <script src="~/Views/WEXStockOverviewRpt/index.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/jsonService2.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/WEXStockOverviewRpt/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}

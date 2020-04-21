@@ -1,0 +1,570 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    var pageSize = System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"];
+    var cookieID = HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString();
+    var supportServiceRoot = (System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"]);
+
+
+    ViewBag.Title = (ViewBag.ID == 0) ? "Create QC Report" : "Edit QC Report";
+    ViewBag.Module = "QC Report";
+
+    string userManualUrl = string.Empty;
+    if (System.IO.File.Exists(Server.MapPath("~/UserManual/" + ViewBag.ModuleCode + ".pdf")))
+    {
+        userManualUrl = "/UserManual/" + ViewBag.ModuleCode + ".pdf";
+    }
+}
+<form name="editForm" class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <ul class="nav nav-tabs pull-left in">
+                    <li class="active">
+                        <a data-toggle="tab" href="#tabGeneral" name="gtab"> <span>@ViewBag.Title</span> </a>
+                    </li>
+                    <li>
+                        <a data-toggle="tab" href="#tabFactoryOrder" name="gtab"> <span>PI</span> </a>
+                    </li>
+                </ul>
+            </header>
+            <div>
+                <div class="jarviswidget-editbox"></div>
+                <div class="widget-body">
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="tabGeneral">
+                            <div class="smart-form" style="padding:0px">
+                                @*General*@
+                                <fieldset class="no-padding">
+                                    <div class="row">
+                                        <section class="col col-sm-2">
+                                            <label class="label">Code</label>
+                                            <label class="input">
+                                                <input class="form-control" type="text" style="min-height: 32px; font-family: Arial" ng-model="data.qcReportUD" readonly>
+                                            </label>
+                                        </section>
+                                        <section class="col col-sm-2">
+                                            <label class="label">Inspected Date</label>
+                                            <label class="input-group">
+                                                <input type="text" class="form-control" avs-calendar ng-data-source="data.inspectedDate" />
+                                                <span class="input-group-addon">
+                                                    <i class="fa fa-calendar"></i>
+                                                </span>
+                                            </label>
+                                        </section>
+                                        <section class="col col-sm-2">
+                                            <label class="label">Customer</label>
+                                            <label class="input">
+                                                <span class="form-control">{{data.clientUD}}</span>
+                                            </label>
+                                        </section>
+                                        <section class="col col-sm-2">
+                                            <label class="label">Factory</label>
+                                            <label class="input">
+                                                <span class="form-control">{{data.factoryUD}}</span>
+                                            </label>
+                                        </section>
+                                        <section class="col col-sm-2">
+                                            <label class="label">Article Code</label>
+                                            <label class="input">
+                                                <span class="form-control">{{data.articleCode}}</span>
+                                            </label>
+                                        </section>
+                                        <section class="col col-sm-1">
+                                            <label class="label">P/I NO</label>
+                                            <label class="input">
+                                                <span class="form-control">{{data.proformaInvoiceNo}}</span>
+                                            </label>
+                                        </section>
+                                        <section class="col col-sm-1">
+                                            <label class="label">Quantity</label>
+                                            <label class="input">
+                                                <span class="form-control">{{data.quantity}}</span>
+                                            </label>
+                                        </section>
+                                    </div>
+                                    <div class="row">
+                                        <section class="col col-sm-2">
+                                            <label class="label">Sample Size</label>
+                                            <label class="input">
+                                                <input class="form-control" type="text" style="min-height: 32px; font-family: Arial" ng-model="data.sampleSize">
+                                            </label>
+                                        </section>
+                                        <section class="col col-sm-2">
+                                            <label class="label">Assemply Sample Size</label>
+                                            <label class="input">
+                                                <input class="form-control" type="text" style="min-height: 32px; font-family: Arial" ng-model="data.assemplySampleSize">
+                                            </label>
+                                        </section>
+                                        <section class="col col-sm-2">
+                                            <label class="label">Location</label>
+                                            <label class="input">
+                                                <input class="form-control" type="text" style="min-height: 32px; font-family: Arial" ng-model="data.location">
+                                            </label>
+                                        </section>
+                                        <section class="col col-sm-2">
+                                            <label class="label">QC Name</label>
+                                            <label class="input">
+                                                <input class="form-control" type="text" style="min-height: 32px; font-family: Arial" ng-model="data.qcName">
+                                            </label>
+                                        </section>
+                                        <section class="col col-sm-4">
+                                            <label class="label">Article Description</label>
+                                            <label class="input">
+                                                @*<input class="form-control" type="text" style="min-height: 32px; font-family: Arial">*@
+                                                <span class="form-control">{{data.description}}</span>
+                                            </label>
+                                        </section>
+                                    </div>
+                                    <div class="row">
+                                        <section class="col col-sm-6">
+                                            <a ng-if="!data.reportFriendlyName" href="javascript:void(0)" style="float:left" class="btn btn-default btn-xs btn-primary" ng-click="event.addReportFile()">
+                                                <i class="fa fa-plus"></i> Upload report files
+                                            </a>
+                                            <a ng-if="data.reportFriendlyName" href="javascript:void(0)" style="float:left" class="btn btn-default btn-xs btn-primary" ng-click="event.addReportFile()">
+                                                <i class="fa fa-pencil"></i> Change report files
+                                            </a>
+                                            &nbsp;
+                                            <a ng-if="data.reportFriendlyName" href="javascript:void(0)" class="btn btn-default btn-xs btn-danger" ng-click="event.removeReportFile()">
+                                                <i class="fa fa-delete"></i> Remove
+                                            </a>
+                                            &nbsp;
+                                            <a href="{{data.reportFileLocation}}" target="_blank">{{data.reportFriendlyName}}</a>
+                                        </section>
+                                    </div>
+                                </fieldset>
+
+                                @*Inspection Summary*@
+                                <div class="row">
+                                    <section class="col col-sm-6">
+                                        <div class="tilsoft-table-wrapper">
+                                            <div class="tilsoft-table">
+                                                <div class="tilsoft-table-header" style="width:700px">
+                                                    <div style="width:500px;text-align:left">
+                                                        Inspection Summary
+                                                    </div>
+                                                    <div style="width:95px">Result</div>
+                                                    <div>Remark</div>
+                                                </div>
+                                                <div class="tilsoft-table-body" style="width:700px">
+                                                    <table>
+                                                        <tbody>
+                                                            <tr ng-repeat="item in data.qcReportSummaryDTOs">
+                                                                <td style="width:500px">{{item.description}}</td>
+                                                                <td style="width:95px">
+                                                                    <select class="form-control" ng-model="item.qcReportSummaryResultID" ng-options="summaryResult.qcReportSummaryResultID as summaryResult.qcReportSummaryResultNM for summaryResult in summaryResults">
+                                                                        <option value=""></option>
+                                                                    </select>
+                                                                </td>
+                                                                <td><input class="form-control" type="text" style="min-height:32px; font-family: Arial" ng-model="item.remark" /></td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+                                    <section class="col col-sm-6" style="text-align:center">
+                                        <div class="smart-form" style="border: solid 1px">
+                                            <div class="label" style="text-align: center; margin-top:5px; border-bottom: 1px solid">Product Picture </div>
+                                            <a class="btn btn-default btn-primary btn-xs m-bottom-15" href="javascript:void(0)" ng-click="event.addImage()" ng-if="data.thumbnailLocation == '' ||data.thumbnailLocation == null "> <i class="fa fa-plus"></i> Add Picture</a>
+                                            <div class="img-item" ng-if="data.thumbnailLocation != '' && data.thumbnailLocation != null" style="height:280px; width:400px;display: inline-block">
+                                                <a href="{{data.fileLocation}}" data-featherlight="image">
+                                                    <img src="{{data.thumbnailLocation}}">
+                                                </a><br />
+                                                <a class="btn btn-success btn-xs" href="javascript:void(0)" ng-click="event.changeImage()">Edit</a>
+                                                <a class="btn btn-danger btn-xs" href="javascript:void(0)" ng-click="event.removeImage()">Delete</a>
+
+                                            </div>
+                                        </div>
+                                    </section>
+                                </div>
+
+                                @*InspectionStage*@
+                                <div class="row">
+                                    <section class="col col-sm-1">
+                                        <label></label>
+                                        <label class="label" style="padding-top:7px">Inspection stage:</label>
+                                    </section>
+                                    <section class="col col-sm-1">
+                                        <label></label>
+                                        <select class="form-control" ng-model="data.inspectionStageID" ng-options="inspectionStage.inspectionStageID as inspectionStage.inspectionStageNM for inspectionStage in inspectionStages">
+                                            <option value=""></option>
+                                        </select>
+                                    </section>
+                                </div>
+
+                                @*Quantity*@
+                                <div class="no-padding">
+                                    <div class="widget-body">
+                                        <div class="tilsoft-table-wrapper">
+                                            <div class="tilsoft-table">
+                                                <div class="tilsoft-table-body" style="width:100%; max-width:1000px; overflow-y:auto; height:auto; min-height:100px; margin-top:0px">
+                                                    <table>
+                                                        <tbody>
+                                                            <tr>
+                                                                <th style="width:200px" rowspan="2">Order Qty</th>
+                                                                <th style="width:150px" colspan="2">Quantity presented for inspection</th>
+                                                                <th colspan="2">Number of cartons</th>
+                                                            </tr>
+                                                            <tr>
+                                                                <th>Packed</th>
+                                                                <th>Not packed</th>
+                                                                <th>Packed</th>
+                                                                <th>Not packed</th>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>
+                                                                    <span class="form-control" style="text-align:center">{{data.quantity}}</span>
+                                                                </td>
+                                                                <td>
+                                                                    <input class="form-control" type="text" style="min-height: 32px; text-align:center; font-family: Arial" avs-number ng-data-source="data.inspectedPackedQuantity">
+                                                                </td>
+                                                                <td>
+                                                                    <input class="form-control" type="text" style="min-height: 32px; text-align:center; font-family: Arial" avs-number ng-data-source="data.inspectedNotPackedQuantity">
+                                                                </td>
+                                                                <td>
+                                                                    <input class="form-control" type="text" style="min-height: 32px; text-align:center; font-family: Arial" avs-number ng-data-source="data.inspectedPackedCartonQuantity">
+                                                                </td>
+                                                                <td>
+                                                                    <input class="form-control" type="text" style="min-height: 32px; text-align:center; font-family: Arial" avs-number ng-data-source="data.inspectedNotPackedCartonQuantity">
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                @*Packaging*@
+                                <div class="no-padding">
+                                    <div class="row" style="margin-top: 5px">
+                                        <section class="col col-sm-1">
+                                            <label class="label"><strong>Packaging:</strong></label>
+                                        </section>
+                                        <section class="col col-sm-3">
+                                            <label class="label">Packaging Type:</label>
+                                            <label class="input">
+                                                <select class="form-control" ng-model="data.packagingMethodID" ng-options="packagingMethod.packagingMethodID as packagingMethod.packagingMethodNM for packagingMethod in packagingMethods">
+                                                    <option value=""></option>
+                                                </select>
+                                            </label>
+                                        </section>
+                                        <section class="col col-sm-3">
+                                            <label class="label">Box Drop Test ISTA 1A (If applicable)</label>
+                                            <label style="display:inline-flex">
+                                                <label style="padding-top:7px;">Comformity: </label>
+                                                <select class="form-control" style="margin-left:5px" ng-model="data.isConformed" ng-options="conformity.isConformed as conformity.name for conformity in listConformity">
+                                                    <option value=""></option>
+                                                </select>
+                                            </label>
+                                        </section>
+                                    </div>
+                                    <div class="row">
+                                        <section class="col col-sm-12">
+                                            <label class="label"><strong>Workmanship Appearance / Function Inspection Findings:</strong></label>
+                                            <label class="label">Inspection level: MIL-Std-105D single sampling, level II, normal inspection</label>
+                                        </section>
+                                    </div>
+                                    <div class="row">
+                                        <section class="col col-sm-1">
+                                            <label class="label">AQL</label>
+                                        </section>
+                                        <section class="col col-sm-1">
+                                            <label class="label">Critical</label>
+                                            <label class="input">
+                                                <input class="form-control" type="text" style="min-height:32px; font-family: Arial" avs-number ng-data-source="data.aqlCritical" ng-decimal="2" />
+                                            </label>
+                                        </section>
+                                        <section class="col col-sm-1">
+                                            <label class="label">Major</label>
+                                            <label class="input">
+                                                <input class="form-control" type="text" style="min-height:32px; font-family: Arial" avs-number ng-data-source="data.aqlMajor" ng-decimal="2" />
+                                            </label>
+                                        </section>
+                                        <section class="col col-sm-1">
+                                            <label class="label">Minor</label>
+                                            <label class="input">
+                                                <input class="form-control" type="text" style="min-height:32px; font-family: Arial" avs-number ng-data-source="data.aqlMinor" ng-decimal="2" />
+                                            </label>
+                                        </section>
+                                    </div>
+                                    <div class="row">
+                                        <section class="col col-sm-12">
+                                            <label class="label">Special tests: destructive = S.2</label>
+                                        </section>
+                                    </div>
+                                    <div class="row">
+                                        <section class="col col-sm-12">
+                                            <div class="widget-body">
+                                                <a href="javascript:void(0)" class="btn btn-default btn-primary btn-xs" ng-click="event.addDefect($event)">
+                                                    <i class="fa fa-plus"></i> Add Defect
+                                                </a>
+                                                <div class="tilsoft-table-wrapper" style="margin-top: 5px;">
+                                                    <div class="tilsoft-table">
+                                                        <div class="tilsoft-table-body" style="width:100%; max-width:1000px; overflow-y:auto; height:auto; min-height:100px; margin-top:0px">
+                                                            <table>
+                                                                <tbody>
+                                                                    <tr style="width: 1000px">
+                                                                        <th style="width:70px"></th>
+                                                                        <th style="width:700px">Defect description</th>
+                                                                        <th style="width:100px">Critical</th>
+                                                                        <th style="width:100px">Major</th>
+                                                                        <th style="width:100px">Minor</th>
+                                                                        <th>IMPROVEMENT(S)</th>
+                                                                    </tr>
+                                                                    <tr ng-repeat="item in data.qcReportDefectDTOs">
+                                                                        <td style="text-align: center; vertical-align: middle; width:70px">
+                                                                            <a href="javascript:void(0)" class="btn btn-default btn-danger btn-xs" ng-click="event.removeDefect($event, $index)">
+                                                                                <i class="fa fa-times"></i> Remove
+                                                                            </a>
+                                                                        </td>
+                                                                        <td style="width:700px"><input class="form-control" type="text" style="min-height: 32px; font-family: Arial" ng-model="item.description"></td>
+                                                                        <td style="width:100px"><input class="form-control" type="text" style="min-height: 32px; text-align:center; font-family: Arial" ng-model="item.critical" ng-change="method.calculateAmount()"></td>
+                                                                        <td style="width:100px"><input class="form-control" type="text" style="min-height: 32px; text-align:center; font-family: Arial" ng-model="item.major" ng-decimal="2" ng-change="method.calculateAmount()"></td>
+                                                                        <td style="width:100px"><input class="form-control" type="text" style="min-height: 32px; text-align:center; font-family: Arial" ng-model="item.minor" ng-decimal="2" ng-change="method.calculateAmount()"></td>
+                                                                        <td><input class="form-control" type="text" style="min-height: 32px; font-family: Arial" ng-model="item.remark"></td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <th colspan="2" style="width:700px; text-align:right">Total defectives</th>
+                                                                        <th style="width:100px; text-align:center" class="sorting">{{totalCritical | number}}</th>
+                                                                        <th style="width:100px" class="sorting">{{totalMajor | number}}</th>
+                                                                        <th style="width:100px" class="sorting">{{totalMinor | number}}</th>
+                                                                        <th></th>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <th colspan="2" style="width:700px; text-align:right">Maximum allowed</th>
+                                                                        <th style="width:100px; text-align:center"><input class="form-control" type="text" style="text-align:center; font-family: Arial" ng-model="data.maximumCritical"></th>
+                                                                        <th style="width:100px"><input class="form-control" type="text" style="text-align:center; font-family: Arial" ng-model="data.maximumMajor"></th>
+                                                                        <th style="width:100px"><input class="form-control" type="text" style="text-align:center; font-family: Arial" ng-model="data.maximumMinor"></th>
+                                                                        <th></th>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </section>
+                                    </div>
+                                </div>
+
+                                @*Product - Specific Data Measurement *@
+                                <div class="row">
+                                    <section class="col col-sm-4">
+                                        <label class="label"><strong>Product - Specific Data Measurement / Field Test on Reduced Sample size:</strong></label>
+                                    </section>
+                                </div>
+                                <div class="row">
+                                    <section class="col col-sm-12">
+                                        <div class="widget-body">
+                                            <div class="tilsoft-table-wrapper">
+                                                <div class="tilsoft-table">
+                                                    <div class="tilsoft-table-body" style="width:100%; max-width:1000px; overflow-y:auto; height:auto; min-height:100px; margin-top:0px">
+                                                        <table>
+                                                            <tbody>
+                                                                <tr style="width: 1000px">
+                                                                    <th style="width:400px">Description</th>
+                                                                    <th style="width:100px">Unit</th>
+                                                                    <th style="width:250px">Specification</th>
+                                                                    <th style="width:250px">Result</th>
+                                                                    <th>Tolerance</th>
+                                                                </tr>
+                                                                <tr ng-repeat="item in data.qcReportDetailDTOs">
+                                                                    <td style="width:400px">{{item.name}}</td>
+                                                                    <td style="width:100px"><input class="form-control" type="text" style="min-height: 32px; text-align:center; font-family: Arial" ng-model="item.unit"></td>
+                                                                    <td style="width:250px"><input class="form-control" type="text" style="min-height: 32px; text-align:center; font-family: Arial" ng-model="item.specification"></td>
+                                                                    <td style="width:250px"><input class="form-control" type="text" style="min-height: 32px; text-align:center; font-family: Arial" ng-model="item.actual"></td>
+                                                                    <td><input class="form-control" type="text" style="min-height: 32px; text-align:center; font-family: Arial" ng-model="item.tolerance"></td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+                                </div>
+
+                                @*Inspection Result *@
+                                <div class="row">
+                                    <section class="col col-sm-12">
+                                        <div class="smart-form">
+                                            <table>
+                                                <tbody>
+                                                    <tr>
+                                                        <th style="width:150px"><strong>Inspection result: </strong></th>
+                                                        <th style="width:100px" ng-repeat="item in inspectionResults"><strong>{{item.inspectionResultNM}}: <input type="checkbox" ng-model="item.isInspectionResult" ng-click="event.clickSelectInpectionResult(item)" /></strong></th>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </section>
+                                </div>
+
+                                @*QCReportImage*@
+                                <div class="no-padding" style="width: 1260px;border:solid 1px">
+                                    <a href="javascript:void(0)" style="margin:7px" class="btn btn-default custom-button" ng-click="event.addQCReportImage()">
+                                        <i class="fa fa-upload"></i> Add Image(s)
+                                    </a>
+                                    <div class="row" style="padding-left:22px">
+                                        <div class="float-img-list" ng-repeat="item in data.qcReportImageDTOs" style="width:410px;border:solid 1px; margin-right: 7px;margin-bottom: 7px">
+                                            <label class="input">
+                                                <input type="text" class="form-control" ng-model="item.imageTitle" />
+                                            </label>
+                                            <label class="img-item">
+                                                <div style="width:300px; height:200px">
+                                                    <a href="{{item.fileLocation}}" data-featherlight="image" style="width:300px ; height:200px">
+                                                        <img src="{{item.thumbnailLocation}}">
+                                                    </a><br />
+                                                    <a class="btn btn-success btn-xs" href="javascript:void(0)" ng-click="event.changeQCReportImage(item.qcReportImageID)">Edit</a>
+                                                    <a class="btn btn-danger btn-xs" href="javascript:void(0)" ng-click="event.removeQCReportImage(item.qcReportImageID)">Delete</a>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                @*Inspection Environment*@
+                                <div class="no-padding" style="border:solid 1px; margin-top:10px">
+                                    <div class="smart-form" style="margin:5px">
+                                        <div class="row">
+                                            <div class="col col-2" ng-repeat="item in testEnvironmentCategorys">
+                                                <div>
+                                                    {{item.description}}
+                                                </div>
+                                                <div ng-repeat="subItem in data.qcReportTestEnvironmentDTOs | filter: {qcReportTestEnvironmentCategoryID : item.qcReportTestEnvironmentCategoryID} ">
+                                                    <label class="checkbox">
+                                                        <input type="checkbox" ng-model="subItem.isSelected">
+                                                        <i></i>{{subItem.qcReportTestEnvironmentItemNM}}
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <section class="col col-sm-2">
+                                                <label class="label" style="margin-top:10px">
+                                                    <strong>Time Inspection:</strong>
+                                                </label>
+                                            </section>
+                                            <section class="col col-sm-2">
+                                                <label class="label" style="margin-top:10px">
+                                                    In (HH:mm)
+                                                </label>
+                                                <label class="input">
+                                                    <input class="form-control" type="text" ng-model="data.beginInspection" maxlength="5" style="width:80px" />
+                                                </label>
+                                            </section>
+                                            <section class="col col-sm-2">
+                                                <label class="label" style="margin-top:10px">
+                                                    Out (HH:mm)
+                                                </label>
+                                                <label class="input">
+                                                    <input class="form-control" type="text" ng-model="data.endInspection" maxlength="5" style="width:80px" />
+                                                </label>
+                                            </section>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="tabFactoryOrder" class="tab-pane">
+                            <fieldset>
+                                <div class="row">
+                                    <div class="tilsoft-table-wrapper">
+                                        <div class="tilsoft-table">
+                                            <div class="tilsoft-table-header" style="width: 660px;">
+                                                <div style="width: 65px;">Select</div>
+                                                <div style="width: 120px; text-align: center">PI No.</div>
+                                                <div style="width: 50px">QTY</div>
+                                                <div style="width: 110px;">LDS</div>
+                                                <div style="width: 110px;">Production Status</div>
+                                                <div>Additional Remark</div>
+                                            </div>
+                                            <div class="tilsoft-table-body" style="width: 660px;">
+                                                <table>
+                                                    <tr ng-repeat="item in data.qcReportFactoryOrderDetailDTOs">
+                                                        <td style="width: 65px; text-align: center;"><input type="checkbox" ng-model="item.isSelected" /></td>
+                                                        <td style="width: 120px">{{item.proformaInvoiceNo}}</td>
+                                                        <td style="width: 50px; text-align:right">{{item.orderQnt | number : 0}}</td>
+                                                        <td style="width: 110px; text-align:center">{{item.lds}}</td>
+                                                        <td style="width: 110px;">{{item.productionStatus}}</td>
+                                                        <td>{{item.additionalRemark}}</td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
+                        <div class="row">
+                            <section class="col col-sm-4">
+                                <div class="note">
+                                    <strong>Updated By</strong>
+                                    <a ng-show="(data.updatedBy != null && data.updaterName != null)" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{data.updatedBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                        <i class="fa fa-user"></i> {{data.updaterName}}
+                                    </a>
+                                    <span ng-show="(data.updatedBy != null && data.updaterName == null)"> <i class="fa fa-user"></i> {{data.updaterName}}</span>
+                                    on {{data.updatedDate}}
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    </article>
+</form>
+@section FormAction{
+<ul id="sparks">
+    <li class="sparks-info">
+        <a href="@Url.Action("Index", "QCReportMng")" class="btn btn-default btn-sm"><i class="fa fa-arrow-left"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0)" class="btn btn-default btn-sm" title="Save" ng-click="event.update()">
+            <i class="fa fa-floppy-o"></i>
+        </a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0)" class="btn btn-default btn-sm" title="Delete" ng-click="event.deleted(data.qcReportID)"><i class="fa fa-times"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="#" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Print, HttpContext.Current))" title="Print excel template" ng-click="event.printQCReport(data.qcReportID)"><i class="fa fa-file-excel-o"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="#" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Print, HttpContext.Current))" title="Print pdf template" ng-click="event.printQCReportpdf(data.qcReportID)"><i class="fa fa-file-pdf-o"></i></a>
+    </li>
+    @if (!string.IsNullOrEmpty(userManualUrl))
+    {
+        <li class="sparks-info">
+            <a target="_blank" href="@userManualUrl" class="btn btn-default" title="Help"><i class="fa fa-info"></i></a>
+        </li>
+    }
+</ul>
+}
+
+@section pagejs{
+    <script type="text/javascript">
+        var context = {
+            saleOrderDetailID: '@ViewBag.SaleOrderDetailID',
+            factoryID: '@ViewBag.FactoryID',
+            itemFactoryOrderLink: '@ViewBag.ItemFactoryOrderLink',
+            clientID: '@ViewBag.ClientID',
+            articleCode: '@ViewBag.ArticleCode',
+            id: '@ViewBag.ID',
+            backUrl: '@Url.Action("Index", "QCReportMng")',
+            serviceUrl: '@(serviceRoot)/api/qcreportmng/',
+            refreshUrl: '@Url.Action("Edit", "QCReportMng", new { id = UrlParameter.Optional })/',
+            token: '@token',
+            supportServiceUrl: '@(supportServiceRoot)/api/support/',
+            msgValid: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED',
+            backendReportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]'
+        }
+    </script>
+    <script type="text/javascript" src="~/Views/QCReportMng/edit.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Views/QCReportMng/service.js?v=@guid"></script>
+}

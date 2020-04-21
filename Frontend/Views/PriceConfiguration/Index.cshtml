@@ -1,0 +1,119 @@
+﻿@{
+    ViewBag.Title = "Search Price Configuration";
+    ViewBag.Module = "Price Configuration";
+
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    var pageSize = System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"];
+    var cookieId = HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString();
+}
+
+<div class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-0" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-search"></i> </span>
+                <h2>Search Filters</h2>
+            </header>
+            <div>
+                <div class="widget-body">
+                    <div class="row">
+                        <section class="col col-sm-2" style="width: auto!important">
+                            <label>
+                                <i class="fa fa-calendar"></i>
+                                <strong> Season</strong>
+                            </label>
+                            <select class="form-control search-filter" style="width: auto" ng-model="filters.Season" ng-options="season.seasonValue as season.seasonText for season in seasons">
+                                <option value=""></option>
+                            </select>
+                        </section>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-1" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-database"></i> </span>
+                <h2>Search Results</h2>
+            </header>
+            <div>
+                <div class="widget-body">
+                    <div avs-scroll grid-handler="gridHandler" id="priceConfigurationGrid" class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header" style="width: 700px!important">
+                                <div style="width: 100px!important"></div>
+                                <div class="sorting_desc" style="width: 100px!important">
+                                    <i class="fa fa-calendar"></i>
+                                    <strong> Season</strong>
+                                </div>
+                                <div style="width: auto!important">
+                                    <i class="fa fa-list"></i>
+                                    <strong>More Information</strong>
+                                </div>
+                            </div>
+                            <div class="tilsoft-table-body" style="width: 700px!important">
+                                <table>
+                                    <tr ng-repeat="item in data">
+                                        <td style="width: 99px!important; text-align: center">
+                                            @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current) == "disabled")
+                                            {
+                                                <a class="btn btn-primary btn-xs font-11" href="#" title="View (Read Only)"><i class="fa fa-folder-open"></i> View</a>
+                                            }
+                                            else
+                                            {
+                                                <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "PriceConfiguration")/{{item.id}}?s={{item.season}}" title="Edit"><i class="fa fa-pencil"></i> Edit</a>
+                                            }
+
+                                            @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current) != "disabled")
+                                            {
+                                                <a class="btn btn-danger btn-xs font-11" href="#" title="Delete" ng-click="event.deleted($event, item, $index)"><i class="fa fa-times"></i> Del</a>
+                                            }
+                                        </td>
+                                        <td style="width: 100px!important; text-align: center">
+                                            {{item.season}}
+                                        </td>
+                                        <td style="width: auto!important">
+
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction{
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Search" ng-click="event.reloaded()"><i class="fa fa-search"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Refresh" ng-click="event.reloaded()"><i class="fa fa-refresh"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="@Url.Action("Edit", "PriceConfiguration")/0?s=" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="New"><i class="fa fa-file-o"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs{
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(serviceRoot)/api/priceconfiguration/',
+            token: '@token',
+            pageSize: '@pageSize',
+            cookieId: '@cookieId',
+            editURL: '@Url.Action("Edit", "PriceConfiguration")/'
+        };
+    </script>
+    <script src="~/Angular/app/priceConfiguration/index.js?v=@guid" type="text/javascript"></script>
+    <script src="~/Angular/app/jsonService2.js?v=@guid" type="text/javascript"></script>
+    <script src="~/Angular/app/priceConfiguration/service.js?v=@guid" type="text/javascript"></script>
+}

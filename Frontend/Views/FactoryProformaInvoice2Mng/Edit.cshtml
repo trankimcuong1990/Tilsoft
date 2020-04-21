@@ -1,0 +1,362 @@
+﻿@{
+    if (ViewBag.ID == 0)
+    {
+        ViewBag.Title = "Create new factory proforma invoice";
+    }
+    else
+    {
+        ViewBag.Title = "Edit factory proforma invoice";
+    }
+
+    int clientId = 0;
+    int factoryId = 0;
+    string season = string.Empty;
+    if (Request.Params["c"] != null)
+    {
+        clientId = Convert.ToInt32(Request.Params["c"]);
+    }
+    if (Request.Params["f"] != null)
+    {
+        factoryId = Convert.ToInt32(Request.Params["f"]);
+    }
+    if (Request.Params["s"] != null)
+    {
+        season = Request.Params["s"].ToString();
+    }
+    Frontend.APIDTO.APIUserInformation userInfo = (Frontend.APIDTO.APIUserInformation)Session[Frontend.Customize.Common.ProjectDefinition.USER_INFO_SESSION];
+}
+
+<style>
+    .custom-pagination {
+        display: none;
+    }
+</style>
+
+<form class="row" name="editForm" id="main-form">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-0" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <h2>General Information</h2>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div class="smart-form">
+                        <fieldset>
+                            <div class="row">
+                                <section class="col col-3">
+                                    <label class="label">Proforma Invoice No</label>
+                                    <label class="input">
+                                        <span class="form-control">{{data.proformaInvoiceNo}}</span>
+                                    </label>
+                                </section>
+                                <section class="col col-3">
+                                    <label class="label">Date</label>
+                                    <label class="input">
+                                        <i class="icon-append fa fa-calendar"></i>
+                                        <input type="text" data-dateformat="dd/mm/yy" class="datepicker" ng-model="data.invoiceDate" />
+                                    </label>
+                                </section>                                
+                                <section class="col col-2">
+                                    <label class="label">Season</label>
+                                    <label class="input">
+                                        <span class="form-control">{{data.season}}</span>
+                                    </label>
+                                </section>
+                                <section class="col col-2">
+                                    <label class="label">Factory</label>
+                                    <label class="input">
+                                        <span class="form-control">{{data.factoryUD}}</span>
+                                    </label>
+                                </section>
+                                <section class="col col-2">
+                                    <label class="label">Client</label>
+                                    <label class="input">
+                                        <span class="form-control">{{data.clientUD}}</span>
+                                    </label>
+                                </section>
+                            </div>
+                            <div class="row">
+                                <section class="col col-6">
+                                    <label class="label">Delivery Term</label>
+                                    <label class="select">
+                                        <select ng-model="data.deliveryTermID" ng-options="deliveryTerm.deliveryTermID as deliveryTerm.deliveryTermNM for deliveryTerm in deliveryTerms">
+                                            <option value=""></option>
+                                        </select>
+                                        <i></i>
+                                    </label>
+                                </section>
+                                <section class="col col-6">
+                                    <label class="label">Payment Term</label>
+                                    <label class="select">
+                                        <select ng-model="data.paymentTermID" ng-options="paymentTerm.paymentTermID as paymentTerm.paymentTermNM for paymentTerm in paymentTerms">
+                                            <option value=""></option>
+                                        </select>
+                                        <i></i>
+                                    </label>
+                                </section>
+                            </div>
+                            <section>
+                                <label class="label">
+                                    Attached File
+                                </label>
+                                <label class="input">
+                                    <span class="form-control">
+                                        {{data.friendlyName}}
+                                        <div style="position: absolute; right: 5px; top: 5px;">
+                                            <a ng-disabled="!data.fileLocation" href="javascript:void(0);" class="btn btn-primary btn-xs" style="font-size: 11px;" ng-click="event.downloadFile()">Download</a>
+                                            <a href="javascript:void(0);" class="btn btn-primary btn-xs" style="font-size: 11px;" ng-click="event.changeFile()">Change</a>
+                                            <a ng-disabled="!data.fileLocation" href="javascript:void(0);" class="btn btn-danger btn-xs" style="font-size: 11px;" ng-click="event.removeFile()">Remove</a>
+                                        </div>
+                                    </span>
+                                </label>
+                            </section>
+                            <div class="row" ng-if="data.factoryProformaInvoiceID">
+                                <section class="col col-6">      
+                                    <h3 style="position: relative;">
+                                        FURNINDO FEEDBACK: {{data.isFurnindoConfirmed ? 'CONFIRMED' : 'PENDING'}}
+                                        <div style="position: absolute; text-align: right; top: -3px; right: 0px;" ng-if="officeId!=4">
+                                            <a ng-disabled="data.isFurnindoConfirmed" href="javascript:void(0)" class="btn btn-primary btn-xs" ng-click="event.furnindoConfirm()">Confirm</a>
+                                            <a ng-disabled="!data.isFurnindoConfirmed" href="javascript:void(0)" class="btn btn-primary btn-xs" ng-click="event.furnindoUnConfirm()">Un-Confirm</a>
+                                        </div>
+                                    </h3>
+                                    <section>
+                                        <label class="label"></label>
+                                        <label class="textarea" ng-if="officeId!=4 && !data.isFurnindoConfirmed">
+                                            <textarea rows="4" ng-model="data.furnindoConfirmedRemark" placeholder="Confirmation remark ... "></textarea>
+                                        </label>
+                                        <p ng-if="officeId==4 || data.isFurnindoConfirmed" ng-bind-html="method.formatRemark(data.furnindoConfirmedRemark)"></p>
+                                    </section>
+                                </section>
+                                <section class="col col-6">
+                                    <h3 style="position: relative;">
+                                        FACTORY FEEDBACK: {{data.isFactoryConfirmed ? 'CONFIRMED' : 'PENDING'}}
+                                        <div style="position: absolute; text-align: right; top: -3px; right: 0px;" ng-if="officeId==4">
+                                            <a ng-disabled="data.isFactoryConfirmed" href="javascript:void(0)" class="btn btn-primary btn-xs" ng-click="event.factoryConfirm()">Confirm</a>
+                                            <a ng-disabled="!data.isFactoryConfirmed" href="javascript:void(0)" class="btn btn-primary btn-xs" ng-click="event.factoryUnConfirm()">Un-Confirm</a>
+                                        </div>
+                                    </h3>
+                                    <section>
+                                        <label class="label"></label>
+                                        <label class="textarea" ng-if="officeId==4 && !data.isFactoryConfirmed">
+                                            <textarea rows="4" ng-model="data.factoryConfirmedRemark" placeholder="Confirmation remark ... "></textarea>
+                                        </label>
+                                        <p ng-if="officeId!=4 || data.isFactoryConfirmed" ng-bind-html="method.formatRemark(data.factoryConfirmedRemark)"></p>
+                                    </section>
+                                </section>
+                            </div>  
+                            <section>
+                                <div class="note" ng-if="data.updatorName"><strong>Updated By</strong>: {{data.updatorName}} on {{data.updatedDate}}</div>
+                                <div class="note" ng-if="data.furnindoConfirmerName"><strong>Furnindo confirmed By</strong>: {{data.furnindoConfirmerName}} on {{data.furnindoConfirmedDate}}</div>
+                                <div class="note" ng-if="data.factoryConfirmerName"><strong>Factory confirmed By</strong>: {{data.factoryConfirmerName}} on {{data.factoryConfirmedDate}}</div>
+                            </section>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="jarviswidget" id="wid-id-2" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <h2>Items</h2>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div class="widget-body-toolbar" ng-if="!data.isFurnindoConfirmed && !data.isFactoryConfirmed">
+                        <a href="javascript:void(0)" class="btn btn-primary btn-xs" ng-click="event.addFormOpen()"><i class="fa fa-plus"></i> Add item</a>
+                    </div>
+                    <div id="grdItem" class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header" style="width: 1400px;">
+                                <div style="width: 80px;" ng-if="!data.isFurnindoConfirmed && !data.isFactoryConfirmed"></div>
+                                <div style="width: 80px;">Type</div>
+                                <div style="width: 300px">Description</div>
+                                <div style="width: 120px">Factory Order</div>
+                                <div style="width: 80px">Qnt</div>
+                                <div style="width: 80px">Quote Price</div>
+                                <div style="width: 80px">Price 1</div>
+                                <div style="width: 80px">Price 2</div>
+                                <div style="width: 80px">Price 3</div>
+                                <div style="width: 80px">Price 4</div>
+                                <div style="width: 120px">Amount</div>
+                                <div>Remark</div>
+                            </div>
+                            <div class="tilsoft-table-body" style="width: 1400px;">
+                                <table>
+                                    <tr style="font-weight: bold;">
+                                        <td style="width: 80px; text-align: center;" ng-if="!data.isFurnindoConfirmed && !data.isFactoryConfirmed">&nbsp;</td>
+                                        <td style="width: 80px; text-align: center;">&nbsp;</td>
+                                        <td style="width: 300px;">&nbsp;</td>
+                                        <td style="width: 120px; text-align: right; font-weight: bold;">TOTAL</td>
+                                        <td style="width: 80px; text-align: right; font-weight: bold;">{{method.toSubTotalQnt() | currency:'':0}}</td>
+                                        <td style="width: 80px; text-align: right;">&nbsp;</td>
+                                        <td style="width: 80px; text-align: right;">&nbsp;</td>
+                                        <td style="width: 80px; text-align: right;">&nbsp;</td>
+                                        <td style="width: 80px; text-align: right;">&nbsp;</td>
+                                        <td style="width: 80px; text-align: right;">&nbsp;</td>
+                                        <td style="width: 120px; text-align: right; font-weight: bold;">{{method.toSubTotalAmount() | currency:'$':2}}</td>
+                                        <td>&nbsp;</td>
+                                    </tr>
+                                    <tr ng-repeat="item in data.factoryProformaInvoiceDetails">
+                                        <td style="width: 80px; text-align: center;" ng-if="!data.isFurnindoConfirmed && !data.isFactoryConfirmed">
+                                            <a class="btn btn-danger btn-xs font-11" href="javascript:void(0)" ng-click="event.removeItem(item)" title="Remove"><i class="fa fa-times"></i> Remove</a>
+                                        </td>
+                                        <td style="width: 80px; text-align: center;">{{item.itemType}}</td>
+                                        <td style="width: 300px;">
+                                            <strong>{{item.articleCode}}</strong>
+                                            <br/>
+                                            {{item.description}}
+                                        </td>
+                                        <td style="width: 120px; text-align: center;">{{item.factoryOrderUD}}</td>
+                                        <td style="width: 80px; text-align: right;">{{item.orderQnt | currency:'':0}}</td>
+                                        <td style="width: 80px; text-align: right;">{{item.purchasingPrice | currency:'$':2}}</td>
+                                        <td style="width: 80px; text-align: right;">
+                                            <input ng-if="!data.isFurnindoConfirmed && !data.isFactoryConfirmed" type="text" class="form-control" ng-model="item.unitPrice1" furnindo-currency-nullable style="text-align:right; padding-right: 5px; box-sizing: border-box;" />
+                                            <span ng-if="data.isFurnindoConfirmed || data.isFactoryConfirmed">{{item.unitPrice1 | currency:'$':2}}</span>
+                                        </td>
+                                        <td style="width: 80px; text-align: right;">
+                                            <input ng-if="!data.isFurnindoConfirmed && !data.isFactoryConfirmed" type="text" class="form-control" ng-model="item.unitPrice2" furnindo-currency-nullable style="text-align:right; padding-right: 5px; box-sizing: border-box;" />
+                                            <span ng-if="data.isFurnindoConfirmed || data.isFactoryConfirmed">{{item.unitPrice2 | currency:'$':2}}</span>
+                                        </td>
+                                        <td style="width: 80px; text-align: right;">
+                                            <input ng-if="!data.isFurnindoConfirmed && !data.isFactoryConfirmed" type="text" class="form-control" ng-model="item.unitPrice3" furnindo-currency-nullable style="text-align:right; padding-right: 5px; box-sizing: border-box;" />
+                                            <span ng-if="data.isFurnindoConfirmed || data.isFactoryConfirmed">{{item.unitPrice3 | currency:'$':2}}</span>
+                                        </td>
+                                        <td style="width: 80px; text-align: right;">
+                                            <input ng-if="!data.isFurnindoConfirmed && !data.isFactoryConfirmed" type="text" class="form-control" ng-model="item.unitPrice4" furnindo-currency-nullable style="text-align:right; padding-right: 5px; box-sizing: border-box;" />
+                                            <span ng-if="data.isFurnindoConfirmed || data.isFactoryConfirmed">{{item.unitPrice4 | currency:'$':2}}</span>
+                                        </td>
+                                        <td style="width: 120px; text-align: right;">{{$parent.method.toAmount(item) | currency:'$':2}}</td>
+                                        <td>
+                                            <textarea ng-if="!data.isFurnindoConfirmed && !data.isFactoryConfirmed" rows="4" style="width: 100%;" ng-model="item.remark"></textarea>
+                                            <p ng-if="data.isFurnindoConfirmed || data.isFactoryConfirmed">{{item.remark}}</p>
+                                        </td>
+                                    </tr>                                   
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+<div id="addForm" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title" id="myModalLabel">Add item</h4>
+            </div>
+            <div class="modal-body no-padding">
+                <div id="grdSearchResult" class="tilsoft-table-wrapper">
+                    <div class="tilsoft-table">
+                        <div class="tilsoft-table-header" style="width: 650px;">
+                            <div style="width: 80px; text-align:center;"><label style="padding: 5px 10px; cursor: pointer;"><input ng-model="selectAll" type="checkbox" style="cursor: pointer;" /></label></div>
+                            <div style="width: 80px;">Type</div>
+                            <div style="width: 300px">Description</div>
+                            <div style="width: 120px">Factory Order</div>
+                            <div style="width: 80px">Qnt</div>
+                            <div>Quote Price</div>
+                        </div>
+                        <div class="tilsoft-table-body" style="width: 650px;">
+                            <table>
+                                <tr>
+                                    <td style="width: 80px; text-align: center;">
+                                        <a class="btn btn-default" href="javascript:void(0)" title="Filter" ng-click="event.addFormFilter()"><i class="fa fa-filter"></i> Filter</a>
+                                    </td>
+                                    <td style="width: 80px; text-align: center;">
+                                        <select ng-model="filter.itemType">
+                                            <option value=""></option>
+                                            <option value="PRODUCT">PRODUCT</option>
+                                            <option value="SPAREPART">SPAREPART</option>
+                                        </select>
+                                    </td>
+                                    <td style="width: 300px;"><input ng-model="filter.description" type="text" style="width: 100%;" /></td>
+                                    <td style="width: 120px; text-align: center;"><input ng-model="filter.factoryOrderUd" type="text" style="width: 100%;" /></td>
+                                    <td style="width: 80px; text-align: right;"></td>
+                                    <td style="text-align: right;"></td>
+                                </tr>
+                                <tr ng-repeat="item in items">
+                                    <td style="width: 80px; text-align: center;"><label style="padding: 5px 10px; cursor: pointer;"><input style="cursor: pointer;" ng-model="item.isSelected" type="checkbox" /></label></td>
+                                    <td style="width: 80px; text-align: center;">{{item.itemType}}</td>
+                                    <td style="width: 300px;">
+                                        <strong>{{item.articleCode}}</strong>
+                                        <br />
+                                        {{item.description}}
+                                    </td>
+                                    <td style="width: 120px; text-align: center;">
+                                        {{item.factoryOrderUD}}
+                                        <br/>
+                                        ({{item.lds}})
+                                    </td>
+                                    <td style="width: 80px; text-align: right;">{{item.orderQnt | currency:'':0}}</td>
+                                    <td style="text-align: right;">{{item.purchasingPrice | currency:'$':2}}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" ng-click="event.addFormAdd()">
+                    Add
+                </button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "FactoryProformaInvoice2Mng")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="event.update()"><i class="fa fa-save"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current))" title="Delete" ng-click="event.delete()" style="color: #ff0000;" ng-disabled="data.isFactoryConfirmed || data.isFurnindoConfirmed"><i class="fa fa-times"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Print, HttpContext.Current))" title="Print" ng-click="event.print()"><i class="fa fa-print"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default disabled" title="Approve"><i class="fa fa-thumbs-o-up"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default disabled" title="Reset Approval status"><i class="fa fa-thumbs-o-down"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script src="~/Angular/app/jsonService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script type="text/javascript">
+        jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/factoryproformainvoice2/';
+        jsonService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+        jsonService.supportServiceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/support/';
+        var context = {
+            id: @ViewBag.ID,
+            clientId : @clientId,
+            factoryId : @factoryId,
+            season : '@season',
+            errMsg: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED',
+            backUrl: '@Url.Action("Index", "FactoryProformaInvoice2Mng")',
+            refreshUrl: '@Url.Action("Edit", "FactoryProformaInvoice2Mng", new { id = UrlParameter.Optional })/',
+            editTitle: '@ViewBag.Title',
+            userId: @userInfo.Data.UserId,
+            userName: '@userInfo.Data.FullName',
+            officeId: @userInfo.Data.OfficeID,
+            backendReportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]'
+        }
+    </script>
+    <script src="~/Angular/app/factoryProformaInvoice2Mng/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/factoryProformaInvoice2Mng/edit.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}
+

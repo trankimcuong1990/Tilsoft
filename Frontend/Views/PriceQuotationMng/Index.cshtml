@@ -1,0 +1,547 @@
+﻿@{
+
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var pageSize = System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"];
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    var cookieId = HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString();
+
+    var canUpdate = (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current) != "disabled");
+    var canApprove = (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Approve, HttpContext.Current) != "disabled");
+
+    ViewBag.Title = "Search Price Quotation";
+    ViewBag.Module = "Price Quotation";
+}
+
+<style>
+    .ui-autocomplete {
+        max-height: 150px;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .ui-menu-item > a.ui-corner-all {
+        display: block;
+        padding: 3px 15px;
+        clear: both;
+        /*font-weight: normal;*/
+        line-height: 18px;
+        /*color: #555555;*/
+        white-space: nowrap;
+    }
+</style>
+
+<div class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-table"></i>
+                </span>
+                <h2>Search Results</h2>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div id="grdSearchResult" class="form-inline dt-bootstrap no-footer tilsoft-table-wrapper" avs-scroll grid-handler="gridHandler">
+                        <div class="dt-toolbar" style="padding: 10px; border: solid 1px #ddd; border-bottom: none; box-sizing: border-box; z-index: 101;">
+                            <div class="col-xs-12 col-sm-6">
+                                <div class="dataTables_filter">
+                                    <label>
+                                        <span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>
+                                        <select id="search-season" style="-moz-appearance: none; -webkit-appearance: none;" class="form-control search-filter" ng-model="filters.Season" ng-options="season.seasonValue as season.seasonText for season in supportSeasons"></select>
+                                    </label>
+                                </div>                                
+                            </div>
+                            <div class="col-xs-12 col-sm-6" style="text-align: right;">
+                                <div class="btn-group col-setting">
+                                    <button onclick="$(this).parent().toggleClass('open')" class="btn dropdown-toggle btn-default">
+                                        <i class="fa fa-gear"></i> Toggle Show/Hide Column
+                                    </button>
+                                    <ul class="dropdown-menu pull-right"></ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tilsoft-table-wrapper">
+                            <div class="tilsoft-table">
+                                <div style="width: 2980px" class="tilsoft-table-header">
+                                    <div style="width: 120px; text-align: center; vertical-align: middle">FOUND(S)<br><b style="color:blue">{{currentRows}}</b>/<b style="color:firebrick">{{totalRows}}</b></div>
+                                    <div style="width: 50px; text-align: center; vertical-align: middle"></div>
+                                    <div style="width: 70px" class="sorting">Order<br>No.</div>
+                                    <div style="width: 75px" class="sorting">Client</div>
+                                    <div style="width: 85px" class="sorting">Factory</div>
+                                    <div style="width: 100px" class="sorting">Art. Code</div>
+                                    <div style="width: 205px" class="sorting">Description</div>
+                                    <div style="width: 105px">New Offer<br />Price</div>
+                                    <div style="width: 60px">Qnt/<br>40HC</div>
+                                    <div style="width: 60px">Order Qnt</div>
+                                    <div style="width: 73px">Order<br>Qnt/40HC</div>
+                                    <div style="width: 60px" class="sorting">{{titleDiffCode}}<br>{{titleDiffCode2}}</div>
+                                    <div style="width: 76px">Price<br>{{titlePriceSeason1}}</div>
+                                    <div style="width: 76px">Price<br>{{titlePriceSeason2}}</div>
+                                    <div style="width: 76px">Price<br>{{titlePriceSeason3}}</div>
+                                    <div style="width: 150px">Remark<br>Old Price</div>
+                                    <div style="width: 78px">Factory<br>Price 1</div>
+                                    <div style="width: 78px">Target<br>Price1</div>
+                                    <div style="width: 78px">Factory<br>Price 2</div>
+                                    <div style="width: 78px">Target<br>Price 2</div>
+                                    <div style="width: 78px">Factory<br>Price 3</div>
+                                    <div style="width: 78px">Target<br>Price 3</div>
+                                    <div style="width: 95px">Purchasing<br>Price</div>
+                                    <div style="width: 78px" ng-if="isCompany">Sale<br>Price</div>
+                                    <div style="width: 78px">Target<br>Price</div>
+                                    <div style="width: 85px" class="sorting">Price<br>Status</div>
+                                    <div style="width: 95px" class="sorting">Status<br>Date</div>
+                                    <div style="width: 150px">Remark</div>
+                                    <div style="width: 72px" class="sorting">Status</div>
+                                    <div style="width: 122px" class="sorting">Price<br>Updated Date</div>
+                                    <div style="width: 130px" class="sorting">Waiting<br>Comment</div>
+                                    <div class="sorting" style="width: 80px; text-align: center;">LDS</div>
+                                    <div>&nbsp;</div>
+                                </div>
+                                <div style="width: 2980px; top: 50px" class="tilsoft-table-filter">
+                                    <div style="width: 120px; text-align: center; vertical-align: middle">
+                                        <a class="btn btn-{{isDefaultFilter ? 'default' : 'primary'}} btn-xs font-11" href="javascript:void(0)" title="Filter" ng-click="event.reload()"><i class="fa fa-filter"></i></a>
+                                        <a class="btn btn-default btn-xs font-11" href="javascript:void(0)" title="Clear" ng-click="event.clear()"><i class="fa fa-ban"></i></a>
+                                    </div>
+                                    <div style="width: 50px; text-align: center; vertical-align: middle">
+                                        <input type="checkbox" ng-model="isSelectedAll" ng-click="event.all()">
+                                    </div>
+                                    <div style="width: 70px">
+                                        <input style="width: 100%; height: 30px!important" type="text" class="form-control search-filter" ng-model="filters.OrderNumber">
+                                    </div>
+                                    <div style="width: 75px">
+                                        <input id="searchClient" style="width: 100%; height: 30px!important" type="text" class="form-control search-filter" ng-model="filters.ClientUD">
+                                    </div>
+                                    <div style="width: 85px">
+                                        <input id="searchFactory" style="width: 100%; height: 30px!important" type="text" class="form-control search-filter" ng-model="filters.FactoryUD">
+                                    </div>
+                                    <div style="width: 100px">
+                                        <input style="width: 100%; height: 30px!important" class="form-control search-filter" ng-model="filters.ArticleCode">
+                                    </div>
+                                    <div style="width: 205px">
+                                        <input style="width: 100%; height: 30px!important" class="form-control search-filter" ng-model="filters.Description">
+                                    </div>
+                                    <div style="width: 105px"></div>
+                                    <div style="width: 60px"></div>
+                                    <div style="width: 60px"></div>
+                                    <div style="width: 73px"></div>
+                                    <div style="width: 60px">
+                                        <select style="width: 100%; height: 30px!important" class="form-control search-filter" ng-model="filters.PriceDifferenceCode" ng-options="pd.priceDifferenceUD as pd.priceDifferenceUD for pd in supportPriceDifferences">
+                                            <option value=""></option>
+                                        </select>
+                                    </div>
+                                    <div style="width: 76px"></div>
+                                    <div style="width: 76px"></div>
+                                    <div style="width: 76px"></div>
+                                    <div style="width: 150px"></div>
+                                    <div style="width: 78px"></div>
+                                    <div style="width: 78px"></div>
+                                    <div style="width: 78px"></div>
+                                    <div style="width: 78px"></div>
+                                    <div style="width: 78px"></div>
+                                    <div style="width: 78px"></div>
+                                    <div style="width: 95px"></div>
+                                    <div style="width: 78px" ng-if="isCompany"></div>
+                                    <div style="width: 78px"></div>
+                                    <div style="width: 85px; border-right:solid 1px #ddd">
+                                        <select style="width: 100%; height: 30px!important" class="form-control search-filter" ng-model="filters.QuotationStatusID" ng-options="quotationStatus.quotationStatusID as quotationStatus.quotationStatusNM for quotationStatus in supportQuotationStatus">
+                                            <option value=""></option>
+                                        </select>
+                                    </div>
+                                    <div style="width: 95px"></div>
+                                    <div style="width: 150px"></div>
+                                    <div style="width: 72px"></div>
+                                    <div style="width: 122px"></div>
+                                    <div style="width: 130px"></div>
+                                    <div style="width: 80px;"></div>
+                                    <div></div>
+                                </div>
+                                <div style="width: 2980px" class="tilsoft-table-body">
+                                    <table>
+                                        <tbody>
+                                            <tr ng-repeat="item in data">
+                                                <td style="width: 120px; text-align: center">
+                                                    <a class="btn btn-primary btn-xs font-11" href="javascript:void(0)" title="Edit" ng-class="{'disabled': !@canUpdate && item.quotationStatusID == 3}" ng-click="event.edit(item, $index)"> <i class="fa fa-pencil"></i></a>
+
+                                                    <a class="btn btn-warning btn-xs font-11" href="javascript:void(0)" title="UnConfirm" ng-class="{'disabled': !@canApprove && item.quotationStatusID != 3}" ng-click="event.approve(item, $index)"> <i class="fa fa-reply"></i></a>
+
+                                                    <a class="btn btn-primary btn-xs font-11" href="javascript:void(0)" title="Approve" ng-class="{'disabled': !@canApprove && ((isCompany && item.purchasingPrice == null) || (!isCompany && item.targetPrice == null)) || item.quotationStatusID == 3}" ng-click="event.accept(item, $index)"> <i class="fa fa-thumbs-o-up"></i></a>
+
+                                                    <a class="btn btn-primary btn-xs font-11" href="javascript:void(0)" title="History" ng-click="event.getHistory(item, $index)"> <i class="fa fa-history"></i></a>
+
+                                                    @{
+                                                        if (@Frontend.Helper.AuthHelper.GetActionButtonStatus("ProductOverviewRpt", Frontend.Helper.ActionEnum.Read, HttpContext.Current) != "disabled")
+                                                        {
+                                                            <a href="@Url.Action("PriceCompare", "ProductOverviewRpt", new { id = UrlParameter.Optional })/{{item.factoryOrderDetailID}}" target="_blank" class="btn btn-success btn-xs" title="Compare"><i class="fa fa-exchange"></i></a>
+                                                        }
+                                                    }
+                                                </td>
+                                                <td style="width: 50px; text-align: center">
+                                                    <input type="checkbox" ng-model="item.isSelected" ng-if="(item.quotationStatusID != 3)" ng-click="event.select(item, $index)">
+                                                </td>
+                                                <td style="width: 70px; text-align: center">{{item.proformaInvoiceNo}}</td>
+                                                <td style="width: 75px; text-align: center">{{item.clientUD}}</td>
+                                                <td style="width: 85px; text-align: center">{{item.factoryUD}}</td>
+                                                <td style="width: 100px; text-align: left">{{item.articleCode}}</td>
+                                                <td style="width: 205px; text-align: left">{{item.description}}</td>
+                                                <td style="width: 105px">
+                                                    <div>
+                                                        <input avs-currency type="text" class="form-control" style="width: 100%; text-align: right" ng-data-source="item.price" />
+                                                    </div>
+                                                </td>
+                                                <td style="width: 60px; text-align: right">{{item.qnt40HC | number}}</td>
+                                                <td style="width: 60px; text-align: right">{{item.orderQnt | number}}</td>
+                                                <td style="width: 73px; text-align: right">{{item.orderQnt40HC | number}}</td>
+                                                <td style="width: 60px; text-align: center">{{item.priceDifferenceCode}}</td>
+                                                <td style="width: 76px; text-align: center">
+                                                    <div ng-if="item.oldPrice1 != null">
+                                                        <span>$ {{item.oldPrice1 | number}}</span>
+                                                    </div>
+                                                </td>
+                                                <td style="width: 76px; text-align: center">
+                                                    <div ng-if="item.oldPrice2 != null">
+                                                        <span>$ {{item.oldPrice2 | number}}</span>
+                                                    </div>
+                                                </td>
+                                                <td style="width: 76px; text-align: center">
+                                                    <div ng-if="item.oldPrice3 != null">
+                                                        <span>$ {{item.oldPrice3 | number}}</span>
+                                                    </div>
+                                                </td>
+                                                <td style="width: 150px; text-align: left">{{item.oldPriceRemark}}</td>
+                                                <td style="width: 78px; text-align: center">
+                                                    <div ng-if="item.factoryPrice1 != null">
+                                                        <span>$ {{item.factoryPrice1 | number}}</span>
+                                                    </div>
+                                                </td>
+                                                <td style="width: 78px; text-align: center">
+                                                    <div ng-if="item.furnindoPrice1 != null">
+                                                        <span>$ {{item.furnindoPrice1 | number}}</span>
+                                                    </div>
+                                                </td>
+                                                <td style="width: 78px; text-align: center">
+                                                    <div ng-if="item.factoryPrice2 != null">
+                                                        <span>$ {{item.factoryPrice2 | number}}</span>
+                                                    </div>
+                                                </td>
+                                                <td style="width: 78px; text-align: center">
+                                                    <div ng-if="item.furnindoPrice2 != null">
+                                                        <span>$ {{item.furnindoPrice2 | number}}</span>
+                                                    </div>
+                                                </td>
+                                                <td style="width: 78px; text-align: center">
+                                                    <div ng-if="item.factoryPrice3 != null">
+                                                        <span>$ {{item.factoryPrice3 | number}}</span>
+                                                    </div>
+                                                </td>
+                                                <td style="width: 78px; text-align: center">
+                                                    <div ng-if="item.furnindoPrice3 != null">
+                                                        <span>$ {{item.furnindoPrice3 | number}}</span>
+                                                    </div>
+                                                </td>
+                                                <td style="width: 95px; text-align: center">
+                                                    <div ng-if="item.purchasingPrice != null">
+                                                        <span>$ {{item.purchasingPrice | number}}</span>
+                                                    </div>
+                                                </td>
+                                                <td style="width: 78px; text-align: center" ng-if="isCompany">
+                                                    <div ng-if="item.salePrice != null">
+                                                        <span>$ {{item.salePrice | number}}</span>
+                                                    </div>
+                                                </td>
+                                                <td style="width: 78px; text-align: center">
+                                                    <div ng-if="item.targetPrice != null">
+                                                        <span>$ {{isCompany ? item.targetPrice : item.furnindoPrice3 | number}}</span>
+                                                    </div>
+                                                </td>
+                                                <td style="width: 85px; text-align: center">{{item.quotationStatusNM}}</td>
+                                                <td style="width: 95px; text-align: center">{{item.statusUpdatedDate}}</td>
+                                                <td style="width: 150px; text-align: left">{{item.remark}}</td>
+                                                <td style="width: 72px; text-align: center">{{item.productionStatus}}</td>
+                                                <td style="width: 122px; text-align: center">{{item.priceUpdatedDate}}</td>
+                                                <td style="width: 130px; text-align: center">{{item.waitingComment}}</td>
+                                                <td style="width: 80px; text-align: center">{{item.lds}}</td>
+                                                <td></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>                   
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+<div id="applyAllCodeForm" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title" id="">Apply All Difference Price</h4>
+            </div>
+            <div class="modal-body no-padding">
+                <div class="smart-form">
+                    <fieldset>
+                        <div class="row">
+                            <div id="warning-msg" style="display:none" class="alert alert-warning"></div>
+                        </div>
+                        <div class="row">
+                            <section class="col col-sm-2">
+                                <label>
+                                    <strong>Difference Code</strong>
+                                </label>
+                                <select class="form-control" ng-model="applyDiffID" ng-options="diff.priceDifferenceID as diff.priceDifferenceUD for diff in supportPriceDifferences">
+                                    <option value=""></option>
+                                </select>
+                                <i></i>
+                            </section>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a href="javascript:void(0)" class="btn btn-primary btn-xs" ng-click="event.updateDiffCode(applyDiffID)"> <i class="fa fa-save"></i> Save </a>
+                <a href="javascript:void(0)" class="btn btn-danger btn-xs" ng-click="event.closeApplyAllCodeForm()"> <i class="fa fa-times"></i> Cancel </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="setOfferPriceQuotationForm" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+    <form name="editForm" class="row">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title" id="">Set Offer Price Quotation</h4>
+                </div>
+                <div class="modal-body no-padding">
+                    <div class="smart-form">
+                        <fieldset>
+                            <div class="row">
+                                <section class="col col-sm-12">
+                                    <div id="warningMsgEdit" style="display:none" class="alert alert-warning"></div>
+                                </section>
+                            </div>
+                            <div class="row">
+                                <section class="col col-sm-2">
+                                    <label><strong>Article Code</strong></label>
+                                </section>
+                                <section class="col col-sm-10">
+                                    <label>{{editData.articleCode}}</label>
+                                </section>
+                            </div>
+                            <div class="row">
+                                <section class="col col-sm-2">
+                                    <label><strong>Description</strong></label>
+                                </section>
+                                <section class="col col-sm-10">
+                                    <label>{{editData.description}}</label>
+                                </section>
+                            </div>
+                            <div class="row">
+                                <section class="col col-sm-2">
+                                    <label><strong>Price Of {{titlePriceSeason1}}</strong></label>
+                                    <label class="input">
+                                        <input id="oldPrice1" avs-currency type="text" style="text-align:right" class="form-control" ng-data-source="editData.oldPrice1" ng-if="isCompany">
+                                        <span style="text-align:right" class="form-control" ng-if="!isCompany">$ {{editData.oldPrice1 | number}}</span>
+                                    </label>
+                                </section>
+                                <section class="col col-sm-2">
+                                    <label><strong>Price Of {{titlePriceSeason2}}</strong></label>
+                                    <label class="input">
+                                        <input id="oldPrice2" avs-currency type="text" style="text-align:right" class="form-control" ng-data-source="editData.oldPrice2" ng-if="isCompany">
+                                        <span style="text-align:right" class="form-control" ng-if="!isCompany">$ {{editData.oldPrice2 | number}}</span>
+                                    </label>
+                                </section>
+                                <section class="col col-sm-2">
+                                    <label><strong>Price Of {{titlePriceSeason3}}</strong></label>
+                                    <label class="input">
+                                        <input id="oldPrice3" avs-currency type="text" style="text-align:right" class="form-control" ng-data-source="editData.oldPrice3" ng-if="isCompany">
+                                        <span style="text-align:right" class="form-control" ng-if="!isCompany">$ {{editData.oldPrice3 | number}}</span>
+                                    </label>
+                                </section>
+                                <section class="col col-sm-2" ng-if="isCompany">
+                                    <label>
+                                        <strong>Difference Price</strong>
+                                    </label>
+                                    <label class="select" ng-class="{'state-error': editForm.priceDifferenceID.$error.required}">
+                                        <select name="priceDifferenceID" style="height:32px" class="form-control" ng-model="editData.priceDifferenceID" ng-options="diffPrice.priceDifferenceID as diffPrice.priceDifferenceUD for diffPrice in supportPriceDifferences" required>
+                                            <option value=""></option>
+                                        </select>
+                                        <i></i>
+                                    </label>
+                                </section>
+                                <section class="col col-sm-2">
+                                    <label>
+                                        <strong>Offer Price</strong>
+                                    </label>
+                                    <label class="input" ng-class="{'state-error': editForm.price.$error.required}">
+                                        <input id="price" avs-currency name="price" type="text" style="text-align:right" class="form-control" ng-data-source="editData.price">
+                                    </label>
+                                </section>
+                            </div>
+                            <div class="row">
+                                <section class="col col-sm-2" ng-if="isCompany">
+                                    <label>
+                                        <strong>Sale Price(Modify)</strong>
+                                    </label>
+                                    <label class="input" ng-class="{'state-error': editForm.salePrice.$error.required}">
+                                        <input id="salePrice" avs-currency name="salePrice" type="text" style="text-align:right" class="form-control" ng-data-source="editData.salePrice">
+                                    </label>
+                                </section>
+                            </div>
+                            <div class="row">
+                                <section class="col col-sm-{{isCompany ? 6 : 12}}">
+                                    <label><strong>Remark</strong></label>
+                                    <label class="textarea">
+                                        <input type="text" class="form-control" ng-model="editData.remark" />
+                                    </label>
+                                </section>
+                                <section class="col col-sm-6" ng-if="isCompany">
+                                    <label><strong>Remark(Old Price)</strong></label>
+                                    <label class="textarea">
+                                        <input type="text" class="form-control" ng-model="editData.oldPriceRemark" />
+                                    </label>
+                                </section>
+                            </div>
+                            <div class="row">
+                                <section class="col col-sm-12">
+                                    <div class="jarviswidget-editbox"></div>
+                                    <div class="widget-body">
+                                        <div style="height: 150px" class="table-responsive">
+                                            <table class="table table-bordered table-hover custom-table dataTable">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="text-align:center">Offer Direction</th>
+                                                        <th style="text-align:center">Offer Date</th>
+                                                        <th style="text-align:center">Offer Price</th>
+                                                        <th style="text-align:center">Offer User</th>
+                                                        <th style="text-align:center">Offer Remark</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="historyPrice in historyPriceQuotations">
+                                                        <td style="text-align:center">{{historyPrice.quotationOfferDirectionNM}}</td>
+                                                        <td style="text-align:center">{{historyPrice.quotationOfferDate}}</td>
+                                                        <td style="text-align:right">{{historyPrice.price | number}}</td>
+                                                        <td style="text-align:left">
+                                                            <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{historyPrice.updatedBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600" ng-if="historyPrice.updatorName != null">
+                                                                <i class="fa fa-user"></i> {{historyPrice.updatorName}}
+                                                            </a>
+                                                        </td>
+                                                        <td>{{historyPrice.remark}}</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </section>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <a href="javascript:void(0)" class="btn btn-primary btn-xs" ng-click="event.save()"> <i class="fa fa-save"></i> Save </a>
+                    <a href="javascript:void(0)" class="btn btn-danger btn-xs" ng-click="event.closeOfferPrice()"> <i class="fa fa-times"></i> Cancel </a>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div id="frmHistory" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+    <form name="editForm" class="row">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title" id="">Offer Price History</h4>
+                </div>
+                <div class="modal-body no-padding">
+                    <div class="smart-form">
+                        <fieldset>
+                            <section>
+                                <table class="table table-bordered table-hover custom-table dataTable">
+                                    <thead>
+                                        <tr>
+                                            <th style="text-align:center">Offer Direction</th>
+                                            <th style="text-align:center">Offer Date</th>
+                                            <th style="text-align:center">Offer Price</th>
+                                            <th style="text-align:center">Offer User</th>
+                                            <th style="text-align:center">Offer Remark</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="historyPrice in historyPriceQuotations">
+                                            <td style="text-align:center">{{historyPrice.quotationOfferDirectionNM}}</td>
+                                            <td style="text-align:center">{{historyPrice.quotationOfferDate}}</td>
+                                            <td style="text-align:right">{{historyPrice.price | number}}</td>
+                                            <td style="text-align:left">
+                                                <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{historyPrice.updatedBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600" ng-if="historyPrice.updatorName != null">
+                                                    <i class="fa fa-user"></i> {{historyPrice.updatorName}}
+                                                </a>
+                                            </td>
+                                            <td>{{historyPrice.remark}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </section>
+                        </fieldset>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section FormAction{
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default" title="Search" ng-click="event.reload()"> <i class="fa fa-search"></i> </a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default" title="Refresh" ng-click="event.reload()"> <i class="fa fa-refresh"></i> </a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default" title="Save" ng-click="event.save2()"> <i class="fa fa-save"></i> </a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default" title="Apply all difference price" ng-click="event.apply()" ng-class="{'disabled': !isCompany}"> <i class="fa fa-magic"></i> </a>
+        </li>
+        <li>
+            <a href="javascript:void(0)" class="btn btn-default" title="Set price previous season" ng-click="event.updatePricePreviousSeason()" ng-class="{'disabled': !isCompany}"> <i class="fa fa-exchange"></i> </a>
+        </li>
+    </ul>
+}
+
+@section pagejs{
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(serviceRoot)/api/priceQuotation/',
+            token: '@token',
+            pageSize: '100',
+            cookieId: '@cookieId',
+            urlIndex: '@Url.Action("Index", "PriceQuotationMng")',
+            supportServiceUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/support/'
+        }
+    </script>
+    <script type="text/javascript" src="~/Views/PriceQuotationMng/index.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Views/PriceQuotationMng/service.js?v=@guid"></script>
+}

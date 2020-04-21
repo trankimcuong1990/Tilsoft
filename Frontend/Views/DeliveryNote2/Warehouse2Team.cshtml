@@ -1,0 +1,707 @@
+﻿@{
+    string title = "Delivery from warehouse to team";
+    ViewBag.Title = title;
+    ViewBag.Module = title;
+    //get param
+    string workOrderIDs = null;
+    if (Request.Params["workOrderIDs"] != null)
+    {
+        workOrderIDs = Request.Params["workOrderIDs"];
+    }
+
+    // Session login
+    Frontend.APIDTO.APIUserInformation userInfo = (Frontend.APIDTO.APIUserInformation)Session[Frontend.Customize.Common.ProjectDefinition.USER_INFO_SESSION];
+}
+<style>
+    .modal-dialog {
+        top: 100px !important
+    }
+
+    .append1 {
+        right: 35px !important;
+    }
+
+    .append2 {
+        right: 5px !important;
+    }
+</style>
+
+<form class="row" name="editForm">
+
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <ul class="nav nav-tabs pull-left in">
+                    <li class="active">
+                        <a data-toggle="tab" href="#tabGeneral" name="gtab"> <span> <i class="fa fa-database"></i> General </span> </a>
+                    </li>
+                </ul>
+            </header>
+            <div>
+                <div class="widget-body">
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="tabGeneral">
+                            <div class="smart-form">
+                                <div class="row">
+                                    <section class="col col-sm-2">
+                                        <label>Delivery Note No</label>
+                                        <label class="input">
+                                            <input class="form-control" style="font-family: Arial; font-size: 12px" ng-model="data.deliveryNoteUD" readonly />
+                                        </label>
+                                    </section>
+
+                                    <section class="col col-sm-2">
+                                        <label><i class="fa fa-calendar"></i> Delivery Note Date</label>
+                                        <label class="input">
+                                            <input id="deliveryNoteDate" class="form-control" style="font-family: Arial; font-size: 12px" avs-date ng-model="data.deliveryNoteDate" ng-if="@ViewBag.ID == 0" />
+                                            <input id="deliveryNoteDate" class="form-control" style="font-family: Arial; font-size: 12px" ng-model="data.deliveryNoteDate" ng-if="@ViewBag.ID > 0" readonly />
+                                        </label>
+                                    </section>
+
+                                    <section class="col col-sm-2">
+                                        <label>Status Type</label>
+                                        <label class="input">
+                                            <input class="form-control" style="font-family: Arial; font-size: 12px" ng-model="data.statusTypeNM" readonly />
+                                        </label>
+                                    </section>
+
+                                    <section class="col col-sm-2">
+                                        <label>Work Center1 <em class="note note-error" ng-if="editForm.workCenterID.$error.required">(Required)</em></label>
+                                        <label class="input" ng-if="(!data.isApproved)">
+                                            <select required 
+                                                    id="workCenterID" 
+                                                    style="font-family: Arial; font-size: 12px" 
+                                                    name="workCenterID"
+                                                    ng-model="data.workCenterID"
+                                                    ng-disabled="data.isApproved"
+                                                    ng-options="item.workCenterID as item.workCenterNM for item in workCenters"
+                                                    ng-confirm-click="change(data.workCenterID)"
+                                                    selected-item="data.workCenterID"
+                                                    popupcloseevent="popupCloseEvent_workCenterID"
+                                                    ng-change="event.changeSelectWorkCenter(data.workCenterID)"
+                                                    ng-confirm-message="When you change Workcenter then all product in this receipt will be deleted. </br>Are you sure you want to changed?">
+                                                <option value=""></option>
+                                            </select>
+                                        </label>
+                                        <label class="input" ng-if="(data.isApproved)">
+                                            <input type="text" class="form-control" style="font-family: Arial; font-size: 12px" readonly ng-model="data.workCenterNM" />
+                                        </label>
+                                    </section>
+
+                                    <section class="col col-sm-2">
+                                        <label>To Team1 <em class="note note-error" ng-if="editForm.toProductionTeamID.$error.required">(Required)</em></label>
+                                        <label class="input" ng-if="(!data.isApproved)" ng-class="{'state-error': (data.toProductionTeamID === null || data.toProductionTeamID === '')}">
+                                            <select 
+                                                    id="toProductionTeamID" 
+                                                    style="font-family: Arial; font-size: 12px" 
+                                                    name="toProductionTeamID"
+                                                    ng-model="data.toProductionTeamID" 
+                                                    ng-disabled="data.isApproved" 
+                                                    ng-options="item.productionTeamID as item.productionTeamNM for item in productionTeams | productionTeamByWorkCenter : data.workCenterID" required>
+                                                <option value=""></option>
+                                            </select>
+                                        </label>
+                                        <label class="input" ng-if="(data.isApproved)">
+                                            <input type="text" class="form-control" style="font-family: Arial; font-size: 12px" readonly ng-model="data.toProductionTeamNM" />
+                                        </label>
+                                    </section>
+
+                                    <section class="col col-sm-2" ng-if="data.workCenterID == 9">
+                                        <label>Transportation Service</label>
+                                        <label class="input" ng-if="(!data.isApproved)">
+                                            <select id="transportationServiceID" style="font-family: Arial; font-size: 12px" name="transportationServiceID" class="form-control" ng-model="data.transportationServiceID" ng-disabled="data.isApproved" ng-options="item.transportationServiceID as item.transportationServiceNM for item in transportationServiceDTOs">
+                                                <option value=""></option>
+                                            </select>
+                                        </label>
+                                        <label class="input" ng-if="(data.isApproved)">
+                                            <input type="text" class="form-control" style="font-family: Arial; font-size: 12px" readonly ng-model="data.transportationServiceNM" />
+                                        </label>
+                                    </section>
+                                </div>
+
+                                <div class="row">
+                                    <section class="col col-sm-4">
+                                        <label>Receiver Name</label>
+                                        <label class="input" ng-if="(!data.isApproved)">
+                                            <input type="text" class="form-control" style="font-family: Arial; font-size: 12px" ng-model="data.receiverName" ng-show="!data.isApproved" />
+                                        </label>
+                                        <label class="input" ng-if="(data.isApproved)">
+                                            <input class="form-control" style="font-family: Arial; font-size: 12px" ng-model="data.receiverName" readonly />
+                                        </label>
+                                    </section>
+
+                                    <section class="col col-sm-4">
+                                        <label>Receiver Address</label>
+                                        <label class="input" ng-if="(!data.isApproved)">
+                                            <input type="text" class="form-control" style="font-family: Arial; font-size: 12px" ng-model="data.receiverAddress" ng-show="!data.isApproved" />
+                                        </label>
+                                        <label class="input" ng-if="(data.isApproved)">
+                                            <input class="form-control" style="font-family: Arial; font-size: 12px" ng-model="data.receiverAddress" readonly />
+                                        </label>
+                                    </section>
+
+                                    <section class="col col-sm-4">
+                                        <label>Remark (Reason)</label>
+                                        <label class="input" ng-if="(!data.isApproved)">
+                                            <input type="text" class="form-control" style="font-family: Arial; font-size: 12px" ng-model="data.description" ng-show="!data.isApproved" />
+                                        </label>
+                                        <label class="input" ng-if="(data.isApproved)">
+                                            <input class="form-control" style="font-family: Arial; font-size: 12px" ng-model="data.description" readonly />
+                                        </label>
+                                    </section>                                   
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+        <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <ul class="nav nav-tabs pull-left in">
+                    <li class="active">
+                        <a data-toggle="tab" href="#tabItem" name="gtab"> <span> <i class="fa fa-database"></i> Items </span> </a>
+                    </li>
+                    <li>
+                        <a data-toggle="tab" href="#tabSemiItem" name="gtab"> <span> <i class="fa fa-database"></i> Semi Items </span> </a>
+                    </li>
+                </ul>
+            </header>
+            <div>
+                <div class="widget-body">
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="tabItem">
+                            <div class="smart-form">
+
+                                <div class="row">
+                                    <section class="col col-sm-2" ng-if="(!data.isApproved)">
+                                        <label class="btn">
+                                            <a class="btn btn-primary btn-xs" ng-show="!data.isApproved" ng-click="event.addNewLine($event, null,null)"><i class="fa fa-plus"></i> Add Material(Component)</a>
+                                        </label>
+                                    </section>
+
+                                    <section class="col col-sm-1" ng-if="(!data.isApproved)">
+                                        <label class="checkbox">
+                                            <input type="checkbox" ng-model="includeMaterial" ng-change="event.filterMaterial()" ng-disabled="data.isApproved">
+                                            <i></i>Material
+                                        </label>
+                                    </section>
+
+                                    <section class="col col-sm-1" ng-if="(!data.isApproved)">
+                                        <label class="checkbox">
+                                            <input type="checkbox" ng-model="includeComponent" ng-change="event.filterComponent()" ng-disabled="data.isApproved">
+                                            <i></i>Component
+                                        </label>
+                                    </section>
+                                </div>
+
+                                <div class="row">
+                                    <section class="col col-sm-12">
+                                        <div id="grdDeliveryNoteDetail" class="tilsoft-table-wrapper" avs-scrollable-table>
+                                            <div class="tilsoft-table">
+                                                <div class="tilsoft-table-header" style="width: 1900px;">
+                                                    <div style="width:50px; padding-left: 5px;">Total<br><b style="color: blue; padding: 10px;">{{deliveryNoteProducts.length|number}}</b></div>
+                                                    <div style="width:230px">Production Item</div>
+                                                    <div style="width:65px">Unit</div>
+                                                    <div style="width:140px">Warehouse</div>
+                                                    <div style="width:65px">Pallet</div>
+                                                    <div style="width:75px">Price</div>
+                                                    <div style="width:75px">Stock Qnt</div>
+                                                    <div style="width:75px">Total Deliver</div>
+                                                    <div style="width:110px" ng-show="data.workCenterID == 9">Outsourcing Cost</div>
+                                                    <div style="width:75px">Qnt</div>
+                                                    <div style="width:85px">Work Order</div>
+                                                    <div style="width:220px">In Component</div>
+                                                    <div style="width:70px">Other Price</div>
+                                                    <div style="width:100px">Reason</div>
+                                                    <div style="width:75px">Norm Qnt</div>
+                                                    <div style="width:75px">Total Norm</div>
+                                                    <div style="width:75px">Deliver<br />WO</div>
+                                                    <div>Remark</div>
+                                                </div>
+                                                <div class="tilsoft-table-body" style="width: 1900px; height:auto;">
+                                                    <table id="nl">
+                                                        <tbody ng-repeat="item in deliveryNoteProducts | orderBy: 'productionItemTypeID'">
+                                                            <tr>
+                                                                <td style="text-align:center; width: 49px">
+                                                                    <a ng-click="event.removeLine($event,item)" ng-if="!data.isApproved" ng-disabled="item.isNew == false" class="btn btn-danger btn-xs font-11" href="javascript:void(0);"><i class=" fa fa-times"></i>Del</a>
+                                                                    <label ng-if="data.isApproved">{{($index + 1)}}</label>
+                                                                </td>
+                                                                <td style="width:230px">
+                                                                    <label class="input" ng-if="!data.isApproved">
+                                                                        <input type="text" class="input-xs"
+                                                                               ng-show="!data.isApproved"
+                                                                               avs-remote-auto-complete ng-request-param="productionItemBox.request"
+                                                                               data-method="POST"
+                                                                               ng-init-param="item.productionItemNM"
+                                                                               ng-init-param-2="data.deliveryNoteDate"
+                                                                               ng-model="item.productionItemNM"
+                                                                               ng-item-value="productionItemBox.data"
+                                                                               ng-item-selected="event.selectedProductionItem(productionItemBox.data, item)"
+                                                                               data-format-function="formatProductionItem"
+                                                                               style="font-family: Arial; font-size: 12px" />
+                                                                    </label>
+                                                                    <label class="input" ng-show="data.isApproved">
+                                                                        {{item.productionItemNM}}
+                                                                    </label>
+                                                                    <a href="@Url.Action("Edit", "ProductionItem")/{{item.productionItemID}}" target="_blank" ng-if="(item.productionItemID !== null)">
+                                                                        <b>{{item.productionItemUD}}</b>
+                                                                    </a>
+                                                                </td>
+                                                                <td style="width: 65px; text-align: center">
+                                                                    <label class="input" ng-if="!data.isApproved" ng-class="{'state-error': (item.productionItemID != null && item.unitID === null)}">
+                                                                        <select class="input-xs" ng-model="item.unitID" ng-disabled="data.isApproved" ng-options="unitItem.unitID as unitItem.unitNM for unitItem in item.productionItemUnits" ng-change="event.changeUnit(item)" style="font-size: 12px; font-family: Arial">
+                                                                            <option value=""></option>
+                                                                        </select>
+                                                                    </label>
+                                                                    <label ng-if="data.isApproved">{{item.unitNM}}</label>
+                                                                </td>
+                                                                <td style="width: 140px">
+                                                                    <label class="input" ng-if="!data.isApproved" ng-class="{'state-error': (item.productionItemID != null && item.fromFactoryWarehouseID === null)}">
+                                                                        <select id="fromFactoryWarehouseID" name="fromFactoryWarehouseID" class="input-xs" ng-model="item.fromFactoryWarehouseID" ng-disabled="data.isApproved" ng-options="warehouseItem.factoryWarehouseID as warehouseItem.factoryWarehouseNM for warehouseItem in factoryWarehouses" ng-change="event.changeFactoryWarehouse(item)" style="font-size: 12px; font-family: Arial">
+                                                                            <option value=""></option>
+                                                                        </select>
+                                                                    </label>
+                                                                    <label ng-if="data.isApproved">{{item.fromFactoryWarehouseNM}}</label>
+                                                                </td>
+                                                                <td style="width: 65px">
+                                                                    <label ng-if="!data.isApproved">
+                                                                        <select class="input-xs" ng-model="item.factoryWarehousePalletID" ng-disabled="data.isApproved" ng-options="pallet.factoryWarehousePalletID as pallet.factoryWarehousePalletNM for pallet in $parent.factoryWarehousePallets | filter: {factoryWarehouseID: item.fromFactoryWarehouseID}" ng-change="event.changeFactoryWarehousePallet(item)" style="font-size: 12px; font-family: Arial">
+                                                                            <option></option>
+                                                                        </select>
+                                                                    </label>
+                                                                    <label ng-if="data.isApproved">{{(item.factoryWarehousePalletNM === 'Unknown') ? null : item.factoryWarehousePalletNM}}</label>
+                                                                </td>
+                                                                <td style="width:75px">
+                                                                    <label style="text-align:right">
+                                                                        {{item.unitPrice | number}}
+                                                                    </label>
+                                                                </td>
+                                                                <td style="width: 75px; text-align: right">
+                                                                    <label style="text-align: right;">
+                                                                        {{item.stockQnt | number}}
+                                                                    </label>
+                                                                </td>
+                                                                <td style="width:75px; text-align: right">
+                                                                    <label style="text-align: right;">
+                                                                        {{item.totalDelivery | number}}
+                                                                    </label>
+                                                                </td>
+                                                                <td style="width: 110px" ng-show="data.workCenterID == 9">
+                                                                    <label ng-if="!data.isApproved">
+                                                                        <select class="input-xs" ng-model="item.outsourcingCostID" ng-disabled="data.isApproved" ng-options="outsourcing.outsourcingCostID as outsourcing.outsourcingCostNM for outsourcing in outsourcingCostDTOs" ng-change="event.changeOutsourcingCost(item)" style="font-size: 12px; font-family: Arial" ng-readonly="item.productionItemTypeID != 1">
+                                                                            <option></option>
+                                                                        </select>
+                                                                    </label>
+                                                                    <label ng-if="data.isApproved">{{(item.outsourcingCostNM === 'Unknown') ? null : item.outsourcingCostNM}}</label>
+                                                                </td>
+                                                                <td>
+                                                                    <table style="border: 1px solid #ccc;">
+                                                                        <tr ng-repeat="pItem in item.pieces">
+                                                                            <td style="width:75px; text-align: right">
+                                                                                <label class="input" ng-if="!data.isApproved">
+                                                                                    <input class="input-xs" type="text" avs-number-2 ng-model="pItem.qtyByUnit" style="width: 100%;text-align:right; font-size: 12px; font-family: Arial" ng-decimal="4" />
+                                                                                </label>
+                                                                                <label ng-if="data.isApproved">
+                                                                                    {{pItem.qtyByUnit | number}}
+                                                                                </label>
+                                                                            </td>
+                                                                            <td style="width:85px">
+                                                                                <a ng-show="pItem.workOrderUD !=null" href="@Url.Action("Edit", "WorkOrder")/{{pItem.workOrderID}}" target="_blank">
+                                                                                    <b>{{pItem.workOrderUD}}</b>
+                                                                                </a>
+                                                                                <select class="input-xs" ng-disabled="data.isApproved" ng-show="pItem.workOrderUD ==null" ng-model="pItem.workOrderID" ng-required="pItem.workOrderID == null" style="font-size: 12px; font-family: Arial">
+                                                                                    <option value="{{witem.workOrderID}}" ng-repeat="witem in workOrderList">
+                                                                                        {{witem.workOrderUD}}
+                                                                                    </option>
+                                                                                </select>
+                                                                            </td>
+                                                                            <td style="width:220px;">
+                                                                                {{pItem.parentProductionItemNM}}
+                                                                            </td>
+
+
+                                                                            <td style="width:70px; text-align:right;">
+                                                                                <label class="input" ng-if="(!data.isApproved)">
+                                                                                    <input type="text" class="input-xs" style="font-family:Arial; font-size:12px; text-align:right;" avs-number-2 ng-model="pItem.otherPrice" ng-decimal="2" />
+                                                                                </label>
+                                                                                <label ng-if="(data.isApproved)">
+                                                                                    {{pItem.otherPrice | number : 2}}
+                                                                                </label>
+                                                                            </td>
+
+                                                                            <td style="width:100px;">
+                                                                                <label class="input" ng-if="(!data.isApproved)">
+                                                                                    <select class="input-xs" style="font-family: Arial; font-size: 12px;" ng-model="pItem.reasonOtherPriceID" ng-options="wItem.reasonOtherPriceID as wItem.reasonOtherPriceName for wItem in reasonOtherPrices">
+                                                                                        <option value=""></option>
+                                                                                    </select>
+                                                                                </label>
+                                                                                <label ng-if="(data.isApproved)">{{method.getReasonOtherPriceName(pItem.reasonOtherPriceID)}}</label>
+                                                                            </td>
+
+
+                                                                            <td style="width:75px; text-align: right">
+                                                                                {{pItem.bomQnt | number}}
+                                                                            </td>
+                                                                            <td style="width:75px; text-align: right">
+                                                                                {{pItem.bomQntTotal | number}}
+                                                                            </td>
+                                                                            <td style="width:75px; text-align: right">
+                                                                                {{pItem.totalDeliverWorkOrder | number}}
+                                                                            </td>
+                                                                            <td style="text-align:left;">
+                                                                                <label class="input" ng-if="!data.isApproved">
+                                                                                    <input class="input-xs" style="font-size: 12px; font-family: Arial" ng-model="pItem.description" />
+                                                                                </label>
+                                                                                <label class="input" ng-if="data.isApproved">
+                                                                                    {{pItem.description}}
+                                                                                </label>
+                                                                            </td>
+                                                                        </tr>
+                                                                    </table>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+                                </div>
+
+                                <div class="note" ng-if="!isApproved">
+                                    <strong>Updated by</strong>
+                                    <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{data.updatedBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                        <i class="fa fa-user"></i> {{data.updatorName}}
+                                    </a>
+                                    at {{data.updatedDate}}
+                                </div>
+
+                                <div class="note">
+                                    <div ng-if="data.approvedBy">
+                                        <strong>Approved By</strong>
+                                        <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{data.approvedBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                            <i class="fa fa-user"></i> {{data.approverName}}
+                                        </a>
+                                        at {{data.approvedDate}}
+                                    </div>
+                                </div>
+
+                                <div class="note">
+                                    <div ng-if="data.resetBy">
+                                        <strong>Reset By</strong>
+                                        <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{data.resetBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                            <i class="fa fa-user"></i> {{data.reseterName}}
+                                        </a>
+                                        at {{data.resetDate}}
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <div class="tab-pane" id="tabSemiItem">
+                            <div class="smart-form">
+                                
+                                <div class="row">
+                                    <section class="col col-sm-12">
+                                        <div id="grdDeliveryNoteDetail" class="tilsoft-table-wrapper" avs-scrollable-table>
+                                            <div class="tilsoft-table">
+                                                <div class="tilsoft-table-header" style="width: 1900px;">
+                                                    <div style="width:50px; padding-left: 5px;">Total<br><b style="color: blue; padding: 10px;">{{deliveryNoteSemiProducts.length|number}}</b></div>
+                                                    <div style="width:230px">Production Item</div>
+                                                    <div style="width:65px">Unit</div>
+                                                    <div style="width:140px">Warehouse</div>
+                                                    <div style="width:65px">Pallet</div>
+                                                    <div style="width:75px">Price</div>
+                                                    <div style="width:75px">Stock Qnt</div>
+                                                    <div style="width:75px">Total Deliver</div>
+                                                    <div style="width:110px" ng-show="data.workCenterID == 9">Outsourcing Cost</div>
+                                                    <div style="width:75px">Qnt</div>
+                                                    <div style="width:85px">Work Order</div>
+                                                    <div style="width:220px">In Component</div>
+                                                    <div style="width:70px">Other Price</div>
+                                                    <div style="width:100px">Reason</div>
+                                                    <div style="width:75px">Norm Qnt</div>
+                                                    <div style="width:75px">Total Norm</div>
+                                                    <div style="width:75px">Deliver<br />WO</div>
+                                                    <div>Remark</div>
+                                                </div>
+                                                <div class="tilsoft-table-body" style="width: 1900px; height:auto;">
+                                                    <table id="nl">
+                                                        <tbody ng-repeat="item in deliveryNoteSemiProducts | orderBy: 'productionItemTypeID'">
+                                                            <tr>
+                                                                <td style="text-align:center; width: 49px">
+                                                                    <a ng-click="event.removeLine($event,item)" ng-if="!data.isApproved" ng-disabled="item.isNew == false" class="btn btn-danger btn-xs font-11" href="javascript:void(0);"><i class=" fa fa-times"></i>Del</a>
+                                                                    <label ng-if="data.isApproved">{{($index + 1)}}</label>
+                                                                </td>
+                                                                <td style="width:230px">
+                                                                    <label class="input" ng-if="!data.isApproved">
+                                                                        <input type="text" class="input-xs"
+                                                                               ng-show="!data.isApproved"
+                                                                               avs-remote-auto-complete ng-request-param="productionItemBox.request"
+                                                                               data-method="POST"
+                                                                               ng-init-param="item.productionItemNM"
+                                                                               ng-init-param-2="@userInfo.Data.BranchID"
+                                                                               ng-model="item.productionItemNM"
+                                                                               ng-item-value="productionItemBox.data"
+                                                                               ng-item-selected=""
+                                                                               data-format-function="formatProductionItem"
+                                                                               style="font-family: Arial; font-size: 12px" />
+                                                                    </label>
+                                                                    <label class="input" ng-show="data.isApproved">
+                                                                        {{item.productionItemNM}}
+                                                                    </label>
+                                                                    <a href="@Url.Action("Edit", "ProductionItem")/{{item.productionItemID}}" target="_blank" ng-if="(item.productionItemID !== null)">
+                                                                        <b>{{item.productionItemUD}}</b>
+                                                                    </a>
+                                                                </td>
+                                                                <td style="width: 65px; text-align: center">
+                                                                    <label class="input" ng-if="!data.isApproved" ng-class="{'state-error': (item.productionItemID != null && item.unitID === null)}">
+                                                                        <select class="input-xs" ng-model="item.unitID" ng-disabled="data.isApproved" ng-options="unitItem.unitID as unitItem.unitNM for unitItem in item.productionItemUnits" ng-change="event.changeUnit(item)" style="font-size: 12px; font-family: Arial">
+                                                                            <option value=""></option>
+                                                                        </select>
+                                                                    </label>
+                                                                    <label ng-if="data.isApproved">{{item.unitNM}}</label>
+                                                                </td>
+                                                                <td style="width: 140px">
+                                                                    <label class="input" ng-if="!data.isApproved" ng-class="{'state-error': (item.productionItemID != null && item.fromFactoryWarehouseID === null)}">
+                                                                        <select id="fromFactoryWarehouseID" name="fromFactoryWarehouseID" class="input-xs" ng-model="item.fromFactoryWarehouseID" ng-disabled="data.isApproved" ng-options="warehouseItem.factoryWarehouseID as warehouseItem.factoryWarehouseNM for warehouseItem in factoryWarehouses" ng-change="event.changeFactoryWarehouse(item)" style="font-size: 12px; font-family: Arial">
+                                                                            <option value=""></option>
+                                                                        </select>
+                                                                    </label>
+                                                                    <label ng-if="data.isApproved">{{item.fromFactoryWarehouseNM}}</label>
+                                                                </td>
+                                                                <td style="width: 65px">
+                                                                    <label ng-if="!data.isApproved">
+                                                                        <select class="input-xs" ng-model="item.factoryWarehousePalletID" ng-disabled="data.isApproved" ng-options="pallet.factoryWarehousePalletID as pallet.factoryWarehousePalletNM for pallet in $parent.factoryWarehousePallets | filter: {factoryWarehouseID: item.fromFactoryWarehouseID}" ng-change="event.changeFactoryWarehousePallet(item)" style="font-size: 12px; font-family: Arial">
+                                                                            <option></option>
+                                                                        </select>
+                                                                    </label>
+                                                                    <label ng-if="data.isApproved">{{(item.factoryWarehousePalletNM === 'Unknown') ? null : item.factoryWarehousePalletNM}}</label>
+                                                                </td>
+                                                                <td style="width:75px">
+                                                                    <label style="text-align:right">
+                                                                        {{item.unitPrice | number}}
+                                                                    </label>
+                                                                </td>
+                                                                <td style="width: 75px; text-align: right">
+                                                                    <label style="text-align: right;">
+                                                                        {{item.stockQnt | number}}
+                                                                    </label>
+                                                                </td>
+                                                                <td style="width:75px; text-align: right">
+                                                                    <label style="text-align: right;">
+                                                                        {{item.totalDelivery | number}}
+                                                                    </label>
+                                                                </td>
+                                                                <td style="width: 110px" ng-show="data.workCenterID == 9">
+                                                                    <label ng-if="!data.isApproved">
+                                                                        <select class="input-xs" ng-model="item.outsourcingCostID" ng-disabled="data.isApproved" ng-options="outsourcing.outsourcingCostID as outsourcing.outsourcingCostNM for outsourcing in outsourcingCostDTOs" ng-change="event.changeOutsourcingCost(item)" style="font-size: 12px; font-family: Arial" ng-readonly="item.productionItemTypeID != 1">
+                                                                            <option></option>
+                                                                        </select>
+                                                                    </label>
+                                                                    <label ng-if="data.isApproved">{{(item.outsourcingCostNM === 'Unknown') ? null : item.outsourcingCostNM}}</label>
+                                                                </td>
+                                                                <td>
+                                                                    <table style="border: 1px solid #ccc;">
+                                                                        <tr ng-repeat="pItem in item.pieces">
+                                                                            <td style="width:75px; text-align: right">
+                                                                                <label class="input" ng-if="!data.isApproved">
+                                                                                    <input class="input-xs" type="text" avs-number-2 ng-model="pItem.qtyByUnit" style="width: 100%;text-align:right; font-size: 12px; font-family: Arial" ng-decimal="4" />
+                                                                                </label>
+                                                                                <label ng-if="data.isApproved">
+                                                                                    {{pItem.qtyByUnit | number}}
+                                                                                </label>
+                                                                            </td>
+
+                                                                            <td style="width:85px">
+                                                                                <a ng-show="pItem.workOrderUD !=null" href="@Url.Action("Edit", "WorkOrder")/{{pItem.workOrderID}}" target="_blank">
+                                                                                    <b>{{pItem.workOrderUD}}</b>
+                                                                                </a>
+                                                                                <select class="input-xs" ng-disabled="data.isApproved" ng-show="pItem.workOrderUD ==null" ng-model="pItem.workOrderID" ng-required="pItem.workOrderID == null" style="font-size: 12px; font-family: Arial">
+                                                                                    <option value="{{witem.workOrderID}}" ng-repeat="witem in workOrderList">
+                                                                                        {{witem.workOrderUD}}
+                                                                                    </option>
+                                                                                </select>
+                                                                            </td>
+
+                                                                            <td style="width:220px;">
+                                                                                {{pItem.parentProductionItemNM}}
+                                                                            </td>
+
+                                                                            <td style="width:70px; text-align:right;">
+                                                                                <label class="input" ng-if="(!data.isApproved)">
+                                                                                    <input type="text" class="input-xs" style="font-family:Arial; font-size:12px; text-align:right;" avs-number-2 ng-model="pItem.otherPrice" ng-decimal="2" />
+                                                                                </label>
+                                                                                <label ng-if="(data.isApproved)">
+                                                                                    {{pItem.otherPrice | number : 2}}
+                                                                                </label>
+                                                                            </td>
+
+                                                                            <td style="width:100px;">
+                                                                                <label class="input" ng-if="(!data.isApproved)">
+                                                                                    <select class="input-xs" style="font-family: Arial; font-size: 12px;" ng-model="pItem.reasonOtherPriceID" ng-options="wItem.reasonOtherPriceID as wItem.reasonOtherPriceName for wItem in reasonOtherPrices">
+                                                                                        <option value=""></option>
+                                                                                    </select>
+                                                                                </label>
+                                                                                <label ng-if="(data.isApproved)">{{method.getReasonOtherPriceName(pItem.reasonOtherPriceID)}}</label>
+                                                                            </td>
+
+                                                                            <td style="width:75px; text-align: right">
+                                                                                {{pItem.bomQnt | number}}
+                                                                            </td>
+
+                                                                            <td style="width:75px; text-align: right">
+                                                                                {{pItem.bomQntTotal | number}}
+                                                                            </td>
+
+                                                                            <td style="width:75px; text-align: right">
+                                                                                {{pItem.totalDeliverWorkOrder | number}}
+                                                                            </td>
+
+                                                                            <td style="text-align:left;">
+                                                                                <label class="input" ng-if="!data.isApproved">
+                                                                                    <input class="input-xs" style="font-size: 12px; font-family: Arial" ng-model="pItem.description" />
+                                                                                </label>
+                                                                                <label class="input" ng-if="data.isApproved">
+                                                                                    {{pItem.description}}
+                                                                                </label>
+                                                                            </td>
+                                                                        </tr>
+                                                                    </table>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </article>
+
+    <div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="frmProductInfo" class="modal fade" style="display: none;">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button aria-hidden="true" data-dismiss="modal" class="close" type="button">
+                        ×
+                    </button>
+                    <h4 id="myModalLabel" class="modal-title">{{productionItemForm.productionItemID==0?'Create New Item (Material,Component)':'Item Infomation'}}</h4>
+                </div>
+                <div class="modal-body smart-form">
+                    <fieldset>
+                        <div class="row">
+                            <div class="row">
+                                <section class="col col-lg-4">
+                                    <div class="input-group" style="width: 100%;">
+                                        @Html.Partial("~/Views/Shared/_Controls/_ImageBox.cshtml", new Frontend.Models.ImageBoxViewModel() { URLBinding = "productionItemForm.data.thumbnailLocation", OrginalImageURLBinding = "productionItemForm.data.fileLocation", JSOnChangeHandler = "productionItemForm.event.changeImage", JSONRemoveHandler = "productionItemForm.event.removeImage" })
+                                    </div>
+                                </section>
+                                <section class="col col-lg-8">
+                                    <label>Product Code</label>
+                                    <input type="text" ng-model="productionItemForm.data.productionItemUD" ng-readonly="data.isApproved" class="form-control" />
+                                </section>
+                                <section class="col col-lg-8">
+                                    <label>Product Name</label>
+                                    <input type="text" ng-model="productionItemForm.data.productionItemNM" ng-readonly="data.isApproved" class="form-control" />
+                                </section>
+                                <section class="col col-lg-2">
+                                    <label>Product Type</label>
+                                    <select id="productionItemTypeID" name="productionItemTypeID" class="form-control" ng-disabled="data.isApproved" ng-model="productionItemForm.data.productionItemTypeID" ng-options="item.productionItemTypeID as item.productionItemTypeNM for item in productionItemTypes" disabled>
+                                        <option value=""></option>
+                                    </select>
+                                </section>
+                                <section class="col col-lg-2">
+                                    <label>Unit</label>
+                                    <input type="text" ng-model="productionItemForm.data.unit" class="form-control" ng-readonly="data.isApproved" />
+                                </section>
+                                <section class="col col-lg-8">
+                                    <label>Description</label>
+                                    <input type="text" ng-model="productionItemForm.data.description" class="form-control" ng-readonly="data.isApproved" />
+                                </section>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+                <div class="modal-footer">
+                    <button data-dismiss="modal" class="btn btn-default" type="button" ng-click="productionItemForm.event.cancel()">
+                        Cancel
+                    </button>
+                    <button class="btn btn-primary" type="button" ng-show="!data.isApproved" ng-click="productionItemForm.event.updateProductionItem()">
+                        Save
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "WorkOrder")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="#" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-disabled="data.isApproved || (isBlockMaterial !== null && isBlockMaterial)" ng-click="event.update()"><i class="fa fa-save"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="#" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="Delete" style="color: #ff0000;" ng-disabled="data.isApproved" ng-click="event.delete($event)"><i class="fa fa-times"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="#" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Print, HttpContext.Current))" title="Print" ng-click="event.getDeliveryNotePrintout()"><i class="fa fa-print"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="@Url.Action("PrintOut", "DeliveryNote2")/{{data.deliveryNoteID}}" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Print, HttpContext.Current))" title="Print out" target="_blank"><i class="fa fa-print"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="#" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Reset, HttpContext.Current))" title="Reset" ng-disabled="!data.isApproved" ng-click="event.reset()"><i style="color:blue" class="fa fa-refresh"></i></a>
+        </li>
+    </ul>
+}
+@section pagejs {
+    <script src="~/Angular/app/jsonService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/support/service.js?c=@System.Guid.NewGuid().ToString().Replace("-","")"></script>
+
+    <script src="~/Views/DeliveryNote2/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/DeliveryNote2/edit.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+
+    <script type="text/javascript">
+        jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/deliveryNote2/';
+        jsonService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+        supportService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/support/';
+        supportService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+        BOMService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/BOM/';
+        BOMService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+        var context = {
+            id: '@ViewBag.ID',
+            backUrl: '@Url.Action("Index", "DeliveryNote2")',
+            refreshUrl: '@Url.Action("Warehouse2Team", "DeliveryNote2", new { id = UrlParameter.Optional })/',
+            errMsg: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED',
+            reportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]',
+
+            token: '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]',
+            viewName: 'Warehouse2Team',
+            workOrderIDs: '@workOrderIDs',
+            getProductionItemUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/DeliveryNote2/' + 'getProductionItem',
+            branchID: '@userInfo.Data.BranchID',
+        }
+    </script>
+
+}
+

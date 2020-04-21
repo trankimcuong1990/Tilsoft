@@ -1,0 +1,1034 @@
+﻿@{
+    ViewBag.Title = "Edit labeling packaging";
+    ViewBag.Module = "LabelingPackaging";
+    string userManualUrl = string.Empty;
+    if (System.IO.File.Exists(Server.MapPath("~/UserManual/" + ViewBag.ModuleCode + ".pdf")))
+    {
+        userManualUrl = "/UserManual/" + ViewBag.ModuleCode + ".pdf";
+    }
+    Frontend.APIDTO.APIUserInformation userInfo = (Frontend.APIDTO.APIUserInformation)Session[Frontend.Customize.Common.ProjectDefinition.USER_INFO_SESSION];
+}
+<style>
+    .custom-table {
+        display: table-cell;
+    }
+
+        .custom-table .input-checkbox tr td:nth-child(2), .custom-table .input-checkbox tr td:nth-child(3), .custom-table thead td {
+            text-align: center;
+        }
+
+    .m-left-15 {
+        margin-left: 15px;
+    }
+
+    .action {
+        text-align: center;
+    }
+
+    .displaynone {
+        display: none;
+    }
+</style>
+<form class="row" name="editForm" id="main-form">
+    <article class="col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <ul class="nav nav-tabs pull-left in">
+                    <li class="active">
+                        <a data-toggle="tab" href="#tabGeneral"> <i class="fa fa-database"></i> <span> Labeling Packaging </span> </a>
+                    </li>
+                </ul>
+            </header>
+            <div>
+                <div class="jarviswidget-editbox"></div>
+                <div class="widget-body">
+                    <div class="smart-form">
+                        <div class="row">
+                            <section class="col col-sm-2">
+                                <label class="label"> PO Number </label>
+                                <label class="input">
+                                    <span class="form-control"> {{data.proformaInvoiceNo}} </span>
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label class="label"> Client </label>
+                                <label class="input">
+                                    <span class="form-control"> {{data.clientUD}} </span>
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label class="label"> Client PO </label>
+                                <label class="input">
+                                    <span class="form-control"> {{data.clientOrderNumber}} </span>
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label class="label"> Factory </label>
+                                <label class="input">
+                                    <span class="form-control"> {{data.factoryUD}} </span>
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label class="label"> Sales Rep </label>
+                                <label class="input">
+                                    <span class="form-control"> {{data.saleNM}} </span>
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label class="label"> VN Rep </label>
+                                <label class="input">
+                                    <span class="form-control"> {{data.vnRep}} </span>
+                                </label>
+                            </section>
+                        </div>
+                        <div class="row">
+                            <section class="col col-sm-2">
+                                <label class="label">LDS</label>
+                                <label class="input">
+                                    <span class="form-control">{{data.lds}}</span>
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label class="label">Production Status</label>
+                                <label class="input">
+                                    <span class="form-control">{{data.productionStatus}}</span>
+                                </label>
+                            </section>
+                        </div>
+                        <div class="row">
+                            <section class="col col-sm-2">
+                                <label class="label"> Status </label>
+                                <label class="select">
+                                    <select class="form-control" ng-model="data.lpStatusID" ng-change="event.selectedApporve()" ng-options="lpStatus.lpStatusID as lpStatus.lpStatusNM for lpStatus in lpStatuses">
+                                        <option value=""></option>
+                                    </select>
+                                    <i></i>
+                                </label>
+                                <span class="onoffswitch" ng-hide="data.lpStatusID!=6">
+                                    <input name="onoffswitch1" class="onoffswitch-checkbox" id="myonoffswitch1" type="checkbox" ng-model="data.isSaveConfig" />
+                                    <label class="onoffswitch-label" for="myonoffswitch1"> <span class="onoffswitch-inner" data-swchon-text="YES" data-swchoff-text="NO"></span> <span class="onoffswitch-switch"></span> </label>
+                                </span>
+                                <span ng-hide="data.lpStatusID!=6"> Auto update for the same items of this Client?</span>
+                            </section>
+                            <section class="col col-sm-7">
+                                <label class="label">
+                                    <a href="javascript:void(0)" class="btn btn-default btn-xs btn-primary font-11" ng-click="event.addRejections()">
+                                        <i class="fa fa-plus"></i> Add rejection reason(s)
+                                    </a>
+                                </label>
+                                <div class="tilsoft-table-wrapper">
+                                    <div class="tilsoft-table">
+                                        <div class="tilsoft-table-body" style="width: 100%; overflow-y: hidden; height: auto; margin-top: 0px;">
+                                            <table>
+                                                <tbody>
+                                                    <tr>
+                                                        <th style="width: 80px;">  </th>
+                                                        <th style="width: 380px;"> File </th>
+                                                        <th> Remark </th>
+                                                    </tr>
+                                                    <tr ng-repeat="item in data.labelingPackagingRejections">
+                                                        <td style="width: 80px; text-align: center;">
+                                                            <a href="javascript:void(0)" class="btn btn-default btn-xs btn-danger font-11" ng-click="event.removeRejections(item)">
+                                                                <i class="fa fa-times"></i> Delete
+                                                            </a>
+                                                        </td>
+                                                        <td style="width: 380px; text-align: center;">
+                                                            @Html.Partial("~/Views/Shared/_Controls/_FileUploadBox2.cshtml", new Frontend.Models.FileUploadViewModel2() { ControlID = "item.labelingPackagingRejectionID", TypeID = 1, URLBinding = "item.labelingPackagingRejectionFileLocation", FileName = "item.labelingPackagingRejectionFriendlyName", JSOnChangeHandler = "changeRejections", JSONRemoveHandler = "removeRejectionFile" })
+                                                        </td>
+                                                        <td>
+                                                            <input type="text" class="form-control" maxlength="500" ng-model="item.labelingPackagingRejectionComment" />
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                            <section class="col col-sm-3">
+                                <div class="col-sm-12 m-left-5 m-bottom-5">
+                                    <label class="label">
+                                        <a href="javascript:void(0)" class="btn btn-default btn-xs btn-primary font-11" ng-click="event.addOtherOption()">
+                                            <i class="fa fa-plus"></i> Add other option(s)
+                                        </a>
+                                    </label>
+                                    <table class="custom-table">
+                                        <thead>
+                                            <tr>
+                                                <td></td>
+                                                <td> Special </td>
+                                                <td style="display: block; margin-right: 15px; margin-left: 15px"> Standard </td>
+                                                <td> No </td>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="input-checkbox">
+                                            <tr>
+                                                <td>Hangtag</td>
+                                                <td ng-if="data.isAutoUpdateSimilarLP"><input id="HangtagSpecial" data-id="Hangtag" type="checkbox" ng-change="event.autoFile(1, data.hangTagStatusID)" ng-model="data.hangTagStatusID" ng-true-value="1" ng-false-value="0" /></td>
+                                                <td ng-if="!data.isAutoUpdateSimilarLP"><input id="HangtagSpecial" data-id="Hangtag" type="checkbox" ng-model="data.hangTagStatusID" ng-true-value="1" ng-false-value="0" /></td>
+                                                <td><input id="HangtagStandard" data-id="Hangtag" type="checkbox" ng-model="data.hangTagStatusID" ng-true-value="2" ng-false-value="0" /></td>
+                                                <td><input id="HangtagNo" data-id="Hangtag" type="checkbox" ng-model="data.hangTagStatusID" ng-true-value="3" ng-false-value="0" disabled /></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Box/shippingmark</td>
+                                                <td ng-if="data.isAutoUpdateSimilarLP"><input id="BoxShippingMarkSpecial" data-id="BoxShippingMark" type="checkbox" ng-change="event.autoFile(2, data.boxShippingMarkStatusID)" ng-model="data.boxShippingMarkStatusID" ng-true-value="1" ng-false-value="0" /></td>
+                                                <td ng-if="!data.isAutoUpdateSimilarLP"><input id="BoxShippingMarkSpecial" data-id="BoxShippingMark" type="checkbox" ng-model="data.boxShippingMarkStatusID" ng-true-value="1" ng-false-value="0" /></td>
+                                                <td><input id="BoxShippingMarkStandard" data-id="BoxShippingMark" type="checkbox" ng-model="data.boxShippingMarkStatusID" ng-true-value="2" ng-false-value="0" /></td>
+                                                <td><input id="BoxShippingMarkNo" data-id="BoxShippingMark" type="checkbox" ng-model="data.boxShippingMarkStatusID" ng-true-value="3" ng-false-value="0" disabled /></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Brass label</td>
+                                                <td ng-if="data.isAutoUpdateSimilarLP"><input id="BrassLabelSpecial" data-id="BrassLabel" type="checkbox" ng-change="event.autoFile(3, data.brassLabelStatusID)" ng-model="data.brassLabelStatusID" ng-true-value="1" ng-false-value="0" /></td>
+                                                <td ng-if="!data.isAutoUpdateSimilarLP"><input id="BrassLabelSpecial" data-id="BrassLabel" type="checkbox" ng-model="data.brassLabelStatusID" ng-true-value="1" ng-false-value="0" /></td>
+                                                <td><input id="BrassLabelStandard" data-id="BrassLabel" type="checkbox" ng-model="data.brassLabelStatusID" ng-true-value="2" ng-false-value="0" disabled /></td>
+                                                <td><input id="BrassLabelNo" data-id="BrassLabel" type="checkbox" ng-model="data.brassLabelStatusID" ng-true-value="3" ng-false-value="0" /></td>
+                                            </tr>
+                                            <tr>
+                                                <td>AI</td>
+                                                <td ng-if="data.isAutoUpdateSimilarLP"><input id="AISpecial" data-id="AI" type="checkbox" ng-change="event.autoFile(4, data.aiStatusID)" ng-model="data.aiStatusID" ng-true-value="1" ng-false-value="0" /></td>
+                                                <td ng-if="!data.isAutoUpdateSimilarLP"><input id="AISpecial" data-id="AI" type="checkbox" ng-model="data.aiStatusID" ng-true-value="1" ng-false-value="0" /></td>
+                                                <td><input id="AIStandard" data-id="AI" type="checkbox" ng-model="data.aiStatusID" ng-true-value="2" ng-false-value="0" /></td>
+                                                <td><input id="AINo" data-id="AI" type="checkbox" ng-model="data.aiStatusID" ng-true-value="3" ng-false-value="0" disabled /></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Wash/CushionLabel</td>
+                                                <td ng-if="data.isAutoUpdateSimilarLP"><input id="WashCushionLabelSpecial" data-id="WashCushionLabel" type="checkbox" ng-change="event.autoFile(5, data.washCushionLabelID)" ng-model="data.washCushionLabelID" ng-true-value="1" ng-false-value="0" /></td>
+                                                <td ng-if="!data.isAutoUpdateSimilarLP"><input id="WashCushionLabelSpecial" data-id="WashCushionLabel" type="checkbox" ng-model="data.washCushionLabelID" ng-true-value="1" ng-false-value="0" /></td>
+                                                <td><input id="WashCushionLabelStandard" data-id="WashCushionLabel" type="checkbox" ng-model="data.washCushionLabelID" ng-true-value="2" ng-false-value="0" /></td>
+                                                <td><input id="WashCushionLabelNo" data-id="WashCushionLabel" type="checkbox" ng-model="data.washCushionLabelID" ng-true-value="3" ng-false-value="0" disabled /></td>
+                                            </tr>
+                                            <tr id="Option1" class="displaynone">
+                                                <td>
+                                                    <a class="btn btn-danger btn-xs font-11" ng-click="event.removeOption(1)" title="Delete"><i class="fa fa-times"></i></a>
+                                                    <select class="search-filter" ng-model="data.option1Label" ng-options="item.optionNM as item.optionNM for item in options">
+                                                        <option></option>
+                                                    </select>
+
+                                                    @*<input class="option1label" type="text" optionNM="option1" style="text-align:left; width: 74%" ng-model="data.option1Label">*@
+                                                </td>
+                                                <td ng-if="data.isAutoUpdateSimilarLP"><input id="Option1Special" data-id="Option1Label" type="checkbox" ng-change="event.autoFile(6, data.option1StatusID)" ng-model="data.option1StatusID" ng-true-value="1" ng-false-value="0" /></td>
+                                                <td ng-if="!data.isAutoUpdateSimilarLP"><input id="Option1Special" data-id="Option1Label" type="checkbox" ng-model="data.option1StatusID" ng-true-value="1" ng-false-value="0" /></td>
+                                                <td><input id="Option1Standard" data-id="Option1Label" type="checkbox" ng-model="data.option1StatusID" ng-true-value="2" ng-false-value="0" /></td>
+                                                <td><input id="Option1No" data-id="Option1Label" type="checkbox" ng-model="data.option1StatusID" ng-true-value="3" ng-false-value="0" disabled /></td>
+                                            </tr>
+                                            <tr id="Option2" class="displaynone">
+                                                <td>
+                                                    <a class="btn btn-danger btn-xs font-11" ng-click="event.removeOption(2)" title="Delete"><i class="fa fa-times"></i></a>
+                                                    <select class="search-filter" ng-model="data.option2Label" ng-options="item.optionNM as item.optionNM for item in options">
+                                                        <option></option>
+                                                    </select>
+                                                    @*<input class="option2label" type="text" optionNM="option2" style="text-align:left; width: 74%" ng-model="data.option2Label">*@
+                                                </td>
+                                                <td ng-if="data.isAutoUpdateSimilarLP"><input id="Option2Special" data-id="Option2Label" type="checkbox" ng-change="event.autoFile(7, data.option2StatusID)" ng-model="data.option2StatusID" ng-true-value="1" ng-false-value="0" /></td>
+                                                <td ng-if="!data.isAutoUpdateSimilarLP"><input id="Option2Special" data-id="Option2Label" type="checkbox" ng-model="data.option2StatusID" ng-true-value="1" ng-false-value="0" /></td>
+                                                <td><input id="Option2Standard" data-id="Option2Label" type="checkbox" ng-model="data.option2StatusID" ng-true-value="2" ng-false-value="0" /></td>
+                                                <td><input id="Option2No" data-id="Option2Label" type="checkbox" ng-model="data.option2StatusID" ng-true-value="3" ng-false-value="0" disabled /></td>
+                                            </tr>
+                                            <tr id="Option3" class="displaynone">
+                                                <td>
+                                                    <a class="btn btn-danger btn-xs font-11" ng-click="event.removeOption(3)" title="Delete"><i class="fa fa-times"></i></a>
+                                                    <select class="search-filter" ng-model="data.option3Label" ng-options="item.optionNM as item.optionNM for item in options">
+                                                        <option></option>
+                                                    </select>
+                                                    @*<input class="option3label" type="text" optionNM="option3" style="text-align:left; width: 74%" ng-model="data.option3Label">*@
+                                                </td>
+                                                <td ng-if="data.isAutoUpdateSimilarLP"><input id="Option3Special" data-id="Option3Label" type="checkbox" ng-change="event.autoFile(8, data.option3StatusID)" ng-model="data.option3StatusID" ng-true-value="1" ng-false-value="0" /></td>
+                                                <td ng-if="!data.isAutoUpdateSimilarLP"><input id="Option3Special" data-id="Option3Label" type="checkbox" ng-model="data.option3StatusID" ng-true-value="1" ng-false-value="0" /></td>
+                                                <td><input id="Option3Standard" data-id="Option3Label" type="checkbox" ng-model="data.option3StatusID" ng-true-value="2" ng-false-value="0" /></td>
+                                                <td><input id="Option3No" data-id="Option3Label" type="checkbox" ng-model="data.option3StatusID" ng-true-value="3" ng-false-value="0" disabled /></td>
+                                            </tr>
+                                            @**@
+                                            <tr id="Option4" class="displaynone">
+                                                <td>
+                                                    <a class="btn btn-danger btn-xs font-11" ng-click="event.removeOption(4)" title="Delete"><i class="fa fa-times"></i></a>
+                                                    <select class="search-filter" ng-model="data.option4Label" ng-options="item.optionNM as item.optionNM for item in options">
+                                                        <option></option>
+                                                    </select>
+                                                    @*<input class="option3label" type="text" optionNM="option3" style="text-align:left; width: 74%" ng-model="data.option3Label">*@
+                                                </td>
+                                                <td ng-if="data.isAutoUpdateSimilarLP"><input id="Option4Special" data-id="Option4Label" type="checkbox" ng-change="event.autoFile(9, data.option4StatusID)" ng-model="data.option4StatusID" ng-true-value="1" ng-false-value="0" /></td>
+                                                <td ng-if="!data.isAutoUpdateSimilarLP"><input id="Option4Special" data-id="Option4Label" type="checkbox" ng-model="data.option4StatusID" ng-true-value="1" ng-false-value="0" /></td>
+                                                <td><input id="Option4Standard" data-id="Option4Label" type="checkbox" ng-model="data.option4StatusID" ng-true-value="2" ng-false-value="0" /></td>
+                                                <td><input id="Option4No" data-id="Option4Label" type="checkbox" ng-model="data.option4StatusID" ng-true-value="3" ng-false-value="0" disabled /></td>
+                                            </tr>
+                                            <tr id="Option5" class="displaynone">
+                                                <td>
+                                                    <a class="btn btn-danger btn-xs font-11" ng-click="event.removeOption(5)" title="Delete"><i class="fa fa-times"></i></a>
+                                                    <select class="search-filter" ng-model="data.option5Label" ng-options="item.optionNM as item.optionNM for item in options">
+                                                        <option></option>
+                                                    </select>
+                                                    @*<input class="option3label" type="text" optionNM="option3" style="text-align:left; width: 74%" ng-model="data.option3Label">*@
+                                                </td>
+                                                <td ng-if="data.isAutoUpdateSimilarLP"><input id="Option5Special" data-id="Option5Label" type="checkbox" ng-change="event.autoFile(10, data.option5StatusID)" ng-model="data.option5StatusID" ng-true-value="1" ng-false-value="0" /></td>
+                                                <td ng-if="!data.isAutoUpdateSimilarLP"><input id="Option5Special" data-id="Option5Label" type="checkbox" ng-model="data.option5StatusID" ng-true-value="1" ng-false-value="0" /></td>
+                                                <td><input id="Option5Standard" data-id="Option5Label" type="checkbox" ng-model="data.option5StatusID" ng-true-value="2" ng-false-value="0" /></td>
+                                                <td><input id="Option5No" data-id="Option5Label" type="checkbox" ng-model="data.option5StatusID" ng-true-value="3" ng-false-value="0" disabled /></td>
+                                            </tr>
+                                            <tr id="Option6" class="displaynone">
+                                                <td>
+                                                    <a class="btn btn-danger btn-xs font-11" ng-click="event.removeOption(6)" title="Delete"><i class="fa fa-times"></i></a>
+                                                    <select class="search-filter" ng-model="data.option6Label" ng-options="item.optionNM as item.optionNM for item in options">
+                                                        <option></option>
+                                                    </select>
+                                                    @*<input class="option3label" type="text" optionNM="option3" style="text-align:left; width: 74%" ng-model="data.option3Label">*@
+                                                </td>
+                                                <td ng-if="data.isAutoUpdateSimilarLP"><input id="Option6Special" data-id="Option6Label" type="checkbox" ng-change="event.autoFile(11, data.option6StatusID)" ng-model="data.option6StatusID" ng-true-value="1" ng-false-value="0" /></td>
+                                                <td ng-if="!data.isAutoUpdateSimilarLP"><input id="Option6Special" data-id="Option6Label" type="checkbox" ng-model="data.option6StatusID" ng-true-value="1" ng-false-value="0" /></td>
+                                                <td><input id="Option6Standard" data-id="Option6Label" type="checkbox" ng-model="data.option6StatusID" ng-true-value="2" ng-false-value="0" /></td>
+                                                <td><input id="Option6No" data-id="Option6Label" type="checkbox" ng-model="data.option6StatusID" ng-true-value="3" ng-false-value="0" disabled /></td>
+                                            </tr>
+                                            <tr id="Option7" class="displaynone">
+                                                <td>
+                                                    <a class="btn btn-danger btn-xs font-11" ng-click="event.removeOption(7)" title="Delete"><i class="fa fa-times"></i></a>
+                                                    <select class="search-filter" ng-model="data.option7Label" ng-options="item.optionNM as item.optionNM for item in options">
+                                                        <option></option>
+                                                    </select>
+                                                    @*<input class="option3label" type="text" optionNM="option3" style="text-align:left; width: 74%" ng-model="data.option3Label">*@
+                                                </td>
+                                                <td ng-if="data.isAutoUpdateSimilarLP"><input id="Option7Special" data-id="Option7Label" type="checkbox" ng-change="event.autoFile(12, data.option7StatusID)" ng-model="data.option7StatusID" ng-true-value="1" ng-false-value="0" /></td>
+                                                <td ng-if="!data.isAutoUpdateSimilarLP"><input id="Option7Special" data-id="Option7Label" type="checkbox" ng-model="data.option7StatusID" ng-true-value="1" ng-false-value="0" /></td>
+                                                <td><input id="Option7Standard" data-id="Option7Label" type="checkbox" ng-model="data.option7StatusID" ng-true-value="2" ng-false-value="0" /></td>
+                                                <td><input id="Option7No" data-id="Option7Label" type="checkbox" ng-model="data.option7StatusID" ng-true-value="3" ng-false-value="0" disabled /></td>
+                                            </tr>
+                                            <tr id="Option8" class="displaynone">
+                                                <td>
+                                                    <a class="btn btn-danger btn-xs font-11" ng-click="event.removeOption(8)" title="Delete"><i class="fa fa-times"></i></a>
+                                                    <select class="search-filter" ng-model="data.option8Label" ng-options="item.optionNM as item.optionNM for item in options">
+                                                        <option></option>
+                                                    </select>
+                                                    @*<input class="option3label" type="text" optionNM="option3" style="text-align:left; width: 74%" ng-model="data.option3Label">*@
+                                                </td>
+                                                <td ng-if="data.isAutoUpdateSimilarLP"><input id="Option8Special" data-id="Option8Label" type="checkbox" ng-change="event.autoFile(13, data.option8StatusID)" ng-model="data.option8StatusID" ng-true-value="1" ng-false-value="0" /></td>
+                                                <td ng-if="!data.isAutoUpdateSimilarLP"><input id="Option8Special" data-id="Option8Label" type="checkbox" ng-model="data.option8StatusID" ng-true-value="1" ng-false-value="0" /></td>
+                                                <td><input id="Option8Standard" data-id="Option8Label" type="checkbox" ng-model="data.option8StatusID" ng-true-value="2" ng-false-value="0" /></td>
+                                                <td><input id="Option8No" data-id="Option8Label" type="checkbox" ng-model="data.option8StatusID" ng-true-value="3" ng-false-value="0" disabled /></td>
+                                            </tr>
+                                            <tr id="Option9" class="displaynone">
+                                                <td>
+                                                    <a class="btn btn-danger btn-xs font-11" ng-click="event.removeOption(9)" title="Delete"><i class="fa fa-times"></i></a>
+                                                    <select class="search-filter" ng-model="data.option9Label" ng-options="item.optionNM as item.optionNM for item in options">
+                                                        <option></option>
+                                                    </select>
+                                                    @*<input class="option3label" type="text" optionNM="option3" style="text-align:left; width: 74%" ng-model="data.option3Label">*@
+                                                </td>
+                                                <td ng-if="data.isAutoUpdateSimilarLP"><input id="Option9Special" data-id="Option9Label" type="checkbox" ng-change="event.autoFile(14, data.option9StatusID)" ng-model="data.option9StatusID" ng-true-value="1" ng-false-value="0" /></td>
+                                                <td ng-if="!data.isAutoUpdateSimilarLP"><input id="Option9Special" data-id="Option9Label" type="checkbox" ng-model="data.option9StatusID" ng-true-value="1" ng-false-value="0" /></td>
+                                                <td><input id="Option9Standard" data-id="Option9Label" type="checkbox" ng-model="data.option9StatusID" ng-true-value="2" ng-false-value="0" /></td>
+                                                <td><input id="Option9No" data-id="Option9Label" type="checkbox" ng-model="data.option9StatusID" ng-true-value="3" ng-false-value="0" disabled /></td>
+                                            </tr>
+                                            <tr id="Option10" class="displaynone">
+                                                <td>
+                                                    <a class="btn btn-danger btn-xs font-11" ng-click="event.removeOption(10)" title="Delete"><i class="fa fa-times"></i></a>
+                                                    <select class="search-filter" ng-model="data.option10Label" ng-options="item.optionNM as item.optionNM for item in options">
+                                                        <option></option>
+                                                    </select>
+                                                    @*<input class="option3label" type="text" optionNM="option3" style="text-align:left; width: 74%" ng-model="data.option3Label">*@
+                                                </td>
+                                                <td ng-if="data.isAutoUpdateSimilarLP"><input id="Option10Special" data-id="Option10Label" type="checkbox" ng-change="event.autoFile(15, data.option10StatusID)" ng-model="data.option10StatusID" ng-true-value="1" ng-false-value="0" /></td>
+                                                <td ng-if="!data.isAutoUpdateSimilarLP"><input id="Option10Special" data-id="Option10Label" type="checkbox" ng-model="data.option10StatusID" ng-true-value="1" ng-false-value="0" /></td>
+                                                <td><input id="Option10Standard" data-id="Option10Label" type="checkbox" ng-model="data.option10StatusID" ng-true-value="2" ng-false-value="0" /></td>
+                                                <td><input id="Option10No" data-id="Option10Label" type="checkbox" ng-model="data.option10StatusID" ng-true-value="3" ng-false-value="0" disabled /></td>
+                                            </tr>
+                                            <tr id="Option11" class="displaynone">
+                                                <td>
+                                                    <a class="btn btn-danger btn-xs font-11" ng-click="event.removeOption(11)" title="Delete"><i class="fa fa-times"></i></a>
+                                                    <select class="search-filter" ng-model="data.option11Label" ng-options="item.optionNM as item.optionNM for item in options">
+                                                        <option></option>
+                                                    </select>
+                                                    @*<input class="option3label" type="text" optionNM="option3" style="text-align:left; width: 74%" ng-model="data.option3Label">*@
+                                                </td>
+                                                <td ng-if="data.isAutoUpdateSimilarLP"><input id="Option11Special" data-id="Option11Label" type="checkbox" ng-change="event.autoFile(16, data.option11StatusID)" ng-model="data.option11StatusID" ng-true-value="1" ng-false-value="0" /></td>
+                                                <td ng-if="!data.isAutoUpdateSimilarLP"><input id="Option11Special" data-id="Option11Label" type="checkbox" ng-model="data.option11StatusID" ng-true-value="1" ng-false-value="0" /></td>
+                                                <td><input id="Option11Standard" data-id="Option11Label" type="checkbox" ng-model="data.option11StatusID" ng-true-value="2" ng-false-value="0" /></td>
+                                                <td><input id="Option11No" data-id="Option11Label" type="checkbox" ng-model="data.option11StatusID" ng-true-value="3" ng-false-value="0" disabled /></td>
+                                            </tr>
+                                            <tr id="Option12" class="displaynone">
+                                                <td>
+                                                    <a class="btn btn-danger btn-xs font-11" ng-click="event.removeOption(12)" title="Delete"><i class="fa fa-times"></i></a>
+                                                    <select class="search-filter" ng-model="data.option12Label" ng-options="item.optionNM as item.optionNM for item in options">
+                                                        <option></option>
+                                                    </select>
+                                                    @*<input class="option3label" type="text" optionNM="option3" style="text-align:left; width: 74%" ng-model="data.option3Label">*@
+                                                </td>
+                                                <td ng-if="data.isAutoUpdateSimilarLP"><input id="Option12Special" data-id="Option12Label" type="checkbox" ng-change="event.autoFile(17, data.option12StatusID)" ng-model="data.option12StatusID" ng-true-value="1" ng-false-value="0" /></td>
+                                                <td ng-if="!data.isAutoUpdateSimilarLP"><input id="Option12Special" data-id="Option12Label" type="checkbox" ng-model="data.option12StatusID" ng-true-value="1" ng-false-value="0" /></td>
+                                                <td><input id="Option12Standard" data-id="Option12Label" type="checkbox" ng-model="data.option12StatusID" ng-true-value="2" ng-false-value="0" /></td>
+                                                <td><input id="Option12No" data-id="Option12Label" type="checkbox" ng-model="data.option12StatusID" ng-true-value="3" ng-false-value="0" disabled /></td>
+                                            </tr>
+                                            <tr id="Option13" class="displaynone">
+                                                <td>
+                                                    <a class="btn btn-danger btn-xs font-11" ng-click="event.removeOption(13)" title="Delete"><i class="fa fa-times"></i></a>
+                                                    <select class="search-filter" ng-model="data.option13Label" ng-options="item.optionNM as item.optionNM for item in options">
+                                                        <option></option>
+                                                    </select>
+                                                    @*<input class="option3label" type="text" optionNM="option3" style="text-align:left; width: 74%" ng-model="data.option3Label">*@
+                                                </td>
+                                                <td ng-if="data.isAutoUpdateSimilarLP"><input id="Option13Special" data-id="Option13Label" type="checkbox" ng-change="event.autoFile(18, data.option13StatusID)" ng-model="data.option13StatusID" ng-true-value="1" ng-false-value="0" /></td>
+                                                <td ng-if="!data.isAutoUpdateSimilarLP"><input id="Option13Special" data-id="Option13Label" type="checkbox" ng-model="data.option13StatusID" ng-true-value="1" ng-false-value="0" /></td>
+                                                <td><input id="Option13Standard" data-id="Option13Label" type="checkbox" ng-model="data.option13StatusID" ng-true-value="2" ng-false-value="0" /></td>
+                                                <td><input id="Option13No" data-id="Option13Label" type="checkbox" ng-model="data.option13StatusID" ng-true-value="3" ng-false-value="0" disabled /></td>
+                                            </tr>
+                                            <tr id="Option14" class="displaynone">
+                                                <td>
+                                                    <a class="btn btn-danger btn-xs font-11" ng-click="event.removeOption(14)" title="Delete"><i class="fa fa-times"></i></a>
+                                                    <select class="search-filter" ng-model="data.option14Label" ng-options="item.optionNM as item.optionNM for item in options">
+                                                        <option></option>
+                                                    </select>
+                                                    @*<input class="option3label" type="text" optionNM="option3" style="text-align:left; width: 74%" ng-model="data.option3Label">*@
+                                                </td>
+                                                <td ng-if="data.isAutoUpdateSimilarLP"><input id="Option14Special" data-id="Option14Label" type="checkbox" ng-change="event.autoFile(19, data.option14StatusID)" ng-model="data.option14StatusID" ng-true-value="1" ng-false-value="0" /></td>
+                                                <td ng-if="!data.isAutoUpdateSimilarLP"><input id="Option14Special" data-id="Option14Label" type="checkbox" ng-model="data.option14StatusID" ng-true-value="1" ng-false-value="0" /></td>
+                                                <td><input id="Option14Standard" data-id="Option14Label" type="checkbox" ng-model="data.option14StatusID" ng-true-value="2" ng-false-value="0" /></td>
+                                                <td><input id="Option14No" data-id="Option14Label" type="checkbox" ng-model="data.option14StatusID" ng-true-value="3" ng-false-value="0" disabled /></td>
+                                            </tr>
+                                            <tr id="Option15" class="displaynone">
+                                                <td>
+                                                    <a class="btn btn-danger btn-xs font-11" ng-click="event.removeOption(15)" title="Delete"><i class="fa fa-times"></i></a>
+                                                    <select class="search-filter" ng-model="data.option15Label" ng-options="item.optionNM as item.optionNM for item in options">
+                                                        <option></option>
+                                                    </select>
+                                                    @*<input class="option3label" type="text" optionNM="option3" style="text-align:left; width: 74%" ng-model="data.option3Label">*@
+                                                </td>
+                                                <td ng-if="data.isAutoUpdateSimilarLP"><input id="Option15Special" data-id="Option15Label" type="checkbox" ng-change="event.autoFile(20, data.option15StatusID)" ng-model="data.option15StatusID" ng-true-value="1" ng-false-value="0" /></td>
+                                                <td ng-if="!data.isAutoUpdateSimilarLP"><input id="Option15Special" data-id="Option15Label" type="checkbox" ng-model="data.option15StatusID" ng-true-value="1" ng-false-value="0" /></td>
+                                                <td><input id="Option15Standard" data-id="Option15Label" type="checkbox" ng-model="data.option15StatusID" ng-true-value="2" ng-false-value="0" /></td>
+                                                <td><input id="Option15No" data-id="Option15Label" type="checkbox" ng-model="data.option15StatusID" ng-true-value="3" ng-false-value="0" disabled /></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </section>
+                        </div>
+                        <div class="row">
+                            <section class="col col-sm-6">
+                                <label class="label">
+                                    <a href="javascript:void(0)" class="btn btn-default btn-xs btn-primary font-11" ng-click="event.changeRemark()">
+                                        <i class="fa fa-plus"></i> Add LP info from client
+                                    </a>
+                                </label>
+                                <div class="tilsoft-table-wrapper">
+                                    <div class="tilsoft-table">
+                                        <div class="tilsoft-table-body" style="width: 100%; overflow-y: hidden; height: auto; margin-top: 0px;">
+                                            <table>
+                                                <tbody>
+                                                    <tr>
+                                                        <th style="width: 80px;">  </th>
+                                                        <th style="width: 180px;"> Updated by </th>
+                                                        <th> Remark </th>
+                                                    </tr>
+                                                    <tr ng-repeat="e in data.labelingPackagingRemarks">
+                                                        <td style="width: 80px; text-align: center;">
+                                                            <a ng-if="e.remarkFriendlyName" title="View file" class="btn btn-primary btn-xs" style="font-size: 11px;" ng-href="{{e.remarkFileUrl}}" target="_blank">
+                                                                <i class="fa fa-folder-open-o"> View </i>
+                                                            </a>
+                                                        </td>
+                                                        <td style="width: 180px;">
+                                                            <i class="fa fa-user"></i>
+                                                            <a ng-if="e.updatedBy" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{e.updatedBy}}" da dat data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                                {{e.updatorName}}
+                                                            </a>
+                                                        </td>
+                                                        <td style="word-break: break-all;"> {{$index + 1}}. {{e.remark}} </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                            <section class="col col-sm-6">
+                                <label class="label">
+                                    <a href="javascript:void(0)" class="btn btn-default btn-xs btn-primary font-11" ng-click="event.addOtherFile()">
+                                        <i class="fa fa-plus"></i> Add other file(s)
+                                    </a>
+                                </label>
+                                <div class="tilsoft-table-wrapper">
+                                    <div class="tilsoft-table">
+                                        <div class="tilsoft-table-body" style="width: 100%; overflow-y: hidden; height: auto; margin-top: 0px;">
+                                            <table>
+                                                <tbody>
+                                                    <tr>
+                                                        <th style="width: 80px;">  </th>
+                                                        <th> File </th>
+                                                    </tr>
+                                                    <tr ng-repeat="e in data.labelingPackagingOtherFiles">
+                                                        <td style="width: 80px; text-align: center;">
+                                                            <a href="javascript:void(0)" class="btn btn-default btn-xs btn-danger font-11" ng-click="event.removeOtherFile(e)">
+                                                                <i class="fa fa-times"></i> Delete
+                                                            </a>
+                                                        </td>
+                                                        <td>
+                                                            <a ng-if="e.otherFileFriendlyName" title="View file" style="font-size: 11px;" ng-href="{{e.otherFileUrl}}" target="_blank">
+                                                                {{e.otherFileFriendlyName}}
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+                        <div class="row">
+                            <section class="col col-sm-3" ng-if="data.isAutoUpdateSimilarLP">
+                                <a href="javascript:void(0)" class="btn btn-default btn-xs btn-primary font-11" title="Auto update" ng-click="event.autoUpdate($event)">
+                                    <i class="fa fa-save"></i> Auto update
+                                </a>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+    <article class="col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <ul class="nav nav-tabs pull-left in">
+                    <li class="active">
+                        <a data-toggle="tab" href="#detail1"> <i class="fa fa-database"></i> <span class="hidden-mobile hidden-tablet">Product</span> </a>
+                    </li>
+                    <li>
+                        <a data-toggle="tab" href="#detail2"> <i class="fa fa-database"></i> <span class="hidden-mobile hidden-tablet">Sparepart</span> </a>
+                    </li>
+                </ul>
+            </header>
+            <div>
+                <div class="jarviswidget-editbox"></div>
+                <div class="widget-body">
+                    <div class="smart-form">
+                        <div class="tab-content">
+                            <div class="tab-pane active" id="detail1">
+                                <div ng-if="data.labelingPackagingDetails.length" class="row">
+                                    <div class="col col-sm-12 m-bottom-5">
+                                        <div id="OrderDetailGrid" class="tilsoft-table-wrapper">
+                                            <div class="tilsoft-table">
+                                                <div class="tilsoft-table-body" style="width: 100%; height: auto; margin-top: 0px;">
+                                                    <table>
+                                                        <tbody>
+                                                            <tr>
+                                                                <th style="width:100px">ITEM CODE</th>
+                                                                <th style="width:200px">ITEM DESCRIPTION</th>
+                                                                <th style="width:80px">CLIENT ART CODE</th>
+                                                                <th style="width:100px">CLIENT ART NAME</th>
+                                                                <th style="width:100px;">CLIENT EAN CODE</th>
+                                                                <th ng-if="data.hangTagStatusID==1 || data.hangTagStatusID==2" style="width:100px;">
+                                                                    <span ng-if="data.hangTagStatusID==1">HANGTAG</span><br />
+                                                                    <a ng-if="data.hangTagStatusID==1" title="Upload file" href="javascript:void(0);" class="btn btn-warning btn-xs" style="font-size: 9px;text-transform:none;" ng-click="event.changAIOHangTagFile(1)"><i class="fa fa-folder-open-o"> Upload all</i></a>
+                                                                    <span ng-if="data.hangTagStatusID==2">HANGTAG STANDARD</span><br />
+                                                                </th>
+                                                                <th ng-if="data.boxShippingMarkStatusID == 1" style="width:100px;">
+                                                                    <span>BOX/SHIPPINGMARK</span><br />
+                                                                    <a title="Upload file" href="javascript:void(0);" class="btn btn-warning btn-xs" style="font-size: 9px;text-transform:none;" ng-click="event.changAIOBoxShippingMarkFile(1)"><i class="fa fa-folder-open-o"> Upload all</i></a>
+                                                                </th>
+                                                                <th ng-if="data.brassLabelStatusID == 1" style="width:100px;">
+                                                                    <span>BRASS LABEL</span><br />
+                                                                    <a title="Upload file" href="javascript:void(0);" class="btn btn-warning btn-xs" style="font-size: 9px;text-transform:none;" ng-click="event.changAIOBrassLabelFile(1)"><i class="fa fa-folder-open-o"> Upload all</i></a>
+                                                                </th>
+                                                                <th ng-if="data.aiStatusID == 1" style="width:100px;">
+                                                                    <span>AI</span><br />
+                                                                    <a title="Upload file" href="javascript:void(0);" class="btn btn-warning btn-xs" style="font-size: 9px;text-transform:none;" ng-click="event.changAIOAIFile(1)"><i class="fa fa-folder-open-o"> Upload all</i></a>
+                                                                </th>
+                                                                <th ng-if="data.washCushionLabelID == 1" style="width:150px;">
+                                                                    <span>WASH/CUSHION LABEL</span><br />
+                                                                    <a title="Upload file" href="javascript:void(0);" class="btn btn-warning btn-xs" style="font-size: 9px;text-transform:none;" ng-click="event.changAIOWashCushionLabelFile(1)"><i class="fa fa-folder-open-o"> Upload all</i></a>
+                                                                </th>
+                                                                <th style="width:100px;">
+                                                                    <span>FSC Label</span><br />
+                                                                </th>
+                                                                <th ng-if="data.option1StatusID == 1" style="width:100px">
+                                                                    <span>{{data.option1Label}}</span><br />
+                                                                    <a title="Upload file" href="javascript:void(0);" class="btn btn-warning btn-xs" style="font-size: 9px;text-transform:none;" ng-click="event.changAIOOption1File(1)"><i class="fa fa-folder-open-o"> Upload all</i></a>
+                                                                </th>
+                                                                <th ng-if="data.option2StatusID == 1" style="width:100px">
+                                                                    <span>{{data.option2Label}}</span><br />
+                                                                    <a title="Upload file" href="javascript:void(0);" class="btn btn-warning btn-xs" style="font-size: 9px;text-transform:none;" ng-click="event.changAIOOption2File(1)"><i class="fa fa-folder-open-o"> Upload all</i></a>
+                                                                </th>
+                                                                <th ng-if="data.option3StatusID == 1" style="width:100px">
+                                                                    <span>{{data.option3Label}}</span><br />
+                                                                    <a title="Upload file" href="javascript:void(0);" class="btn btn-warning btn-xs" style="font-size: 9px;text-transform:none;" ng-click="event.changAIOOption3File(1)"><i class="fa fa-folder-open-o"> Upload all</i></a>
+                                                                </th>
+                                                                <th ng-if="data.option4StatusID == 1" style="width:100px">
+                                                                    <span>{{data.option4Label}}</span><br />
+                                                                    <a title="Upload file" href="javascript:void(0);" class="btn btn-warning btn-xs" style="font-size: 9px;text-transform:none;" ng-click="event.changAIOOption4File(1)"><i class="fa fa-folder-open-o"> Upload all</i></a>
+                                                                </th>
+                                                                <th ng-if="data.option5StatusID == 1" style="width:100px">
+                                                                    <span>{{data.option5Label}}</span><br />
+                                                                    <a title="Upload file" href="javascript:void(0);" class="btn btn-warning btn-xs" style="font-size: 9px;text-transform:none;" ng-click="event.changAIOOption5File(1)"><i class="fa fa-folder-open-o"> Upload all</i></a>
+                                                                </th>
+                                                                <th ng-if="data.option6StatusID == 1" style="width:100px">
+                                                                    <span>{{data.option6Label}}</span><br />
+                                                                    <a title="Upload file" href="javascript:void(0);" class="btn btn-warning btn-xs" style="font-size: 9px;text-transform:none;" ng-click="event.changAIOOption6File(1)"><i class="fa fa-folder-open-o"> Upload all</i></a>
+                                                                </th>
+                                                                <th ng-if="data.option7StatusID == 1" style="width:100px">
+                                                                    <span>{{data.option7Label}}</span><br />
+                                                                    <a title="Upload file" href="javascript:void(0);" class="btn btn-warning btn-xs" style="font-size: 9px;text-transform:none;" ng-click="event.changAIOOption7File(1)"><i class="fa fa-folder-open-o"> Upload all</i></a>
+                                                                </th>
+                                                                <th ng-if="data.option8StatusID == 1" style="width:100px">
+                                                                    <span>{{data.option8Label}}</span><br />
+                                                                    <a title="Upload file" href="javascript:void(0);" class="btn btn-warning btn-xs" style="font-size: 9px;text-transform:none;" ng-click="event.changAIOOption8File(1)"><i class="fa fa-folder-open-o"> Upload all</i></a>
+                                                                </th>
+                                                                <th ng-if="data.option9StatusID == 1" style="width:100px">
+                                                                    <span>{{data.option9Label}}</span><br />
+                                                                    <a title="Upload file" href="javascript:void(0);" class="btn btn-warning btn-xs" style="font-size: 9px;text-transform:none;" ng-click="event.changAIOOption9File(1)"><i class="fa fa-folder-open-o"> Upload all</i></a>
+                                                                </th>
+                                                                <th ng-if="data.option10StatusID == 1" style="width:100px">
+                                                                    <span>{{data.option10Label}}</span><br />
+                                                                    <a title="Upload file" href="javascript:void(0);" class="btn btn-warning btn-xs" style="font-size: 9px;text-transform:none;" ng-click="event.changAIOOption10File(1)"><i class="fa fa-folder-open-o"> Upload all</i></a>
+                                                                </th>
+                                                                <th ng-if="data.option11StatusID == 1" style="width:100px">
+                                                                    <span>{{data.option11Label}}</span><br />
+                                                                    <a title="Upload file" href="javascript:void(0);" class="btn btn-warning btn-xs" style="font-size: 9px;text-transform:none;" ng-click="event.changAIOOption11File(1)"><i class="fa fa-folder-open-o"> Upload all</i></a>
+                                                                </th>
+                                                                <th ng-if="data.option12StatusID == 1" style="width:100px">
+                                                                    <span>{{data.option12Label}}</span><br />
+                                                                    <a title="Upload file" href="javascript:void(0);" class="btn btn-warning btn-xs" style="font-size: 9px;text-transform:none;" ng-click="event.changAIOOption12File(1)"><i class="fa fa-folder-open-o"> Upload all</i></a>
+                                                                </th>
+                                                                <th ng-if="data.option13StatusID == 1" style="width:100px">
+                                                                    <span>{{data.option13Label}}</span><br />
+                                                                    <a title="Upload file" href="javascript:void(0);" class="btn btn-warning btn-xs" style="font-size: 9px;text-transform:none;" ng-click="event.changAIOOption13File(1)"><i class="fa fa-folder-open-o"> Upload all</i></a>
+                                                                </th>
+                                                                <th ng-if="data.option14StatusID == 1" style="width:100px">
+                                                                    <span>{{data.option14Label}}</span><br />
+                                                                    <a title="Upload file" href="javascript:void(0);" class="btn btn-warning btn-xs" style="font-size: 9px;text-transform:none;" ng-click="event.changAIOOption14File(1)"><i class="fa fa-folder-open-o"> Upload all</i></a>
+                                                                </th>
+                                                                <th ng-if="data.option15StatusID == 1" style="width:100px">
+                                                                    <span>{{data.option15Label}}</span><br />
+                                                                    <a title="Upload file" href="javascript:void(0);" class="btn btn-warning btn-xs" style="font-size: 9px;text-transform:none;" ng-click="event.changAIOOption15File(1)"><i class="fa fa-folder-open-o"> Upload all</i></a>
+                                                                </th>
+                                                            </tr>
+                                                            <tr ng-repeat="item in data.labelingPackagingDetails">
+                                                                <td>{{item.articleCode}}</td>
+                                                                <td style="min-height:50px;">{{item.description}}</td>
+                                                                <td>{{item.clientArticleCode}}</td>
+                                                                <td>{{item.clientArticleName}}</td>
+                                                                <td><input class="form-control" type="text" name="clientEanCode" ng-model="item.clientEANCode" style="text-align:right"></td>
+                                                                <td ng-if="data.hangTagStatusID==1 || data.hangTagStatusID==2" class="action">
+                                                                    <span ng-if="data.hangTagStatusID == 1">
+                                                                        @Html.Partial("~/Views/Shared/_Controls/_FileUploadBox2.cshtml", new Frontend.Models.FileUploadViewModel2() { ControlID = "item.labelingPackagingDetailID", TypeID = 1, URLBinding = "item.hangTagFileUrl", FileName = "item.hangTagFriendlyName", JSOnChangeHandler = "changeHangtag", JSONRemoveHandler = "removeHangtag" })
+                                                                        <br />
+                                                                        <span ng-if="item.hangTagFilePI">
+                                                                            Auto. PI {{item.hangTagFilePI}}
+                                                                        </span>
+                                                                    </span>
+                                                                    <span ng-if="data.hangTagStatusID == 2">
+                                                                        <a ng-if="item.hangtagStandardFriendlyName!=null" title="View file" class="btn btn-primary btn-xs" style="font-size: 11px;" ng-href="{{item.hangtagStandardFileUrl}}" target="_blank">
+                                                                            <i class="fa fa-folder-open-o"> View</i>
+                                                                        </a>
+                                                                    </span>
+                                                                </td>
+                                                                <td ng-if="data.boxShippingMarkStatusID == 1" class="action">
+                                                                    @Html.Partial("~/Views/Shared/_Controls/_FileUploadBox2.cshtml", new Frontend.Models.FileUploadViewModel2() { ControlID = "item.labelingPackagingDetailID", TypeID = 1, URLBinding = "item.boxShippingMarkFileUrl", FileName = "item.boxShippingMarkFriendlyName", JSOnChangeHandler = "changeBoxAndShippingmark", JSONRemoveHandler = "removeBoxAndShippingmark" })
+                                                                    <br />
+                                                                    <span ng-if="item.boxShippingMarkFilePI">
+                                                                        Auto. PI {{item.boxShippingMarkFilePI}}
+                                                                    </span>
+                                                                </td>
+                                                                <td ng-if="data.brassLabelStatusID == 1" class="action">
+                                                                    @Html.Partial("~/Views/Shared/_Controls/_FileUploadBox2.cshtml", new Frontend.Models.FileUploadViewModel2() { ControlID = "item.labelingPackagingDetailID", TypeID = 1, URLBinding = "item.brassLabelFileUrl", FileName = "item.brassLabelFriendlyName", JSOnChangeHandler = "changeBrassLabel", JSONRemoveHandler = "removeBrassLabel" })
+                                                                    <br />
+                                                                    <span ng-if="item.brassLabelFilePI">
+                                                                        Auto. PI {{item.brassLabelFilePI}}
+                                                                    </span>
+                                                                </td>
+                                                                <td ng-if="data.aiStatusID == 1" class="action AI">
+                                                                    @Html.Partial("~/Views/Shared/_Controls/_FileUploadBox2.cshtml", new Frontend.Models.FileUploadViewModel2() { ControlID = "item.labelingPackagingDetailID", TypeID = 1, URLBinding = "item.aiFileUrl", FileName = "item.aiFriendlyName", JSOnChangeHandler = "changeAi", JSONRemoveHandler = "removeAi", })
+                                                                    <br />
+                                                                    <span ng-if="item.aiFilePI">
+                                                                        Auto. PI {{item.aiFilePI}}
+                                                                    </span>
+                                                                </td>
+                                                                <td ng-if="data.washCushionLabelID == 1" class="action AI">
+                                                                    @Html.Partial("~/Views/Shared/_Controls/_FileUploadBox2.cshtml", new Frontend.Models.FileUploadViewModel2() { ControlID = "item.labelingPackagingDetailID", TypeID = 1, URLBinding = "item.washCushionLabelFileUrl", FileName = "item.washCushionLabelFriendlyName", JSOnChangeHandler = "changeWashCushionLabel", JSONRemoveHandler = "removeWashCushionLabel", })
+                                                                    <br />
+                                                                    <span ng-if="item.washCushionLabelFilePI">
+                                                                        Auto. PI {{item.washCushionLabelFilePI}}
+                                                                    </span>
+                                                                </td>
+                                                                <td class="action AI">
+                                                                    <span ng-if="item.useFSCLabel">
+                                                                        @Html.Partial("~/Views/Shared/_Controls/_FileUploadBox2.cshtml", new Frontend.Models.FileUploadViewModel2() { ControlID = "item.labelingPackagingDetailID", TypeID = 1, URLBinding = "item.fscLabelFileUrl", FileName = "item.fscLabelFriendlyName", JSOnChangeHandler = "changeFSCLabel", JSONRemoveHandler = "removeFSCLabel", })
+                                                                    </span>
+                                                                    <span ng-if="!item.useFSCLabel" class="form-control">No</span>
+                                                                </td>
+                                                                <td ng-if="data.option1StatusID == 1" class="action">
+                                                                    @Html.Partial("~/Views/Shared/_Controls/_FileUploadBox2.cshtml", new Frontend.Models.FileUploadViewModel2() { ControlID = "item.labelingPackagingDetailID", TypeID = 1, URLBinding = "item.option1FileUrl", FileName = "item.option1FriendlyName", JSOnChangeHandler = "changeOption1", JSONRemoveHandler = "removeOption1", })
+                                                                    <br />
+                                                                    <span ng-if="item.option1FilePI">
+                                                                        Auto. PI {{item.option1FilePI}}
+                                                                    </span>
+                                                                </td>
+                                                                <td ng-if="data.option2StatusID == 1" class="action">
+                                                                    @Html.Partial("~/Views/Shared/_Controls/_FileUploadBox2.cshtml", new Frontend.Models.FileUploadViewModel2() { ControlID = "item.labelingPackagingDetailID", TypeID = 1, URLBinding = "item.option2FileUrl", FileName = "item.option2FriendlyName", JSOnChangeHandler = "changeOption2", JSONRemoveHandler = "removeOption2", })
+                                                                    <br />
+                                                                    <span ng-if="item.option2FilePI">
+                                                                        Auto. PI {{item.option2FilePI}}
+                                                                    </span>
+                                                                </td>
+                                                                <td ng-if="data.option3StatusID == 1" class="action">
+                                                                    @Html.Partial("~/Views/Shared/_Controls/_FileUploadBox2.cshtml", new Frontend.Models.FileUploadViewModel2() { ControlID = "item.labelingPackagingDetailID", TypeID = 1, URLBinding = "item.option3FileUrl", FileName = "item.option3FriendlyName", JSOnChangeHandler = "changeOption3", JSONRemoveHandler = "removeOption3", })
+                                                                    <br />
+                                                                    <span ng-if="item.option3FilePI">
+                                                                        Auto. PI {{item.option3FilePI}}
+                                                                    </span>
+                                                                </td>
+                                                                <td ng-if="data.option4StatusID == 1" class="action">
+                                                                    @Html.Partial("~/Views/Shared/_Controls/_FileUploadBox2.cshtml", new Frontend.Models.FileUploadViewModel2() { ControlID = "item.labelingPackagingDetailID", TypeID = 1, URLBinding = "item.option4FileUrl", FileName = "item.option4FriendlyName", JSOnChangeHandler = "changeOption4", JSONRemoveHandler = "removeOption4", })
+                                                                    <br />
+                                                                    <span ng-if="item.option4FilePI">
+                                                                        Auto. PI {{item.option4FilePI}}
+                                                                    </span>
+                                                                </td>
+                                                                <td ng-if="data.option5StatusID == 1" class="action">
+                                                                    @Html.Partial("~/Views/Shared/_Controls/_FileUploadBox2.cshtml", new Frontend.Models.FileUploadViewModel2() { ControlID = "item.labelingPackagingDetailID", TypeID = 1, URLBinding = "item.option5FileUrl", FileName = "item.option5FriendlyName", JSOnChangeHandler = "changeOption5", JSONRemoveHandler = "removeOption5", })
+                                                                    <br />
+                                                                    <span ng-if="item.option5FilePI">
+                                                                        Auto. PI {{item.option5FilePI}}
+                                                                    </span>
+                                                                </td>
+                                                                <td ng-if="data.option6StatusID == 1" class="action">
+                                                                    @Html.Partial("~/Views/Shared/_Controls/_FileUploadBox2.cshtml", new Frontend.Models.FileUploadViewModel2() { ControlID = "item.labelingPackagingDetailID", TypeID = 1, URLBinding = "item.option6FileUrl", FileName = "item.option6FriendlyName", JSOnChangeHandler = "changeOption6", JSONRemoveHandler = "removeOption6", })
+                                                                    <br />
+                                                                    <span ng-if="item.option6FilePI">
+                                                                        Auto. PI {{item.option6FilePI}}
+                                                                    </span>
+                                                                </td>
+                                                                <td ng-if="data.option7StatusID == 1" class="action">
+                                                                    @Html.Partial("~/Views/Shared/_Controls/_FileUploadBox2.cshtml", new Frontend.Models.FileUploadViewModel2() { ControlID = "item.labelingPackagingDetailID", TypeID = 1, URLBinding = "item.option7FileUrl", FileName = "item.option7FriendlyName", JSOnChangeHandler = "changeOption7", JSONRemoveHandler = "removeOption7", })
+                                                                    <br />
+                                                                    <span ng-if="item.option7FilePI">
+                                                                        Auto. PI {{item.option7FilePI}}
+                                                                    </span>
+                                                                </td>
+                                                                <td ng-if="data.option8StatusID == 1" class="action">
+                                                                    @Html.Partial("~/Views/Shared/_Controls/_FileUploadBox2.cshtml", new Frontend.Models.FileUploadViewModel2() { ControlID = "item.labelingPackagingDetailID", TypeID = 1, URLBinding = "item.option8FileUrl", FileName = "item.option8FriendlyName", JSOnChangeHandler = "changeOption8", JSONRemoveHandler = "removeOption8", })
+                                                                    <br />
+                                                                    <span ng-if="item.option8FilePI">
+                                                                        Auto. PI {{item.option8FilePI}}
+                                                                    </span>
+                                                                </td>
+                                                                <td ng-if="data.option9StatusID == 1" class="action">
+                                                                    @Html.Partial("~/Views/Shared/_Controls/_FileUploadBox2.cshtml", new Frontend.Models.FileUploadViewModel2() { ControlID = "item.labelingPackagingDetailID", TypeID = 1, URLBinding = "item.option9FileUrl", FileName = "item.option9FriendlyName", JSOnChangeHandler = "changeOption9", JSONRemoveHandler = "removeOption9", })
+                                                                    <br />
+                                                                    <span ng-if="item.option9FilePI">
+                                                                        Auto. PI {{item.option9FilePI}}
+                                                                    </span>
+                                                                </td>
+                                                                <td ng-if="data.option10StatusID == 1" class="action">
+                                                                    @Html.Partial("~/Views/Shared/_Controls/_FileUploadBox2.cshtml", new Frontend.Models.FileUploadViewModel2() { ControlID = "item.labelingPackagingDetailID", TypeID = 1, URLBinding = "item.option10FileUrl", FileName = "item.option10FriendlyName", JSOnChangeHandler = "changeOption10", JSONRemoveHandler = "removeOption10", })
+                                                                    <br />
+                                                                    <span ng-if="item.option10FilePI">
+                                                                        Auto. PI {{item.option10FilePI}}
+                                                                    </span>
+                                                                </td>
+                                                                <td ng-if="data.option11StatusID == 1" class="action">
+                                                                    @Html.Partial("~/Views/Shared/_Controls/_FileUploadBox2.cshtml", new Frontend.Models.FileUploadViewModel2() { ControlID = "item.labelingPackagingDetailID", TypeID = 1, URLBinding = "item.option11FileUrl", FileName = "item.option11FriendlyName", JSOnChangeHandler = "changeOption11", JSONRemoveHandler = "removeOption11", })
+                                                                    <br />
+                                                                    <span ng-if="item.option11FilePI">
+                                                                        Auto. PI {{item.option11FilePI}}
+                                                                    </span>
+                                                                </td>
+                                                                <td ng-if="data.option12StatusID == 1" class="action">
+                                                                    @Html.Partial("~/Views/Shared/_Controls/_FileUploadBox2.cshtml", new Frontend.Models.FileUploadViewModel2() { ControlID = "item.labelingPackagingDetailID", TypeID = 1, URLBinding = "item.option12FileUrl", FileName = "item.option12FriendlyName", JSOnChangeHandler = "changeOption12", JSONRemoveHandler = "removeOption12", })
+                                                                    <br />
+                                                                    <span ng-if="item.option12FilePI">
+                                                                        Auto. PI {{item.option12FilePI}}
+                                                                    </span>
+                                                                </td>
+                                                                <td ng-if="data.option13StatusID == 1" class="action">
+                                                                    @Html.Partial("~/Views/Shared/_Controls/_FileUploadBox2.cshtml", new Frontend.Models.FileUploadViewModel2() { ControlID = "item.labelingPackagingDetailID", TypeID = 1, URLBinding = "item.option13FileUrl", FileName = "item.option13FriendlyName", JSOnChangeHandler = "changeOption13", JSONRemoveHandler = "removeOption13", })
+                                                                    <br />
+                                                                    <span ng-if="item.option13FilePI">
+                                                                        Auto. PI {{item.option13FilePI}}
+                                                                    </span>
+                                                                </td>
+                                                                <td ng-if="data.option14StatusID == 1" class="action">
+                                                                    @Html.Partial("~/Views/Shared/_Controls/_FileUploadBox2.cshtml", new Frontend.Models.FileUploadViewModel2() { ControlID = "item.labelingPackagingDetailID", TypeID = 1, URLBinding = "item.option14FileUrl", FileName = "item.option14FriendlyName", JSOnChangeHandler = "changeOption14", JSONRemoveHandler = "removeOption14", })
+                                                                    <br />
+                                                                    <span ng-if="item.option14FilePI">
+                                                                        Auto. PI {{item.option14FilePI}}
+                                                                    </span>
+                                                                </td>
+                                                                <td ng-if="data.option15StatusID == 1" class="action">
+                                                                    @Html.Partial("~/Views/Shared/_Controls/_FileUploadBox2.cshtml", new Frontend.Models.FileUploadViewModel2() { ControlID = "item.labelingPackagingDetailID", TypeID = 1, URLBinding = "item.option15FileUrl", FileName = "item.option15FriendlyName", JSOnChangeHandler = "changeOption15", JSONRemoveHandler = "removeOption15", })
+                                                                    <br />
+                                                                    <span ng-if="item.option15FilePI">
+                                                                        Auto. PI {{item.option15FilePI}}
+                                                                    </span>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane" id="detail2">
+                                <div ng-if="data.labelingPackagingSparepartDetails.length" class="row">
+                                    <div class="col-sm-12 m-bottom-5">
+                                        <div id="SparepartDetailGrid" class="tilsoft-table-wrapper">
+                                            <div class="tilsoft-table">
+                                                <div class="tilsoft-table-body" style="width: 100%; margin-top:0px;height:auto;">
+                                                    <table>
+                                                        <tr>
+                                                            <th style="width:100px">ITEM CODE</th>
+                                                            <th style="width:200px">ITEM DESCRIPTION</th>
+                                                            <th style="width:80px">CLIENT ART CODE</th>
+                                                            <th style="width:100px">CLIENT ART NAME</th>
+                                                            <th style="width:100px;">CLIENT EAN CODE</th>
+                                                            <th ng-if="data.hangTagStatusID == 1" style="width:100px;">
+                                                                <span>HANGTAG</span><br />
+                                                                <a title="Upload file" href="javascript:void(0);" class="btn btn-warning btn-xs" style="font-size: 9px;text-transform:none;" ng-click="event.changAIOHangTagFile(2)"><i class="fa fa-folder-open-o"> Upload all</i></a>
+                                                            </th>
+                                                            <th ng-if="data.boxShippingMarkStatusID == 1" style="width:100px;">
+                                                                <span>BOX/SHIPPINGMARK</span><br />
+                                                                <a title="Upload file" href="javascript:void(0);" class="btn btn-warning btn-xs" style="font-size: 9px;text-transform:none;" ng-click="event.changAIOBoxShippingMarkFile(2)"><i class="fa fa-folder-open-o"> Upload all</i></a>
+                                                            </th>
+                                                            <th ng-if="data.brassLabelStatusID == 1" style="width:100px;">
+                                                                <span>BRASS LABEL</span><br />
+                                                                <a title="Upload file" href="javascript:void(0);" class="btn btn-warning btn-xs" style="font-size: 9px;text-transform:none;" ng-click="event.changAIOBrassLabelFile(2)"><i class="fa fa-folder-open-o"> Upload all</i></a>
+                                                            </th>
+                                                            <th ng-if="data.aiStatusID == 1" style="width:100px;">
+                                                                <span>AI</span><br />
+                                                                <a title="Upload file" href="javascript:void(0);" class="btn btn-warning btn-xs" style="font-size: 9px;text-transform:none;" ng-click="event.changAIOAIFile(2)"><i class="fa fa-folder-open-o"> Upload all</i></a>
+                                                            </th>
+                                                            <th ng-if="data.washCushionLabelID == 1" style="width:150px;">
+                                                                <span>Wash/Cushion Label</span><br />
+                                                                <a title="Upload file" href="javascript:void(0);" class="btn btn-warning btn-xs" style="font-size: 9px;text-transform:none;" ng-click="event.changAIOWashCushionLabelFile(2)"><i class="fa fa-folder-open-o"> Upload all</i></a>
+                                                            </th>
+                                                            <th ng-if="data.option1StatusID == 1" style="width:100px">
+                                                                <span>{{data.option1Label}}</span><br />
+                                                                <a title="Upload file" href="javascript:void(0);" class="btn btn-warning btn-xs" style="font-size: 9px;text-transform:none;" ng-click="event.changAIOOption1File(2)"><i class="fa fa-folder-open-o"> Upload all</i></a>
+                                                            </th>
+                                                            <th ng-if="data.option2StatusID == 1" style="width:100px">
+                                                                <span>{{data.option2Label}}</span><br />
+                                                                <a title="Upload file" href="javascript:void(0);" class="btn btn-warning btn-xs" style="font-size: 9px;text-transform:none;" ng-click="event.changAIOOption2File(2)"><i class="fa fa-folder-open-o"> Upload all</i></a>
+                                                            </th>
+                                                            <th ng-if="data.option3StatusID == 1" style="width:100px">
+                                                                <span>{{data.option3Label}}</span><br />
+                                                                <a title="Upload file" href="javascript:void(0);" class="btn btn-warning btn-xs" style="font-size: 9px;text-transform:none;" ng-click="event.changAIOOption3File(2)"><i class="fa fa-folder-open-o"> Upload all</i></a>
+                                                            </th>
+                                                            <th ng-if="data.option4StatusID == 1" style="width:100px">
+                                                                <span>{{data.option4Label}}</span><br />
+                                                                <a title="Upload file" href="javascript:void(0);" class="btn btn-warning btn-xs" style="font-size: 9px;text-transform:none;" ng-click="event.changAIOOption4File(1)"><i class="fa fa-folder-open-o"> Upload all</i></a>
+                                                            </th>
+                                                            <th ng-if="data.option5StatusID == 1" style="width:100px">
+                                                                <span>{{data.option5Label}}</span><br />
+                                                                <a title="Upload file" href="javascript:void(0);" class="btn btn-warning btn-xs" style="font-size: 9px;text-transform:none;" ng-click="event.changAIOOption5File(1)"><i class="fa fa-folder-open-o"> Upload all</i></a>
+                                                            </th>
+                                                            <th ng-if="data.option6StatusID == 1" style="width:100px">
+                                                                <span>{{data.option6Label}}</span><br />
+                                                                <a title="Upload file" href="javascript:void(0);" class="btn btn-warning btn-xs" style="font-size: 9px;text-transform:none;" ng-click="event.changAIOOption6File(1)"><i class="fa fa-folder-open-o"> Upload all</i></a>
+                                                            </th>
+                                                            <th ng-if="data.option7StatusID == 1" style="width:100px">
+                                                                <span>{{data.option7Label}}</span><br />
+                                                                <a title="Upload file" href="javascript:void(0);" class="btn btn-warning btn-xs" style="font-size: 9px;text-transform:none;" ng-click="event.changAIOOption7File(1)"><i class="fa fa-folder-open-o"> Upload all</i></a>
+                                                            </th>
+                                                            <th ng-if="data.option8StatusID == 1" style="width:100px">
+                                                                <span>{{data.option8Label}}</span><br />
+                                                                <a title="Upload file" href="javascript:void(0);" class="btn btn-warning btn-xs" style="font-size: 9px;text-transform:none;" ng-click="event.changAIOOption8File(1)"><i class="fa fa-folder-open-o"> Upload all</i></a>
+                                                            </th>
+                                                            <th ng-if="data.option9StatusID == 1" style="width:100px">
+                                                                <span>{{data.option9Label}}</span><br />
+                                                                <a title="Upload file" href="javascript:void(0);" class="btn btn-warning btn-xs" style="font-size: 9px;text-transform:none;" ng-click="event.changAIOOption9File(1)"><i class="fa fa-folder-open-o"> Upload all</i></a>
+                                                            </th>
+                                                            <th ng-if="data.option10StatusID == 1" style="width:100px">
+                                                                <span>{{data.option10Label}}</span><br />
+                                                                <a title="Upload file" href="javascript:void(0);" class="btn btn-warning btn-xs" style="font-size: 9px;text-transform:none;" ng-click="event.changAIOOption10File(1)"><i class="fa fa-folder-open-o"> Upload all</i></a>
+                                                            </th>
+                                                            <th ng-if="data.option11StatusID == 1" style="width:100px">
+                                                                <span>{{data.option11Label}}</span><br />
+                                                                <a title="Upload file" href="javascript:void(0);" class="btn btn-warning btn-xs" style="font-size: 9px;text-transform:none;" ng-click="event.changAIOOption11File(1)"><i class="fa fa-folder-open-o"> Upload all</i></a>
+                                                            </th>
+                                                            <th ng-if="data.option12StatusID == 1" style="width:100px">
+                                                                <span>{{data.option12Label}}</span><br />
+                                                                <a title="Upload file" href="javascript:void(0);" class="btn btn-warning btn-xs" style="font-size: 9px;text-transform:none;" ng-click="event.changAIOOption12File(1)"><i class="fa fa-folder-open-o"> Upload all</i></a>
+                                                            </th>
+                                                            <th ng-if="data.option13StatusID == 1" style="width:100px">
+                                                                <span>{{data.option13Label}}</span><br />
+                                                                <a title="Upload file" href="javascript:void(0);" class="btn btn-warning btn-xs" style="font-size: 9px;text-transform:none;" ng-click="event.changAIOOption13File(1)"><i class="fa fa-folder-open-o"> Upload all</i></a>
+                                                            </th>
+                                                            <th ng-if="data.option14StatusID == 1" style="width:100px">
+                                                                <span>{{data.option14Label}}</span><br />
+                                                                <a title="Upload file" href="javascript:void(0);" class="btn btn-warning btn-xs" style="font-size: 9px;text-transform:none;" ng-click="event.changAIOOption14File(1)"><i class="fa fa-folder-open-o"> Upload all</i></a>
+                                                            </th>
+                                                            <th ng-if="data.option15StatusID == 1" style="width:100px">
+                                                                <span>{{data.option15Label}}</span><br />
+                                                                <a title="Upload file" href="javascript:void(0);" class="btn btn-warning btn-xs" style="font-size: 9px;text-transform:none;" ng-click="event.changAIOOption15File(1)"><i class="fa fa-folder-open-o"> Upload all</i></a>
+                                                            </th>
+
+                                                        </tr>
+                                                        <tr ng-repeat="item in data.labelingPackagingSparepartDetails">
+                                                            <td>{{item.articleCode}}</td>
+                                                            <td style="min-height:50px;">{{item.description}}</td>
+                                                            <td>{{item.clientArticleCode}}</td>
+                                                            <td>{{item.clientArticleName}}</td>
+                                                            <td><input class="form-control" type="text" name="clientEanCode" ng-model="item.clientEANCode" style="text-align:right"></td>
+                                                            <td ng-if="data.hangTagStatusID == 1" class="action">
+                                                                @Html.Partial("~/Views/Shared/_Controls/_FileUploadBox2.cshtml", new Frontend.Models.FileUploadViewModel2() { ControlID = "item.labelingPackagingSparepartDetailID", TypeID = 2, URLBinding = "item.hangTagFileUrl", FileName = "item.hangTagFriendlyName", JSOnChangeHandler = "changeHangtag", JSONRemoveHandler = "removeHangtag" })
+                                                            </td>
+                                                            <td ng-if="data.boxShippingMarkStatusID == 1" class="action">
+                                                                @Html.Partial("~/Views/Shared/_Controls/_FileUploadBox2.cshtml", new Frontend.Models.FileUploadViewModel2() { ControlID = "item.labelingPackagingSparepartDetailID", TypeID = 2, URLBinding = "item.boxShippingMarkFileUrl", FileName = "item.boxShippingMarkFriendlyName", JSOnChangeHandler = "changeBoxAndShippingmark", JSONRemoveHandler = "removeBoxAndShippingmark" })
+                                                            </td>
+                                                            <td ng-if="data.option1StatusID == 1" class="action">
+                                                                @Html.Partial("~/Views/Shared/_Controls/_FileUploadBox2.cshtml", new Frontend.Models.FileUploadViewModel2() { ControlID = "item.labelingPackagingSparepartDetailID", TypeID = 2, URLBinding = "item.option1FileUrl", FileName = "item.option1FriendlyName", JSOnChangeHandler = "changeOption1", JSONRemoveHandler = "removeOption1", })
+                                                            </td>
+                                                            <td ng-if="data.option2StatusID == 1" class="action">
+                                                                @Html.Partial("~/Views/Shared/_Controls/_FileUploadBox2.cshtml", new Frontend.Models.FileUploadViewModel2() { ControlID = "item.labelingPackagingSparepartDetailID", TypeID = 2, URLBinding = "item.option2FileUrl", FileName = "item.option2FriendlyName", JSOnChangeHandler = "changeOption2", JSONRemoveHandler = "removeOption2", })
+                                                            </td>
+                                                            <td ng-if="data.option3StatusID == 1" class="action">
+                                                                @Html.Partial("~/Views/Shared/_Controls/_FileUploadBox2.cshtml", new Frontend.Models.FileUploadViewModel2() { ControlID = "item.labelingPackagingSparepartDetailID", TypeID = 2, URLBinding = "item.option3FileUrl", FileName = "item.option3FriendlyName", JSOnChangeHandler = "changeOption3", JSONRemoveHandler = "removeOption3", })
+                                                            </td>
+                                                            <td ng-if="data.option4StatusID == 1" class="action">
+                                                                @Html.Partial("~/Views/Shared/_Controls/_FileUploadBox2.cshtml", new Frontend.Models.FileUploadViewModel2() { ControlID = "item.labelingPackagingSparepartDetailID", TypeID = 2, URLBinding = "item.option4FileUrl", FileName = "item.option4FriendlyName", JSOnChangeHandler = "changeOption4", JSONRemoveHandler = "removeOption4", })
+                                                            </td>
+                                                            <td ng-if="data.option5StatusID == 1" class="action">
+                                                                @Html.Partial("~/Views/Shared/_Controls/_FileUploadBox2.cshtml", new Frontend.Models.FileUploadViewModel2() { ControlID = "item.labelingPackagingSparepartDetailID", TypeID = 2, URLBinding = "item.option5FileUrl", FileName = "item.option5FriendlyName", JSOnChangeHandler = "changeOption5", JSONRemoveHandler = "removeOption5", })
+                                                            </td>
+                                                            <td ng-if="data.option6StatusID == 1" class="action">
+                                                                @Html.Partial("~/Views/Shared/_Controls/_FileUploadBox2.cshtml", new Frontend.Models.FileUploadViewModel2() { ControlID = "item.labelingPackagingSparepartDetailID", TypeID = 2, URLBinding = "item.option6FileUrl", FileName = "item.option6FriendlyName", JSOnChangeHandler = "changeOption6", JSONRemoveHandler = "removeOption6", })
+                                                            </td>
+                                                            <td ng-if="data.option7StatusID == 1" class="action">
+                                                                @Html.Partial("~/Views/Shared/_Controls/_FileUploadBox2.cshtml", new Frontend.Models.FileUploadViewModel2() { ControlID = "item.labelingPackagingSparepartDetailID", TypeID = 2, URLBinding = "item.option7FileUrl", FileName = "item.option7FriendlyName", JSOnChangeHandler = "changeOption7", JSONRemoveHandler = "removeOption7", })
+                                                            </td>
+                                                            <td ng-if="data.option8StatusID == 1" class="action">
+                                                                @Html.Partial("~/Views/Shared/_Controls/_FileUploadBox2.cshtml", new Frontend.Models.FileUploadViewModel2() { ControlID = "item.labelingPackagingSparepartDetailID", TypeID = 2, URLBinding = "item.option8FileUrl", FileName = "item.option8FriendlyName", JSOnChangeHandler = "changeOption8", JSONRemoveHandler = "removeOption8", })
+                                                            </td>
+                                                            <td ng-if="data.option9StatusID == 1" class="action">
+                                                                @Html.Partial("~/Views/Shared/_Controls/_FileUploadBox2.cshtml", new Frontend.Models.FileUploadViewModel2() { ControlID = "item.labelingPackagingSparepartDetailID", TypeID = 2, URLBinding = "item.option9FileUrl", FileName = "item.option9FriendlyName", JSOnChangeHandler = "changeOption9", JSONRemoveHandler = "removeOption9", })
+                                                            </td>
+                                                            <td ng-if="data.option10StatusID == 1" class="action">
+                                                                @Html.Partial("~/Views/Shared/_Controls/_FileUploadBox2.cshtml", new Frontend.Models.FileUploadViewModel2() { ControlID = "item.labelingPackagingSparepartDetailID", TypeID = 2, URLBinding = "item.option10FileUrl", FileName = "item.option10FriendlyName", JSOnChangeHandler = "changeOption10", JSONRemoveHandler = "removeOption10", })
+                                                            </td>
+                                                            <td ng-if="data.option11StatusID == 1" class="action">
+                                                                @Html.Partial("~/Views/Shared/_Controls/_FileUploadBox2.cshtml", new Frontend.Models.FileUploadViewModel2() { ControlID = "item.labelingPackagingSparepartDetailID", TypeID = 2, URLBinding = "item.option11FileUrl", FileName = "item.option11FriendlyName", JSOnChangeHandler = "changeOption11", JSONRemoveHandler = "removeOption11", })
+                                                            </td>
+                                                            <td ng-if="data.option12StatusID == 1" class="action">
+                                                                @Html.Partial("~/Views/Shared/_Controls/_FileUploadBox2.cshtml", new Frontend.Models.FileUploadViewModel2() { ControlID = "item.labelingPackagingSparepartDetailID", TypeID = 2, URLBinding = "item.option12FileUrl", FileName = "item.option12FriendlyName", JSOnChangeHandler = "changeOption12", JSONRemoveHandler = "removeOption12", })
+                                                            </td>
+                                                            <td ng-if="data.option13StatusID == 1" class="action">
+                                                                @Html.Partial("~/Views/Shared/_Controls/_FileUploadBox2.cshtml", new Frontend.Models.FileUploadViewModel2() { ControlID = "item.labelingPackagingSparepartDetailID", TypeID = 2, URLBinding = "item.option13FileUrl", FileName = "item.option13FriendlyName", JSOnChangeHandler = "changeOption13", JSONRemoveHandler = "removeOption13", })
+                                                            </td>
+                                                            <td ng-if="data.option14StatusID == 1" class="action">
+                                                                @Html.Partial("~/Views/Shared/_Controls/_FileUploadBox2.cshtml", new Frontend.Models.FileUploadViewModel2() { ControlID = "item.labelingPackagingSparepartDetailID", TypeID = 2, URLBinding = "item.option14FileUrl", FileName = "item.option14FriendlyName", JSOnChangeHandler = "changeOption14", JSONRemoveHandler = "removeOption14", })
+                                                            </td>
+                                                            <td ng-if="data.option15StatusID == 1" class="action">
+                                                                @Html.Partial("~/Views/Shared/_Controls/_FileUploadBox2.cshtml", new Frontend.Models.FileUploadViewModel2() { ControlID = "item.labelingPackagingSparepartDetailID", TypeID = 2, URLBinding = "item.option15FileUrl", FileName = "item.option15FriendlyName", JSOnChangeHandler = "changeOption15", JSONRemoveHandler = "removeOption15", })
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+<!-- Remark form-->
+<div id="remarkForm" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static" style="z-index: 1400;">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title" id="myModalLabel">Edit remark</h4>
+            </div>
+            <div class="modal-body">
+                <div class="smart-form">
+                    <fieldset>
+                        <div class="row">
+                            <div>
+                                <a href="javascript:void(0);" ng-click="event.addRemark($event)"><b><u>Add new remark</u></b></a>
+                            </div>
+                            <div id="contract" class="tilsoft-table-wrapper">
+                                <div class="tilsoft-table">
+                                    <div class="tilsoft-table-header" style="width: 450px;height:auto;">
+                                        <div style="width: 50px;"></div>
+                                        <div style="width: 400px;">Remark</div>
+                                        <div style="width: 100px;">Remark File</div>
+                                        <div style="width: 100px;">Updated By</div>
+                                        <div>Updated Date</div>
+                                    </div>
+                                    <div class="tilsoft-table-body" style="width: 450px; height:auto;">
+                                        <table>
+                                            <tr ng-repeat="item in data.labelingPackagingRemarks">
+                                                <td style="width: 49px; text-align: center;"><a href="#" title="Delete" ng-click="event.removeRemark($event, item.labelingPackagingRemarkID)"><i class="fa fa-times-circle grid-button"></i></a></td>
+                                                <td style="width: 400px;"><input class="form-control" type="text" name="remark" ng-model="item.remark" ng-change="event.remarkText($event,item)"></td>
+                                                <td style="width: 100px;">
+                                                    @Html.Partial("~/Views/Shared/_Controls/_FileUploadBox2.cshtml", new Frontend.Models.FileUploadViewModel2() { ControlID = "item.labelingPackagingRemarkID", TypeID = 0, URLBinding = "item.remarkFileUrl", FileName = "item.remarkFriendlyName", JSOnChangeHandler = "changeRemarkFile", JSONRemoveHandler = "removeRemarkFile" })
+                                                </td>
+                                                <td style="width: 100px;">{{item.updatorName}}</td>
+                                                <td>{{item.updatedDate}}</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">
+                    OK
+                </button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "labelingPackaging")" class="btn btn-default btn-sm" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default btn-sm @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="event.update($event)"><i class="fa fa-save"></i></a>
+        </li>
+        <li class="sparks-info" ng-hide="(@userInfo.Data.CompanyID !== 4)">
+            <a href="javascript:void(0)" class="btn btn-default btn-sm" title="Click this bell, the following email notification need to be send out" ng-click="event.sendNotificationNL2VN(data.factoryID, data.clientUD, data.proformaInvoiceNo, data.factoryUD)">
+                <i class="fa fa-bell"></i>
+            </a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default btn-sm" title="Export Excel" style="color: #31B404" ng-click="event.generateExcel(data.labelingPackagingID)"><i class="fa fa-file-excel-o"></i></a>
+        </li>
+        @if (!string.IsNullOrEmpty(userManualUrl))
+        {
+            <li class="sparks-info">
+                <a target="_blank" href="@userManualUrl" class="btn btn-default" title="Help"><i class="fa fa-info"></i></a>
+            </li>
+        }
+    </ul>
+}
+
+@section pagejs {
+    <script src="~/Angular/app/jsonService.js?cache=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script type="text/javascript">
+    jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/labelingpackaging/';
+    jsonService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+    var context = {
+            id: @ViewBag.ID,
+            errMsg: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED',
+            backURL: '@Url.Action("Index", "labelingpackaging")',
+            refreshURL: '@Url.Action("Edit", "labelingpackaging", new { id = UrlParameter.Optional })/',
+            backendReportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]'
+        }
+    </script>
+    <script src="~/Views/LabelingPackaging/service.js?cache=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/LabelingPackaging/edit.js?cache=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}
+

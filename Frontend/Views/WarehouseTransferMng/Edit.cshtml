@@ -1,0 +1,230 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    var supportServiceRoot = (System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"]);
+
+    ViewBag.Title = (ViewBag.ID == 0) ? "Create Warehouse Transfer" : "Edit Warehouse Transfer";
+    ViewBag.SubTitle = (ViewBag.ID == 0) ? "Create" : "Edit";
+    ViewBag.Module = " Warehouse Transfer";
+}
+
+<style>
+    .select2-arrow {
+        width: 15px !important;
+    }
+
+    .search-text {
+        height: 29px !important;
+        padding: 8px !important;
+        border: 1px solid #ddd !important;
+    }
+
+    .error-cus {
+        background: #fff0f0;
+        border-color: #A90329;
+    }
+
+    #colorred {
+        color: red
+    }
+</style>
+
+<form name="editForm" class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>@(ViewBag.ID == 0 ? "Create Warehouse Transfer" : "Edit Warehouse Transfer")</h2>
+            </header>
+            <div>
+                <div class="jarviswidget-editbox"></div>
+                <div class="widget-body">
+                    <div class="smart-form">
+                        <div class="row">
+                            <section class="col col-sm-2">
+                                <label>Type <span id="colorred">(required)</span></label>
+                                <label class="input">
+                                    <select onchange="selectType(this)" id="select-type" class="form-control error-cus" ng-model="data.warehouseTransferType" required>
+
+                                        <option value="0" onchange="selected()">SENT</option>
+                                        <option value="1">TRANSFERRED</option>
+                                    </select>
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label>WH Transfer Nr.</label>
+                                <label class="input">
+                                    <input type="text" class="form-control" ng-model="data.receiptNo" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label>WH Transfer Date.</label>
+                                <label class="input-group">
+                                    <input type="text" class="form-control" style="height: 30px" avs-calendar ng-data-source="data.receiptDate" />
+                                    <span class="input-group-addon">
+                                        <i class="fa fa-calendar"></i>
+                                    </span>
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label>WH Transfer from Branch. <span style="color:red" ng-show="editForm.fromBranchID.$error.required">(required)</span></label>
+                                <label class="input" ng-class="{'state-error': editForm.fromBranchID.$error.required}">
+                                    <select class="form-control" name="fromBranchID" id="fromBranchID" ng-model="data.fromBranchID" ng-options="item.branchID as item.branchUD for item in branches" ng-disabled="data.isConfirmDelivering" required>
+                                        <option value=""></option>
+                                    </select>
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label>WH Transfer to Branch. <span style="color:red" ng-show="editForm.toBranchID.$error.required">(required)</span></label>
+                                <label class="input" ng-class="{'state-error': editForm.toBranchID.$error.required}">
+                                    <select class="form-control" name="toBranchID" id="toBranchID" ng-model="data.toBranchID" ng-options="item.branchID as item.branchUD for item in branches" ng-disabled="data.isConfirmReceiving" required>
+                                        <option value=""></option>
+                                    </select>
+                                </label>
+                            </section>
+                            <section class="col col-sm-4">
+                                <label>WH Transfer Remark.</label>
+                                <label class="input">
+                                    <input type="text" class="form-control" ng-model="data.description" />
+                                </label>
+                            </section>
+                        </div>
+                        <div class="row">
+                            <section class="col col-sm-12">
+                                <h1>WH Transfer Detail.</h1>
+                                <hr style="margin-top: 5px;margin-bottom: 5px" />
+                                <div>
+                                    <a href="javascript:void(0);" ng-show="!(data.isConfirmReceiving || data.isConfirmDelivering)" ng-click="event.addProduct($event)"><b><u>Add product</u></b></a>
+                                </div>
+                                <div avs-scrollable-table class="tilsoft-table-wrapper">
+                                    <div class="tilsoft-table">
+                                        <div class="tilsoft-table-header" style="width: 1615px">
+                                            <div style="width: 55px"></div>
+                                            <div style="width: 350px">Item Name</div>
+                                            <div style="width: 200px">Item Code</div>
+                                            <div style="width: 80px">Unit</div>
+                                            <div style="width: 150px">From Warehouse</div>
+                                            <div style="width: 90px">Stock quantity</div>
+                                            <div style="width: 90px">Deliveried Qnt</div>
+                                            <div style="width: 150px">To Warehouse</div>
+                                            <div style="width: 90px">Received Qnt</div>
+                                            <div style="width: 350px">Remark</div>
+                                            <div style="border-bottom: none"></div>
+                                        </div>
+                                        <div class="tilsoft-table-body" style="width: 1615px">
+                                            <table>
+                                                <tr ng-repeat="detail in data.warehouseTransferDetails">
+                                                    <td style="width: 55px; text-align: center">
+                                                        <a href="javascript:void(0)" ng-show="!(data.isConfirmReceiving || data.isConfirmDelivering)" class="btn btn-default btn-xs btn-danger font-11" ng-click="event.removeProduct(detail)">
+                                                            <i class="fa fa-times"></i> Del
+                                                        </a>
+                                                    </td>
+                                                    <td style="width: 350px" ng-class="{'state-error': editForm.itemName.$error.required}">
+                                                        <input type="text" class="form-control" ng-disabled="data.isConfirmReceiving || data.isConfirmDelivering" id="itemName" name="itemName"
+                                                               avs-remote-auto-complete
+                                                               ng-request-param="productionItemBox.request"
+                                                               data-method="POST"
+                                                               ng-init-param="detail.productionItemNM"
+                                                               ng-init-param-2="data.fromBranchID"
+                                                               ng-init-param-3="data.toBranchID"
+                                                               ng-model="detail.productionItemNM"
+                                                               ng-item-value="productionItemBox.data"
+                                                               ng-item-selected="event.selectedProductionItem(productionItemBox.data, detail)"
+                                                               data-format-function="formatProductionItem" required
+                                                               @*ng-disabled="data.isConfirm"*@ />
+                                                    </td>
+                                                    <td style="width: 200px">
+                                                        <input type="text" class="form-control" ng-model="detail.productionItemUD" readonly />
+                                                    </td>
+                                                    <td style="width: 80px">
+                                                        <select class="form-control" ng-change="event.changeUnit(detail)" ng-disabled="data.isConfirmReceiving || data.isConfirmDelivering"
+                                                                ng-model="detail.unitID"
+                                                                ng-options="item.unitID as item.unitNM for item in detail.productionItemUnits">
+                                                            <option value=""></option>
+                                                        </select>
+                                                    </td>
+                                                    <td style="width: 150px" ng-class="{'state-error': editForm.fromFactoryWarehouseID.$error.required}">
+                                                        <select class="form-control" ng-disabled="data.isConfirmDelivering" ng-model="detail.fromFactoryWarehouseID" ng-options="item.factoryWarehouseID as item.factoryWarehouseNM for item in factoryWarehouses | filter : {'branchID' : data.fromBranchID} : true" ng-change="event.changeFromWarehouse(detail)" id="fromFactoryWarehouseID" name="fromFactoryWarehouseID" required>
+                                                            @*<option value=""></option>*@
+                                                        </select>
+                                                    </td>
+                                                    <td style="width: 90px">
+                                                        <input type="text" class="form-control" style="text-align: right" ng-data-source="detail.stockQnt" ng-decimal="4" avs-number readonly />
+                                                    </td>
+                                                    <td style="width: 90px">
+                                                        <input type="text" class="form-control" style="text-align: right" ng-disabled="data.isConfirmDelivering" ng-data-source="detail.receivedQnt" ng-on-change="event.calreceivedQnt(detail)" ng-decimal="4" avs-number />
+                                                    </td>
+                                                    <td style="width: 150px" ng-class="{'state-error': editForm.toFactoryWarehouseID.$error.required}">
+                                                        <select class="form-control" ng-disabled="data.isConfirmReceiving" ng-model="detail.toFactoryWarehouseID" ng-options="item.factoryWarehouseID as item.factoryWarehouseNM for item in factoryWarehouses | filter : {'branchID' : data.toBranchID} : true" id="toFactoryWarehouseID" name="toFactoryWarehouseID" required>
+                                                            @*<option value=""></option>*@
+                                                        </select>
+                                                    </td>
+                                                    <td style="width: 90px">
+                                                        <input type="text" class="form-control" style="text-align: right" ng-disabled="data.isConfirmReceiving" ng-data-source="detail.deliveriedQnt" ng-on-change="event.caldeliveriedQnt(detail)" ng-decimal="4" avs-number />
+                                                    </td>
+                                                    <td style="width: 350px">
+                                                        <input type="text" class="form-control" ng-model="detail.Remark" />
+                                                    </td>
+                                                    <td style="border-bottom: none"></td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default btn-sm" title="Delete" ng-click="event.remove(data.warehouseTransferID)">
+                <i class="fa fa-times"></i>
+            </a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default btn-sm" title="Save" ng-click="event.update()">
+                <i class="fa fa-floppy-o"></i>
+            </a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default btn-sm" title="Confirm item from warehouse" ng-disabled="data.isConfirmDelivering" ng-click="event.confirmDelivering(data.warehouseTransferID)" style="color: blue">
+                <i class="fa fa-check-circle"></i>
+            </a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default btn-sm" title="Confirm item to warehouse" ng-disabled="data.isConfirmReceiving" ng-click="event.confirmReceiving(data.warehouseTransferID)" style="color: green">
+                <i class="fa fa-check-circle"></i>
+            </a>
+        </li>
+        <li class="sparks-info">
+            <a href="@Url.Action("PrintOut", "WarehouseTransferMng")/{{data.warehouseTransferID}}" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Print, HttpContext.Current))" title="Print out" target="_blank"><i class="fa fa-print"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs{
+    <script type="text/javascript">
+        var context = {
+            id: @ViewBag.ID,
+            backUrl: '@Url.Action("Index", "WarehouseTransferMng")',
+            refreshUrl: '@Url.Action("Edit", "WarehouseTransferMng", new { id = UrlParameter.Optional })/',
+            serviceUrl: '@(serviceRoot)/api/WarehouseTransferMng/',
+            supportServiceUrl: '@(supportServiceRoot)/api/support/',
+            token: '@token',
+            msgValid: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED'
+        };
+    </script>
+    <script type="text/javascript" src="~/Angular/app/warehouseTransferMng/edit.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/warehouseTransferMng/service.js?v=@guid"></script>
+}
+

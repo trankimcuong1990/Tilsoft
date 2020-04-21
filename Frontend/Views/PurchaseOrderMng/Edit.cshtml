@@ -1,0 +1,735 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var supportServiceRoot = (System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"]);
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+
+    ViewBag.Title = (ViewBag.ID == 0) ? "Create Purchase Order" : "Edit Purchase Order";
+    ViewBag.SubTitle = (ViewBag.ID == 0) ? "Create" : "Edit";
+    ViewBag.Module = " Purchase Order ";
+
+    string userManualUrl = string.Empty;
+    if (System.IO.File.Exists(Server.MapPath("~/UserManual/" + ViewBag.ModuleCode + ".pdf")))
+    {
+        userManualUrl = "/UserManual/" + ViewBag.ModuleCode + ".pdf";
+    }
+}
+<div ng-show="viewName != 'edit'">
+    <form class="row" name="editForm">
+        <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+            <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+                <header>
+                    <h2>Select options Supplier create PurchaseOrder</h2>
+                </header>
+                <div>
+                    <div class="widget-body no-padding">
+                        <div class="smart-form">
+                            <fieldset>
+                                <div class="row">
+                                    <section class="col col-6">
+                                        <label class="label">Supplier</label>
+                                        <label class="label">
+                                            <select avs-select ng-model="data.factoryRawMaterialID" ng-options="factoryRawMaterial.factoryRawMaterialID as factoryRawMaterial.factoryRawMaterialShortNM for factoryRawMaterial in factoryRawMaterials">
+                                                <option value=""></option>
+                                            </select>
+                                            <i></i>
+                                        </label>
+                                    </section>
+                                </div>
+                            </fieldset>
+                            <footer>
+                                <button class="btn btn-primary" type="button" ng-click="event.goNext($event, data.factoryRawMaterialID)">
+                                    Next
+                                </button>
+                                <button class="btn btn-default" type="button" ng-click="event.goBack($event)">
+                                    Cancel
+                                </button>
+                            </footer>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </article>
+    </form>
+</div>
+<div ng-show="viewName == 'edit'">
+    <form name="editForm" class="row">
+        <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+            <div class="jarviswidget jarviswidget-color-darken" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+                <header>
+                    <span class="widget-icon">
+                        <i class="fa fa-database"></i>
+                    </span>
+                    <h2>@(ViewBag.ID == 0 ? "Create Purchase Order" : "Edit Purchase Order")</h2>
+                </header>
+                <div>
+                    <div class="jarviswidget-editbox"></div>
+                    <div class="widget-body">
+                        <div class="smart-form">
+                            <div class="row">
+                                <section class="col col-sm-2">
+                                    <label class="label">Purchase Order Nr.</label>
+                                    <label class="input">
+                                        <span class="form-control">{{data.purchaseOrderUD}}</span>
+                                    </label>
+                                </section>
+                                <section class="col col-sm-2">
+                                    <label class="label">
+                                        Purchase Order Date
+                                        <em class="note note-error" ng-show="(data.purchaseOrderDate == null  || data.purchaseOrderDate == '')">(Required)</em>
+                                    </label>
+                                    <label class="input" ng-show="data.purchaseOrderStatusID<2">
+                                        <label class="input-group" ng-show="data.purchaseOrderID == null || data.purchaseOrderID == 0">
+                                            <input type="text" id="purchaseOrderDate" class="form-control" style="font-family:Arial" avs-calendar ng-data-source="data.purchaseOrderDate" required autocomplete="off" />
+                                            <span class="input-group-addon">
+                                                <i class="fa fa-calendar"></i>
+                                            </span>
+                                        </label>
+                                        <label class="input" ng-show="data.purchaseOrderID > 0">
+                                            <span class="form-control">{{data.purchaseOrderDate}}</span>
+                                        </label>
+                                    </label>
+                                    <label class="input" ng-show="data.purchaseOrderStatusID>=2">
+                                        <span class="form-control">{{data.purchaseOrderDate}}</span>
+                                    </label>
+                                </section>
+                                <section class="col col-sm-1">
+                                    <label class="label">Currency</label>
+                                    <label class="input" ng-show="data.purchaseOrderStatusID<2">
+                                        <select class="form-control" ng-model="data.currency" ng-options="item.sname as item.name for item in spCurrency">
+                                            <option value=""></option>
+                                        </select>
+                                    </label>
+                                    <label class="input" ng-show="data.purchaseOrderStatusID>=2">
+                                        <span class="form-control">{{data.currency}}</span>
+                                    </label>
+                                </section>
+                                <section class="col col-sm-1">
+                                    <label class="label">Season</label>
+                                    <label class="input" ng-show="data.purchaseOrderID == null || data.purchaseOrderID == 0">
+                                        <select class="form-control" ng-model="data.season" ng-options="item.seasonValue as item.seasonText for item in seasons">
+                                            <option value=""></option>
+                                        </select>
+                                    </label>
+                                    <label class="input" ng-show="data.purchaseOrderID > 0">
+                                        <span class="form-control">{{data.season}}</span>
+                                    </label>
+                                </section>
+                                <section class="col col-sm-2">
+                                    <label class="label">
+                                        <label>ETA</label>
+                                        <em class="note note-error" ng-show="(data.eta == null || data.eta == '')">(Required)</em>
+                                    </label>
+                                    <label class="input-group" ng-show="data.purchaseOrderStatusID<2">
+                                        <input id="eta" name="eta_main" type="text" class="form-control" avs-calendar ng-data-source="data.eta" required autocomplete="off" />
+                                        <span class="input-group-addon">
+                                            <i class="fa fa-calendar"></i>
+                                        </span>
+                                    </label>
+                                    <label class="input" ng-show="data.purchaseOrderStatusID>=2">
+                                        <span class="form-control">{{data.eta}}</span>
+                                    </label>
+                                </section>
+                                <section class="col col-sm-4">
+                                    <label class="label">Attached File</label>
+                                    <label class="input">
+                                        <span class="form-control">
+                                            {{data.friendlyName}}
+                                            <div style="position: absolute; right: 5px; top: 5px;">
+                                                <a ng-disabled="!data.fileLocation || data.friendlyName==null" href="javascript:void(0);" class="btn btn-primary btn-xs" style="font-size: 11px;" ng-click="event.downloadFile()">Download</a>
+                                                <a href="javascript:void(0);" class="btn btn-primary btn-xs" style="font-size: 11px;" ng-click="event.changeFile()">Change</a>
+                                                <a ng-disabled="!data.fileLocation || data.friendlyName==null" href="javascript:void(0);" class="btn btn-danger btn-xs" style="font-size: 11px;" ng-click="event.removeFile()">Remove</a>
+                                            </div>
+                                        </span>
+                                    </label>
+                                </section>
+                            </div>
+                            <div class="row">
+                                <section class="col col-sm-4">
+                                    <label class="label">Supplier:</label>
+                                    <label class="input">
+                                        <span class="form-control">{{data.factoryRawMaterialShortNM}}</span>
+                                    </label>
+                                </section>
+                                <section class="col col-sm-4">
+                                    <label class="label">
+                                        Purchase Request Nr.
+                                        <em class="note note-error" ng-show="(data.purchaseOrderDate == null  || data.purchaseOrderDate == '')">(Please input Purchase Order Date first)</em>
+                                    </label>
+                                    <label class="input">
+                                        <input ng-readonly="(data.purchaseOrderDate == null  || data.purchaseOrderDate == '')" type="text" class="form-control" style="font-family:Arial" ng-readonly="data.purchaseOrderID != null && data.purchaseOrderID != 0" placeholder="Please input one PurchaseRequest..." avs-remote-auto-complete ng-request-param="ngRequestPurchaseRequest" ng-init-param="data.purchaseRequestUD" ng-init-param-2="data.factoryRawMaterialID" ng-model="data.purchaseRequestUD" ng-item-value="ngItemPurchaseRequest" ng-item-selected="event.getPurchaseRequest(ngItemPurchaseRequest, data.factoryRawMaterialID, data.purchaseOrderDate)" data-method="POST" data-format-function="formatData" />
+                                    </label>
+                                </section>
+                                <section class="col col-sm-3">
+                                    <label class="label">Remark</label>
+                                    <label class="input" ng-show="data.purchaseOrderStatusID<4">
+                                        <input type="text" class="form-control" style="font-family: Arial" ng-model="data.remark" />
+                                    </label>
+                                    <label class="input" ng-show="data.purchaseOrderStatusID>=4">
+                                        <span class="form-control">{{data.remark}}</span>
+                                    </label>
+                                </section>
+                                <section class="col col-sm-1">
+                                    <label class="label">Staus</label>
+                                    <label class="input">
+                                        <span ng-if="data.purchaseOrderStatusID == null" class="form-control"></span>
+                                        <span ng-if="data.purchaseOrderStatusID == 1" class="form-control">OPEN</span>
+                                        <span ng-if="data.purchaseOrderStatusID == 2" class="form-control">CONFIRMED</span>
+                                        <span ng-if="data.purchaseOrderStatusID == 3" class="form-control">CANCEL</span>
+                                        <span ng-if="data.purchaseOrderStatusID == 4" class="form-control">FINISHED</span>
+                                    </label>
+                                </section>
+                            </div>
+                            <div class="row">
+                                <section class="col col-sm-4">
+                                    <label class="label">Required Documents</label>
+                                    <label class="input" ng-show="data.purchaseOrderStatusID<2">
+                                        <input type="text" class="form-control" style="font-family: Arial" ng-model="data.requiredDocuments" />
+                                    </label>
+                                    <label class="input" ng-show="data.purchaseOrderStatusID>=2">
+                                        <span class="form-control">{{data.requiredDocuments}}</span>
+                                    </label>
+                                </section>
+                                <section class="col col-sm-4">
+                                    <label class="label">Payment Documents</label>
+                                    <label class="input" ng-show="data.purchaseOrderStatusID<2">
+                                        <input type="text" class="form-control" style="font-family: Arial" ng-model="data.paymentDocuments" />
+                                    </label>
+                                    <label class="input" ng-show="data.purchaseOrderStatusID>=2">
+                                        <span class="form-control">{{data.paymentDocuments}}</span>
+                                    </label>
+                                </section>
+                                <section class="col col-sm-3">
+                                    <label class="label">
+                                        Payment Period
+                                        <em class="note note-error" ng-show="((data.supplierPaymentTermID == null  || data.supplierPaymentTermID == '') && data.purchaseOrderStatusID == 1)">(Required)</em>
+                                    </label>
+                                    <label class="select" ng-show="data.purchaseOrderStatusID<2">
+                                        <select id="paymentTerm" ng-model="data.supplierPaymentTermID" ng-options="supplierPaymentTerm.supplierPaymentTermID as supplierPaymentTerm.supplierPaymentTermNM for supplierPaymentTerm in supplierPaymentTermLists">
+                                            <option value=""></option>
+                                        </select>
+                                        <i></i>
+                                    </label>
+                                    <label class="input" ng-show="data.purchaseOrderStatusID>=2">
+                                        <span class="form-control">{{data.supplierPaymentTermNM}}</span>
+                                    </label>
+                                </section>
+                                <section class="col col-sm-1">
+                                    <label class="label">VAT Items</label>
+                                    @*<label class="select" ng-show="data.purchaseOrderStatusID<2">
+            <select ng-model="data.vat" ng-options="item.id as item.name for item in spcheckPercentVAT" ng-show="data.purchaseOrderStatusID!=3">
+                <option value=""></option>
+            </select>
+            <i></i>
+        </label>*@
+                                    @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Reset, HttpContext.Current) != "disabled")
+                                    {
+                                        <label class="select">
+                                            <select ng-model="data.vat" ng-options="item.id as item.name for item in spcheckPercentVAT">
+                                                <option value=""></option>
+                                            </select>
+                                            <i></i>
+                                        </label>
+                                    }
+                                    else
+                                    {
+                                        <label class="select" ng-show="data.purchaseOrderStatusID==1 || data.purchaseOrderStatusID==null || data.purchaseOrderStatusID==0">
+                                            <select ng-model="data.vat" ng-options="item.id as item.name for item in spcheckPercentVAT">
+                                                <option value=""></option>
+                                            </select>
+                                            <i></i>
+                                        </label>
+                                        <label class="input" ng-show="data.purchaseOrderStatusID > 1">
+                                            <span class="form-control">{{data.vat}}</span>
+                                        </label>
+                                    }
+                                </section>
+                            </div>
+                            <div class="row">
+                                <section class="col col-sm-4">
+                                    <label class="label">Approved Name</label>
+                                    <label class="input">
+                                        <span class="form-control">{{data.approverName}}</span>
+                                    </label>
+                                </section>
+                                <section class="col col-sm-4">
+                                    <label class="label">Approved Date</label>
+                                    <label class="input">
+                                        <span class="form-control">{{data.approvedDate}}</span>
+                                    </label>
+                                </section>
+                                <section class="col col-sm-4">
+                                    <label class="label">Total Amount</label>
+                                    <label class="input">
+                                        <span class="form-control">{{method.totalAmountPO() | number : 0}}</span>
+                                    </label>
+                                </section>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </article>
+        <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+            <div class="jarviswidget jarviswidget-color-darken" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+                <header>
+                    <span class="widget-icon">
+                        <i class="fa fa-database"></i>
+                    </span>
+                    <h2>@ViewBag.SubTitle Details</h2>
+                </header>
+                <div>
+                    <div class="jarviswidget-editbox"></div>
+                    <div class="widget-body">
+                        <div class="tilsoft-table-wrapper">
+                            <a href="javascript:void(0)" class="btn btn-default btn-primary btn-xs" ng-click="addItemForm.loadApprovePrice()" style="margin-bottom:5px" ng-if="data.purchaseRequestID" ng-show="data.purchaseOrderStatusID<2">
+                                <i class="fa fa-plus"></i> Add Item
+                            </a>
+
+                            <a href="javascript:void(0)" class="btn btn-default btn-primary btn-xs" ng-click="addItemForm.loadDefaultPrice(data.purchaseOrderDate)" style="margin-bottom:5px" ng-if="!data.purchaseRequestID" ng-show="data.purchaseOrderStatusID<2">
+                                <i class="fa fa-plus"></i> Add Item
+                            </a>
+
+                            <div class="tilsoft-table">
+                                <div style="width:2000px" class="tilsoft-table-header">
+                                    <div style="width:120px"></div>
+                                    <div style="width:150px">Code</div>
+                                    <div style="width:280px">Name</div>
+                                    <div style="width:60px">In stock</div>
+                                    <div style="width:85px">Request QNT</div>
+                                    <div style="width:70px">Unit</div>
+                                    <div style="width:121px">ETA</div>
+                                    <div style="width:100px">Order QNT</div>
+                                    <div style="width:100px">Price</div>
+                                    <div style="width:100px">Amount</div>
+                                    <div style="width:90px">Price Status</div>
+                                    <div style="width:90px">Total Received</div>
+                                    <div style="width:210px">Remark</div>
+                                    <div style="width:210px">ID</div>
+                                    <div></div>
+                                </div>
+                                <div style="width:2000px" class="tilsoft-table-body">
+                                    <table>
+                                        <tbody ng-repeat="item in data.purchaseOrderDetailDTOs">
+                                            <tr>
+                                                <td style="width:120px; text-align:center">
+                                                    <a class="btn btn-danger btn-xs font-11" href="#" title="Delete" ng-click="event.remove($event, item)" style="width:40px; margin-top: 5px" ng-show="data.purchaseOrderStatusID<2"><i class="fa fa-times"></i> Del</a>
+                                                    <a href="javascript:void(0)" class="btn btn-primary btn-xs font-11" ng-click="event.openViewDetail(item)" style="width:60px; margin-top: 5px" ng-if="data.purchaseRequestID"><i class=" fa fa-folder-open"></i> Details</a>
+                                                    <a class="btn btn-primary btn-xs font-11" ng-if="item.friendlyName && item.purchaseQuotationDetailID!=null" style="width:40px;margin-top: 5px" href="{{item.fileLocation}}" target="_blank">
+                                                        View
+                                                    </a>
+                                                    <a class="btn btn-primary btn-xs font-11" ng-if="item.friendlyName && item.purchaseQuotationDetailID==null" style="width:40px;margin-top: 5px" href="{{item.fileLocation}}" target="_blank">
+                                                        View
+                                                    </a>
+                                                </td>
+                                                <td style="width:150px; padding-top:12px">
+                                                    {{item.productionItemUD}}
+                                                </td>
+                                                <td style="width:280px; padding-top:12px">{{item.productionItemNM}}</td>
+                                                <td style="width:60px; text-align:right; padding-top:12px">
+                                                    {{item.stockQnt | number:2}}
+                                                </td>
+                                                <td style="width:85px; text-align:right; padding-top:12px">{{item.requestQnt | number:2}}</td>
+                                                <td style="width:70px; text-align:center; padding-top:12px">
+                                                    {{item.unitNM}}
+                                                </td>
+                                                <td style="width:122px">
+                                                    <label class="input-group" ng-show="data.purchaseOrderStatusID<2">
+                                                        <input type="text" class="form-control" avs-calendar ng-data-source="item.eta" ng-on-change="event.changETA(item)" required @*ng-model="item.eta" class="datepicker id_datepicker" data-dateformat="dd/mm/yy"*@ />
+                                                        <span class="input-group-addon">
+                                                            <i class="fa fa-calendar"></i>
+                                                        </span>
+                                                    </label>
+                                                    <label class="input" ng-show="data.purchaseOrderStatusID>=2" style="padding-top:7px; text-align: center">
+                                                        {{item.eta}}
+                                                    </label>
+                                                </td>
+                                                <td style="width:100px">
+                                                    @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Reset, HttpContext.Current) != "disabled")
+                                                    {
+                                                        <input ng-readonly="data.purchaseOrderStatusID==4" avs-number class="form-control" type="text" style="text-align:right" ng-data-source="item.orderQnt" ng-decimal="4" ng-on-change="event.changeQntPurchaseOrderDetail(item)" />
+                                                    }
+                                                    else
+                                                    {
+                                                        <input ng-readonly="data.purchaseOrderStatusID==4" avs-number class="form-control" type="text" style="text-align:right" ng-data-source="item.orderQnt" ng-decimal="4" ng-on-change="event.changeQntPurchaseOrderDetail(item)" ng-show="data.purchaseOrderStatusID==1 || data.purchaseOrderStatusID==0 || data.purchaseOrderStatusID==null" />
+                                                        <span class="form-control" style="text-align:right" ng-show="data.purchaseOrderStatusID>1">{{item.orderQnt}}</span>
+                                                    }
+                                                </td>
+                                                <td style="width:100px">
+                                                    @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Reset, HttpContext.Current) != "disabled")
+                                                    {
+                                                        <input ng-readonly="data.purchaseOrderStatusID==4" avs-number class="form-control" type="text" style="text-align:right" ng-data-source="item.unitPrice" ng-decimal="0" ng-on-change="event.changePrice(item)" />
+                                                    }
+                                                    else
+                                                    {
+                                                        <input ng-readonly="data.purchaseOrderStatusID==4" avs-number class="form-control" type="text" style="text-align:right" ng-data-source="item.unitPrice" ng-decimal="0" ng-on-change="event.changePrice(item)" ng-show="data.purchaseOrderStatusID==1 || data.purchaseOrderStatusID==0 || data.purchaseOrderStatusID==null" />
+                                                        <span class="form-control" style="text-align:right; padding-top:12px" ng-show="data.purchaseOrderStatusID>1">{{item.unitPrice | number : 0}}</span>
+                                                    }
+                                                </td>
+                                                <td style="width:100px; text-align:right; padding-top:12px">{{item.orderQnt * item.unitPrice | number : 0}}</td>
+                                                <td style="width:90px"></td>
+                                                <td style="width:90px; text-align:right; padding-top:12px">{{(item.totalReceived == null ? 0 : item.totalReceived) | number: 4}}</td>
+                                                <td style="width:210px">
+                                                    <label class="input" ng-show="data.purchaseOrderStatusID<4">
+                                                        <input class="form-control" type="text" style="font-family:Arial" ng-model="item.remark" />
+                                                    </label>
+                                                    <span class="form-control" ng-show="data.purchaseOrderStatusID>=4">{{item.remark}}</span>
+                                                </td>
+
+                                                <td style="width:210px">
+                                                    <input class="form-control" ng-model="item.id" />
+                                                </td>
+                                                <td>
+                                                    <a href="javascript:void(0)" class="btn btn-primary btn-xs font-11" ng-click="addItemForm.openReceivingPlan(item)" style="width:45px; margin-top: 5px" ng-show="data.purchaseOrderStatusID!=2"> Plan</a>
+                                                    <a href="javascript:void(0)" class="btn btn-primary btn-xs font-11" ng-click="addItemForm.openHictoryPrice(item)" style="width:45px; background-color: green; margin-top: 5px"> History</a>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </article>
+    </form>
+
+    @*Add purchaseOrderDetail*@
+    <div id="purchaseOrderDetailForm" style="z-index: 999999999" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button aria-hidden="true" data-dismiss="modal" class="close" type="button">
+                        ×
+                    </button>
+                    <h4 id="myModalLabel" class="modal-title">View Add Item</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="smart-form">
+                            <section class="col col-sm-3">
+                                <label class="label">Code</label>
+                                <label class="input"> <input class="form-control" type="text" ng-model="filter.productionItemUD" /></label>
+                            </section>
+                            <section class="col col-sm-4">
+                                <label class="label">Name</label>
+                                <label class="input"> <input class="form-control" type="text" ng-model="filter.productionItemNM" /></label>
+                            </section>
+                        </div>
+                    </div>
+                    <div class="widget-body">
+                        <div class="tilsoft-table-wrapper">
+                            <div class="tilsoft-table">
+                                <div style="width:100%;margin-top:0px" class="tilsoft-table-body">
+                                    <table>
+                                        <tr>
+                                            <th style="width:50px"></th>
+                                            <th style="width:80px" ng-if="addItemForm.typePQAndPR == 2">Type</th>
+                                            <th style="width:150px">Code</th>
+                                            <th style="">Name</th>
+                                            <th style="width:60px">Unit</th>
+                                            <th style="width:90px">Qnt</th>
+                                            <th style="width:100px">Price</th>
+                                            <th style="width:90px">Request Qnt</th>
+                                        </tr>
+                                        <tbody ng-repeat="item in addItemForm.data | filter: {'productionItemUD': filter.productionItemUD, 'productionItemNM': filter.productionItemNM}">
+                                            <tr>
+                                                <td style="text-align:center"><input type="checkbox" ng-model="item.checkVal" /> </td>
+                                                <td style="" ng-if="addItemForm.typePQAndPR == 2">{{item.typeName}}</td>
+                                                <td style="">{{item.productionItemUD}}</td>
+                                                <td style="">{{item.productionItemNM}}</td>
+                                                <td style="text-align:center">{{item.unitNM}}</td>
+                                                <td style="text-align:right">{{item.orderQnt | number:4}}</td>
+                                                <td style="text-align:right">{{item.unitPrice | number:2}}</td>
+                                                <td style="text-align:right">{{item.requestQnt | number:2}}</td>
+                                            </tr>
+                                            <tr ng-repeat="wItem in item.purchaseRequestWorkOrderDetails">
+                                                <td colspan="6" style="text-align:right">{{wItem.workOrderUD}}</td>
+                                                <td style="text-align: right">{{wItem.requestedQnt | number:2}}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" ng-click="addItemForm.selectedApprovedItem()" ng-if="addItemForm.purchaseRequestID">
+                        Select
+                    </button>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" ng-click="addItemForm.selectedDefaultItem()" ng-if="!addItemForm.purchaseRequestID">
+                        Select
+                    </button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @*PurchaseOrderWorkOrderDetail*@
+    <div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="frmWorkOrderDetailView" class="modal fade" style="display: none;" data-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button aria-hidden="true" class="close" type="button" ng-click="event.changeRequestQntByWorkOrder(purchaseOrderDetail)">
+                        ×
+                    </button>
+                    <h4 id="myModalLabel" class="modal-title">View work order detail</h4>
+                </div>
+                <div class="modal-body smart-form">
+                    <div class="row">
+                        <div class="col col-lg-12">
+                            <div id="grdPurchaseRequestDetail" class="tilsoft-table-wrapper">
+                                <div class="tilsoft-table">
+                                    <div class="tilsoft-table-body" style="width: 300px; height:500px; margin-top:0px">
+                                        <table>
+                                            <tr>
+                                                <th style="width: 200px">Work Order</th>
+                                                <th style="width: 120px">Finish Date</th>
+                                                <th style="width: 100px">Norm Qnt</th>
+                                                <th style="width: 100px">Quantity</th>
+                                            </tr>
+                                            <tbody ng-repeat="subItem in purchaseOrderDetail.purchaseOrderWorkOrderDetailDTOs">
+                                                <tr>
+                                                    <td style="text-align:left">
+                                                        <input class="form-control" style="height: 29px; text-align: left" readonly ng-model="subItem.workOrderUD" />
+                                                    </td>
+                                                    <td>
+                                                        <span class="form-control">{{subItem.finishDate}}</span>
+                                                    </td>
+                                                    <td>
+                                                        <span class="form-control" style="text-align: right">{{subItem.totalNorm | number : 2}}</span>
+                                                    </td>
+                                                    <td>
+                                                        <label class="input" ng-show="data.purchaseOrderStatusID<2">
+                                                            <input class="form-control" style="height: 29px; text-align: right" avs-number ng-data-source="subItem.orderQnt" ng-decimal="2" />
+                                                        </label>
+                                                        <span class="form-control" ng-show="data.purchaseOrderStatusID>=2" style="text-align: right">{{subItem.orderQnt | number : 2}}</span>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button data-dismiss="modal" class="btn btn-default" type="button">
+                        Cancel
+                    </button>
+                    <button class="btn btn-primary" type="button" ng-click="event.changeRequestQntByWorkOrder(purchaseOrderDetail)">
+                        OK
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @*PurchaseOrderReceivingPlan*@
+    <div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="frmReceivingPlanView" class="modal fade" style="display: none;" data-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button aria-hidden="true" class="close" type="button" ng-click="event.changeOrderQnt(purchaseOrderDetail)">
+                        ×
+                    </button>
+                    <h4 id="myModalLabel" class="modal-title">View Receiving Plan</h4>
+                </div>
+                <div class="modal-body smart-form">
+                    <div class="row">
+                        <div class="col col-lg-12">
+                            <div id="grdPurchaseOrderDetailReceivingPlan" class="tilsoft-table-wrapper">
+                                <a href="javascript:void(0)" class="btn btn-default btn-primary btn-xs" ng-click="addItemForm.addReceivingPlan()" style="margin-bottom:5px">
+                                    <i class="fa fa-plus"></i> Add Item
+                                </a>
+                                <div class="tilsoft-table">
+                                    <div class="tilsoft-table-body" style="width: 500px; height:500px; margin-top:0px">
+                                        <table>
+                                            <tr>
+                                                <th style="width: 59px"></th>
+                                                <th style="width: 120px">Plan ETA</th>
+                                                <th style="width: 100px">Quantity</th>
+                                                <th>Remark</th>
+                                            </tr>
+                                            <tbody ng-repeat="subItem in purchaseOrderDetail.purchaseOrderDetailReceivingPlanDtos">
+                                                <tr>
+                                                    <td>
+                                                        <a class="btn btn-danger btn-xs font-11" href="#" title="Delete" ng-click="addItemForm.removeReceivingPlan($event, purchaseOrderDetail, subItem)" style="width:45px"><i class="fa fa-times"></i> Del</a>
+                                                    </td>
+                                                    <td>
+                                                        <label class="input">
+                                                            <input type="text" class="form-control" style="font-family:Arial" avs-calendar ng-data-source="subItem.plannedETA" />
+                                                            <i class="icon-append fa fa-calendar"></i>
+                                                        </label>
+
+                                                    </td>
+                                                    <td>
+                                                        <input class="form-control" style="height: 29px; text-align: right" avs-number ng-data-source="subItem.plannedReceivingQnt" ng-decimal="2" />
+                                                    </td>
+                                                    <td>
+                                                        <input class="form-control" style="height: 29px" ng-model="subItem.remark" />
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" type="button" ng-click="event.changeOrderQnt(purchaseOrderDetail)">
+                        OK
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @*PurchaseOrderDetailHictoryPrice*@
+    <div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="frmHictoryPrice" class="modal fade" style="display: none;" data-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button aria-hidden="true" data-dismiss="modal" class="close" type="button">
+                        ×
+                    </button>
+                    <h4 id="myModalLabel" class="modal-title">View Price Update</h4>
+                </div>
+                <div class="modal-body smart-form">
+                    <div class="row">
+                        <div class="col col-lg-12">
+                            <div class="tilsoft-table-wrapper">
+                                <div class="tilsoft-table">
+                                    <div class="tilsoft-table-body" style="width: 400px; height:500px; margin-top:0px">
+                                        <table>
+                                            <tr>
+                                                <th style="width: 120px">Unit Price</th>
+                                                <th style="width: 170px">Approve By</th>
+                                                <th>Approve Date</th>
+                                            </tr>
+                                            <tbody ng-repeat="subItem in purchaseOrderDetail.purchaseOrderDetailPriceHistoryDtos">
+                                                <tr>
+                                                    <td>
+                                                        <span class="form-control" style="text-align: right">{{subItem.unitPrice | number}}</span>
+                                                    </td>
+                                                    <td>
+                                                        <span class="form-control">{{subItem.employeeNM}}</span>
+                                                    </td>
+                                                    <td>
+                                                        <span class="form-control">{{subItem.approvedDate}}</span>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button data-dismiss="modal" class="btn btn-default" type="button">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section FormAction{
+<ul id="sparks">
+    <li class="sparks-info">
+        <a href="@Url.Action("Index", "PurchaseOrderMng")" class="btn btn-default" title="Back">
+            <i class="fa fa-arrow-left"></i>
+        </a>
+    </li>
+    <li class="sparks-info" ng-show="data.purchaseOrderStatusID<2">
+        <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current))" ng-disabled="data.purchaseOrderID == null || data.purchaseOrderID == 0" title="Delete" ng-click="event.del(data.purchaseOrderID)">
+            <i class="fa fa-times"></i>
+        </a>
+    </li>
+    @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Reset, HttpContext.Current) != "disabled")
+    {
+        <li class="sparks-info" ng-show="data.purchaseOrderStatusID !=3 || data.purchaseOrderID == null || data.purchaseOrderID == 0">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="event.update()">
+                <i class="fa fa-floppy-o"></i>
+            </a>
+        </li>
+    }
+    else
+    {
+        <li class="sparks-info" ng-show="data.purchaseOrderStatusID==1 data.purchaseOrderID == null || data.purchaseOrderID == 0">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="event.update()">
+                <i class="fa fa-floppy-o"></i>
+            </a>
+        </li>
+    }
+    @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Approve, HttpContext.Current) != "disabled" || Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Reset, HttpContext.Current) != "disabled")
+    {
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default" title="Cancel" ng-click="event.cancel()" ng-disabled="data.purchaseOrderStatusID!=2" style="color: red">
+                <i class="fa fa-close"></i>
+            </a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default" ng-disabled="(data.purchaseOrderID == null || data.purchaseOrderID == 0) || data.purchaseOrderStatusID!=1" title="Confirm" ng-click="event.approve()" style="color: red">
+                <i class="fa fa-check"></i>
+            </a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default" title="Finish" ng-click="event.finish()" ng-disabled="data.purchaseOrderStatusID!=2" style="color: red">
+                <i class="fa fa-check-circle"></i>
+            </a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default" title="Revise" ng-click="event.revise()" ng-disabled="data.purchaseOrderStatusID!=4" style="color: red">
+                <i class="fa fa-mail-reply"></i>
+            </a>
+        </li>
+    }
+    <li class="sparks-info">
+        <a href="@Url.Action("PrintOut", "PurchaseOrderMng", new {ViewBag.ID})" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Print, HttpContext.Current))" title="Print HTML" target="_blank" ng-disabled="data.purchaseOrderID == null || data.purchaseOrderID == 0" ng-show="data.purchaseOrderStatusID!=3"><i class="fa fa-print"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="#" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Print, HttpContext.Current))" title="Export Excel" style="color: #31B404" ng-disabled="data.purchaseOrderID == null || data.purchaseOrderID == 0" ng-click="event.excelPurchaseOrderReport(data.purchaseOrderID)" ng-show="data.purchaseOrderStatusID!=3"><i class="fa fa-file-excel-o"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="#" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Print, HttpContext.Current))" title="Export PDF" style="color: #ff6a00" ng-disabled="data.purchaseOrderID == null || data.purchaseOrderID == 0" ng-click="event.getPurchaseOrderPrintOut(data.purchaseOrderID)" ng-show="data.purchaseOrderStatusID!=3"><i class="fa fa-file-code-o"></i></a>
+    </li>
+    @if (!string.IsNullOrEmpty(userManualUrl))
+    {
+        <li class="sparks-info">
+            <a target="_blank" href="@userManualUrl" class="btn btn-default" title="Help"><i class="fa fa-info"></i></a>
+        </li>
+    }
+</ul>
+}
+
+@section pagejs{
+    <script type="text/javascript">
+    var context = {
+    id: @ViewBag.ID,
+    backUrl: '@Url.Action("Index", "PurchaseOrderMng")',
+    refreshUrl: '@Url.Action("Edit", "PurchaseOrderMng", new { id = UrlParameter.Optional })/',
+    serviceUrl: '@(serviceRoot)/api/purchaseOrderMng/',
+    supportServiceUrl: '@(supportServiceRoot)/api/support/',
+    token: '@token',
+    msgValid: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED',
+    backendReportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]'
+
+};
+    </script>
+    <script type="text/javascript" src="~/Angular/app/purchaseOrderMng/edit.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/purchaseOrderMng/service.js?v=@guid"></script>
+}

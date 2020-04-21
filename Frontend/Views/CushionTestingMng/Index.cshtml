@@ -1,0 +1,150 @@
+﻿
+@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    var pageSize = System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"];
+    var cookieID = HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString();
+
+    ViewBag.Title = "Search Cushion Testing";
+    ViewBag.Module = "Cushion Testing";
+}
+
+<form class="row" id="main-form">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-search-result" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Search Result</h2>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+
+                    <div avs-scroll grid-handler="gridHandler" class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table">
+                            <div style="width:1100px" class="tilsoft-table-header">
+                                <div style="width:80px">Found(s)<br /><strong style="color:maroon">{{totalRows}} <font style="color:maroon; text-transform:none">row(s)</font></strong></div>
+                                <div style="width:90px">Test Code</div>
+                                <div class="sorting" style="width: 90px" data-colname="IsEnabled">Enabled</div>
+                                <div style="width:180px">Cushion Color</div>
+                                <div style="width:80px">Client</div>
+                                <div style="width:250px">File Name</div>
+                                <div style="width:250px">Test Standard</div>
+                                <div>Test Date</div>
+
+                            </div>
+                            <div style="width:1100px" class="tilsoft-table-filter">
+                                <div style="width:80px; text-align:center">
+                                    <a href="javascript:void(0)" class="btn btn-default btn-xs" title="Apply Filter" ng-click="event.refresh()"><i class="fa fa-filter"></i></a>
+                                    <a href="javascript:void(0)" class="btn btn-default btn-xs" title="Clear Filter" ng-click="event.clear()"><i class="fa fa-ban"></i></a>
+                                    </a>
+                                </div>
+                                <div style="width:90px">
+                                    <input type="text" class="form-control search-filter" style="width:100%; font-size:13px" ng-model="filters.CushionTestReportUD" />
+                                </div>
+                                <div style="width: 90px">
+                                    <label class="select">
+                                        <select class="form-control search-filter" ng-model="filters.IsEnabled">
+                                            <option value=""></option>
+                                            <option value="true">YES</option>
+                                            <option value="false">NO</option>
+                                        </select>
+                                    </label>
+                                </div>
+                                <div style="width:180px">
+                                    <input type="text" class="form-control search-filter" style="width:100%" ng-model="filters.CushionColorNM" />
+                                </div>
+                                <div style="width:80px">
+                                    <input type="text" class="form-control search-filter" style="width:100%; font-size:12px" ng-model="filters.ClientUD" />
+                                </div>
+                                <div style="width:250px">
+                                    <input type="text" class="form-control search-filter" style="width:100%" ng-model="filters.FriendlyName" />
+                                </div>
+                                <div style="width:250px">
+                                    <input type="text" class="form-control search-filter" style="width:100%" ng-model="filters.TestStandardNM" />
+                                </div>
+                                <div style="padding: 0px">
+                                    <div class="input-group" style="border:none">
+                                        <input type="text" class="form-control search-filter" style="width:100%" avs-calendar ng-data-source="filters.TestDate" />
+                                        <span class="input-group-addon">
+                                            <i class="fa fa-calendar"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="width:1100px" class="tilsoft-table-body">
+                                <table>
+                                    <tbody>
+                                        <tr ng-repeat="item in data">
+                                            <td style="width:79px; text-align:center">
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current) == "disabled")
+                                                {
+                                                    <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "CushionTestingMng")/{{item.cushionTestReportID}}" style="width:60px;" title="View (Read Only)" target="_blank"><i class="fa fa-folder-open"></i>View</a>
+                                                }
+                                                else
+                                                {
+                                                    <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "CushionTestingMng")/{{item.cushionTestReportID}}" title="Edit" style="width:60px;" target="_blank"><i class="fa fa-pencil-square-o"></i>Edit</a>
+                                                }
+
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current) != "disabled")
+                                                {
+                                                    <a class="btn btn-danger btn-xs font-11" href="#" title="Delete" style="width:60px; margin-top:3px;" ng-click="event.remove(item, $index)"><i class="fa fa-times"></i>Del</a>
+                                                }
+                                            </td>
+                                            <td style="width:90px; text-align:center">{{item.cushionTestReportUD}}</td>
+                                            <td style="text-align: center; width: 90px; vertical-align: middle"><input type="checkbox" ng-model="item.isEnabled" disabled /></td>
+                                            <td style="width:180px">{{item.cushionColorNM}}</td>
+                                            <td style="width:80px; text-align: center">{{item.clientUD}}</td>
+                                            <td style="width:250px">
+                                                <div ng-repeat="item2 in item.cushionTestFileSearchDTOs">
+                                                    <a href="{{item2.fileLocation}}" target="_blank">{{item2.friendlyName}}</a>
+                                                </div>
+                                            </td>
+                                            <td style="width:250px">
+                                                <div ng-repeat="item3 in item.cushionTestStandardSearchDTOs">
+                                                    <label>{{item3.testStandardNM}}</label>
+                                                </div>
+                                            </td>
+                                            <td>{{item.testDate}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Search" ng-click="event.refresh()"><i class="fa fa-search"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Clear" ng-click="event.clear()"><i class="fa fa-refresh"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="@Url.Action("Edit", "CushionTestingMng", new { id = UrlParameter.Optional })/0" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="Create new Cushion Testing" target="_blank"><i class="fa fa-file-o"></i></a>
+        </li>
+    </ul>
+}
+
+
+@section pagejs {
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(serviceRoot)/api/cushionTestingMng/',
+            token: '@token',
+            pageSize: '@pageSize',
+            cookieID: '@cookieID'
+        }
+    </script>
+    <script type="text/javascript" src="~/Views/CushionTestingMng/index.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Views/CushionTestingMng/service.js?v=@guid"></script>
+}
+
+

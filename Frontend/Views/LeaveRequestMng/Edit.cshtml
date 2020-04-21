@@ -1,0 +1,249 @@
+﻿
+@{
+    if (ViewBag.ID == 0)
+    {
+        ViewBag.Title = "Create New LeaveRequest";
+    }
+    else
+    {
+        ViewBag.Title = "Edit LeaveRequest";
+    }
+
+    ViewBag.Module = "LeaveRequest Management";
+
+    string userManualUrl = string.Empty;
+    if (System.IO.File.Exists(Server.MapPath("~/UserManual/" + ViewBag.ModuleCode + ".pdf")))
+    {
+        userManualUrl = "/UserManual/" + ViewBag.ModuleCode + ".pdf";
+    }
+
+}
+
+<form class="row" name="editForm" id="main-form">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-product-information" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <ul class="nav nav-tabs pull-left in">
+                    <li class="active">
+                        <a data-toggle="tab" href="#tabGeneral"> <span> Leave Request Information </span> </a>
+                    </li>
+                    <li>
+                        <a data-toggle="tab" href="#tabTracking"> <i class="fa fa-history"></i> <span> Tracking </span> </a>
+                    </li>
+                </ul>
+            </header>
+            <div>
+                <div class="widget-body">
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="tabGeneral">
+                            <div class="smart-form">
+                                <fieldset style="padding: 0px;">
+                                    <div class="row">
+                                        <div class="col col-6 m-bottom-15">
+                                            <label>Requester Name</label>
+                                            <div class="smart-form">
+                                                <label class="input">
+                                                    <input type="text" ng-model="dataContainer.requesterNM" autocomplete="off" ng-keyup="quickSearchEmployee.event.searchBoxKeyUp()" id="txtEmployee" />
+                                                    <input type="hidden" ng-model="dataContainer.requesterID" name="requesterID" required />
+                                                    <i class="icon-append fa fa-search"></i>
+                                                </label>
+                                                <div id="employee-popup" class="popup-container-2">
+                                                    <div style="float: right; margin-bottom: 8px;">
+                                                        <a ng-click="quickSearchEmployee.event.close($event, true)" class="btn btn-primary btn-xs" href="javascript:void(0);"><i class="fa fa-remove"></i> Close</a>
+                                                    </div>
+                                                    <div class="clear"></div>
+                                                    <div id="quickSearchEmployeeTable" class="tilsoft-table-wrapper">
+                                                        <div class="tilsoft-table">
+                                                            <div class="tilsoft-table-header" style="width: 360px;">
+                                                                <div style="width: 70px;"></div>
+                                                                <div style="width: 100px;">Code</div>
+                                                                <div>Requester Name</div>
+                                                            </div>
+                                                            <div class="tilsoft-table-body" style="width: 360px;">
+                                                                <table>
+                                                                    <tr ng-repeat="item in quickSearchEmployee.data">
+                                                                        <td style="width: 70px; text-align: center;"><a ng-click="quickSearchEmployee.event.ok($event, item.employeeID)" class="btn btn-primary btn-xs" href="javascript:void(0);"><i class="fa fa-check"></i> Select</a></td>
+                                                                        <td style="width: 100px;">{{item.employeeUD}}</td>
+                                                                        <td>{{item.employeeNM}}</td>
+                                                                    </tr>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <span class="help-block" ng-show="editForm.requesterID.$error.required"><i class="fa fa-warning"></i>Employee is required.</span>
+                                            </div>
+                                        </div>
+                                        <div class="col col-3 m-bottom-15">
+                                            <label>Requester Code</label>
+                                            <span class="form-control">{{dataContainer.requesterUD}}</span>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col col-2 m-bottom-15">
+                                            <label class="label">From Date</label>
+                                            <label class="input">
+                                                <input type="text" class="datepicker" ng-model="dataContainer.fromDate" data-dateformat="dd/mm/yy" id="fromDate"/>
+                                                <i class="icon-append fa fa-calendar"></i>
+                                            </label>
+                                        </div>
+                                        <div class="col col-2 m-bottom-15">
+                                            <label class="label">To Date</label>
+                                            <label class="input">
+                                                <input type="text" class="datepicker" ng-model="dataContainer.toDate" data-dateformat="dd/mm/yy" id="toDate" />
+                                                <i class="icon-append fa fa-calendar"></i>
+                                            </label>
+                                        </div>
+                                        <div class="col col-2 m-bottom-15">
+                                            <label class="label">Time</label>
+                                            <label class="select">
+                                                <select id="leaveTime" ng-model="dataContainer.toTime" ng-options="leaveRequestTime.leaveRequestTimeID as leaveRequestTime.leaveRequestTimeNM for leaveRequestTime in leaveRequestTimes">
+                                                    <option value=""></option>
+                                                </select>
+                                                <i></i>
+                                            </label>
+                                        </div>
+                                        <div class="col col-2 m-bottom-15">
+                                            <label class="label">Total Days</label>
+                                            <label class="input">
+                                                <input type="text" id="totalDays" ng-model="dataContainer.totalDays"/>
+                                            </label>    
+                                        </div>
+                                        <div class="col col-3 m-bottom-15">
+                                            <label class="label">Leave Type</label>
+                                            <label class="select">
+                                                <select ng-model="dataContainer.leaveTypeID" ng-options="leaveType.leaveTypeID as leaveType.leaveTypeNM for leaveType in leaveTypes">
+                                                    <option value=""></option>
+                                                </select>
+                                                <i></i>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <section>
+                                        <label class="label">Reason For Leave</label>
+                                        <label class="textarea">
+                                            <textarea rows="3" ng-model="dataContainer.reasonForLeave"></textarea>
+                                        </label>
+                                    </section>
+                                    <div class="row">
+                                        <div class="col col-3 m-bottom-15">
+                                            <label class="label">Manager Approved</label>
+                                            <label class="select">
+                                                <select ng-model="dataContainer.managerApprovedBy" ng-options="manager.employeeID as manager.employeeNM for manager in managers">
+                                                    <option value=""></option>
+                                                </select>
+                                                <i></i>
+                                            </label>
+                                        </div>
+                                        <div class="col col-3 m-bottom-15">
+                                            <label class="label">Director Approved</label>
+                                            <label class="select">
+                                                <select ng-model="dataContainer.directorApprovedBy" ng-options="director.employeeID as director.employeeNM for director in directors">
+                                                    <option value=""></option>
+                                                </select>
+                                                <i></i>
+                                            </label>
+                                        </div>
+                                        <div class="col col-md-offset-2 m-bottom-15">
+                                            <label class="label">&nbsp;</label>
+                                            <label class="checkbox">
+                                                <input type="checkbox" ng-model="dataContainer.isApproved">
+                                                <i></i> Approved
+                                            </label>
+                                        </div>
+                                        <div class="col col-2 m-bottom-15">
+                                            <label class="label">&nbsp;</label>
+                                            <label class="checkbox">
+                                                <input type="checkbox" ng-model="dataContainer.isDenied">
+                                                <i></i> Denied
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <section>
+                                        <label class="label">Denial Comment</label>
+                                        <label class="textarea">
+                                            <textarea rows="3" ng-model="dataContainer.denialComment"></textarea>
+                                        </label>
+                                    </section>
+                                </fieldset>
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="tabTracking">
+                            <div class="smart-form">
+                                <fieldset>
+                                    <div class="row">
+                                        <section class="col col-3">
+                                            <label class="label">Updated By</label>
+                                            <label class="input">
+                                                <span class="form-control">
+                                                    <a ng-show="(dataContainer.updatedBy!=null && dataContainer.updatorName2!=null)" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{dataContainer.updatedBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                        <i class="fa fa-user"></i> {{dataContainer.updatorName2}}
+                                                    </a>
+                                                    <span ng-show="(dataContainer.updatedBy!=null && dataContainer.updatorName2==null && dataContainer.updatorName!=null)">{{dataContainer.updatorName}}</span>
+                                                </span>
+                                            </label>
+                                        </section>
+                                        <section class="col col-3">
+                                            <label class="label">Updated Date</label>
+                                            <label class="input">
+                                                <span class="form-control">{{dataContainer.updatedDate}}</span>
+                                            </label>
+                                        </section>
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="jarviswidget" id="wid-id-product-detail" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false"></div>
+    </article>
+</form>
+
+@section FormAction {
+<ul id="sparks">
+    <li class="sparks-info">
+        <a href="@Url.Action("Index", "leaverequestmng")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="event.update($event)"><i class="fa fa-save"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0)" class="btn btn-default@(ViewBag.ID==0?" disabled":"") @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="Delete" style="color: #ff0000;" ng-click="event.delete($event)"><i class="fa fa-times"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0)" disabled class="btn btn-default" title="Print"><i class="fa fa-print"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Reset, HttpContext.Current))" title="Reset Approval status" disabled><i class="fa fa-thumbs-o-down"></i></a>
+    </li>
+
+    @if (!string.IsNullOrEmpty(userManualUrl))
+    {
+        <li class="sparks-info">
+            <a target="_blank" href="@userManualUrl" class="btn btn-default" title="Help"><i class="fa fa-info"></i></a>
+        </li>
+    }
+</ul>
+}
+@section pagejs {
+    <script src="~/Angular/app/leaveRequestMng/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/support/service.js?c=@System.Guid.NewGuid().ToString().Replace("-","")"></script>
+    <script type="text/javascript">
+        leaveRequestMngService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/leaverequestmng/';
+        leaveRequestMngService.supportServiceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/support/';
+        leaveRequestMngService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+    supportService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/support/';
+    supportService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+    var context = {
+            id: @ViewBag.ID,
+            backUrl: '@Url.Action("Index", "leaverequestmng")',
+            refreshUrl: '@Url.Action("Edit", "leaverequestmng", new { id = UrlParameter.Optional })/',
+            errMsg: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED'
+        }
+    </script>
+    <script src="~/Angular/app/leaveRequestMng/edit.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}

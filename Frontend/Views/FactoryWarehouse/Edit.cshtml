@@ -1,0 +1,279 @@
+﻿@{
+    if (ViewBag.ID == 0)
+    {
+        ViewBag.Title = "Create New Warehouse";
+    }
+    else
+    {
+        ViewBag.Title = "Edit Warehouse";
+    }
+
+    ViewBag.Module = "Factory Warehouse Management";
+    Frontend.APIDTO.APIUserInformation userInfo = (Frontend.APIDTO.APIUserInformation)Session[Frontend.Customize.Common.ProjectDefinition.USER_INFO_SESSION];
+}
+<style>
+    .css-inline a {
+        display: inline;
+    }
+
+    .smart-form .state-error .select2-container a {
+        background: #fff0f0;
+        border-color: #A90329;
+    }
+</style>
+<form class="row" name="editForm" id="main-form">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-product-information3" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <h2>Warehouse Information</h2>
+            </header>
+            <div>
+                <div class="widget-body">
+                    <div class="smart-form m-bottom-15" ">
+                        <fieldset style="padding: 0px;">
+                            <div class="row">
+
+                                <div class="col col-2 m-bottom-15">
+                                    <label class="label">
+                                        <span>Code</span>
+                                        <em ng-show="editForm.factoryWarehouseUD.$error.required" class="note note-error">(Required)</em>
+                                    </label>
+                                    <label class="input" ng-class="{'state-error': editForm.factoryWarehouseUD.$error.required}">
+                                        <input name="factoryWarehouseUD" type="text" id="factoryWarehouseUD" ng-model="data.factoryWarehouseUD" required />
+                                    </label>
+                                </div>
+
+                                <div class="col col-6 m-bottom-15">
+                                    <label class="label">
+                                        <span>Warehouse Name</span>
+                                        <em ng-show="editForm.factoryWarehouseNM.$error.required" class="note note-error">(Required)</em>
+                                    </label>
+                                    <label class="input" ng-class="{'state-error': editForm.factoryWarehouseNM.$error.required}">
+                                        <input name="factoryWarehouseNM" type="text" id="factoryWarehouseNM" ng-model="data.factoryWarehouseNM" required autocomplete="off" />
+                                    </label>
+                                </div>
+
+                                <div class="col col-2 m-bottom-15">
+                                    <label class="label">
+                                        <span>Company</span>
+                                    </label>
+                                    <label class="input">
+                                        <span class="form-control">{{data.shortName}}</span>
+                                    </label>
+                                </div>
+                                <div class="col col-2 m-bottom-15">
+                                    <label class="label">
+                                        <span>Branch</span>
+                                    </label>
+                                    <label class="select">
+                                        <select ng-model="data.branchID" ng-options="branch.branchID as branch.branchUD for branch in branches">
+                                            <option value=""></option>
+                                        </select>
+                                        <i></i>
+                                    </label>
+                                </div>
+
+                                <div class="col col-xs-12 m-bottom-15">
+                                    <label class="label">Description</label>
+                                    <label class="textarea">
+                                        <i class="icon-append fa fa-comment"></i>
+                                        <textarea class="form-control" ng-model="data.description" rows="3" style="padding:5px"></textarea>
+                                    </label>
+                                </div>
+
+                                <div class="col col-xs-4">
+                                    <label class="label">
+                                        <b>Person Responsible</b>
+                                    </label>
+                                    <label class="input">
+                                        <select class="form-control" ng-model="data.responsibleBy" ng-options="employee.employeeID as employee.employeeNM for employee in supportEmployee">
+                                            <option value=""></option>
+                                        </select>
+                                    </label>
+                                </div>
+                            </div>
+                            <section>
+                                <div class="note">
+                                    <strong>Updated By</strong>
+                                    <i class="fa fa-user" ng-show="data.updatedBy != null"> </i>
+                                    <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{data.updatedBy}}" data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600" ng-show="data.updatedBy != null && data.updatorNM != null">
+                                        {{data.updatorNM}}
+                                    </a>
+                                    on
+                                    {{data.updatedDate}}
+                                </div>
+                            </section>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="jarviswidget" id="wid-id-product-detail" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <h2>Pallet Information</h2>
+            </header>
+            <div>
+                <div class="widget-body">
+                    <div class="smart-form m-bottom-15">
+                        <a class="btn btn-primary btn-xs m-bottom-15" ng-click="event.addDetail($event)"><i class=" fa fa-plus"></i> Add </a>
+                        <fieldset style="padding: 0px;">
+                            <div class="row">
+                                <section class="col col-lg-12">
+                                    <div class="tilsoft-table-wrapper">
+                                        <div class="tilsoft-table">
+                                            <div class="tilsoft-table-body" style="width: 950px; margin-top:0px; height: auto;">
+                                                <table>
+                                                    <tr>
+                                                        <th style="width:40px"></th>
+                                                        <th style="width:300px">Code</th>
+                                                        <th style="width:400px">Name</th>
+                                                        <th style="width:200px">Capacity</th>
+                                                        <th></th>
+                                                    </tr>
+                                                    <tr ng-repeat="item in data.factoryWarehousePallets">
+                                                        <td style="text-align:center; vertical-align:middle">
+                                                            <a ng-click="event.removeDetail($event,$index)" class="btn btn-danger btn-xs font-11" href="javascript:void(0);"><i class=" fa fa-times"></i> Delete</a>
+                                                        </td>
+                                                        <td>
+                                                            <input class="form-control" type="text" name="factoryWarehousePalletUD" ng-model="item.factoryWarehousePalletUD">
+                                                        </td>
+                                                        <td>
+                                                            <input class="form-control" type="text" name="factoryWarehousePalletNM" ng-model="item.factoryWarehousePalletNM">
+                                                        </td>
+                                                        <td>
+                                                            <input class="form-control" style="text-align:right" avs-number ng-data-source="item.capacity">
+                                                        </td>
+                                                        <td></td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="jarviswidget" id="wid-id-product-information4" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <h2>Stock Capacity</h2>
+            </header>
+            <div>
+                <div class="widget-body">
+                    <div class="smart-form">
+                        <a class="btn btn-primary btn-xs m-bottom-15" ng-click="event.showCapacity()"><i class=" fa fa-plus"></i> Show </a>
+                        <fieldset style="padding: 0px;">
+                            <div class="tilsoft-table-wrapper">
+                                <div class="tilsoft-table">
+                                    <div class="tilsoft-table-body" style="width: 100%; height: auto; margin-top: 0px;">
+                                        <table>
+                                            <tr>
+                                                <th>Code</th>
+                                                <th>Name</th>
+                                                <th>Capacity</th>
+                                                <th>Current</th>
+                                                <th>Available</th>
+                                            </tr>
+                                            <tr ng-repeat="item in capacityOverviews" ng-style="setColor(item)">
+                                                <td>{{item.factoryWarehousePalletUD}}</td>
+                                                <td>{{item.factoryWarehousePalletNM}}</td>
+                                                <td style="text-align:right">{{item.capacity | number}}</td>
+                                                <td style="text-align:right">{{item.totalBalance | number}}</td>
+                                                <td style="text-align:right">{{item.capacity - item.totalBalance | number}}</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="jarviswidget" id="wid-id-product-information1" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <h2>Stock Overview</h2>
+            </header>
+            <div>
+                <div class="widget-body">
+                    <div class="smart-form">
+                        <a class="btn btn-primary btn-xs m-bottom-15" ng-click="event.showCapacityDetail()"><i class=" fa fa-plus"></i> Show </a>
+                        <fieldset style="padding: 0px;">
+                            <div class="tilsoft-table-wrapper">
+                                <div class="tilsoft-table">
+                                    <div class="tilsoft-table-body" style="width: 100%; height: auto; margin-top: 0px;">
+                                        <table>
+                                            <tbody ng-repeat="pallet in data.factoryWarehousePallets">
+                                                <tr>
+                                                    <th style="text-align: left;"><h3>Pallet: {{pallet.factoryWarehousePalletNM}} ({{pallet.factoryWarehousePalletUD}})</h3></th>
+                                                </tr>
+                                                <tr>
+                                                    <td style="padding: 0px;">
+                                                        <table>
+                                                            <tr>
+                                                                <th>Item Code</th>
+                                                                <th>Item Name</th>
+                                                                <th>Type</th>
+                                                                <th>Qty</th>
+                                                                <th>Unit</th>
+                                                            </tr>
+                                                            <tr ng-repeat="item in $parent.palletOverviews | filter: {factoryWarehousePalletID: pallet.factoryWarehousePalletID}">
+                                                                <td>{{item.productionItemUD}}</td>
+                                                                <td>{{item.productionItemNM}}</td>
+                                                                <td>{{item.productionItemTypeNM}}</td>
+                                                                <td>{{item.totalBalance}}</td>
+                                                                <td>{{item.unit}}</td>
+                                                            </tr>
+                                                        </table>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "FactoryWarehouse")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="event.update($event)"><i class="fa fa-save"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default@(ViewBag.ID==0?" disabled":"") @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="Delete" style="color: #ff0000;" ng-click="event.delete($event)"><i class="fa fa-times"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script type="text/javascript">
+        var context = {
+                id: @ViewBag.ID,
+                serviceUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/factorywarehouse/',
+                token: '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]',
+                backUrl: '@Url.Action("Index", "FactoryWarehouse")',
+                refreshUrl: '@Url.Action("Edit", "FactoryWarehouse", new { id = UrlParameter.Optional })/',
+                branchID: '@userInfo.Data.BranchID',
+                factoryID: '@userInfo.Data.FactoryID',
+                companyID: '@userInfo.Data.CompanyID',
+            }
+    </script>
+    <script src="~/Angular/app/factoryWarehouse/edit.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/jsonService2.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/factoryWarehouse/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/support/service.js?c=@System.Guid.NewGuid().ToString().Replace("-","")"></script>
+}

@@ -1,0 +1,1153 @@
+﻿@{
+    if (ViewBag.ID == 0)
+    {
+        ViewBag.Title = "Create New Sample Order";
+    }
+    else
+    {
+        ViewBag.Title = "Edit Sample Order";
+    }
+    Frontend.APIDTO.APIUserInformation userInfo = (Frontend.APIDTO.APIUserInformation)Session[Frontend.Customize.Common.ProjectDefinition.USER_INFO_SESSION];
+}
+
+<style>
+    tr.approved {
+        background: #ca5100 !important;
+    }
+</style>
+
+<form class="row" name="editForm" id="main-form">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-0" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>General Information</h2>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div class="smart-form">
+                        <fieldset>
+                            <div class="row">
+                                <section class="col col-2">
+                                    <label class="label">Code</label>
+                                    <label class="input">
+                                        <span class="form-control">{{data.sampleOrderUD}}</span>
+                                    </label>
+                                </section>
+                                <section class="col col-2">
+                                    <label class="label">Season</label>
+                                    <label class="select">
+                                        <select class="form-control search-filter" ng-model="data.season" ng-options="season.seasonValue as season.seasonText for season in seasons">
+                                            <option value=""></option>
+                                        </select>
+                                        <i></i>
+                                    </label>
+                                </section>
+                                <section class="col col-2">
+                                    <label class="label">Client</label>
+                                    <label class="input">
+                                        <input type="text" ng-model="data.clientID" id="clientSelectBox" />
+                                    </label>
+                                </section>
+                                <section class="col col-3">
+                                    <label class="label">Purpose</label>
+                                    <label class="select">
+                                        <select class="form-control search-filter" ng-model="data.purposeID" ng-options="purpose.purposeID as purpose.purposeNM for purpose in samplePurposes">
+                                            <option value=""></option>
+                                        </select>
+                                        <i></i>
+                                    </label>
+                                </section>
+                                <section class="col col-3">
+                                    <label class="label">Transport Type</label>
+                                    <label class="select">
+                                        <select class="form-control search-filter" ng-model="data.transportTypeID" ng-options="transport.transportTypeID as transport.transportTypeNM for transport in sampleTransportTypes">
+                                            <option value=""></option>
+                                        </select>
+                                        <i></i>
+                                    </label>
+                                </section>
+                            </div>
+                            <div class="row">    
+                                <section class="col col-9">
+                                    <label class="label">Notify Emails</label>
+                                    <label class="textarea">
+                                        <textarea rows="3" ng-model="data.notifyEmail"></textarea>
+                                    </label>
+                                    <div class="note">
+                                        <strong>Note:</strong> separate email address using semi colon ";"
+                                    </div>
+                                </section>   
+                                <section class="col col-3">
+                                    <label class="label">Deadline</label>
+                                    <label class="input">
+                                        <i class="icon-append fa fa-calendar"></i>
+                                        <input type="text" data-dateformat="dd/mm/yy" class="datepicker" ng-model="data.deadline" />
+                                    </label>
+                                </section>  
+                                @if (userInfo.Data.UserGroupID != 5) {
+                                    <section class="col col-3">
+                                        <label class="label">Hard Deadline</label>
+                                        <label class="input">
+                                            <i class="icon-append fa fa-calendar"></i>
+                                            <input type="text" data-dateformat="dd/mm/yy" class="datepicker" ng-model="data.hardDeadline" />
+                                        </label>
+                                    </section>
+                                }
+                            </div>   
+                            <div class="row">
+                                <section class="col col-9">
+                                    <label class="label">Remark</label>
+                                    <label class="textarea">
+                                        <textarea rows="5" ng-model="data.remark"></textarea>
+                                    </label>                                    
+                                </section>
+                                <section class="col col-3">
+                                    <label class="label">Destination</label>
+                                    <label class="input">
+                                        <input type="text" ng-model="data.destination" />
+                                    </label>
+                                </section> 
+                                <section class="col col-3">
+                                    <label class="label">Status</label>
+                                    <label class="input">
+                                        <span class="form-control">{{data.sampleOrderStatusNM}}</span>
+                                    </label>
+                                </section>
+                            </div>      
+                            <section>
+                                <div class="note" ng-if="data.creatorName">
+                                    <strong>Created by:</strong> {{data.creatorName}} on {{data.createdDate}}
+                                </div>
+                                <div class="note" ng-if="data.updatorName">
+                                    <strong>Updated by:</strong> {{data.updatorName}} on {{data.updatedDate}}
+                                </div>
+                                <div class="note" ng-if="data.statusUpdatorName">
+                                    <strong>Status updated by:</strong> {{data.statusUpdatorName}} on {{data.statusUpdatedDate}}
+                                </div>
+                            </section>
+                        </fieldset>
+                        @if (userInfo.Data.UserGroupID != 5) {
+                        <footer>
+                            <a href="javascript:void(0)" style="float: none;" class="btn btn-primary" ng-click="event.updateOrder()"><i class="fa fa-save"></i> Update</a>
+                            <a href="javascript:void(0)" style="float: none;" class="btn btn-default" ng-click="event.getMinuteReport()" ng-if="data.sampleOrderID > 0"><i class="fa fa-bar-chart-o"></i> Minute Report</a>
+                            <a href="javascript:void(0)" style="float: none;" class="btn btn-default" ng-click="event.getSampleReport()" ng-if="data.sampleOrderID > 0"><i class="fa fa-bar-chart-o"></i> Sample Report</a>
+                            <a href="javascript:void(0)" style="float: none;" class="btn btn-warning" ng-click="event.refreshOrder()">Reset</a>
+                            <br/>
+                            <a style="float: none;" ng-click="event.changeOrderStatus(3)" class="btn btn-success" href="javascript:void(0)">Revised</a>
+                            <a style="float: none;" ng-click="event.changeOrderStatus(1)" class="btn btn-success" href="javascript:void(0)">Confirmed</a>
+                            <a style="float: none;" ng-click="event.changeOrderStatus(2)" class="btn btn-success" href="javascript:void(0)">Completed</a>
+                        </footer>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12" ng-if="data.sampleOrderID > 0">
+        <div class="jarviswidget" id="wid-id-product" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <h2>Product Detail</h2>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div class="smart-form">
+                        <fieldset style="padding: 0px; border-top: none;">
+                            <div class="tilsoft-table-wrapper" id="grdImages">
+                                <div class="tilsoft-table">
+                                    <div style="width: 100%; overflow-y: scroll; height: 450px; min-height: 100px;" class="tilsoft-table-body">
+                                        <table>
+                                            <tbody>
+                                                <tr>
+                                                    <th style="width: 50px;">&nbsp;</th>
+                                                    <th style="width: 20px;">#</th>
+                                                    <th style="width: 50px;">Status</th>
+                                                    <th style="width: 150px;">Image</th>
+                                                    <th style="width: 30px;">Qnt</th>
+                                                    <th>Item Description</th>
+                                                    <th>Factory</th>
+                                                </tr>
+                                                <tr ng-repeat="item in data.sampleProducts" ng-class="{approved: item.sampleProductStatusID == 5}">
+                                                    <td style="width: 60px; text-align: center;">
+                                                        <a title="Edit" href="javascript:void(0)" class="btn btn-primary btn-xs font-11" ng-click="event.editProduct(item)" style="margin-top: 5px; display: block; width: 45px;"><i class="fa fa-pencil"></i> Edit</a>
+                                                        <a title="Edit" href="javascript:void(0)" class="btn btn-danger btn-xs font-11" ng-click="event.removeProduct(item)" style="margin-top: 10px; display: block; width: 45px;"><i class="fa fa-times"></i> Del</a>
+                                                    </td>
+                                                    <td style="text-align: right;">{{$index + 1}}</td>
+                                                    <td style="width: 40px; text-align:center;">{{item.sampleProductStatusNM}}</td>
+                                                    <td style="width: 150px; text-align: center;">
+                                                        <a data-featherlight="image" href="{{item.fileLocation}}" style="width: 135px; height: 135px; display: block;">
+                                                            <img style="width: 100%;" ng-src="{{item.thumbnailLocation}}">
+                                                        </a>
+                                                    </td>
+                                                    <td style="text-align: right;">{{item.quantity}}</td>
+                                                    <td style="width: 350px;">
+                                                        <strong>Request Type</strong>: {{item.requestTypeNM}}
+                                                        <br />
+                                                        <strong>Description</strong>: {{item.articleDescription}}
+                                                        <br />
+                                                        <strong>Minutes</strong>:
+                                                        <p ng-bind-html="method.formatRemark(item.remark)"></p>
+                                                    </td>
+                                                    <td>
+                                                        <strong>NL Suggested</strong>: {{item.nlSuggestedFactoryUD}}
+                                                        <br />
+                                                        <strong>VN Suggested</strong>: {{item.vnSuggestedFactoryUD}}
+                                                        <br />
+                                                        <strong>Deadline</strong>: {{item.factoryDeadline}}
+                                                        <br />
+                                                        <strong>ETA Destination</strong>: {{item.etaDestination}}
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+                        <footer>
+                            <a href="#" class="btn btn-primary" ng-click="event.addProduct()"><i class="fa fa-file-o"></i> Add New Product</a>
+                        </footer>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+<div id="detailPanel" class="row" style="display: none;">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-popup" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">    
+            <header>
+                <h2>Edit Item: {{currentProduct.articleDescription}}</h2>
+            </header>
+            <div>
+                <div class="widget-body">
+                    <ul class="nav nav-tabs pull-left in" style="width: 100%;">
+                        <li class="active">
+                            <a data-toggle="tab" href="#tabPopupProductInformation"> <span> Product Information </span> </a>
+                        </li>
+                        <li>
+                            <a data-toggle="tab" href="#tabMinute" ng-if="currentProduct.sampleProductID > 0"> <span> Meeting minute </span> </a>
+                        </li>
+                        <li>
+                            <a data-toggle="tab" href="#tabReferenceImage" ng-if="currentProduct.sampleProductID > 0"> <span> Reference Image </span> </a>
+                        </li>
+                        <li>
+                            <a data-toggle="tab" href="#tabTechnicalDrawing" ng-if="currentProduct.sampleProductID > 0"> <span> Technical Drawing </span> </a>
+                        </li>
+                        <li>
+                            <a data-toggle="tab" href="#tabPopupSamplingProgress" ng-if="currentProduct.sampleProductID > 0"> <span> Sampling Progress </span> </a>
+                        </li>                        
+                        <li>
+                            <a data-toggle="tab" href="#tabRemark" ng-if="currentProduct.sampleProductID > 0"> <span> Progress Remark </span> </a>
+                        </li>
+                    </ul>
+                    <div class="clear"></div>
+                    <div class="tab-content" style="border-left: solid 1px #ddd; border-right: solid 1px #ddd; border-bottom: solid 1px #ddd;">
+                        <div class="tab-pane active" id="tabPopupProductInformation">
+                            <div class="smart-form">
+                                <footer style="border-top: none; background: none; border-bottom: solid 1px #ddd">
+                                    <a href="#" style="float: none;" class="btn btn-default" ng-click="event.backToOrder()">Back</a>
+                                    <a style="float: none;" ng-click="event.refreshProduct()" class="btn btn-warning" href="javascript:void(0)">Reset</a>
+                                    <a style="float: none;" ng-click="event.updateProduct()" class="btn btn-primary" href="javascript:void(0)">Update</a>
+                                    
+                                    <br/>
+
+                                    @if (userInfo.Data.UserGroupID != 5) {
+                                    <a style="float: none;" ng-click="event.changeProductStatus(2)" class="btn btn-success" href="javascript:void(0)">Confirmed</a>
+                                    <a style="float: none;" ng-click="event.changeProductStatus(3)" class="btn btn-success" href="javascript:void(0)">Revised</a>
+                                    }
+                                    <a style="float: none;" ng-click="event.changeProductStatus(4)" class="btn btn-success" href="javascript:void(0)">Finished</a>
+                                    @if (userInfo.Data.UserGroupID != 5)
+                                    {
+                                    <a style="float: none;" ng-click="event.changeProductStatus(8)" class="btn btn-success" href="javascript:void(0)">Declined</a>
+                                    <a style="float: none;" ng-click="event.changeProductStatus(5)" class="btn btn-success" href="javascript:void(0)">Approved</a>
+                                    }
+                                    <a style="float: none;" ng-click="event.changeProductStatus(9)" class="btn btn-success" href="javascript:void(0)">Data Finished</a>
+                                    @if (userInfo.Data.UserGroupID != 5)
+                                    {                                    
+                                    <a style="float: none;" ng-click="event.changeProductStatus(6)" class="btn btn-success" href="javascript:void(0)">Completed</a>
+                                    <a style="float: none;" ng-click="event.changeProductStatus(7)" class="btn btn-success" href="javascript:void(0)">Cancelled</a>
+                                    }
+                                    <div class="note" ng-if="currentProduct.updatorName"><strong>Update by:</strong> {{currentProduct.updatorName}} on {{currentProduct.updatedDate}}</div>
+                                    <div class="note" ng-if="currentProduct.statusUpdatorName"><strong>Status updated by:</strong> {{currentProduct.statusUpdatorName}} on {{currentProduct.statusUpdatedDate}}</div>
+                                </footer>
+                                <fieldset>
+                                    <div class="row">
+                                        <section class="col col-3">
+                                            <label class="label">Status</label>
+                                            <label class="input">
+                                                <span class="form-control">{{currentProduct.sampleProductStatusNM}}</span>
+                                            </label>
+                                        </section>
+                                        <section class="col col-3">
+                                            <label class="label">Quantity</label>
+                                            <label class="input">
+                                                <input type="text" ng-model="currentProduct.quantity" />
+                                            </label>
+                                        </section>
+                                        <section class="col col-3">
+                                            <label class="label">ETA Destination</label>
+                                            <label class="input">
+                                                <i class="icon-append fa fa-calendar"></i>
+                                                <input type="text" data-dateformat="dd/mm/yy" class="datepicker" ng-model="currentProduct.etaDestination" />
+                                            </label>
+                                        </section>  
+                                    </div>
+                                    <section>
+                                        <label class="label">Description</label>
+                                        <label class="input">
+                                            <input type="text" ng-model="currentProduct.articleDescription" />
+                                        </label>
+                                    </section>
+                                    <div class="row">
+                                        <section class="col col-6">
+                                            <label class="label">Model <a class="btn btn-default" href="javascript:void(0)" ng-click="event.resetModel()">Clear selection</a></label>
+                                            <label class="input">
+                                                <input type="text" ng-model="currentProduct.modelID" id="popupModelSelectBox" data-allow-clear="true" />
+                                            </label>
+                                        </section>
+                                        <section class="col col-2">
+                                            <label class="label">Frame Material</label>
+                                            <label class="select">
+                                                <select ui-select2 ng-model="currentProduct.frameMaterialID" style="width:100%" class="select2">
+                                                    <option value="">--NULL--</option>
+                                                    <option ng-repeat="frameMaterial in frameMaterials | orderBy: 'frameMaterialNM'" value="{{frameMaterial.frameMaterialID}}">{{frameMaterial.frameMaterialNM}}</option>
+                                                </select>
+                                            </label>
+                                            <label class="input">
+                                                <input type="text" ng-model="currentProduct.frameMaterialDescription" placeholder="Other frame material" />
+                                            </label>
+                                        </section>
+                                        <section class="col col-4">
+                                            <label class="label">Frame Material Color</label>
+                                            <label class="select">
+                                                <select ui-select2 ng-model="currentProduct.frameMaterialColorID" style="width:100%" class="select2">
+                                                    <option value="">--NULL--</option>
+                                                    <option ng-repeat="frameMaterialColor in frameMaterialColors | orderBy: 'frameMaterialColorNM'" value="{{frameMaterialColor.frameMaterialColorID}}">{{frameMaterialColor.frameMaterialColorNM}}</option>
+                                                </select>
+                                            </label>
+                                            <label class="input">
+                                                <input type="text" ng-model="currentProduct.frameMaterialColorDescription" placeholder="Other frame material color" />
+                                            </label>
+                                        </section>
+                                    </div>
+                                    <div class="row">
+                                        <section class="col col-2">
+                                            <label class="label">Material</label>
+                                            <label class="select">
+                                                <select ui-select2 ng-model="currentProduct.materialID" style="width:100%" class="select2">
+                                                    <option value="">--NULL--</option>
+                                                    <option ng-repeat="material in materials | orderBy: 'materialNM'" value="{{material.materialID}}">{{material.materialNM}}</option>
+                                                </select>
+                                            </label>
+                                            <label class="input">
+                                                <input type="text" ng-model="currentProduct.materialDescription" placeholder="Other material" />
+                                            </label>
+                                        </section>
+                                        <section class="col col-4">
+                                            <label class="label">Material Type</label>
+                                            <label class="select">
+                                                <select ui-select2 ng-model="currentProduct.materialTypeID" style="width:100%" class="select2">
+                                                    <option value="">--NULL--</option>
+                                                    <option ng-repeat="materialType in materialTypes | orderBy: 'materialTypeNM'" value="{{materialType.materialTypeID}}">{{materialType.materialTypeNM}}</option>
+                                                </select>
+                                            </label>
+                                            <label class="input">
+                                                <input type="text" ng-model="currentProduct.materialTypeDescription" placeholder="Other material type" />
+                                            </label>
+                                        </section>
+                                        <section class="col col-6">
+                                            <label class="label">Material Color</label>
+                                            <label class="select">
+                                                <select ui-select2 ng-model="currentProduct.materialColorID" style="width:100%" class="select2">
+                                                    <option value="">--NULL--</option>
+                                                    <option ng-repeat="materialColor in materialColors | orderBy: 'materialColorNM'" value="{{materialColor.materialColorID}}">{{materialColor.materialColorNM}}</option>
+                                                </select>
+                                            </label>
+                                            <label class="input">
+                                                <input type="text" ng-model="currentProduct.materialColorDescription" placeholder="Other material color" />
+                                            </label>
+                                        </section>
+                                    </div>
+                                    <div class="row">
+                                        <section class="col col-2">
+                                            <label class="label">Sub Material</label>
+                                            <label class="select">
+                                                <select ui-select2 ng-model="currentProduct.subMaterialID" style="width:100%" class="select2">
+                                                    <option value="">--NULL--</option>
+                                                    <option ng-repeat="subMaterial in subMaterials | orderBy: 'subMaterialNM'" value="{{subMaterial.subMaterialID}}">{{subMaterial.subMaterialNM}}</option>
+                                                </select>
+                                            </label>
+                                            <label class="input">
+                                                <input type="text" ng-model="currentProduct.subMaterialDescription" placeholder="Other sub material" />
+                                            </label>
+                                        </section>
+                                        <section class="col col-4">
+                                            <label class="label">Sub Material Color</label>
+                                            <label class="select">
+                                                <select ui-select2 ng-model="currentProduct.subMaterialColorID" style="width:100%" class="select2">
+                                                    <option value="">--NULL--</option>
+                                                    <option ng-repeat="subMaterialColor in subMaterialColors | orderBy: 'subMaterialColorNM'" value="{{subMaterialColor.subMaterialColorID}}">{{subMaterialColor.subMaterialColorNM}}</option>
+                                                </select>
+                                            </label>
+                                            <label class="input">
+                                                <input type="text" ng-model="currentProduct.subMaterialColorDescription" placeholder="Other sub material color" />
+                                            </label>
+                                        </section>
+                                    </div>
+                                    <div class="row">
+                                        <section class="col col-3">
+                                            <label class="label">Back Cushion</label>
+                                            <label class="select">
+                                                <select ui-select2 ng-model="currentProduct.backCushionID" style="width:100%" class="select2">
+                                                    <option value="">--NULL--</option>
+                                                    <option ng-repeat="backCushion in backCushions | orderBy: 'backCushionNM'" value="{{backCushion.backCushionID}}">{{backCushion.backCushionNM}}</option>
+                                                </select>
+                                            </label>
+                                            <label class="input">
+                                                <input type="text" ng-model="currentProduct.backCushionDescription" placeholder="Other back cushion" />
+                                            </label>
+                                        </section>
+                                        <section class="col col-3">
+                                            <label class="label">Back Cushion Thickness</label>
+                                            <label class="input">
+                                                <input type="text" ng-model="currentProduct.backCushionThickness" />
+                                            </label>
+                                        </section>
+                                        <section class="col col-6">
+                                            <label class="label">Back Cushion Specification</label>
+                                            <label class="input">
+                                                <input type="text" ng-model="currentProduct.backCushionSpecification" />
+                                            </label>
+                                        </section>
+                                    </div>
+                                    <div class="row">
+                                        <section class="col col-3">
+                                            <label class="label">Seat Cushion</label>
+                                            <label class="select">
+                                                <select ui-select2 ng-model="currentProduct.seatCushionID" style="width:100%" class="select2">
+                                                    <option value="">--NULL--</option>
+                                                    <option ng-repeat="seatCushion in seatCushions | orderBy: 'seatCushionNM'" value="{{seatCushion.seatCushionID}}">{{seatCushion.seatCushionNM}}</option>
+                                                </select>
+                                            </label>
+                                            <label class="input">
+                                                <input type="text" ng-model="currentProduct.seatCushionDescription" placeholder="Other seat cushion" />
+                                            </label>
+                                        </section>
+                                        <section class="col col-3">
+                                            <label class="label">Seat Cushion Thickness</label>
+                                            <label class="input">
+                                                <input type="text" ng-model="currentProduct.seatCushionThickness" />
+                                            </label>
+                                        </section>
+                                        <section class="col col-6">
+                                            <label class="label">Seat Cushion Specification</label>
+                                            <label class="input">
+                                                <input type="text" ng-model="currentProduct.seatCushionSpecification" />
+                                            </label>
+                                        </section>
+                                    </div>
+                                    <section>
+                                        <label class="label">Cushion Color</label>
+                                        <label class="select">
+                                            <select ui-select2 ng-model="currentProduct.cushionColorID" style="width:100%" class="select2">
+                                                <option value="">--NULL--</option>
+                                                <option ng-repeat="cushionColor in cushionColors | orderBy: 'cushionColorNM'" value="{{cushionColor.cushionColorID}}">{{cushionColor.cushionColorNM}}</option>
+                                            </select>
+                                        </label>
+                                        <label class="input">
+                                            <input type="text" ng-model="currentProduct.cushionColorDescription" placeholder="Other cushion color" />
+                                        </label>
+                                    </section>
+                                    <div class="row">
+                                        <section class="col col-3">
+                                            <label class="label">Overall Dimension</label>
+                                            <label class="input">
+                                                <input type="text" placeholder="Length" ng-model="currentProduct.overallDimL" style="width: 30%; margin-right: 3%; float: left;" />
+                                                <input type="text" placeholder="Width" ng-model="currentProduct.overallDimW" style="width: 30%; margin-right: 3%; float: left;" />
+                                                <input type="text" placeholder="Height" ng-model="currentProduct.overallDimH" style="width: 30%; margin-right: 3%; float: left;" />
+                                            </label>
+                                        </section>
+                                        <section class="col col-3">
+                                            <label class="label">Load Ability</label>
+                                            <label class="input">
+                                                <input type="text" placeholder="20DC" ng-model="currentProduct.loadAbility20DC" style="width: 30%; margin-right: 3%; float: left;" />
+                                                <input type="text" placeholder="40DC" ng-model="currentProduct.loadAbility40DC" style="width: 30%; margin-right: 3%; float: left;" />
+                                                <input type="text" placeholder="40HC" ng-model="currentProduct.loadAbility40HC" style="width: 30%; margin-right: 3%; float: left;" />
+                                            </label>
+                                        </section>
+                                        <section class="col col-3">
+                                            <label class="label">Carton Box Dimension</label>
+                                            <label class="input">
+                                                <input type="text" placeholder="Length" ng-model="currentProduct.cartonBoxDimL" style="width: 30%; margin-right: 3%; float: left;" />
+                                                <input type="text" placeholder="Width" ng-model="currentProduct.cartonBoxDimW" style="width: 30%; margin-right: 3%; float: left;" />
+                                                <input type="text" placeholder="Height" ng-model="currentProduct.cartonBoxDimH" style="width: 30%; margin-right: 3%; float: left;" />
+                                            </label>
+                                        </section>
+                                        <section class="col col-3">
+                                            <label class="label">Qnt/Box</label>
+                                            <label class="input">
+                                                <input type="text" ng-model="currentProduct.qntInBox" />
+                                            </label>
+                                        </section>
+                                        <section class="col col-3">
+                                            <label class="label">Net Weight</label>
+                                            <label class="input">
+                                                <input type="text" ng-model="currentProduct.netWeight" />
+                                            </label>
+                                        </section>
+                                        <section class="col col-3">
+                                            <label class="label">Gross Weight</label>
+                                            <label class="input">
+                                                <input type="text" ng-model="currentProduct.grossWeight" />
+                                            </label>
+                                        </section>
+                                    </div>
+                                    <div class="row">
+                                        <section class="col col-6">
+                                            <label class="label">NL Suggested Factory</label>
+                                            <label class="select">
+                                                <select id="popupNLSuggestedFactorySelectBox" ui-select2 ng-model="currentProduct.nlSuggestedFactoryID" style="width:100%" class="select2">
+                                                    <option value="">--NULL--</option>
+                                                    <option ng-repeat="factory in factories | orderBy: 'factoryUD'" value="{{factory.factoryID}}">{{factory.factoryUD}}</option>
+                                                </select>
+                                            </label>
+                                        </section>
+                                        <section class="col col-6">
+                                            <label class="label">Factory Deadline</label>
+                                            <label class="input">
+                                                <i class="icon-append fa fa-calendar"></i>
+                                                <input type="text" data-dateformat="dd/mm/yy" class="datepicker" ng-model="currentProduct.factoryDeadline" />
+                                            </label>
+                                        </section>                                        
+                                    </div>
+                                    <section>
+                                        <label class="label">NL Suggested Factory Remark</label>
+                                        <label class="textarea">
+                                            <textarea ng-model="currentProduct.nlSuggestedFactoryRemark" rows="5"></textarea>
+                                        </label>
+                                    </section>
+                                </fieldset>
+                                <footer>
+                                    <a href="#" style="float: none;" class="btn btn-default" ng-click="event.backToOrder()">Back</a>
+                                    <a style="float: none;" ng-click="event.refreshProduct()" class="btn btn-warning" href="javascript:void(0)">Reset</a>
+                                    <a style="float: none;" ng-click="event.updateProduct()" class="btn btn-primary" href="javascript:void(0)">Update</a>
+
+                                    <br />
+
+                                    @if (userInfo.Data.UserGroupID != 5)
+                                    {
+                                        <a style="float: none;" ng-click="event.changeProductStatus(2)" class="btn btn-success" href="javascript:void(0)">Confirmed</a>
+                                        <a style="float: none;" ng-click="event.changeProductStatus(3)" class="btn btn-success" href="javascript:void(0)">Revised</a>
+                                    }
+                                    <a style="float: none;" ng-click="event.changeProductStatus(4)" class="btn btn-success" href="javascript:void(0)">Finished</a>
+                                    @if (userInfo.Data.UserGroupID != 5)
+                                    {
+                                        <a style="float: none;" ng-click="event.changeProductStatus(8)" class="btn btn-success" href="javascript:void(0)">Declined</a>
+                                        <a style="float: none;" ng-click="event.changeProductStatus(5)" class="btn btn-success" href="javascript:void(0)">Approved</a>
+                                    }
+                                    <a style="float: none;" ng-click="event.changeProductStatus(9)" class="btn btn-success" href="javascript:void(0)">Data Finished</a>
+                                    @if (userInfo.Data.UserGroupID != 5)
+                                    {
+                                        <a style="float: none;" ng-click="event.changeProductStatus(6)" class="btn btn-success" href="javascript:void(0)">Completed</a>
+                                        <a style="float: none;" ng-click="event.changeProductStatus(7)" class="btn btn-success" href="javascript:void(0)">Cancelled</a>
+                                    }
+                                </footer>
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="tabMinute">
+                            <div class="smart-form">
+                                <footer style="border-top: none; background: none; border-bottom: solid 1px #ddd">
+                                    <a href="#" class="btn btn-default" ng-click="event.backToOrder()">Back to Order</a>
+                                    <a href="javascript:void(0)" class="btn btn-primary" ng-click="event.addMinute()">Add Minute</a>
+                                </footer>
+                                <fieldset ng-if="currentProduct.sampleProductMinutes.length == 0">
+                                    <section>
+                                        <label class="label" style="color: #999">EMPTY</label>
+                                    </section>
+                                </fieldset>
+                                <fieldset>
+                                    <div class="smart-timeline" ng-if="currentProduct.sampleProductMinutes.length > 0">
+                                        <ul class="smart-timeline-list">
+                                            <li ng-repeat="item in currentProduct.sampleProductMinutes | orderBy: '-updatedDate'">
+                                                <div class="smart-timeline-icon">
+                                                    <i class="fa fa-user"></i>
+                                                </div>
+                                                <div class="smart-timeline-time" style="text-align: center;">
+                                                    <small style="margin-bottom: 5px;">{{item.updatedDate}}</small>
+                                                    <a href="javascript:void(0);" class="btn btn-primary btn-xs font-11" ng-click="event.editMinute(item)" style="margin-bottom: 5px; display: block;"><i class="fa fa-pencil"></i> Edit</a>
+                                                    <a href="javascript:void(0);" class="btn btn-danger btn-xs font-11" ng-click="event.removeMinute(item)" style="margin-bottom: 5px; display: block;"><i class="fa fa-times"></i> Delete</a>
+                                                </div>
+                                                <div class="smart-timeline-content">
+                                                    <p>
+                                                        <strong>{{item.updatorName}}</strong>
+                                                    </p>
+                                                    <p ng-bind-html="method.formatRemark(item.meetingMinute)"></p>
+                                                    <br /><br />
+                                                    <div class="furnindo-image-editor" style="border: none; padding: 0px;">
+                                                        <div class="img-item" ng-repeat="image in item.sampleProductMinuteImages">
+                                                            <a data-featherlight="image" href="{{image.fileLocation}}">
+                                                                <img style="width: 100%;" ng-src="{{image.thumbnailLocation}}">
+                                                            </a>
+                                                        </div>
+                                                        <div class="clear"></div>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </fieldset>
+                                <footer>
+                                    <a href="#" class="btn btn-default" ng-click="event.backToOrder()">Back to Order</a>
+                                    <a href="javascript:void(0)" class="btn btn-primary" ng-click="event.addMinute()">Add Minute</a>
+                                </footer>
+                            </div>
+                        </div>
+                        <div id="tabReferenceImage" class="tab-pane">
+                            <div class="smart-form">
+                                <footer style="border-top: none; background: none; border-bottom: solid 1px #ddd">
+                                    <a href="#" class="btn btn-default" ng-click="event.backToOrder()">Back to Order</a>
+                                    <a href="javascript:void(0)" class="btn btn-primary" ng-click="event.addReferenceImage()">Add Reference Image</a>
+                                </footer>
+                                <fieldset ng-if="currentProduct.sampleReferenceImages.length == 0">
+                                    <section>
+                                        <label class="label" style="color: #999">EMPTY</label>
+                                    </section>
+                                </fieldset>
+                                <fieldset ng-if="currentProduct.sampleReferenceImages.length > 0">
+                                    <section>
+                                        <div class="furnindo-image-editor furnindo-large" style="border: none;">
+                                            <div class="img-item" ng-repeat="item in currentProduct.sampleReferenceImages" style="height: auto !important;">
+                                                <a data-featherlight="image" href="{{item.fileLocation}}" style="width: 150px; height: 150px; display: block;">
+                                                    <img style="width: 100%;" ng-src="{{item.thumbnailLocation}}">
+                                                </a>
+                                                <span title="Remove image" class="action" ng-click="event.removeReferenceImage($index)"><i class="fa fa-times"></i></span>
+                                                <span title="Edit image" class="action" ng-click="event.editReferenceImage($index)" style="top: 35px;background: rgba(0, 0, 255, 0.8);"><i class="fa fa-pencil"></i></span>
+                                                <span title="Edit image" class="action" ng-if="item.isDefault" style="top: 0px; left: 0px;background: rgba(0, 0, 255, 0.8);"><i class="fa fa-check"></i></span>
+                                                <section>
+                                                    <div class="note" ng-if="item.bringInBy">{{item.bringInBy}} on {{item.bringInDate}}</div>
+                                                    <div class="note">Updated by {{item.updatorName}} on {{item.updatedDate}}</div>
+                                                </section>
+                                            </div>
+                                            <div class="clear"></div>
+                                        </div>
+                                    </section>
+                                </fieldset>
+                                <footer>
+                                    <a href="#" class="btn btn-default" ng-click="event.backToOrder()">Back to Order</a>
+                                    <a href="javascript:void(0)" class="btn btn-primary" ng-click="event.addReferenceImage()">Add Reference Image</a>
+                                </footer>
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="tabPopupSamplingProgress">                            
+                            <div class="smart-form">
+                                <footer style="border-top: none; background: none; border-bottom: solid 1px #ddd">
+                                    <a href="#" class="btn btn-default" ng-click="event.backToOrder()">Back to Order</a>
+                                    <a href="javascript:void(0)" class="btn btn-primary" ng-click="event.addProgress()">Add Progress</a>
+                                </footer>
+                                <fieldset ng-if="currentProduct.sampleProgresses.length == 0">
+                                    <section>
+                                        <label class="label" style="color: #999">EMPTY</label>
+                                    </section>
+                                </fieldset>
+                                <fieldset>
+                                    <div class="smart-timeline" ng-if="currentProduct.sampleProgresses.length > 0">
+                                        <ul class="smart-timeline-list">
+                                            <li ng-repeat="item in currentProduct.sampleProgresses | orderBy: '-updatedDate'">
+                                                <div class="smart-timeline-icon">
+                                                    <i class="fa fa-user"></i>
+                                                </div>
+                                                <div class="smart-timeline-time" style="text-align: center;">
+                                                    <small style="margin-bottom: 5px;">{{item.updatedDate}}</small>
+                                                    <a href="javascript:void(0);" class="btn btn-primary btn-xs font-11" ng-click="event.editProgress(item)" style="margin-bottom: 5px; display: block;"><i class="fa fa-pencil"></i> Edit</a>
+                                                    <a href="javascript:void(0);" class="btn btn-primary btn-xs font-11" style="margin-bottom: 5px; display: block;" ng-click="event.addProgressRemark(item.sampleProgressID)"><i class="fa fa-comment-o"></i> Comment</a>
+                                                    <a href="javascript:void(0);" class="btn btn-danger btn-xs font-11" ng-click="event.removeProgress(item)" style="margin-bottom: 5px; display: block;"><i class="fa fa-times"></i> Delete</a>
+                                                </div>
+                                                <div class="smart-timeline-content">
+                                                    <p>
+                                                        <strong>{{item.updatorName}}</strong>
+                                                    </p>
+                                                    <strong>Version: {{item.version}}</strong>
+                                                    <p ng-bind-html="method.formatRemark(item.remark)"></p>
+                                                    <br /><br />
+                                                    <div class="furnindo-image-editor" style="border: none; padding: 0px;">
+                                                        <div class="img-item" ng-repeat="image in item.sampleProgressImages">
+                                                            <a data-featherlight="image" href="{{image.fileLocation}}">
+                                                                <img style="width: 100%;" ng-src="{{image.thumbnailLocation}}">
+                                                            </a>
+                                                        </div>
+                                                        <div class="clear"></div>
+                                                    </div>
+                                                    <div style="width: 95%; border: none;" class="chat-body no-padding profile-message">
+                                                        <ul>
+                                                            <li class="message" ng-repeat="remark in item.sampleRemarks">
+                                                                <span class="message-text" style="margin-left: 0px; display: block;">
+                                                                    <a class="username" href="javascript:void(0);" style="border-bottom: solid 1px #ddd;">{{remark.updatorName}} <small class="text-muted pull-right ultra-light"> {{remark.updatedDate}} </small></a>
+                                                                    <a href="javascript:void(0);" class="btn btn-primary btn-xs font-11" ng-click="event.editProgressRemark(remark, item)"><i class="fa fa-pencil"></i> Edit</a>
+                                                                    <a href="javascript:void(0);" class="btn btn-danger btn-xs font-11" ng-click="event.removeProgressRemark(remark, item)"><i class="fa fa-times"></i> Delete</a>
+                                                                    <br /><br />
+                                                                    <custom ng-bind-html="method.formatRemark(remark.remark)"></custom>
+                                                                    <br /><br />
+                                                                </span>
+                                                                <div class="furnindo-image-editor" style="border: none; padding: 0px;">
+                                                                    <div class="img-item" ng-repeat="image in remark.sampleRemarkImages">
+                                                                        <a data-featherlight="image" href="{{image.originalFileLocation}}">
+                                                                            <img style="width: 100%;" ng-src="{{image.thumbnailFileLocation}}">
+                                                                        </a>
+                                                                    </div>
+                                                                    <div class="clear"></div>
+                                                                </div>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </fieldset>     
+                                <footer>
+                                    <a href="#" class="btn btn-default" ng-click="event.backToOrder()">Back to Order</a>
+                                    <a href="javascript:void(0)" class="btn btn-primary" ng-click="event.addProgress()">Add Progress</a>
+                                </footer>                           
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="tabTechnicalDrawing">
+                            <div class="smart-form">
+                                <footer style="border-top: none; background: none; border-bottom: solid 1px #ddd">
+                                    <a href="javascript:void(0)" class="btn btn-default" ng-click="event.backToOrder()">Back to Order</a>
+                                    <a href="javascript:void(0)" class="btn btn-primary" ng-click="event.addDrawing()">Add Technical Drawing</a>
+                                </footer>
+                                <fieldset ng-if="currentProduct.sampleTechnicalDrawings.length == 0">
+                                    <section>
+                                        <label class="label" style="color: #999">EMPTY</label>
+                                    </section>
+                                </fieldset>
+                                <fieldset ng-if="currentProduct.sampleTechnicalDrawings.length > 0">
+                                    <div class="smart-timeline">
+                                        <ul class="smart-timeline-list">
+                                            <li ng-repeat="item in currentProduct.sampleTechnicalDrawings | orderBy: '-updatedDate'">
+                                                <div class="smart-timeline-icon">
+                                                    <i class="fa fa-user"></i>
+                                                </div>
+                                                <div class="smart-timeline-time" style="text-align: center;">
+                                                    <small style="margin-bottom: 5px;">{{item.updatedDate}}</small>
+                                                    <a href="javascript:void(0);" class="btn btn-primary btn-xs font-11" ng-click="event.editDrawing(item)" style="margin-bottom: 5px; display: block;"><i class="fa fa-pencil"></i> Edit</a>
+                                                    <a href="javascript:void(0);" class="btn btn-primary btn-xs font-11" style="margin-bottom: 5px; display: block;" ng-click="event.addDrawingRemark(item.sampleTechnicalDrawingID)"><i class="fa fa-comment-o"></i> Comment</a>
+                                                    <a href="javascript:void(0);" class="btn btn-danger btn-xs font-11" ng-click="event.removeDrawing(item)" style="margin-bottom: 5px; display: block;"><i class="fa fa-times"></i> Delete</a>
+                                                </div>
+                                                <div class="smart-timeline-content">
+                                                    <p>
+                                                        <strong>{{item.updatorName}}</strong>
+                                                    </p>
+                                                    <strong>Version: {{item.version}}</strong>
+                                                    <p>
+                                                        <a ng-if="item.thumbnailLocation" data-featherlight="image" href="{{item.fileLocation}}">
+                                                            <img style="width: 150px; float: left; margin-right: 5px;" ng-src="{{item.thumbnailLocation}}">
+                                                        </a>
+                                                        <span ng-bind-html="method.formatRemark(item.remark)"></span>
+                                                    </p>
+                                                    <div class="clear"></div>
+                                                    <a ng-if="item.sourceFileLocation" href="{{item.sourceFileLocation}}">Download Source File</a>
+
+                                                    <div style="width: 95%; border: none;" class="chat-body no-padding profile-message">
+                                                        <ul>
+                                                            <li class="message" ng-repeat="remark in item.sampleRemarks | orderBy: '-updatedDate'">
+                                                                <span class="message-text" style="margin-left: 0px; display: block;">
+                                                                    <a class="username" href="javascript:void(0);" style="border-bottom: solid 1px #ddd;">{{remark.updatorName}} <small class="text-muted pull-right ultra-light"> {{remark.updatedDate}} </small></a>
+                                                                    <a href="javascript:void(0);" class="btn btn-primary btn-xs font-11" ng-click="event.editProgressRemark(remark)"><i class="fa fa-pencil"></i> Edit</a>
+                                                                    <a href="javascript:void(0);" class="btn btn-danger btn-xs font-11" ng-click="event.removeProgressRemark(remark, item)"><i class="fa fa-times"></i> Delete</a>
+                                                                    <br /><br />
+                                                                    <custom ng-bind-html="method.formatRemark(remark.remark)"></custom>
+                                                                    <br /><br />
+                                                                </span>
+                                                                <div class="furnindo-image-editor" style="border: none; padding: 0px;">
+                                                                    <div class="img-item" ng-repeat="image in remark.sampleRemarkImages">
+                                                                        <a data-featherlight="image" href="{{image.originalFileLocation}}">
+                                                                            <img style="width: 100%;" ng-src="{{image.thumbnailFileLocation}}">
+                                                                        </a>
+                                                                    </div>
+                                                                    <div class="clear"></div>
+                                                                </div>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </fieldset>
+                                <footer>
+                                    <a href="javascript:void(0)" class="btn btn-default" ng-click="event.backToOrder()">Back to Order</a>
+                                    <a href="javascript:void(0)" class="btn btn-primary" ng-click="event.addDrawing()">Add Technical Drawing</a>
+                                </footer>
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="tabRemark">
+                            <div class="smart-form">
+                                <footer style="border-top: none; background: none; border-bottom: solid 1px #ddd">
+                                    <a href="javascript:void(0)" class="btn btn-default" ng-click="event.backToOrder()">Back to Order</a>
+                                    <a href="javascript:void(0)" class="btn btn-primary" ng-click="event.addProductRemark()">Add Remark</a>
+                                </footer>
+                                <fieldset ng-if="currentProduct.sampleRemarks.length == 0">
+                                    <section>
+                                        <label class="label" style="color: #999">EMPTY</label>
+                                    </section>
+                                </fieldset>
+                                <fieldset ng-if="currentProduct.sampleRemarks.length > 0">
+                                    <div class="smart-timeline">
+                                        <ul class="smart-timeline-list">
+                                            <li ng-repeat="item in currentProduct.sampleRemarks | orderBy: '-updatedDate'">
+                                                <div class="smart-timeline-icon">
+                                                    <i class="fa fa-user"></i>
+                                                </div>
+                                                <div class="smart-timeline-time" style="text-align: center;">
+                                                    <small style="margin-bottom: 5px;">{{item.updatedDate}}</small>
+                                                    <a href="javascript:void(0);" class="btn btn-primary btn-xs font-11" ng-click="event.editProductRemark(item)" style="margin-bottom: 5px; display: block;"><i class="fa fa-pencil"></i> Edit</a>
+                                                    <a href="javascript:void(0);" class="btn btn-danger btn-xs font-11" ng-click="event.removeProductRemark(item)" style="margin-bottom: 5px; display: block;"><i class="fa fa-times"></i> Delete</a>
+                                                </div>
+                                                <div class="smart-timeline-content">
+                                                    <p>
+                                                        <strong>{{item.updatorName}}</strong>
+                                                    </p>
+                                                    <br />
+                                                    <p ng-bind-html="method.formatRemark(item.remark)"></p>
+                                                    <br />
+                                                    <div class="furnindo-image-editor" style="border: none; padding: 0px;">
+                                                        <div class="img-item" ng-repeat="image in item.sampleRemarkImages">
+                                                            <a data-featherlight="image" href="{{image.originalFileLocation}}">
+                                                                <img style="width: 100%;" ng-src="{{image.thumbnailFileLocation}}">
+                                                            </a>
+                                                        </div>
+                                                        <div class="clear"></div>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </fieldset>
+                                <footer>
+                                    <a href="javascript:void(0)" class="btn btn-default" ng-click="event.backToOrder()">Back to Order</a>
+                                    <a href="javascript:void(0)" class="btn btn-primary" ng-click="event.addProductRemark()">Add Remark</a>
+                                </footer>
+                            </div>                           
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+<div id="progressForm" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title" id="myModalLabel">Progress</h4>
+            </div>
+            <div class="modal-body no-padding">
+                <div class="smart-form">
+                    <fieldset>
+                        <section>
+                            <label class="input">
+                                <input type="text" ng-model="currentProgress.version" placeholder="Version" />
+                            </label>
+                        </section>
+                        <section>
+                            <label class="textarea">
+                                <textarea rows="5" ng-model="currentProgress.remark" placeholder="Progress description"></textarea>
+                            </label>
+                        </section>
+                        <section>
+                            <div class="furnindo-image-editor">
+                                <a href="javascript:void(0);" class="btn btn-primary" ng-click="event.addProgressImage()">+</a>
+                                <div class="img-item" ng-repeat="item in currentProgress.sampleProgressImages">
+                                    <a data-featherlight="image" href="{{item.fileLocation}}">
+                                        <img style="width: 100%;" ng-src="{{item.thumbnailLocation}}">
+                                    </a>
+                                    <span title="Remove image" class="action" ng-click="event.removeProgressImage($index)">X</span>
+                                </div>
+                                <div class="clear"></div>
+                            </div>
+                        </section>
+                    </fieldset>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" ng-click="event.updateProgress()">
+                    Update
+                </button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="drawingForm" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title" id="myModalLabel">Technical Drawing</h4>
+            </div>
+            <div class="modal-body no-padding">
+                <div class="smart-form">
+                    <fieldset>
+                        <section class="col col-6">
+                            <label class="label">Preview Image</label>
+                            <div class="input" style="text-align: center;">
+                                <div style="width: 100%; height: 300px; border: solid 1px #ddd;">
+                                    <a ng-if="currentDrawing.thumbnailLocation" data-featherlight="image" href="{{currentDrawing.fileLocation}}">
+                                        <img style="width: 100%;" ng-src="{{currentDrawing.thumbnailLocation}}">
+                                    </a>
+                                </div>
+                                <br />
+                                <a ng-click="event.addDrawingPreviewImage()" class="btn btn-primary btn-xs font-11" href="javascript:void(0);"><i class="fa fa-pencil"></i> Change</a>
+                            </div>
+                        </section>
+                        <section class="col col-6">
+                            <label class="label">Version</label>
+                            <label class="input">
+                                <input type="text" ng-model="currentDrawing.version" />
+                            </label>
+                        </section>
+                        <section class="col col-6">
+                            <label class="label">Remark</label>
+                            <label class="textarea">
+                                <textarea rows="5" ng-model="currentDrawing.remark"></textarea>
+                            </label>
+                        </section>
+                        <section class="col col-6">
+                            <label class="label">Author</label>
+                            <label class="select">
+                                <select ng-model="currentDrawing.authorID" ng-options="user.userID as user.fullName for user in users | orderBy: 'fullName'">
+                                    <option value=""></option>
+                                </select>
+                                <i></i>
+                            </label>
+                        </section>
+                        <section class="col col-6">
+                            <label class="label">Source File</label>
+                            <label class="input">
+                                <span class="form-control">
+                                    {{currentDrawing.friendlyName}}
+                                    <a ng-click="event.addDrawingSource()" class="btn btn-primary btn-xs font-11" href="javascript:void(0);" style="position: absolute; right: 85px; top: 5px;"><i class="fa fa-pencil"></i> Change</a>
+                                    <a target="_blank" ng-if="currentDrawing.sourceFileLocation != null" class="btn btn-primary btn-xs font-11" href="{{currentDrawing.sourceFileLocation}}" style="position: absolute; right: 5px; top: 5px;"><i class="fa fa-download"></i> Download</a>
+                                </span>
+                            </label>
+                        </section>
+                    </fieldset>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" ng-click="event.updateDrawing()">
+                    OK
+                </button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="remarkForm" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title" id="myModalLabel">Remark</h4>
+            </div>
+            <div class="modal-body no-padding">
+                <div class="smart-form">
+                    <fieldset>
+                        <section>
+                            <label class="textarea">
+                                <textarea rows="5" ng-model="currentRemark.remark" placeholder="Remark"></textarea>
+                            </label>
+                        </section>
+                        <section>
+                            <div class="furnindo-image-editor">
+                                <a href="javascript:void(0);" class="btn btn-primary" ng-click="event.addRemarkImage()">+</a>
+                                <div class="img-item" ng-repeat="item in currentRemark.sampleRemarkImages">
+                                    <a data-featherlight="image" href="{{item.originalFileLocation}}">
+                                        <img style="width: 100%;" ng-src="{{item.thumbnailFileLocation}}">
+                                    </a>
+                                    <span title="Remove image" class="action" ng-click="event.removeRemarkImage($index)">X</span>
+                                </div>
+                                <div class="clear"></div>
+                            </div>
+                        </section>
+                    </fieldset>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" ng-click="event.updateRemark()">
+                    OK
+                </button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="referenceImageForm" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title" id="myModalLabel">Reference Image</h4>
+            </div>
+            <div class="modal-body no-padding">
+                <div class="smart-form">
+                    <fieldset>
+                        <section class="col col-6">
+                            <label class="label">Image</label>
+                            <div class="input" style="text-align: center;">
+                                <div style="width: 100%; height: 300px; border: solid 1px #ddd;">
+                                    <a ng-if="currentRef.thumbnailLocation" data-featherlight="image" href="{{currentRef.fileLocation}}">
+                                        <img style="height: 300px; max-width: 100%;" ng-src="{{currentRef.thumbnailLocation}}">
+                                    </a>
+                                </div>
+                                <br />
+                                <a ng-click="event.changeReferenceImage()" class="btn btn-primary btn-xs font-11" href="javascript:void(0);"><i class="fa fa-pencil"></i> Change</a>
+                            </div>
+                        </section>
+                        <section class="col col-6">
+                            <label class="label">Bring in by</label>
+                            <label class="input">
+                                <input type="text" ng-model="currentRef.bringInBy" />
+                            </label>
+                        </section>
+                        <section class="col col-6">
+                            <label class="label">Bring in date</label>
+                            <label class="input">
+                                <i class="icon-append fa fa-calendar"></i>
+                                <input type="text" ng-model="currentRef.bringInDate" class="datepicker" data-dateformat="dd/mm/yy">
+                            </label>
+                        </section>
+                        <section class="col col-6">
+                            <label class="label">&nbsp;</label>
+                            <label class="checkbox">
+                                <input type="checkbox" ng-model="currentRef.isDefault">
+                                <i></i>Default
+                            </label>
+                        </section>
+                    </fieldset>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" ng-click="event.updateReferenceImage()">
+                    OK
+                </button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="minuteForm" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title" id="myModalLabel">Minute</h4>
+            </div>
+            <div class="modal-body no-padding">
+                <div class="smart-form">
+                    <fieldset>
+                        <section>
+                            <label class="textarea">
+                                <textarea rows="5" ng-model="currentMinute.meetingMinute" placeholder="Meeting minute"></textarea>
+                            </label>
+                        </section>
+                        <section>
+                            <div class="furnindo-image-editor">
+                                <a href="javascript:void(0);" class="btn btn-primary" ng-click="event.addMinuteImage()">+</a>
+                                <div class="img-item" ng-repeat="item in currentMinute.sampleProductMinuteImages">
+                                    <a data-featherlight="image" href="{{item.fileLocation}}">
+                                        <img style="width: 100%;" ng-src="{{item.thumbnailLocation}}">
+                                    </a>
+                                    <span title="Remove image" class="action" ng-click="event.removeMinuteImage($index)">X</span>
+                                </div>
+                                <div class="clear"></div>
+                            </div>
+                        </section>
+                    </fieldset>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" ng-click="event.updateMinute()">
+                    Update
+                </button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "Sample")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default disabled" title="Save"><i class="fa fa-save"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default disabled" title="Delete" style="color: #ff0000;"><i class="fa fa-times"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default disabled" title="Print"><i class="fa fa-print"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default disabled" title="Approve"><i class="fa fa-thumbs-o-up"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default disabled" title="Reset Approval status"><i class="fa fa-thumbs-o-down"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script src="~/Angular/app/jsonService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script type="text/javascript">
+        jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/sample/';
+        jsonService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+        jsonService.supportServiceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/support/';
+        var context = {
+            id: @ViewBag.ID,
+            errMsg: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED',
+            backUrl: '@Url.Action("Index", "Sample")',
+            refreshUrl: '@Url.Action("Edit", "Sample", new { id = UrlParameter.Optional })/',
+            backendUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])/Media/Thumbnail/',
+            backendFileUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])/Media/File/',
+            editTitle: '@ViewBag.Title',
+            backendReportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]'
+        }
+    </script>
+    <script src="~/Angular/app/sample/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/sample/edit.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}
+

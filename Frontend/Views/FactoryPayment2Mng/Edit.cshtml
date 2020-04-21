@@ -1,0 +1,306 @@
+﻿@{
+    if (ViewBag.ID == 0)
+    {
+        ViewBag.Title = "Create New Factory Payment";
+    }
+    else
+    {
+        ViewBag.Title = "Edit Factory Payment";
+    }
+
+    int supplierId = 0;
+    string season = "";
+    if (Request.Params["s"] != null)
+    {
+        supplierId = Convert.ToInt32(Request.Params["s"]);
+    }
+    if (Request.Params["se"] != null)
+    {
+        season = Request.Params["se"].ToString();
+    }
+}
+<style>
+    .custom-pagination {
+        display: none !important;
+    }
+</style>
+
+<form class="row" name="editForm" id="main-form">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-0" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>General Information</h2>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div class="smart-form">
+                        <fieldset>
+                            <div class="row">
+                                <section class="col col-3">
+                                    <label class="label">Receipt No</label>
+                                    <label class="input">
+                                        <span class="form-control">{{data.receiptNo}}</span>
+                                    </label>
+                                </section>
+                                <section class="col col-3">
+                                    <label class="label">Bank Receipt No</label>
+                                    <label class="input" ng-if="!data.isConfirmed">
+                                        <input type="text" ng-model="data.bankReceiptNo" ng-if="!data.isConfirmed" />
+                                    </label>
+                                    <label class="input" ng-if="data.isConfirmed">
+                                        <span class="form-control">{{data.bankReceiptNo}}</span>
+                                    </label>
+                                </section>
+                                <section class="col col-3">
+                                    <label class="label">Paid Date</label>
+                                    <label class="input" ng-if="!data.isConfirmed">
+                                        <input name="paymentDate" type="text" class="datepicker" ng-model="data.paymentDate" data-dateformat="dd/mm/yy" required />
+                                        <i class="icon-append fa fa-calendar"></i>
+                                        <span class="help-block" ng-show="editForm.paymentDate.$error.required"><i class="fa fa-warning"></i> Required.</span>
+                                    </label>
+                                    <label class="input" ng-if="data.isConfirmed">
+                                        <span class="form-control">{{data.paymentDate}}</span>
+                                    </label>
+                                </section>
+                                <section class="col col-3">
+                                    <label class="label">Season</label>
+                                    <label class="input">
+                                        <span class="form-control">{{data.season}}</span>
+                                    </label>
+                                </section>
+                            </div>
+                            <div class="row">
+                                <section class="col col-8">
+                                    <label class="label">Supplier</label>
+                                    <label class="input">
+                                        <span class="form-control">
+                                            <strong>{{data.supplierUD}}</strong> - {{data.supplierNM}}
+                                        </span>
+                                    </label>
+                                </section>
+                                <section class="col col-4">
+                                    <label class="label">DP Amount</label>
+                                    <label class="input" ng-if="!data.isConfirmed">
+                                        <input name="remark" type="text" style="text-align: right;" furnindo-currency-nullable ng-model="data.dpAmount" />
+                                    </label>
+                                    <label class="input" ng-if="data.isConfirmed">
+                                        <span class="form-control" style="text-align: right;">{{data.dpAmount | currency:'$':2}}</span>
+                                    </label>
+                                </section>
+                            </div>                            
+                            <div class="row">
+                                <div class="col col-8">
+                                    <section>
+                                        <label class="label">Remark</label>
+                                        <label class="input" ng-if="!data.isConfirmed">
+                                            <input type="text" ng-model="data.remark" />
+                                        </label>
+                                        <label class="input" ng-if="data.isConfirmed">
+                                            <span class="form-control">{{data.remark}}</span>
+                                        </label>
+                                    </section>
+                                    <section>
+                                        <label class="label">Confirmed Remark</label>
+                                        <label class="input">
+                                            <span class="form-control">{{data.confirmedRemark}}</span>
+                                        </label>
+                                    </section>
+                                </div>
+                                <section class="col col-4">
+                                    <div class="font-md">
+                                        <div>
+                                            <strong>STATUS :</strong>
+                                            <span class="pull-right" ng-if="!data.isConfirmed"> PENDING </span>
+                                            <span class="pull-right" ng-if="data.isConfirmed"> CONFIRMED </span>
+                                        </div>
+                                    </div>
+                                    <div class="font-md">
+                                        <div>
+                                            <strong>TOTAL PAID :</strong>
+                                            <span class="pull-right"> {{method.getTotal() | currency:'$':2}} </span>
+                                        </div>
+                                    </div>
+                                    <div class="font-md">
+                                        <div>
+                                            <strong>RECEIVED AMOUNT :</strong>
+                                            <span class="pull-right"> {{data.confirmedAmount | currency:'$':2}} </span>
+                                        </div>
+                                    </div>
+                                </section>
+                            </div>
+                            <section>
+                                <div class="note" ng-if="data.updatorName"><strong>Updated By</strong>: {{data.updatorName}} on {{data.updatedDate}}</div>
+                                <div class="note" ng-if="data.confirmerName"><strong>Confirmed By</strong>: {{data.confirmerName}} on {{data.confirmedDate}}</div>
+                            </section>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="jarviswidget" id="wid-id-1" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>Invoice</h2>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div class="smart-form">
+                        <fieldset>
+                            <section ng-if="!data.isConfirmed">
+                                <label class="input">
+                                    <i class="icon-append fa fa-search"></i>
+                                    <input placeholder="Provide at least 3 chars to search for the invoice" id="invoice-autocomplete" type="text">
+                                </label>
+                                <div class="note">
+                                    <strong>You selected</strong>: <span style="font-size: 11px;" ng-if="invoiceSearchResult.invoice">{{invoiceSearchResult.invoice.invoiceNo}} ({{invoiceSearchResult.invoice.invoiceDate}}): {{invoiceSearchResult.invoice.totalAmount | currency:'$':2}} <a class="btn btn-primary btn-xs font-11" href="javascript:void(0)" ng-click="event.addInvoice()">Add</a></span>
+                                </div>
+                            </section>
+
+                            <section>
+                                <div id="grdInvoice" class="tilsoft-table-wrapper">
+                                    <div class="tilsoft-table">
+                                        <div class="tilsoft-table-header" style="width: 1200px;">
+                                            <div style="width: 80px;">&nbsp;</div>
+                                            <div style="width: 150px;">Invoice No</div>
+                                            <div style="width: 120px;">Invoice Amount</div>
+                                            <div style="width: 120px;">Total Paid</div>
+                                            <div style="width: 120px;">Remaining</div>
+                                            <div style="width: 120px;">DP Deducted Amount</div>
+                                            <div style="width: 120px;">Paid Amount</div>                                            
+                                            <div>Remark</div>
+                                        </div>
+                                        <div class="tilsoft-table-body" style="width: 1200px;">
+                                            <table>
+                                                <tr style="font-weight: bold;">
+                                                    <td style="width: 80px; text-align:right">&nbsp;</td>
+                                                    <td style="text-align: right; width: 150px; font-weight: bold;">TOTAL</td>
+                                                    <td style="width: 120px; text-align:right; font-weight: bold;">{{method.getInvoiceTotal() | currency:'$':2}}</td>
+                                                    <td style="width: 120px; text-align:right; font-weight: bold;">{{method.getInvoicePaidTotal() | currency:'$':2}}</td>
+                                                    <td style="width: 120px; text-align:right; font-weight: bold;">{{method.getRemainTotal() | currency:'$':2}}</td>
+                                                    <td style="width: 120px; text-align:right; font-weight: bold;">{{method.getDPDeductedTotal() | currency:'$':2}}</td>
+                                                    <td style="width: 120px; text-align:right; font-weight: bold;">{{method.getPaidTotal() | currency:'$':2}}</td>
+                                                    <td style="text-align: left;font-weight: bold;"></td>
+                                                </tr>
+                                                <tr ng-repeat="item in data.factoryPaymentDetails">
+                                                    <td style="width: 80px; text-align: center;">
+                                                        <a ng-click="event.removeInvoice(item)" class="btn btn-danger btn-xs font-11 {{data.isConfirmed==true?'disabled' : ''}}" href="javascript:void(0);"><i class=" fa fa-times"></i> Remove</a>
+                                                    </td>
+                                                    <td style="width: 150px; text-align: center;">
+                                                        {{item.invoiceNo}}
+                                                        <br />
+                                                        ({{item.invoiceDate}})
+                                                    </td>
+                                                    <td style="width: 120px; text-align: right;">{{item.totalAmount | currency:'$':2}}</td>
+                                                    <td style="width: 120px; text-align: right;">{{item.totalPaid | currency:'$':2}}</td>
+                                                    <td style="width: 120px; text-align: right;">{{item.totalAmount - item.totalPaid | currency:'$':2}}</td>
+
+                                                    <td style="width: 120px; text-align: right;" ng-if="!data.isConfirmed"><input type="text" ng-model="item.dpDeductedAmount" furnindo-currency-nullable style="width: 100%; text-align: right;" /></td>
+                                                    <td style="width: 120px; text-align: right;" ng-if="data.isConfirmed">{{item.dpDeductedAmount | currency:'$':2}}</td>
+
+                                                    <td style="width: 120px; text-align: right;" ng-if="!data.isConfirmed"><input type="text" ng-model="item.paidAmount" furnindo-currency-nullable style="width: 100%; text-align: right;" /></td>
+                                                    <td style="width: 120px; text-align: right;" ng-if="data.isConfirmed">{{item.paidAmount | currency:'$':2}}</td>
+
+                                                    <td ng-if="!data.isConfirmed"><input type="text" ng-model="item.remark" style="width: 100%;" /></td>
+                                                    <td ng-if="data.isConfirmed">{{item.remark}}</td>
+                                                </tr>                                                
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+<div id="confirmForm" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title" id="myModalLabel">Confirm received amount</h4>
+            </div>
+            <div class="modal-body no-padding">
+                <div class="smart-form">
+                    <fieldset>
+                        <section>
+                            <label class="label">Actual received amount</label>
+                            <label class="input">
+                                <input type="text" ng-model="data.confirmedAmount" style="text-align: right;" />
+                            </label>
+                        </section>
+                        <section>
+                            <label class="label">Remark</label>
+                            <label class="textarea">
+                                <textarea ng-model="data.confirmedRemark" rows="4"></textarea>
+                            </label>
+                        </section>
+                    </fieldset>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" ng-click="event.approve()">
+                    Approve
+                </button>
+                <button type="button" class="btn btn-default" ng-click="event.cancelApprove()">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "FactoryPayment2Mng")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="event.update()" ng-disabled="data.isConfirmed"><i class="fa fa-save"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current)) @(ViewBag.ID <= 0 ? "disabled" : "")" title="Delete" ng-click="event.delete()" style="color: #ff0000;" ng-disabled="data.isConfirmed"><i class="fa fa-times"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default disabled" title="Print"><i class="fa fa-print"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Approve, HttpContext.Current)) @(ViewBag.ID <= 0 ? "disabled" : "")" title="Approve" ng-disabled="data.isConfirmed" data-toggle="modal" data-target="#confirmForm"><i class="fa fa-thumbs-o-up"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Reset, HttpContext.Current))" title="Reset approval status" ng-disabled="!data.isConfirmed" ng-click="event.reset()"><i class="fa fa-thumbs-o-down"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs {    
+    <script src="~/Angular/app/jsonService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script type="text/javascript">
+        jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/factorypayment2/';
+        jsonService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+        jsonService.supportServiceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/support/';
+        var context = {
+            id: @ViewBag.ID,
+            supplierId : @supplierId,
+            season: '@season',
+            errMsg: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED',
+            backUrl: '@Url.Action("Index", "FactoryPayment2Mng")',
+            refreshUrl: '@Url.Action("Edit", "FactoryPayment2Mng", new { id = UrlParameter.Optional })/',
+            editTitle: '@ViewBag.Title'
+        }
+    </script>
+    <script src="~/Angular/app/factoryPayment2Mng/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/factoryPayment2Mng/edit.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}
+

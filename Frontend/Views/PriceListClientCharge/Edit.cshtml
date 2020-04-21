@@ -1,0 +1,234 @@
+﻿@{
+    ViewBag.Title = (ViewBag.ID == 0) ? "Create Price Client Charge" : "Edit Price Client Charge";
+    ViewBag.Module = "Price Client Charge";
+
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+}
+
+<form name="editForm" class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-database"></i> </span>
+                <h2>General</h2>
+            </header>
+            <div class="widget-body">
+                <div class="smart-form">
+                    <fieldset>
+                        <div class="row">
+                            <section class="col col-lg-12" ng-show="(data.priceListClientChargeID === 0)">
+                                <label class="label">
+                                    <strong>Client</strong>
+                                    <em ng-show="(editForm.clientNM.$error.required)" class="note note-error">(Required)</em>
+                                </label>
+                                <label class="input" ng-class="{ 'state-error': editForm.clientNM.$error.required }">
+                                    <input type="text" id="clientNM" name="clientNM" placeholder="Please input Client Name" autocomplete="off" required ng-model="data.clientNM" ng-keyup="quickSearchClient.event.searchBoxUp()">
+                                    <input type="hidden" name="clientID" ng-model="data.clientID">
+                                    <i class="icon-append fa fa-search" ng-click="quickSearchClient.event.searchBoxUp()"></i>
+                                </label>
+                                <div id="clientPopup" class="popup-container-2">
+                                    <div style="float: right; margin-bottom: 8px;">
+                                        <a class="btn btn-default btn-xs" href="javascript:void(0);" ng-click="quickSearchClient.event.close()"><i class="fa fa-remove"></i> Close</a>
+                                    </div>
+                                    <div class="clear"></div>
+                                    <div id="quickSearchClientTable" class="tilsoft-table-wrapper" style="width: 98%;">
+                                        <div class="tilsoft-table">
+                                            <div class="tilsoft-table-header">
+                                                <div style="width: 80px;"></div>
+                                                <div style="width: 100px;">Code</div>
+                                                <div>Name</div>
+                                            </div>
+                                            <div class="tilsoft-table-body">
+                                                <table>
+                                                    <tbody>
+                                                        <tr ng-repeat="item in quickSearchClient.data">
+                                                            <td style="width: 79px;">
+                                                                <a ng-click="quickSearchClient.event.ok(item.clientID)" class="btn btn-primary btn-xs" href="javascript:void(0);"><i class="fa fa-check"></i> Select</a>
+                                                            </td>
+                                                            <td style="width: 100px;">{{item.clientUD}}</td>
+                                                            <td>{{item.clientNM}}</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                            <section class="col col-lg-2" ng-show="(data.priceListClientChargeID > 0)">
+                                <label class="label"><strong>Client Code</strong></label>
+                                <label class="input">
+                                    <span class="form-control">{{data.clientUD}}</span>
+                                </label>
+                            </section>
+                            <section class="col col-lg-10" ng-show="(data.priceListClientChargeID > 0)">
+                                <label class="label"><strong>Client Name</strong></label>
+                                <label class="input">
+                                    <span class="form-control">{{data.clientNM}}</span>
+                                </label>
+                            </section>
+                        </div>
+                        <div class="row">
+                            <section class="col col-lg-2">
+                                <label class="label">
+                                    <strong>Start Date</strong>
+                                    <em ng-show="(editForm.startDate.$error.required)" class="note note-error">(Required)</em>
+                                </label>
+                                <label class="input" ng-class="{ 'state-error': editForm.startDate.$error.required }">
+                                    <i class="icon-append fa fa-calendar"></i>
+                                    <input type="text" name="startDate" class="datepicker" data-dateformat="dd/mm/yy" required ng-model="data.startDate">
+                                </label>
+                            </section>
+                            <section class="col col-lg-2">
+                                <label class="label">
+                                    <strong>End Date</strong>
+                                    <em ng-show="(editForm.endDate.$error.required)" class="note note-error">(Required)</em>
+                                </label>
+                                <label class="input" ng-class="{ 'state-error': editForm.endDate.$error.required }">
+                                    <i class="icon-append fa fa-calendar"></i>
+                                    <input type="text" name="endDate" class="datepicker" data-dateformat="dd/mm/yy" required ng-model="data.endDate">
+                                </label>
+                            </section>
+                            <section class="col col-lg-2">
+                                <label class="label">
+                                    <strong>Type Charge</strong>
+                                    <em ng-show="(editForm.typeCharge.$error.required)" class="note note-error">(Required)</em>
+                                </label>
+                                <label class="select2" style="width: 100%;" ng-class="{ 'state-error': editForm.typeCharge.$error.required }">
+                                    <select class="form-control" name="typeCharge" style="height: 30px;" required ng-model="data.chargeTypeID" ng-options="item.typeOfChargeID as item.typeOfChargeNM for item in charge">
+                                        <option value=""></option>
+                                    </select>
+                                    <i></i>
+                                </label>
+                            </section>
+                            <section class="col col-lg-2">
+                                <label class="label">
+                                    <strong>Type Currency</strong>
+                                    <em ng-show="(editForm.typeCurrency.$error.required)" class="note note-error">(Required)</em>
+                                </label>
+                                <label class="select2" style="width: 100%;" ng-class="{ 'state-error': editForm.typeCurrency.$error.required }">
+                                    <select class="form-control" name="typeCurrency" style="height: 30px;" required ng-model="data.currencyTypeID" ng-options="item.entryValue as item.displayText for item in currency">
+                                        <option value=""></option>
+                                    </select>
+                                    <i></i>
+                                </label>
+                            </section>
+                            <section class="col col-lg-2">
+                                <label class="label">
+                                    <strong>Updated By</strong>
+                                </label>
+                                <label class="input">
+                                    <span class="form-control">
+                                        <a ng-show="(data.createdBy != null && data.createEmployeeNM != null)" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{data.createdBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                            <i class="fa fa-user"> {{data.createEmployeeNM}}</i>
+                                        </a>
+                                        <span ng-show="(data.createdBy != null && data.createEmployeeNM == null && data.createFullName != null)"><i class="fa fa-user"></i> {{data.createFullName}}</span>
+                                    </span>
+                                </label>
+                            </section>
+                            <section class="col col-lg-2">
+                                <label class="label">
+                                    <strong>Updated Date</strong>
+                                </label>
+                                <label class="input">
+                                    <span class="form-control">{{data.updatedDate}}</span>
+                                </label>
+                            </section>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+        </div>
+    </article>
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-details" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-database"></i> </span>
+                <h2>Details</h2>
+            </header>
+            <div class="widget-body">
+                <div class="smart-form">
+                    <fieldset>
+                        <a href="#" class="btn btn-xs btn-default" style="margin-bottom: 10px;" ng-click="event.addDetails()"> <i class="fa fa-plus"></i> Add Details</a>
+                    </fieldset>
+                    <fieldset>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover custom-table dataTable">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 70px;"></th>
+                                        <th>Port<br>Of<br>Departure</th>
+                                        <th>Port<br>Of<br>Destination</th>
+                                        <th>Type<br>Of<br>Container</th>
+                                        <th>Price<br>Per<br>Unit</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="detail in data.priceListClientChargeDetail">
+                                        <td style="text-align: center;">
+                                            <a class="btn btn-danger btn-xs" ng-click="event.deleteDetails($index)"><i class="fa fa-times"></i> Del</a>
+                                        </td>
+                                        <td>
+                                            <select class="form-control" ng-model="detail.polid" ng-options="item.polid as item.poLname for item in pol">
+                                                <option value=""></option>
+                                            </select>
+                                            <i></i>
+                                        </td>
+                                        <td>
+                                            <select class="form-control" ng-model="detail.podid" ng-options="item.podid as item.podName for item in pod">
+                                                <option value=""></option>
+                                            </select>
+                                            <i></i>
+                                        </td>
+                                        <td>
+                                            <select class="form-control" ng-model="detail.containerTypeID" ng-options="item.containerTypeID as item.containerTypeNM for item in containerType">
+                                                <option value=""></option>
+                                            </select>
+                                            <i></i>
+                                        </td>
+                                        <td>
+                                            <input class="form-control" style="text-align: right;" type="text" ng-model="detail.pricePerUnit" format>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+@section pagepopup{
+}
+
+@section FormAction{
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "PriceListClientCharge")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="#" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="event.update()"><i class="fa fa-save"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs{
+    <script type="text/javascript">
+        var context = {
+            id: @ViewBag.ID,
+            errMsg: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED',
+            backUrl: '@Url.Action("Index", "PriceListClientCharge")',
+            refreshUrl: '@Url.Action("Edit", "PriceListClientCharge", new { id = UrlParameter.Optional })/',
+            serviceUrl: '@(serviceRoot)api/pricelistclientcharge/',
+            supportServiceUrl: '@(serviceRoot)api/support/',
+            token: '@token'
+        };
+    </script>
+    <script src="~/Angular/app/pricelistclientcharge/edit.js?v=@guid" type="text/javascript"></script>
+    <script src="~/Angular/app/jsonService2.js?v=@guid" type="text/javascript"></script>
+    <script src="~/Angular/app/pricelistclientcharge/service.js?v=@guid" type="text/javascript"></script>
+}

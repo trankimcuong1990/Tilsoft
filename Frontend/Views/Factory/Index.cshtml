@@ -1,0 +1,196 @@
+﻿@{
+    ViewBag.Title = "Search Factory";
+    ViewBag.Module = "Factory";
+}
+
+<div class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-0" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Search Result</h2>
+            </header>
+
+            <div>
+                <div class="widget-body">
+                    <div id="searchResult" class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header" style="width: 1260px;">
+                                <div style="width: 60px;"></div>
+                                <div style="width: 150px;" class="sorting" data-colname="FactoryUD">Code</div>
+                                <div style="width: 250px;" class="sorting" data-colname="FactoryName">Name</div>
+                                <div style="width: 200px;" class="sorting" data-colname="SupplierNM">Supplier</div>
+                                <div style="width: 150px;" class="sorting" data-colname="City">City</div>
+                                <div style="width: 150px;" class="sorting" data-colname="LocationNM">Location</div>
+                                <div style="width: 150px;" data-colname="UpdatorName">Updated By</div>
+                                <div class="sorting_desc" data-colname="UpdatedDate">Updated Date</div>
+                            </div>
+                            <div class="tilsoft-table-body" style="width: 1260px;">
+                                <table>
+                                    <tr ng-repeat="model in data">
+                                        <td style="text-align: center; width: 60px;">
+                                            @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current) == "disabled")
+                                            {
+                                                <a href="@Url.Action("Edit", "Factory")/{{model.factoryID}}" title="View (Read Only)"><i class="fa fa-folder-open grid-button"></i></a>
+                                            }
+                                            else
+                                            {
+                                                <a href="@Url.Action("Edit", "Factory")/{{model.factoryID}}" title="Edit"><i class="fa fa-pencil-square grid-button"></i></a>
+                                            }
+
+                                            @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current) != "disabled")
+                                            {
+                                                <a href="javascript:void(0)" ng-click="event.delete(model.factoryID)" title="Delete"><i class="fa fa-times-circle grid-button"></i></a>
+                                            }
+                                        </td>
+                                        <td style="text-align: center; width: 150px;">{{model.factoryUD}}</td>
+                                        <td style="width: 250px;">{{model.factoryName}}</td>
+                                        <td style="width: 200px;">{{model.supplierNM}}</td>
+                                        <td style="width: 150px;">{{model.city}}</td>
+                                        <td style="width: 150px;">{{model.locationNM}}</td>
+                                        <td style="width: 150px;">
+                                            <a ng-if="model.updatedBy" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{model.updatedBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                <i class="fa fa-user"></i> {{model.updatorName}}
+                                            </a>
+                                        </td>
+                                        <td>{{model.updatedDate}}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default disabled" title="Search"><i class="fa fa-search"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Refresh" ng-click="event.search()"><i class="fa fa-refresh"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="@Url.Action("Edit", "Factory")/0" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="New"><i class="fa fa-file-o"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default disabled" title="Print"><i class="fa fa-print"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script src="~/Angular/app/jsonService.js"></script>
+    <script src="~/Angular/app/cushionOption/service.js"></script>
+    <script type="text/javascript">
+        var searchResultGrid = jQuery('#searchResult').scrollableTable(
+            function(currentPage){
+                var scope = angular.element(jQuery('body')).scope();
+                scope.$apply(function(){
+                    scope.pageIndex = currentPage;
+                    jsonService.searchFilter.pageIndex = scope.pageIndex;
+                    scope.event.search();
+                });
+            },
+            function(sortedBy, sortedDirection){
+                var scope = angular.element(jQuery('body')).scope();
+                scope.$apply(function(){
+                    jsonService.searchFilter.sortedDirection = sortedDirection;
+                    scope.pageIndex = 1;
+                    jsonService.searchFilter.pageIndex = scope.pageIndex;
+                    jsonService.searchFilter.sortedBy = sortedBy;
+                    scope.event.search();
+                });
+            }
+        );
+
+        jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/factory/';
+        jsonService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+        jsonService.searchFilter.pageSize = @System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"];
+
+        var tilsoftApp = angular.module('tilsoftApp', []);
+        tilsoftApp.controller('tilsoftController', ['$scope', function ($scope) {
+            //
+            // property
+            //
+            $scope.data = null;
+            $scope.pageIndex = 1;
+            $scope.totalPage = 0;
+
+            //
+            // event
+            //
+            $scope.event = {
+                search: function(){
+                    jsonService.search(
+                        function (data) {
+                            $scope.data = data.data.data;
+                            $scope.totalPage = Math.ceil(data.totalRows / jsonService.searchFilter.pageSize);
+                            $scope.$apply();
+
+                            if(data.totalRows < jsonService.searchFilter.pageSize) {
+                                jQuery('#searchResult').find('ul').hide();
+                            }
+                            else {
+                                jQuery('#searchResult').find('ul').show();
+                            }
+
+                            jQuery('#content').show();
+                            searchResultGrid.updateLayout();
+                        },
+                        function (error) {
+                            $scope.data = null;
+                            $scope.pageIndex = 1;
+                            $scope.totalPage = 0;
+                            $scope.$apply();
+                        }
+                    );
+                },
+                delete: function (id){
+                    if (confirm('Are you sure ?')) {
+                        jsonService.delete(id,
+                            function (data) {
+                                jsHelper.processMessage(data.message);
+
+                                if(data.message.type == 0) {
+                                    var j = -1;
+                                    for (var i = 0; i < $scope.data.length; i++) {
+                                        if ($scope.data[i].factoryID == data.data) {
+                                            j = i;
+                                            break;
+                                        }
+                                    }
+
+                                    if (j >= 0) {
+                                        $scope.data.splice(j, 1);
+                                    }
+
+                                    $scope.$apply();
+                                }
+                            },
+                            function (error) {
+                                jsHelper.showMessage('warning', error);
+                            }
+                        );
+                    }
+                },
+                init : function(){
+                    $scope.event.search();
+                }
+            }
+
+            //
+            // method
+            //
+
+
+            //
+            // init
+            //
+            $scope.event.init();
+        }]);
+    </script>
+}

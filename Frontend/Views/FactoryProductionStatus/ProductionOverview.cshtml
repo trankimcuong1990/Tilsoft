@@ -1,0 +1,128 @@
+﻿@{
+    ViewBag.Title = "Factory Production Overview";
+    ViewBag.Module = "Factory Production Overview";
+}
+
+<style>
+    .lds {
+        background-color: #b6ff00;
+    }
+    .currentWeek {
+        padding: 2.25em 1.6875em;
+        background-image: -webkit-repeating-radial-gradient(center center, rgba(234, 65, 65, 0.2), rgba(58, 78, 99, 0.2) 1px, rgba(234, 33, 80, 0.51) 1px, rgba(202, 114, 114, 0) 100%);
+        background-size: 3px 3px;
+    }
+    .total-row {
+        background-color: #EFF7F7;
+        font-weight: bold;
+    }
+    .capacity-row {
+        background-color: #EFF7F7;
+        font-weight:bold;
+    }
+</style>
+
+
+
+<form class="row" id="main-form">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-search-result" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Production Overview</h2>
+            </header>
+            <div>
+                <div class="widget-body">
+                    <div class="row m-bottom-15">
+                        <section class="col col-lg-2">
+                            <label>Factory</label>
+                            <select id="factoryID" ng-model="data.factoryID" ng-options="item.factoryID as item.factoryUD for item in factories | orderBy: 'factoryUD'">
+                                <option value=""></option>
+                            </select>
+                        </section>
+
+                        <section class="col col-lg-2">
+                            <label>Season</label>
+                            <select id="season" ng-model="data.season" ng-options="item.seasonValue as item.seasonText for item in seasons | orderBy: 'season'">
+                                <option value=""></option>
+                            </select>
+                        </section>
+                    </div>
+                    <div class="row m-bottom-15">
+                        <section class="col col-lg-2">
+                           <a class="btn btn-primary btn-xs" ng-click="event.search()"><i class="fa fa-search"></i>Search</a>
+                        </section>
+                    </div>
+                    <div class="row">
+                        <section class="col col-lg-12">
+                            <div id="grdOverview" class="tilsoft-table-wrapper">
+                                <div class="tilsoft-table">
+                                    <div class="tilsoft-table-header" style="width: 4200px;">
+                                        <div style="width:70px" class="sorting" data-colname="clientUD">Client</div>
+                                        <div style="width:70px" class="sorting" data-colname="proformaInvoiceNo">Order</div>
+                                        <div style="width:80px" class="sorting" data-colname="lds">LDS</div>
+                                        <div style="width:70px" class="sorting" data-colname="totalContOrder">Order Cont</div>
+                                        <div style="width:70px" class="sorting" data-colname="totalContProducedLastWeeks">Packed</div>
+                                        <div style="width:70px" class="sorting" ng-repeat="wItem in data.weekSeasons" title="From {{wItem.startDate}} To {{wItem.endDate}}">Week {{wItem.weekNo}}</div>
+                                        <div class="sorting" data-colname="remark">Remark</div>
+                                    </div>
+                                    <div class="tilsoft-table-body" style="width: 4200px;">
+                                        <table>
+                                            <tbody>
+                                                <tr class="total-row">
+                                                    <td style="width:220px" colspan="3">Total</td>
+                                                    <td style="width:70px;text-align:right">{{method.getTotalOrderCont() | number : 1}}</td>
+                                                    <td style="width:70px;text-align:right">{{method.getTotalProducedCont() | number : 1}}</td>
+                                                    <td style="width:70px;text-align:right" ng-repeat="wItem in data.weekSeasons" class="{{method.getLDSClass(item.factoryOrderID,wItem.weekNo)}} {{method.getCurrentWeekClass(wItem.weekNo)}}">{{method.getTotalProducedContByWeek(wItem.weekNo) | number : 1}}</td>
+                                                    <td style=""></td>
+                                                </tr>
+                                                @*<tr class="capacity-row">
+                                                    <td style="width:220px" colspan="3">Capacity</td>
+                                                    <td style="width:70px;text-align:center"></td>
+                                                    <td style="width:70px;text-align:center"></td>
+                                                    <td style="width:70px;text-align:center" ng-repeat="wItem in data.weekSeasons" class="{{method.getLDSClass(item.factoryOrderID,wItem.weekNo)}} {{method.getCurrentWeekClass(wItem.weekNo)}}"></td>
+                                                    <td style=""></td>
+                                                </tr>*@
+                                                <tr ng-repeat="item in data.orders">
+                                                    <td style="width:69px">{{item.clientUD}}</td>
+                                                    <td style="width:70px">{{item.proformaInvoiceNo}}</td>
+                                                    <td style="width:80px">{{item.lds}}</td>
+                                                    <td style="width:70px;text-align:right">{{item.totalContOrder | number : 1}}</td>
+                                                    <td style="width:70px;text-align:right">{{item.totalProducedCont | number : 1}}</td>
+                                                    <td style="width:70px;text-align:right" ng-repeat="wItem in data.weekSeasons" class="{{method.getCurrentWeekClass(wItem.weekNo)}} {{method.getLDSClass(item.factoryOrderID,wItem.weekNo)}}">{{method.getProducedCont(item.factoryOrderID,wItem.weekNo) | number : 1}}</td>
+                                                    <td style="">
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                       
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+@section FormAction {
+    
+}
+@section pagepopup2{
+}
+
+@section pagejs {
+    <script src="~/Angular/app/jsonService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script type="text/javascript">
+    jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/factoryProductionStatus/';
+        jsonService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+        var context = {
+            currentSeason: '@Frontend.Helper.Common.GetCurrentSeason()'
+        }
+    </script>
+    <script src="~/Angular/app/factoryProductionStatus/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/factoryProductionStatus/productionOverview.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}

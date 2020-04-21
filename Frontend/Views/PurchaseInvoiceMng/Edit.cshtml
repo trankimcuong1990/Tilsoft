@@ -1,0 +1,83 @@
+﻿@{
+    ViewBag.Title = "Purchase Invoice";
+    ViewBag.Module = "PurchaseInvoiceMng";
+
+    int typeID = 0;
+    if (!string.IsNullOrEmpty(Request.QueryString["typeID"]))
+    {
+        typeID = Convert.ToInt32(Request.QueryString["typeID"].ToString());
+    }
+
+    string userManualUrl = string.Empty;
+    if (System.IO.File.Exists(Server.MapPath("~/UserManual/" + ViewBag.ModuleCode + ".pdf")))
+    {
+        userManualUrl = "/UserManual/" + ViewBag.ModuleCode + ".pdf";
+    }
+}
+
+@Styles.Render("~/Views/PurchaseInvoiceMng/css/daterangepicker.css")
+<form class="row" name="editForm">
+    <div ng-view></div>
+</form>
+
+@section FormAction {
+<ul id="sparks">
+    <li class="sparks-info">
+        <a href="@Url.Action("Index", "PurchaseInvoiceMng")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+    </li>
+    <li class="sparks-info" ng-show="data.purchaseInvoiceStatusID == 1">
+        <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current))" ng-disabled="data.purchaseInvoiceID == null || data.purchaseInvoiceID == 0" title="Delete" ng-click="del(data.purchaseInvoiceID)">
+            <i class="fa fa-times"></i>
+        </a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="update()" ng-show="data.purchaseInvoiceStatusID == 1"><i class="fa fa-save"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0)" ng-show="data.purchaseInvoiceStatusID == 1" class="btn btn-default" title="Confirmed" ng-click="approve()" style="color: red">
+            <i class="fa fa-check"></i>
+        </a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0)" ng-show="data.purchaseInvoiceStatusID == 2 || data.purchaseInvoiceStatusID == 3" class="btn btn-default" title="Cancel" style="color: #ff0000;" ng-click="cancel()">
+        <i class="fa fa-times"></i></a>
+    </li>
+    @if (!string.IsNullOrEmpty(userManualUrl))
+    {
+        <li class="sparks-info">
+            <a target="_blank" href="@userManualUrl" class="btn btn-default" title="Help"><i class="fa fa-info"></i></a>
+        </li>
+    }
+</ul>
+}
+@section pagejs {
+    <script src="~/Views/PurchaseInvoiceMng/edit.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/PurchaseInvoiceMng/_Edit/_GeneralController.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/PurchaseInvoiceMng/_Edit/_PurchaseOrderController.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/PurchaseInvoiceMng/js/daterangepicker.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")" type="text/javascript"></script>
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/purchase-invoice/',
+            token: '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]',
+            backUrl: '@Url.Action("Index", "PurchaseInvoiceMng")',
+            backendReportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]',
+            refreshUrl: '@Url.Action("Edit", "PurchaseInvoiceMng", new { id = UrlParameter.Optional })/',
+            indexUrl: '@Url.Action("Index", "PurchaseInvoiceMng")',
+            reportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]',
+
+            id: @ViewBag.ID,
+            errMsg: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED',
+
+            typeID: @typeID,
+            purchaseOrderAPI: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/PurchaseOrderMng/get?id=',
+            updatePurchaseOrderAPI: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/PurchaseOrderMng/update?id=',
+            getProductionItemUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/purchase-invoice/getProductionItem',
+
+            updateReceivingAPI: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/ReceivingNote/update',
+            receivingAPI: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/ReceivingNote/get',
+        };
+    </script>
+    <script src="~/Angular/app/jsonService2.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/PurchaseInvoiceMng/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+
+}

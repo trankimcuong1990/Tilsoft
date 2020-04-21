@@ -1,0 +1,798 @@
+﻿@{
+    if (ViewBag.ID == 0)
+    {
+        ViewBag.Title = "Create New Employee";
+    }
+    else
+    {
+        ViewBag.Title = "Edit Employee";
+    }
+
+    ViewBag.Module = "Employee Management";
+    Frontend.APIDTO.APIUserInformation userInfo = (Frontend.APIDTO.APIUserInformation)Session[Frontend.Customize.Common.ProjectDefinition.USER_INFO_SESSION];
+}
+<style>
+    .css-inline a {
+        display: inline;
+    }
+</style>
+<form class="row" name="editForm" id="main-form">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-product-information" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <ul class="nav nav-tabs pull-left in">
+                    <li class="active">
+                        <a data-toggle="tab" href="#tabGeneral"> <span> Employee Information </span> </a>
+                    </li>
+                    <li ng-if="@userInfo.Data.ModuleSpecialPermissionAccesses.Count(o => o.ModuleSpecialPermissionUD == Frontend.Helper.ConstantIdentifier.SPECIAL_PERMISSION_EMPLOYEE_RESUME) > 0 && (dataContainer.companyID == null || @userInfo.Data.CompanyID == 4 || @userInfo.Data.UserGroupID == 1 || @userInfo.Data.CompanyID == dataContainer.companyID)">
+                        <a data-toggle="tab" href="#tabResume"><span> Resume <span ng-if="dataContainer.resumeFileFriendlyName" class="label bg-color-blue txt-color-white"> Available <i class="fa fa-exclamation"></i> </span> </span></a>
+                    </li>
+                    @if (userInfo.Data.ModuleSpecialPermissionAccesses.Count(o => o.ModuleSpecialPermissionUD == Frontend.Helper.ConstantIdentifier.SPECIAL_PERMISSION_EMPLOYEE_MANAGER_NOTE) > 0)
+                    {
+                        <li>
+                            <a data-toggle="tab" href="#tabEmployeeDetail"><span> Employee Detail </span> </a>
+                        </li>
+                    }
+                    <li>
+                        <a data-toggle="tab" href="#qaqcAccess"> <span> QA/QC </span> </a>
+                    </li>
+                    @*<li>
+            <a data-toggle="tab" href="#tabUsage"> <span> Usage Tracking Info </span> </a>
+        </li>*@
+                </ul>
+            </header>
+            <div>
+                <div class="widget-body">
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="tabGeneral">
+
+                            <div class="smart-form">
+                                <fieldset style="padding: 0px;">
+
+                                    <div class="row">
+
+                                        <div class="col col-2" style="position:relative;">
+                                            <div>
+                                                <label class="label">Picture</label>
+                                                <div class="input-group css-inline" style="width: 100%;">
+                                                    @Html.Partial("~/Views/Shared/_Controls/_ImageBox.cshtml", new Frontend.Models.ImageBoxViewModel() { URLBinding = "dataContainer.personalPhoto_DisplayURL", JSOnChangeHandler = "event.changePersonalImage", JSONRemoveHandler = "event.removePersonalImage" })
+                                                </div>
+                                            </div>
+                                            <div style="position:absolute">
+                                                <label class="label">&nbsp;</label>
+                                                <label class="checkbox">
+                                                    <input type="checkbox" ng-model="dataContainer.isSuperUser">
+                                                    <i></i> Super User
+                                                </label>
+                                            </div>
+                                            <div style="position:absolute; margin-left: 95px">
+                                                <label class="label">&nbsp;</label>
+                                                <label class="checkbox">
+                                                    <input type="checkbox" ng-model="dataContainer.isscmResponsible">
+                                                    <i></i> SCMResp
+                                                </label>
+                                            </div>
+                                        </div>
+
+                                        <div class="col col-2 m-bottom-15">
+                                            <label class="label">Full Name</label>
+                                            <label class="input">
+                                                <i class="icon-prepend fa fa-user"></i>
+                                                <input type="text" id="employeeNM" ng-model="dataContainer.employeeNM" required />
+                                            </label>
+                                        </div>
+
+                                        <div class="col col-2 m-bottom-15">
+                                            <label class="label">First Name</label>
+                                            <label class="input">
+                                                <input type="text" id="employeeFirstNM" ng-model="dataContainer.employeeFirstNM" />
+                                            </label>
+                                        </div>
+
+                                        <div class="col col-2 m-bottom-15">
+                                            <label class="label">Phonetic</label>
+                                            <label class="input">
+                                                <input type="text" id="phonetic" ng-model="dataContainer.phonetic" />
+                                            </label>
+                                        </div>
+
+                                        <div class="col col-2 m-bottom-15">
+                                            <label class="label">Email</label>
+                                            <label class="input">
+                                                <a title="Email To {{dataContainer.email1}}" style="display:block;text-align:center;" href="mailto:{{dataContainer.email1}}" target="_top"><i class="icon-prepend fa fa-envelope-o"></i></a>
+                                                <input style="padding-left:40px;" type="text" id="email1" ng-model="dataContainer.email1" />
+                                            </label>
+                                        </div>
+
+                                        <div class="col col-2 m-bottom-15">
+                                            <label class="label">Mobile Phone</label>
+                                            <label class="input">
+                                                <a href="javascript:void(0);" ng-click="event.openCall(dataContainer.telephone1)"><i class="icon-prepend fa fa-phone"></i></a>
+                                                <input style="padding-left:40px;" type="text" id="telephone1" ng-model="dataContainer.telephone1" />
+                                            </label>
+                                        </div>
+
+
+                                        <div class="col col-2 m-bottom-15">
+                                            <label class="label">Skype ID</label>
+                                            <label class="input">
+                                                <a href="javascript:void(0);" ng-click="event.skypeChat(dataContainer.skypeID)"><i class="icon-prepend fa fa-skype"></i></a>
+                                                <input style="padding-left:40px;" type="text" id="skypeID" ng-model="dataContainer.skypeID" />
+                                            </label>
+                                        </div>
+
+                                        <div class="col col-2 m-bottom-15">
+                                            <label class="label">Other Contact Info</label>
+                                            <label class="input">
+                                                <input type="text" id="otherContactInfo" ng-model="dataContainer.otherContactInfo" />
+                                            </label>
+                                        </div>
+
+                                        <div class="col col-2 m-bottom-15">
+                                            <label class="label">Email 2</label>
+                                            <label class="input">
+                                                <a title="Email To {{dataContainer.email2}}" style="display:block;text-align:center;" href="mailto:{{dataContainer.email2}}" target="_top"><i class="icon-prepend fa fa-envelope-o"></i></a>
+                                                <input style="padding-left:40px;" type="text" id="email1" ng-model="dataContainer.email2" />
+                                            </label>
+                                        </div>
+
+
+                                        <div class="col col-2 m-bottom-15">
+                                            <label class="label">Company phone</label>
+                                            <label class="input">
+                                                <a href="javascript:void(0);" ng-click="event.openCall(dataContainer.telephone2)"><i class="icon-prepend fa fa-phone"></i></a>
+                                                <input style="padding-left:40px;" type="text" id="telephone1" ng-model="dataContainer.telephone2" />
+                                            </label>
+                                        </div>
+
+                                        <div class="col col-2 m-bottom-15">
+                                            <label class="label">Date of birth</label>
+                                            <label class="input">
+                                                <input type="text" class="yr-datePicker" ng-model="dataContainer.dateOfBirth" data-dateformat="dd/mm/yy" />
+                                                <i class="icon-append fa fa-calendar"></i>
+                                            </label>
+                                        </div>
+
+                                        <div class="col col-2 m-bottom-15">
+                                            <label class="label">Job Title</label>
+                                            <label class="input">
+                                                <input type="text" id="jobTitle" ng-model="dataContainer.jobTitle" />
+                                            </label>
+                                        </div>
+
+                                        <div class="col col-2 m-bottom-15">
+                                            <label class="label">Job Position</label>
+                                            <label class="select">
+                                                <select ng-model="dataContainer.jobLevelID" ng-options="jobLevel.jobLevelID as jobLevel.jobLevelNM for jobLevel in jobLevels">
+                                                    <option value=""></option>
+                                                </select>
+                                                <i></i>
+                                            </label>
+                                        </div>
+
+
+                                        <div class="col col-2 m-bottom-15">
+                                            <label class="label">Department</label>
+                                            <label class="select">
+                                                <select ng-model="dataContainer.departmentID" ng-options="department.internalDepartmentID as department.internalDepartmentNM for department in departments">
+                                                    <option value=""></option>
+                                                </select>
+                                                <i></i>
+                                            </label>
+                                        </div>
+                                        <div class="col col-2 m-bottom-15">
+                                            <label class="label">Report To</label>
+                                            <label class="select">
+                                                <select ui-select2 ng-model="dataContainer.reportToID" class="select2">
+                                                    <option value=""></option>
+                                                    <option ng-repeat="director in directors | orderBy: 'employeeNM'" value="{{director.employeeID}}">{{director.employeeNM}}</option>
+                                                </select>
+                                            </label>
+                                        </div>
+                                        <div class="col col-2 m-bottom-15">
+                                            <label class="label">Location</label>
+                                            <label class="select">
+                                                <select ng-model="dataContainer.locationID" ng-options="location.locationID as location.locationNM for location in locations">
+                                                    <option value=""></option>
+                                                </select>
+                                                <i></i>
+                                            </label>
+                                        </div>
+                                        <div class="col col-md-2 m-bottom-15">
+                                            <label class="label">Company</label>
+                                            <label class="select">
+                                                <select ng-model="dataContainer.companyID" ng-options="company.companyID as company.companyNM for company in companies" required>
+                                                    <option value=""></option>
+                                                </select>
+                                                <i></i>
+                                            </label>
+                                        </div>
+
+                                        <div class="col col-md-2 m-bottom-15">
+                                            <label class="label">Branch</label>
+                                            <label class="select">
+                                                <select ng-model="dataContainer.branchID" ng-options="branch.branchID as branch.branchNM for branch in branches | filter : { companyID : dataContainer.companyID ? dataContainer.companyID : -1} : true">
+                                                    <option value=""></option>
+                                                </select>
+                                                <i></i>
+                                            </label>
+                                        </div>
+
+                                        <div class="col col-2 m-bottom-15">
+                                            <label class="label">Date Joined</label>
+                                            <label class="input">
+                                                <input type="text" class="yr-datePicker" ng-model="dataContainer.dateStart" data-dateformat="dd/mm/yy" />
+                                                <i class="icon-append fa fa-calendar"></i>
+                                            </label>
+                                        </div>
+
+                                        <div class="col col-2 m-bottom-15">
+                                            <label class="label">Tilsoft Acc</label>
+                                            <label class="select">
+                                                <select ui-select2 ng-model="dataContainer.userID" class="select2">
+                                                    <option value=""></option>
+                                                    <option ng-repeat="user in users | orderBy: 'fullName'" value="{{user.userId}}">{{user.fullName}}</option>
+                                                </select>
+                                            </label>
+                                        </div>
+
+                                        <div class="col col-2 m-bottom-15">
+                                            <label class="label">English</label>
+                                            <label class="input">
+                                                <input type="text" id="english" ng-model="dataContainer.english" />
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col col-6 m-bottom-15" style="float:right;">
+                                            <label class="label">Factory responsible</label>
+                                            @*<furnindo-multi-select id="factoryIDs" source="factories" itemid="factoryID" itemtext="factoryUD" item-selected="factorySelected"></furnindo-multi-select>*@
+                                            <select id="factoryID" ng-model="factorySelected" multiple="multiple">
+                                                <option ng-repeat="item in factories" ng-value="item.factoryID" ng-selected="item.selected">{{item.factoryUD}}</option>
+                                            </select>
+                                        </div>
+                                        <div class="col col-2 m-bottom-15" style="float:right;">
+                                            <label class="label">Period joining</label>
+                                            <label class="input">
+                                                <span class="form-control" id="joinedYear">{{method.getDiffDate(dataContainer.dateStart)}}</span>
+                                            </label>
+                                        </div>
+                                        <div class="col col-2 m-bottom-15" style="float:right;">
+                                            <label class="label">Age</label>
+                                            <label class="input">
+                                                <span class="form-control" id="age">{{dataContainer.age}}</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col col-2 m-bottom-15" style="float: right">
+                                            <label class="label">Tilsoft Usage</label>
+                                            <label class="input">
+                                                <span class="form-control" id="tilsoftUsage">{{dataContainer.tilsoftUsage}}</span>
+                                            </label>
+                                        </div>
+                                        <div class="col col-4 m-bottom-15" style="float:right">
+                                            <label class="label">Type Of Contract</label>
+                                            <label class="input">
+                                                <textarea class="form-control" rows="2" ng-model="dataContainer.typeOfContract"></textarea>
+                                            </label>
+                                        </div>
+                                        <div class="col col-2 m-bottom-15" style="float:right;">
+                                            <label class="label">Contract Expiry Date</label>
+                                            <label class="input">
+                                                <span class="form-control">{{method.getEndDay(dataContainer.contractStartDate, dataContainer.numberOfContractMonths)}}</span>
+                                                <i class="icon-append fa fa-calendar"></i>
+                                            </label>
+                                        </div>
+                                        <div class="col col-2 m-bottom-15" style="float:right;">
+                                            <label class="label">Number Of Months</label>
+                                            <label class="input">
+                                                <input type="text" style="text-align:right" ng-model="dataContainer.numberOfContractMonths" />
+                                            </label>
+                                        </div>
+                                        <div class="col col-2 m-bottom-15" style="float:right;">
+                                            <label class="label">Contract Start Date</label>
+                                            <label class="input">
+                                                <input type="text" ng-model="dataContainer.contractStartDate" class="yr-datePicker" data-dateformat="dd/mm/yy" />
+                                                <i class="icon-append fa fa-calendar"></i>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col col-2 m-bottom-15" ng-if="dataContainer.isAccountManager == 1">
+                                            <label class="label">
+                                                Sale code
+                                                <em ng-show="editForm.$error.required" class="note note-error">(Required)</em>
+                                            </label>
+                                            <label class="input">
+                                                <input type="text" style="text-align:right" maxlength="2" required ng-model="dataContainer.saleUD" />
+                                            </label>
+                                        </div>
+                                        <div class="col col-2 m-bottom-15" ng-if="dataContainer.isAccountManager != 1">
+                                            <label class="label">
+                                                Sale code
+                                            </label>
+                                            <label class="input">
+                                                <input type="text" style="text-align:right" maxlength="2" ng-model="dataContainer.saleUD" />
+                                            </label>
+                                        </div>
+                                        <div class="col col-2 m-bottom-15">
+                                            <label class="label">&nbsp;</label>
+                                            <label class="checkbox">
+                                                <input type="checkbox" ng-model="dataContainer.isAccountManager">
+                                                <i></i> Account Manager
+                                            </label>
+                                        </div>
+                                        <div class="col col-2 m-bottom-15">
+                                            <label class="label">&nbsp;</label>
+                                            <label class="checkbox">
+                                                <input type="checkbox" ng-model="dataContainer.isAccountManagerAssistant">
+                                                <i></i> Account Manager Asisstant
+                                            </label>
+                                        </div>
+                                        <div class="col col-2 m-bottom-15">
+                                            <label class="label">&nbsp;</label>
+                                            <label class="checkbox">
+                                                <input type="checkbox" ng-model="dataContainer.isvnAssistant">
+                                                <i></i> VN Asisstant
+                                            </label>
+                                        </div>
+                                        <div class="col col-2 m-bottom-15">
+                                            <label class="label">&nbsp;</label>
+                                            <label class="checkbox">
+                                                <input type="checkbox" ng-model="dataContainer.isvnLogisticAssistant">
+                                                <i></i> VN Logistic Asisstant
+                                            </label>
+                                        </div>
+                                        <div class="col col-2 m-bottom-15" ng-show="dataContainer.isAccountManager == true">
+                                            <label class="label">&nbsp;</label>
+                                            <label class="checkbox">
+                                                <input type="checkbox" ng-model="dataContainer.isIncludeInDDC">
+                                                <i></i> Include in DDC
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col col-4 m-bottom-15">
+                                            <label class="label">Job Description</label>
+                                            <label class="textarea">
+                                                <i class="icon-append fa fa-comment"></i>
+                                                <textarea class="form-control" ng-model="dataContainer.jobDescription" rows="10" style="padding:5px"></textarea>
+                                            </label>
+                                        </div>
+
+                                        <div class="col col-4 m-bottom-15">
+                                            <label class="label">Daily Task</label>
+                                            <label class="textarea">
+                                                <i class="icon-append fa fa-comment"></i>
+                                                <textarea class="form-control" ng-model="dataContainer.dailyTask" rows="10" style="padding:5px"></textarea>
+                                            </label>
+                                        </div>
+                                        <section class="col col-4 m-bottom-15">
+                                            <div class="tilsoft-table-wrapper">
+                                                <div class="tilsoft-table" style="border-bottom: none; margin-top: 25px;">
+                                                    <div class="tilsoft-table-body" style="width: 100%; overflow-y: hidden; min-height: 0px; height: auto; margin-top: 0px;">
+                                                        <table>
+                                                            <tr>
+                                                                <th colspan="4">Responsible for</th>
+                                                            </tr>
+                                                            <tr>
+                                                                <td style="text-align: center; width: 80px;">&nbsp;</td>
+                                                                <td style="text-align: center; font-weight: bold;">Type</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td style="text-align: center;"><a href="javascript:void(0)" ng-click="event.addResponsibleFor(data.responsibleFor, $event)" class="btn btn-primary btn-xs" style="width: 70px;">Add</a></td>
+                                                                <td colspan="2">
+                                                                    <select style="padding: 3px;" ng-model="data.responsibleFor" ng-options="item.entryValue as item.entryText for item in responsibleFor">
+                                                                        <option value=""></option>
+                                                                    </select>
+                                                                </td>
+                                                            </tr>
+                                                            <tr ng-repeat="item in dataContainer.employeeResponsibleForDTOs">
+                                                                <td style="text-align: center;"><a href="javascript:void(0)" ng-click="event.removeResponsibleFor($event, $index)" class="btn btn-danger btn-xs" style="width: 70px;">Remove</a></td>
+                                                                <td>{{item.displayText}}</td>
+                                                            </tr>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </section>
+                                    </div>
+
+                                    <div class="row">
+                                        <section class="col col-3">
+                                            <label class="label">Updated By</label>
+                                            <label class="input">
+                                                <span class="form-control">
+                                                    <a ng-if="dataContainer.updatedBy" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{dataContainer.updatedBy}}" dat data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                        <i class="fa fa-user"></i> {{dataContainer.updatorName}}
+                                                    </a>
+                                                </span>
+                                            </label>
+                                        </section>
+                                        <section class="col col-3">
+                                            <label class="label">Updated Date</label>
+                                            <label class="input">
+                                                <span class="form-control">{{dataContainer.updatedDate}}</span>
+                                            </label>
+                                        </section>
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+
+                        <div ng-if="@userInfo.Data.ModuleSpecialPermissionAccesses.Count(o => o.ModuleSpecialPermissionUD == Frontend.Helper.ConstantIdentifier.SPECIAL_PERMISSION_EMPLOYEE_RESUME) > 0 && (dataContainer.companyID == null || @userInfo.Data.CompanyID == 4 || @userInfo.Data.UserGroupID == 1 || @userInfo.Data.CompanyID == dataContainer.companyID)" class="tab-pane" id="tabResume">
+                            <div class="smart-form">
+                                <div class="row">
+                                    <div class="col col-10 m-bottom-15">
+                                        <label class="label">
+                                            Resume File
+                                        </label>
+                                        <label class="input">
+                                            <span class="form-control">
+                                                {{dataContainer.resumeFileFriendlyName}}
+                                                <div style="position: absolute; right: 5px; top: 5px;">
+                                                    <a ng-disabled="@userInfo.Data.ModuleSpecialPermissionAccesses.Count(o => o.ModuleSpecialPermissionUD == Frontend.Helper.ConstantIdentifier.SPECIAL_PERMISSION_EMPLOYEE_RESUME) == 0" href="{{dataContainer.resumeFileLocation}}" target="_blank" class="btn btn-primary btn-xs" style="font-size: 11px;">Download</a>
+                                                    <a href="javascript:void(0);" class="btn btn-primary btn-xs" style="font-size: 11px;" ng-click="event.changeResumeFile()">Change</a>
+                                                    <a ng-disabled="@userInfo.Data.ModuleSpecialPermissionAccesses.Count(o => o.ModuleSpecialPermissionUD == Frontend.Helper.ConstantIdentifier.SPECIAL_PERMISSION_EMPLOYEE_RESUME) == 0" href="javascript:void(0);" class="btn btn-danger btn-xs" style="font-size: 11px;" ng-click="event.removeResumeFile()">Remove</a>
+                                                </div>
+                                            </span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        @if (userInfo.Data.ModuleSpecialPermissionAccesses.Count(o => o.ModuleSpecialPermissionUD == Frontend.Helper.ConstantIdentifier.SPECIAL_PERMISSION_EMPLOYEE_MANAGER_NOTE) > 0)
+                        {
+                            <div class="tab-pane" id="tabEmployeeDetail">
+                                <div ng-if="!dataContainer.needToUpdateManagerData" class="smart-form">
+                                    <fieldset>
+                                        <div class="row">
+                                            <a href="javascript:void(0)" class="btn btn-success btn-lg" ng-click="event.verifyAccount()">Verify your account to access this area</a>
+                                        </div>
+                                    </fieldset>
+                                </div>
+
+                                <div ng-if="dataContainer.needToUpdateManagerData" class="smart-form">
+                                    <h2>Contract</h2>
+                                    <fieldset>
+                                        <div class="row">
+                                            <table class="table table-bordered table-striped">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 70px;"><a href="javascript:void(0)" class="btn btn-success btn-xs" ng-click="event.addContract()"><i class="fa fa-plus"></i> Add</a></th>
+                                                        <th>Contract</th>
+                                                        <th>Valid From</th>
+                                                        <th>Description</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="item in dataContainer.employeeContractDTOs">
+                                                        <td><a href="javascript:void(0)" class="btn btn-danger btn-xs" ng-click="event.removeContract(item)"><i class="fa fa-times"></i> Remove</a></td>
+                                                        <td><a href="{{item.fileLocation}}">{{item.friendlyName}}</a></td>
+                                                        <td class="has-input">
+                                                            <label class="input">
+                                                                <input type="text" class="yr-datePicker" ng-model="item.validFrom" data-dateformat="dd/mm/yy" />
+                                                                <i class="icon-append fa fa-calendar"></i>
+                                                            </label>
+                                                        </td>
+                                                        <td class="has-input">
+                                                            <label class="input">
+                                                                <input type="text" ng-model="item.description" />
+                                                            </label>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </fieldset>
+
+                                    <h2>Files</h2>
+                                    <fieldset>
+                                        <div class="row">
+                                            <table class="table table-bordered table-striped">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 70px;"><a href="javascript:void(0)" class="btn btn-success btn-xs" ng-click="event.addFile()"><i class="fa fa-plus"></i> Add</a></th>
+                                                        <th>File</th>
+                                                        <th>Description</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="item in dataContainer.employeeFileDTOs">
+                                                        <td><a href="javascript:void(0)" class="btn btn-danger btn-xs" ng-click="event.removeFile(item)"><i class="fa fa-times"></i> Remove</a></td>
+                                                        <td><a href="{{item.fileLocation}}">{{item.friendlyName}}</a></td>
+                                                        <td class="has-input">
+                                                            <label class="input">
+                                                                <input type="text" ng-model="item.description" />
+                                                            </label>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </fieldset>
+
+                                    <h2>Note <a href="javascript:void(0)" class="btn btn-success btn-xs" style="margin-bottom: 10px;" ng-click="method.printNote()"><i class="fa fa-print"></i> Send to printer</a></h2>
+                                    <fieldset>
+                                        <div class="row">
+                                            <label class="textarea">
+                                                <textarea rows="60" ng-model="dataContainer.managerNote"></textarea>
+                                            </label>
+                                        </div>
+                                    </fieldset>
+                                </div>
+                            </div>
+                        }
+
+                            <div class="tab-pane" id="qaqcAccess">
+                                <div class="smart-form">
+                                    <fieldset style="padding: 0px;">
+                                        <a class="btn btn-primary btn-xs font-11" href="javascript:void(0);" ng-click="event.addqaqcFactory($event)" style="margin-bottom: 10px;"><i class="fa fa-plus"></i> Add new </a>
+                                        <div id="grdqaqcAccess" class="tilsoft-table-wrapper">
+                                            <div class="tilsoft-table">
+                                                <div class="tilsoft-table-body" style="width: 100%; overflow-y: auto; height: auto; min-height: 100px; margin-top: 0px;">
+                                                    <table>
+                                                        <tr>
+                                                            <th style="width: 60px;">&nbsp;</th>
+                                                            <th style="width:150px">Factory</th>
+                                                            <th style="width:150px">Approval</th>
+                                                            <th>Remark</th>
+                                                        </tr>
+
+                                                        <tr ng-repeat="item in dataContainer.factoryAccesses">
+                                                            <td style="text-align: center;">
+                                                                <a href="javascript:void(0);" title="Remove" class="btn btn-danger btn-xs font-11" ng-click="event.removeqaqcFactory($event, item.qaqcFactoryAccessID)">Remove</a>
+                                                            </td>
+                                                            <td>
+                                                                <label class="select">
+                                                                    <select ui-select2 ng-model="item.factoryID" class="select2">
+                                                                        <option value=""></option>
+                                                                        <option ng-repeat="xxx in factories" value="{{xxx.factoryID}}">{{xxx.factoryUD}}</option>
+                                                                    </select>
+                                                                </label>
+                                                            </td>
+                                                            <td>
+                                                                <label class="select">
+                                                                    <select ui-select2 ng-model="item.approvalID" class="select2">
+                                                                        <option value=""></option>
+                                                                        <option ng-repeat="xxx in directors" value="{{xxx.approvalID}}">{{xxx.employeeNM}}</option>
+                                                                    </select>
+                                                                </label>
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" class="form-control" style="" ng-model="item.remark" />
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </fieldset>
+                                </div>
+                            </div>
+
+                        @*<div class="tab-pane" id="tabUsage">
+            <div class="smart-form">
+                <h2>WEEKLY OVERVIEW (latest 26 weeks)</h2>
+                <fieldset>
+                    <div class="row">
+                        <div id="weeklyChart"></div>
+                    </div>
+                </fieldset>
+
+                <h2>ACTION OVERVIEW</h2>
+                <fieldset>
+                    <div class="row">
+                        <table class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th style="width: 100px;"></th>
+                                    <th>Module</th>
+                                    <th style="width: 100px;">Total Hit(s)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="item in dataContainer.userDetails | orderBy: '-totalHit'">
+                                    <td>{{$index+1}}</td>
+                                    <td>{{item.displayText}}</td>
+                                    <td class="text-right">{{item.totalHit | number:0}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </fieldset>
+            </div>
+        </div>*@
+
+                        @*<div class="tab-pane" id="tabAnnualLeaveSetting">
+            <div class="smart-form">
+                <footer style="border-top: none; background: none; border-bottom: solid 1px #ddd">
+                    <a href="javascript:void(0)" class="btn btn-primary" ng-click="event.addSetting()">Add</a>
+                </footer>
+                <fieldset ng-if="dataContainer.annualLeaveSettings.length == 0">
+                    <section>
+                        <label class="label" style="color: #999">EMPTY</label>
+                    </section>
+                </fieldset>
+                <div class="widget-body">
+                    <div id="searchResult" class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header" style="width: 600px;">
+                                <div style="width: 150px;"></div>
+                                <div style="width: 100px;">Affected Year</div>
+                                <div style="width: 100px">Number of Day</div>
+                                <div style="width: 100px;" data-colname="IsDefault">Default</div>
+                                <div>Comment</div>
+                            </div>
+                            <div class="tilsoft-table-body" style="width: 600px;">
+                                <table>
+                                    <tr ng-repeat="item in dataContainer.annualLeaveSettings | orderBy: '-updatedDate'">
+                                        <td style="text-align: center; width: 150px;">
+                                            <a href="javascript:void(0);" class="btn btn-primary btn-xs font-11" ng-click="event.editSetting(item)"><i class="fa fa-pencil"></i> Edit</a>
+                                            <a href="javascript:void(0);" class="btn btn-danger btn-xs font-11" ng-click="event.removeSetting(item)"><i class="fa fa-times"></i> Delete</a>
+                                        </td>
+                                        <td style="text-align: center; width: 100px;text-align:center;">{{item.affectedYear}}</td>
+                                        <td style="text-align: center; width: 100px;">{{item.numberOfDay}}</td>
+                                        <td style="text-align: center; width: 100px"><input type="checkbox" disabled ng-model="item.isDefault" /></td>
+                                        <td style="text-align: center;">{{item.comment}}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>*@
+
+                        @*
+            <div id="settingForm" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                            &times;
+                        </button>
+                        <h4 class="modal-title" id="myModalLabel">Annual Leave Info</h4>
+                    </div>
+                    <div class="modal-body no-padding">
+                        <div class="smart-form">
+                            <fieldset>
+                                <div class="row">
+                                    <section class="col col-3">
+                                        <label class="label">Affected Year</label>
+                                        <label class="input">
+                                            <input type="text" ng-model="currentSetting.affectedYear" />
+                                        </label>
+                                    </section>
+                                    <section class="col col-3">
+                                        <label class="label">Number of Day</label>
+                                        <label class="input">
+                                            <input type="text" ng-model="currentSetting.numberOfDay" />
+                                        </label>
+                                    </section>
+                                    <section class="col col-2">
+                                        <label class="label">&nbsp;</label>
+                                        <label class="checkbox">
+                                            <input type="checkbox" ng-model="currentSetting.isDefault">
+                                            <i></i> Default
+                                        </label>
+                                    </section>
+                                </div>
+                            </fieldset>
+                            <fieldset>
+                                <div class="row">
+                                    <section class="col col-md-12">
+                                        <label class="label">Comment</label>
+                                        <label class="textarea">
+                                            <textarea rows="5" ng-model="currentSetting.comment"></textarea>
+                                        </label>
+                                    </section>
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" ng-click="event.updateSetting()">
+                            OK
+                        </button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+                        *@
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="jarviswidget" id="wid-id-product-detail" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false"></div>
+    </article>
+</form>
+
+<!-- POPUP FORM AREA-->
+<div id="frmVerifyAccount" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title"><i class="fa fa-fa-file-picture-o"></i> Verify your account by provide your username and password again</h4>
+            </div>
+            <div class="modal-body no-padding">
+                <div class="smart-form">
+                    <fieldset>
+                        <section>
+                            <label class="label">Username</label>
+                            <label class="input">
+                                <input type="text" ng-model="verifyInfo.username" autocomplete="off" />
+                            </label>
+                        </section>
+                        <section>
+                            <label class="label">Password</label>
+                            <label class="input">
+                                <input type="text" ng-model="verifyInfo.password" class="c-password" autocomplete="off" />
+                            </label>
+                        </section>
+                    </fieldset>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" ng-click="event.verifyAccountPost()">
+                    Verify
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "EmployeeMng")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+        </li>
+        @if (Frontend.Helper.AuthHelper.GetActionButtonStatus("UsageTrackingRpt", Frontend.Helper.ActionEnum.Read, HttpContext.Current) != "disabled")
+        {
+            <li class="sparks-info">
+                <a href="@Url.Action("Index", "UsageTrackingRpt", new {employeeID = ViewBag.ID})" class="btn btn-default" title="Go to Usage Tracking" target="_blank"><i class="fa fa-bar-chart-o"></i></a>
+            </li>
+        }
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="event.update($event)"><i class="fa fa-save"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default@(ViewBag.ID==0?" disabled":"") @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="Delete" style="color: #ff0000;" ng-click="event.delete($event)"><i class="fa fa-times"></i></a>
+        </li>
+        @*<li class="sparks-info">
+                <a href="javascript:void(0)" disabled class="btn btn-default" title="Print"><i class="fa fa-print"></i></a>
+            </li>
+            <li class="sparks-info">
+                <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Reset, HttpContext.Current))" title="Reset Approval status" disabled><i class="fa fa-thumbs-o-down"></i></a>
+            </li>*@
+    </ul>
+}
+@section pagejs {
+    <script src="~/Angular/app/employeeMng/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/support/service.js?c=@System.Guid.NewGuid().ToString().Replace("-","")"></script>
+    <script type="text/javascript">
+        employeeMngService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/employeemng/';
+        employeeMngService.supportServiceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/support/';
+        employeeMngService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+        supportService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/support/';
+        supportService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+        var context = {
+                id: @ViewBag.ID,
+                backUrl: '@Url.Action("Index", "EmployeeMng")',
+                refreshUrl: '@Url.Action("Edit", "EmployeeMng", new { id = UrlParameter.Optional })/',
+                errMsg: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED',
+                pageTitle: '@ViewBag.Title'
+            }
+    </script>
+    <script src="~/Angular/app/employeeMng/edit.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}

@@ -1,0 +1,193 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var pageSize = System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"];
+    var cookieID = HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString();
+    var backendReportUrl = @System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"];
+
+
+    ViewBag.Title = "Search Break Down";
+    ViewBag.Module = "Search Break Down";
+    ViewBag.Icon = "fa-table";
+
+    Frontend.APIDTO.APIUserInformation userInfo = (Frontend.APIDTO.APIUserInformation)Session[Frontend.Customize.Common.ProjectDefinition.USER_INFO_SESSION];
+    int companyId = userInfo.Data.CompanyID;
+    if (companyId != 1)
+        companyId = 3;
+}
+
+
+<div class="row">
+    <article class="col-xs-12 col-sm-12 col-lg-12 col-md-12">
+        <div class="jarviswidget" id="wid-id-1" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Search Break Down</h2>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div class="tilsoft-table-wrapper" avs-scroll grid-handler="gridHandler">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header" style="width: 1445px">
+                                <div style="width: 65px; height: 60px !important; text-align: center !important; background-color: #eee">Total<br /><b style="color: #0026ff; font-size:13px">{{totalRows | number}}</b></div>
+                                <div style="width: 80px; height: 60px !important; text-align: center !important; background-color: #eee">Status</div>
+                                <div style="width: 80px; height: 60px !important; text-align: center !important; background-color: #eee" class="sorting" data-colname="Season">Season</div>
+                                <div style="width: 70px; height: 60px !important; text-align: center !important; background-color: #eee">Image</div>
+                                <div style="width: 70px; height: 60px !important; text-align: center !important; background-color: #eee" class="sorting" data-colname="ClientUD">Client</div>
+                                <div style="width: 70px; height: 60px !important; text-align: center !important; background-color: #eee">Type</div>
+                                <div style="width: 300px; height: 60px !important; text-align: center !important; background-color: #eee" class="sorting" data-colname="ModelUD">Item</div>
+                                <div style="width: 100px; height: 60px !important; text-align: center !important; background-color: #eee" class="sorting" data-colname="DefaultFactory">Default factory</div>
+                                <div style="width: 150px; height: 60px !important; text-align: center !important; background-color: #eee;">Factory Amount (<span style="color:#659265">excl shipping</span>)</div>
+                                <div ng-if="companyID !=1" style="width: 150px; height: 60px !important; text-align: center !important; background-color: #eee;">AVT Amount &nbsp;(<span style="color:#659265">excl shipping</span>)</div>
+                                <div style="height: 60px !important; text-align: center !important; background-color: #eee; width: 295px;">More Info</div>
+                                <div style="height: 60px;"></div>
+                            </div>
+                            <div class="tilsoft-table-filter" style="width: 1445px">
+                                <div style="width: 65px; height: 45px !important; text-align: center !important; background-color: #eee">
+                                    <a href="javascript:void(0)" class="btn btn-default btn-xs" title="Apply Filter" ng-click="event.refresh()"><i class="fa fa-filter"></i></a>
+                                    <a href="javascript:void(0)" class="btn btn-default btn-xs" title="Clear Filter" ng-click="event.clear()"><i class="fa fa-ban"></i></a>
+                                </div>
+                                <div style="width: 80px">
+                                    <select class="form-control search-filter" style="width: 100%" ng-model="filters.modelStatusID" ng-options="modelStatus.modelStatusID as modelStatus.modelStatusNM for modelStatus in modelStatuses">
+                                        <option value=""></option>
+                                    </select>
+                                    <i></i>
+                                </div>
+                                <div style="width: 80px; height: 45px !important; text-align: center !important; background-color: #eee">
+                                    <select class="form-control search-filter" style="width: 100%" ng-model="filters.season" ng-options="season.seasonValue as season.seasonText for season in season">
+                                        <option value=""></option>
+                                    </select>
+                                    <i></i>
+                                </div>
+                                <div style="width: 70px; height: 45px !important; text-align: center !important; background-color: #eee"></div>
+                                <div style="width: 70px; height: 45px !important; text-align: center !important; background-color: #eee">
+                                    <input class="form-control search-filter" type="text" style="width: 100%" ng-model="filters.clientUD" />
+                                </div>
+                                <div style="width: 70px; height: 45px !important; text-align: center !important; background-color: #eee">
+                                    <select class="form-control" ng-model="filters.type" ng-options="listType.type as listType.typeName for listType in listTypes"></select>
+                                </div>
+                                <div style="width: 300px; height: 45px !important; text-align: center !important; background-color: #eee">
+                                    <input class="form-control search-filter" type="text" style="width: 100%" ng-model="filters.description" />
+                                </div>
+                                <div style="width: 100px; height: 45px !important; text-align: center !important; background-color: #eee">
+                                    <input class="form-control search-filter" type="text" style="width: 100%" ng-model="filters.defaultFactory" />
+                                </div>
+                                <div style="width: 150px; height: 45px !important; text-align: center !important; background-color: #eee; font-weight: bold; color: #0026ff;">{{totalAVFConfirmedItem | number}}</div>
+                                <div ng-if="companyID !=1" style="width: 150px; height: 45px !important; text-align: center !important; background-color: #eee; font-weight: bold; color: #0026ff;">{{totalAVTConfirmedItem | number}}</div>
+                                <div style="height: 45px !important; text-align: center !important; background-color: #eee; width: 295px;"></div>
+                                <div></div>
+                            </div>
+                            <div class="tilsoft-table-body" style="margin-top: 105px; width: 1445px">
+                                <table>
+                                    <tbody>
+                                        <tr ng-repeat="item in data">
+                                            <td style="width: 65px; text-align: center">
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current) == "disabled")
+                                                {
+                                                    <a class="btn btn-default btn-xs font-11" href="@Url.Action("View", "BreakDownMng")/{{item.breakdownID}}?modelID={{item.modelID}}&sampleProductID={{item.sampleProductID}}&offerSeasonDetailID=0" style="width: 53px" title="View (Read Only)" target="_blank">
+                                                        <i class="fa fa-folder-open"></i> View
+                                                    </a>
+                                                }
+                                                else
+                                                {
+                                                    <a class="btn btn-default btn-xs font-11" href="@Url.Action("View", "BreakDownMng")/{{item.breakdownID}}?modelID={{item.modelID}}&sampleProductID={{item.sampleProductID}}&offerSeasonDetailID=0" title="View (Read Only)" style="width: 53px" target="_blank">
+                                                        <i class="fa fa-folder-open"></i> View
+                                                    </a> <br />
+                                                    <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "BreakDownMng", new { id = UrlParameter.Optional })/{{item.breakdownID}}?modelID={{item.modelID}}&sampleProductID={{item.sampleProductID}}&offerSeasonDetailID=0" title="Edit" style="width: 53px; margin-top: 5px" ng-if="!item.isConfirmed" target="_blank">
+                                                        <i class="fa fa-pencil-square-o"></i> Edit
+                                                    </a>
+                                                }
+                                            </td>
+                                            <td style="width: 80px; text-align: center">{{item.modelStatusNM}}</td>
+                                            <td style="width: 80px; text-align: center">{{item.season}}</td>
+                                            <td style="width: 70px; text-align: center">
+                                                <a href="{{item.fileLocation}}" data-featherlight="image">
+                                                    <img style="width: 95%;" ng-src="{{item.thumbnailLocation}}" />
+                                                </a>
+                                            </td>
+                                            <td style="width: 70px; text-align: center">{{item.clientUD}}</td>
+
+                                            <td style="width: 70px; text-align:center;">
+                                                {{item.modelID ? 'Model' : 'Sample'}}
+                                            </td>
+                                            <td style="width: 300px; text-align: left;">
+                                                <strong>{{item.modelID ? item.modelUD : item.sampleProductUD}}</strong>
+                                                <br />
+                                                {{item.modelID ? item.modelDescription : item.sampleProductDescription}}
+                                            </td>
+
+                                            <td style="width: 100px; text-align: center;">
+                                                {{item.defaultFactory}}
+                                            </td>
+
+                                            <td style="width: 150px; text-align: right;">
+                                                <span ng-if="item.avfBreakdownAmountVND !== null">{{item.avfBreakdownAmountVND / $parent.exchange | currency:'$':2}}</span>
+                                            </td>
+                                            <td style="width: 150px; text-align: right;" ng-if="companyID !=1">
+                                                <span ng-if="item.avtBreakdownAmountVND !== null">{{item.avtBreakdownAmountVND / $parent.exchange | currency:'$':2}}</span>
+                                            </td>
+                                            <td style="width: 295px;">
+                                                <label>
+                                                    Create By:
+                                                    <a ng-show="(item.createdBy != null && item.createrName != null)" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.createdBy}}" data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                        {{item.createrName}}
+                                                    </a>
+                                                    on {{item.createdDate}}
+                                                </label>
+                                                <label>
+                                                    Update By:
+                                                    <a ng-show="(item.updatedBy != null && item.updaterName != null)" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.updatedBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                        {{item.updaterName}}
+                                                    </a>
+                                                    on {{item.updatedDate}}
+                                                </label>
+                                            </td>
+                                            <td></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default btn-sm" ng-click="event.refresh()" title="Search">
+                <i class="fa fa-search"></i> Search
+            </a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default btn-sm" ng-click="event.clear()" title="Refresh Page">
+                <i class="fa fa-refresh"></i> Refresh
+            </a>
+        </li>
+        <li class="sparks-info">
+            <a href="@Url.Action("Init", "BreakDownMng")/0" class="btn btn-default btn-sm @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="Create new" target="_blank">
+                <i class="fa fa-file-o"></i> New
+            </a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(serviceRoot)api/breakdown/',
+            token: '@token',
+            pageSize: '@pageSize',
+            cookieID: '@cookieID',
+            companyID: @companyId,
+        }
+    </script>
+    <script type="text/javascript" src="~/Views/BreakDownMng/index.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Views/BreakDownMng/service.js?=@guid"></script>
+}
+

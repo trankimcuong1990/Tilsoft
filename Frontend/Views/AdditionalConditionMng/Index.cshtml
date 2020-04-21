@@ -1,0 +1,148 @@
+﻿
+@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    var pageSize = System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"];
+    var cookieID = HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString();
+
+    ViewBag.Title = "Search Additional Condition";
+    ViewBag.Module = "AdditionalConditionMng";
+}
+
+<div class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget " data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-table"></i>
+                </span>
+                <h2>Search Result</h2>
+            </header>
+            <div>
+                <div class="jarviswidget-editbox"></div>
+                <div class="widget-body no-padding">
+                    <div class="tilsoft-table-wrapper" avs-scroll grid-handler="gridHandler">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header" style="width: 1000px">
+                                <div class="sorting" style="width: 80px">Found(s)  <font style="color:deeppink; text-transform:none">{{totalRows}}</font></div>
+                                <div class="sorting" style="width: 150px">Type</div>
+                                <div class="sorting" style="width: 100px">Active Factory</div>
+                                <div class="sorting" style="width: 100px">Who to Pay</div>
+                                <div class="sorting" style="width: 350px">Name</div>
+                                <div style="width:200px">Detail</div>
+                                <div>Tracking</div>
+                            </div>
+                            <div class="tilsoft-table-filter" style="width:1000px">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>
+                                                <div style="width:80px; border-right:1px solid #ccc">
+                                                    <a href="javascript:void(0)" class="btn btn-default btn-xs" title="Apply Filter" ng-click="event.reloadpage()"><i class="fa fa-filter"></i></a>
+                                                    <a href="javascript:void(0)" class="btn btn-default btn-xs" title="Clear Filter" ng-click="event.clearFilters()"><i class="fa fa-ban"></i></a>
+                                                </div>
+                                            </th>
+                                            <th>
+                                                <div style="width: 150px ;border-right:1px solid #ccc">
+                                                </div>
+                                            </th>
+                                            <th style="width: 100px ; border-right:1px solid #ccc; text-align:center"></th>
+                                            <th style="width: 100px ; border-right:1px solid #ccc; text-align:center"></th>
+                                            <th>
+                                                <div style="width: 349px ;border-right:1px solid #ccc">
+                                                    <input class="form-control search-filter" style="width: 100%" ng-model="filters.AdditionalConditionNM">
+                                                </div>
+                                            </th>
+                                            <th style="width:200px ;border-right:1px solid #ccc"></th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                </table>
+
+                            </div>
+                            <div class="tilsoft-table-body" style="width: 1000px">
+                                <table>
+                                    <tbody>
+                                        <tr ng-repeat="item in data">
+                                            <td style="width: 79px;text-align:center">
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current) == "disabled")
+                                                {
+                                                    <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "AdditionalConditionMng")/{{item.additionalConditionID}}" title="View (Read Only)" target="_blank" style="width:60px"><i class="fa fa-folder-open"></i> View</a>
+                                                }
+                                                else
+                                                {
+                                                    <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "AdditionalConditionMng")/{{item.additionalConditionID}}" title="Edit" target="_blank" style="width:60px"><i class="fa fa-pencil"></i> Edit</a>
+                                                }
+
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current) != "disabled")
+                                                {
+                                                    <a class="btn btn-danger btn-xs font-11" href="#" title="Delete" ng-click="event.deleterow(item.additionalConditionID, $index)" style="width:60px;margin-top:3px"><i class="fa fa-times"></i> Del</a>
+                                                }
+                                            </td>
+                                            <td style="width: 150px">
+                                                {{item.additionalConditionTypeNM}}
+                                            </td>
+                                            <td style="width: 100px; text-align:center">
+                                                <input disabled type="checkbox" ng-model="item.activeFactory" />
+                                            </td>
+                                            <td style="width: 100px; text-align:center">
+                                                <input disabled type="checkbox" ng-model="item.whoToPay" />
+                                            </td>
+                                            <td style="width: 350px">
+                                                {{item.additionalConditionNM}}
+                                            </td>
+                                            <td style="width:200px">{{item.remark}}</td>
+                                            <td>
+                                                <a ng-if="item.updateBy" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.updateBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                    <i class="fa fa-user" ng-show="item.updateName !== null"></i> {{item.updateName}}
+                                                </a>
+                                                <br />
+                                                On {{item.updateDate}}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction{
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default" title="Search" ng-click="event.reloadpage()">
+                <i class="fa fa-search"></i>
+            </a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default" title="Refresh" ng-click="event.clearFilters()">
+                <i class="fa fa-refresh"></i>
+            </a>
+        </li>
+        <li class="sparks-info">
+            <a href="@Url.Action("Edit","AdditionalConditionMng")/0" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" target="_blank" title="New">
+                <i class="fa fa-file-o"></i>
+            </a>
+        </li>
+    </ul>
+}
+
+@section pagejs{
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(serviceRoot)/api/additionalcondition/',
+            token: '@token',
+            pageSize: '@pageSize',
+            cookieID: '@cookieID'
+        }
+    </script>
+    <script type="text/javascript" src="~/Views/AdditionalConditionMng/index.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Views/AdditionalConditionMng/service.js?v=@guid"></script>
+}
+

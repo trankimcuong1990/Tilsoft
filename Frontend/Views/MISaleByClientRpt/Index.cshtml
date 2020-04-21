@@ -1,0 +1,581 @@
+﻿@{
+    ViewBag.Title = "Management Info: Sales By Client";
+    ViewBag.Module = "Management Info: Sales By Client";
+    string currentSeason = Library.OMSHelper.Helper.GetCurrentSeason();
+    string nextSeason = Library.OMSHelper.Helper.GetNextSeason(currentSeason);
+    string prevSeason = Library.OMSHelper.Helper.GetPrevSeason(currentSeason);
+
+    string Season = currentSeason;
+    if (DateTime.Now.Month == 8)
+    {
+        Season = nextSeason;
+        //Season = currentSeason;
+    }
+    else
+    {
+        Season = currentSeason;
+    }
+    prevSeason = Library.OMSHelper.Helper.GetPrevSeason(Season);
+    string prePrevSeason = Library.OMSHelper.Helper.GetPrevSeason(prevSeason);
+}
+<style>
+    .tilsoft-table .tilsoft-table-body {
+        height: auto !important;
+        max-height: none !important;
+    }
+</style>
+
+<div class="row" style="margin-top: 15px;">
+    <!-- show report for management level -->
+
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget well jarviswidget-color-darken" id="wid-id-0" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <div>
+                <div class="widget-body no-padding">
+                    <div class="padding-10">
+                        <p class="alert alert-info no-margin" style="border-bottom: none;">
+                            <span style="padding: 5px; display: inline-block; margin-bottom: 5px; margin-right: 5px; background: rgba(255,255,255,0.7);"><strong>Exchange Rate</strong>: {{data.exchangeRate | currency:'':2}}</span>
+                            <span style="padding: 5px; display: inline-block; margin-bottom: 5px; margin-right: 5px; background: rgba(255,255,255,0.7);"><strong>Est. Container Value</strong>: ${{data.usdContainerValue | currency:'':0}} or &euro;{{data.eurContainerValue | currency:'':0}}</span>
+                        </p>
+
+                        <div class="row">
+                            <div class="col-lg-12">
+                                @Html.Partial("~/Views/MISaleByClientRpt/Widget/Expected.cshtml", new ViewDataDictionary() { { "season", Season } })
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-lg-12">
+                                @Html.Partial("~/Views/MISaleByClientRpt/Widget/PiTotal.cshtml", new ViewDataDictionary() { { "season", Season } })
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-lg-12">
+                                @Html.Partial("~/Views/MISaleByClientRpt/Widget/PiConfirmed.cshtml", new ViewDataDictionary() { { "season", Season } })
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-lg-12">
+                                @Html.Partial("~/Views/MISaleByClientRpt/Widget/EurofarCommercialInvoices.cshtml", new ViewDataDictionary() { { "season", Season } })
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <h2 style="margin-bottom: 0px;"><b>NEW CLIENTS (BASE ON PROFORMA INVOICE) (HAVE TURN OVER IN @Season BUT NOT IN @prevSeason)</b></h2>
+                                <div class="tilsoft-table">
+                                    <div style="width: 100%; overflow-y: hidden; height: auto; margin-top:0px" class="tilsoft-table-body">
+                                        <table>
+                                            <tbody>
+                                                <tr>
+                                                    <th style="font-weight: bold; width: 35px;">#</th>
+                                                    <th style="font-weight: bold;">
+                                                        <a href="javascript:void(0)" ng-click="sortType_PI_New = 'clientNM'; sortReverse_PI_New = !sortReverse_PI_New">
+                                                            CLIENT NAME
+                                                            <span ng-show="sortType_PI_New == 'clientNM' && sortReverse_PI_New" class="fa fa-caret-down"></span>
+                                                            <span ng-show="sortType_PI_New == 'clientNM' && !sortReverse_PI_New" class="fa fa-caret-up"></span>
+                                                        </a>
+                                                    </th>
+                                                    <th style="font-weight: bold; width: 40px;">
+                                                        <a href="javascript:void(0)" ng-click="sortType_PI_New = 'clientCountryUD'; sortReverse_PI_New = !sortReverse_PI_New">
+                                                            COUN TRY
+                                                            <span ng-show="sortType_PI_New == 'clientCountryUD' && sortReverse_PI_New" class="fa fa-caret-down"></span>
+                                                            <span ng-show="sortType_PI_New == 'clientCountryUD' && !sortReverse_PI_New" class="fa fa-caret-up"></span>
+                                                        </a>
+                                                    </th>
+                                                    <th style="font-weight: bold; width: 50px;">
+                                                        <a href="javascript:void(0)" ng-click="sortType_PI_New = 'saleUD'; sortReverse_PI_New = !sortReverse_PI_New">
+                                                            SALE ACC
+                                                            <span ng-show="sortType_PI_New == 'saleUD' && sortReverse_PI_New" class="fa fa-caret-down"></span>
+                                                            <span ng-show="sortType_PI_New == 'saleUD' && !sortReverse_PI_New" class="fa fa-caret-up"></span>
+                                                        </a>
+                                                    </th>
+                                                    <th style="font-weight: bold; width: 60px;" class="mi-background-current-season">
+                                                        <a href="javascript:void(0)" ng-click="sortType_PI_New = 'percentUSDAmount'; sortReverse_PI_New = !sortReverse_PI_New">
+                                                            % TOTAL
+                                                            <span ng-show="sortType_PI_New == 'percentUSDAmount' && sortReverse_PI_New" class="fa fa-caret-down"></span>
+                                                            <span ng-show="sortType_PI_New == 'percentUSDAmount' && !sortReverse_PI_New" class="fa fa-caret-up"></span>
+                                                        </a>
+                                                    </th>
+                                                    <th style="font-weight: bold; width: 60px;" class="mi-background-current-season">
+                                                        <a href="javascript:void(0)" ng-click="sortType_PI_New = 'piCont'; sortReverse_PI_New = !sortReverse_PI_New">
+                                                            TOTAL CONT
+                                                            <span ng-show="sortType_PI_New == 'piCont' && sortReverse_PI_New" class="fa fa-caret-down"></span>
+                                                            <span ng-show="sortType_PI_New == 'piCont' && !sortReverse_PI_New" class="fa fa-caret-up"></span>
+                                                        </a>
+                                                    </th>
+
+                                                    <th style="font-weight: bold; width: 100px;" class="mi-background-current-season">
+                                                        <a href="javascript:void(0)" ng-click="sortType_PI_New = 'piAmountInUSD'; sortReverse_PI_New = !sortReverse_PI_New">
+                                                            TOTAL AMOUNT (EUR)
+                                                            <span ng-show="sortType_PI_New == 'piAmountInUSD' && sortReverse_PI_New" class="fa fa-caret-down"></span>
+                                                            <span ng-show="sortType_PI_New == 'piAmountInUSD' && !sortReverse_PI_New" class="fa fa-caret-up"></span>
+                                                        </a>
+                                                    </th>
+                                                </tr>
+
+                                                <tr>
+                                                    <td colspan="4" style="font-weight: bold;">TOTAL ({{data.proformaInvoiceOfNewClients.length}} clients)</td>
+                                                    <td style="font-weight: bold;text-align: right;" class="mi-background-current-season">100%</td>
+                                                    <td style="text-align:right; font-weight:bold" class="mi-background-current-season">{{proformaInvoiceOfNewClients | sumFunc:'piCont' | number : 1}}</td>
+                                                    <td style="text-align:right; font-weight:bold" class="mi-background-current-season">${{proformaInvoiceOfNewClients | sumFunc:'piAmountInUSD' | number : 0}}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td></td>
+                                                    <td><input type="text" ng-model="filter.clientNM" class="form-control" style="height:80%" /></td>
+                                                    <td><input type="text" ng-model="filter.clientCountryUD" class="form-control" style="height:80%" /></td>
+                                                    <td><input type="text" ng-model="filter.saleUD" class="form-control" style="height:80%" /></td>
+                                                    <td colspan="3"></td>
+                                                </tr>
+                                                <tr ng-repeat="item in proformaInvoiceOfNewClients = (data.proformaInvoiceOfNewClients | orderBy : sortType_PI_New:sortReverse_PI_New | filter : {clientNM : filter.clientNM, clientCountryUD : filter.clientCountryUD, saleUD : filter.saleUD})">
+                                                    <td style="text-align: right;">{{$index+1}}</td>
+                                                    <td>{{item.clientNM}}</td>
+                                                    <td style="text-align: center">{{item.clientCountryUD}}</td>
+                                                    <td style="text-align: center">{{item.saleUD}}</td>
+                                                    <td style="text-align: right;" class="mi-background-current-season">{{item.piAmountInUSD / (proformaInvoiceOfNewClients | sumFunc : 'piAmountInUSD') * 100 | number : 1}}%</td>
+                                                    <td style="text-align: right;" class="mi-background-current-season">{{item.piCont | currency:'':1}}</td>
+                                                    <td style="text-align: right;" class="mi-background-current-season">${{item.piAmountInUSD | currency:'':0}}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6">
+                                @*lost client base on proforma invoice 2017-2018 / 2016/2017*@
+                                <h2 style="margin-bottom: 0px;"><b>LOST CLIENTS (BASE ON PROFORMA INVOICE) (HAVE TURN OVER IN @prevSeason BUT NOT IN @Season)</b></h2>
+                                <div class="tilsoft-table">
+                                    <div style="width: 100%; overflow-y: hidden; height: auto; margin-top:0px" class="tilsoft-table-body">
+                                        <table>
+                                            <tbody>
+                                                <tr>
+                                                    <th style="font-weight: bold; width: 35px;">#</th>
+                                                    <th style="font-weight: bold;">
+                                                        <a href="javascript:void(0)" ng-click="sortType_PI_Losted = 'clientNM'; sortReverse_PI_Losted = !sortReverse_PI_Losted">
+                                                            CLIENT NAME
+                                                            <span ng-show="sortType_PI_Losted == 'clientNM' && sortReverse_PI_Losted" class="fa fa-caret-down"></span>
+                                                            <span ng-show="sortType_PI_Losted == 'clientNM' && !sortReverse_PI_Losted" class="fa fa-caret-up"></span>
+                                                        </a>
+                                                    </th>
+                                                    <th style="font-weight: bold; width: 40px;">
+                                                        <a href="javascript:void(0)" ng-click="sortType_PI_Losted = 'clientCountryUD'; sortReverse_PI_Losted = !sortReverse_PI_Losted">
+                                                            COUN TRY
+                                                            <span ng-show="sortType_PI_Losted == 'clientCountryUD' && sortReverse_PI_Losted" class="fa fa-caret-down"></span>
+                                                            <span ng-show="sortType_PI_Losted == 'clientCountryUD' && !sortReverse_PI_Losted" class="fa fa-caret-up"></span>
+                                                        </a>
+                                                    </th>
+                                                    <th style="font-weight: bold; width: 50px;">
+                                                        <a href="javascript:void(0)" ng-click="sortType_PI_Losted = 'saleUD'; sortReverse_PI_Losted = !sortReverse_PI_Losted">
+                                                            SALE ACC
+                                                            <span ng-show="sortType_PI_Losted == 'saleUD' && sortReverse_PI_Losted" class="fa fa-caret-down"></span>
+                                                            <span ng-show="sortType_PI_Losted == 'saleUD' && !sortReverse_PI_Losted" class="fa fa-caret-up"></span>
+                                                        </a>
+                                                    </th>
+                                                    <th style="font-weight: bold; width: 45px;" class="mi-background-last-season">
+                                                        <a href="javascript:void(0)" ng-click="sortType_PI_Losted = 'percentUSDAmount'; sortReverse_PI_Losted = !sortReverse_PI_Losted">
+                                                            % TO TAL
+                                                            <span ng-show="sortType_PI_Losted == 'percentUSDAmount' && sortReverse_PI_Losted" class="fa fa-caret-down"></span>
+                                                            <span ng-show="sortType_PI_Losted == 'percentUSDAmount' && !sortReverse_PI_Losted" class="fa fa-caret-up"></span>
+                                                        </a>
+                                                    </th>
+                                                    <th style="font-weight: bold; width: 60px;" class="mi-background-last-season">
+                                                        <a href="javascript:void(0)" ng-click="sortType_PI_Losted = 'piCont'; sortReverse_PI_Losted = !sortReverse_PI_Losted">
+                                                            TOTAL CONT
+                                                            <span ng-show="sortType_PI_Losted == 'piCont' && sortReverse_PI_Losted" class="fa fa-caret-down"></span>
+                                                            <span ng-show="sortType_PI_Losted == 'piCont' && !sortReverse_PI_Losted" class="fa fa-caret-up"></span>
+                                                        </a>
+                                                    </th>
+                                                    <th style="font-weight: bold; width: 100px;" class="mi-background-last-season">
+                                                        <a href="javascript:void(0)" ng-click="sortType_PI_Losted = 'piAmountInUSD'; sortReverse_PI_Losted = !sortReverse_PI_Losted">
+                                                            TOTAL AMOUNT (EUR)
+                                                            <span ng-show="sortType_PI_Losted == 'piAmountInUSD' && sortReverse_PI_Losted" class="fa fa-caret-down"></span>
+                                                            <span ng-show="sortType_PI_Losted == 'piAmountInUSD' && !sortReverse_PI_Losted" class="fa fa-caret-up"></span>
+                                                        </a>
+                                                    </th>
+                                                </tr>
+
+                                                <tr>
+                                                    <td colspan="4" style="font-weight: bold;">TOTAL ({{data.proformaInvoiceOfLostedClients.length}} clients)</td>
+                                                    <td style="font-weight: bold;text-align: right;" class="mi-background-last-season">100%</td>
+                                                    <td style="text-align:right; font-weight:bold" class="mi-background-last-season">{{proformaInvoiceOfLostedClients | sumFunc:'piCont' | number : 1}}</td>
+                                                    <td style="text-align:right; font-weight:bold" class="mi-background-last-season">${{proformaInvoiceOfLostedClients | sumFunc:'piAmountInUSD' | number : 0}}</td>
+                                                </tr>
+
+                                                <tr>
+                                                    <td></td>
+                                                    <td><input type="text" ng-model="filter.clientNM" class="form-control" style="height:80%" /></td>
+                                                    <td><input type="text" ng-model="filter.clientCountryUD" class="form-control" style="height:80%" /></td>
+                                                    <td><input type="text" ng-model="filter.saleUD" class="form-control" style="height:80%" /></td>
+                                                    <td colspan="3"></td>
+                                                </tr>
+
+                                                <tr ng-repeat="item in proformaInvoiceOfLostedClients = (data.proformaInvoiceOfLostedClients | orderBy : sortType_PI_Losted:sortReverse_PI_Losted | filter : {clientNM : filter.clientNM, clientCountryUD : filter.clientCountryUD, saleUD : filter.saleUD})">
+                                                    <td style="text-align: right;">{{$index+1}}</td>
+                                                    <td>{{item.clientNM}}</td>
+                                                    <td style="text-align: center">{{item.clientCountryUD}}</td>
+                                                    <td style="text-align: center">{{item.saleUD}}</td>
+                                                    <td style="text-align: right;" class="mi-background-last-season">{{item.piAmountInUSD / (proformaInvoiceOfLostedClients | sumFunc : 'piAmountInUSD') * 100 | number : 1}}%</td>
+                                                    <td style="text-align: right;" class="mi-background-last-season">{{item.piCont | currency:'':1}}</td>
+                                                    <td style="text-align: right;" class="mi-background-last-season">${{item.piAmountInUSD | currency:'':0}}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <h2 style="margin-bottom: 0px;"><b>NEW CLIENTS (BASE ON COMMERCIAL INVOICE) (HAVE TURN OVER IN @Season BUT NOT IN @prevSeason)</b></h2>
+                                <div class="tilsoft-table">
+                                    <div style="width: 100%; overflow-y: hidden; height: auto; margin-top:0px" class="tilsoft-table-body">
+                                        <table>
+                                            <tbody>
+                                                <tr>
+                                                    <th style="font-weight: bold; width: 35px;">#</th>
+                                                    <th style="font-weight: bold;">
+                                                        <a href="javascript:void(0)" ng-click="sortType_CI_New = 'clientNM'; sortReverse_CI_New = !sortReverse_CI_New">
+                                                            CLIENT NAME
+                                                            <span ng-show="sortType_CI_New == 'clientNM' && sortReverse_CI_New" class="fa fa-caret-down"></span>
+                                                            <span ng-show="sortType_CI_New == 'clientNM' && !sortReverse_CI_New" class="fa fa-caret-up"></span>
+                                                        </a>
+                                                    </th>
+                                                    <th style="font-weight: bold; width: 40px;">
+                                                        <a href="javascript:void(0)" ng-click="sortType_CI_New = 'clientCountryUD'; sortReverse_CI_New = !sortReverse_CI_New">
+                                                            COUN TRY
+                                                            <span ng-show="sortType_CI_New == 'clientCountryUD' && sortReverse_CI_New" class="fa fa-caret-down"></span>
+                                                            <span ng-show="sortType_CI_New == 'clientCountryUD' && !sortReverse_CI_New" class="fa fa-caret-up"></span>
+                                                        </a>
+                                                    </th>
+                                                    <th style="font-weight: bold; width: 50px;">
+                                                        <a href="javascript:void(0)" ng-click="sortType_CI_New = 'saleUD'; sortReverse_CI_New = !sortReverse_CI_New">
+                                                            SALE ACC
+                                                            <span ng-show="sortType_CI_New == 'saleUD' && sortReverse_CI_New" class="fa fa-caret-down"></span>
+                                                            <span ng-show="sortType_CI_New == 'saleUD' && !sortReverse_CI_New" class="fa fa-caret-up"></span>
+                                                        </a>
+                                                    </th>
+                                                    <th style="font-weight: bold; width: 60px;" class="mi-background-current-season">
+                                                        <a href="javascript:void(0)" ng-click="sortType_CI_New = 'percentUSDAmount'; sortReverse_CI_New = !sortReverse_CI_New">
+                                                            % TOTAL
+                                                            <span ng-show="sortType_CI_New == 'percentUSDAmount' && sortReverse_CI_New" class="fa fa-caret-down"></span>
+                                                            <span ng-show="sortType_CI_New == 'percentUSDAmount' && !sortReverse_CI_New" class="fa fa-caret-up"></span>
+                                                        </a>
+                                                    </th>
+                                                    <th style="font-weight: bold; width: 60px;" class="mi-background-current-season">
+                                                        <a href="javascript:void(0)" ng-click="sortType_CI_New = 'ciCont'; sortReverse_CI_New = !sortReverse_CI_New">
+                                                            TOTAL CONT
+                                                            <span ng-show="sortType_CI_New == 'ciCont' && sortReverse_CI_New" class="fa fa-caret-down"></span>
+                                                            <span ng-show="sortType_CI_New == 'ciCont' && !sortReverse_CI_New" class="fa fa-caret-up"></span>
+                                                        </a>
+                                                    </th>
+
+                                                    <th style="font-weight: bold; width: 100px;" class="mi-background-current-season">
+                                                        <a href="javascript:void(0)" ng-click="sortType_CI_New = 'ciAmountInUSD'; sortReverse_CI_New = !sortReverse_CI_New">
+                                                            TOTAL AMOUNT (EUR)
+                                                            <span ng-show="sortType_CI_New == 'ciAmountInUSD' && sortReverse_CI_New" class="fa fa-caret-down"></span>
+                                                            <span ng-show="sortType_CI_New == 'ciAmountInUSD' && !sortReverse_CI_New" class="fa fa-caret-up"></span>
+                                                        </a>
+                                                    </th>
+
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="4" style="font-weight: bold;">TOTAL ({{data.eurofarCommercialInvoiceOfNewClientThisSeason.length}} clients)</td>
+                                                    <td style="font-weight: bold;text-align: right;" class="mi-background-current-season">100%</td>
+                                                    <td style="text-align:right; font-weight:bold" class="mi-background-current-season">{{eurofarInvoiceOfNewClient2 | sumFunc:'ciCont' | number : 1}}</td>
+                                                    <td style="text-align:right; font-weight:bold" class="mi-background-current-season">${{eurofarInvoiceOfNewClient2 | sumFunc:'ciAmountInUSD' | number : 0}}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td></td>
+                                                    <td><input type="text" ng-model="filter.clientNM" class="form-control" style="height:80%" /></td>
+                                                    <td><input type="text" ng-model="filter.clientCountryUD" class="form-control" style="height:80%" /></td>
+                                                    <td><input type="text" ng-model="filter.saleUD" class="form-control" style="height:80%" /></td>
+                                                    <td colspan="3"></td>
+                                                </tr>
+                                                <tr ng-repeat="item in eurofarInvoiceOfNewClient2 = (data.eurofarCommercialInvoiceOfNewClientThisSeason | orderBy : sortType_CI_New:sortReverse_CI_New | filter : {clientNM : filter.clientNM, clientCountryUD : filter.clientCountryUD, saleUD : filter.saleUD})">
+                                                    <td style="text-align: right;">{{$index+1}}</td>
+                                                    <td>{{item.clientNM}}</td>
+                                                    <td style="text-align: center">{{item.clientCountryUD}}</td>
+                                                    <td style="text-align: center">{{item.saleUD}}</td>
+                                                    <td style="text-align: right;" class="mi-background-current-season">{{item.ciAmountInUSD / (eurofarInvoiceOfNewClient2 | sumFunc : 'ciAmountInUSD') * 100 | number : 1}}%</td>
+                                                    <td style="text-align: right;" class="mi-background-current-season">{{item.ciCont | currency:'':1}}</td>
+                                                    <td style="text-align: right;" class="mi-background-current-season">${{item.ciAmountInUSD | currency:'':0}}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6">
+                                @*lost client base on commercial invoice 2017-2018 / 2016/2017*@
+                                <h2 style="margin-bottom: 0px;"><b>LOST CLIENTS (BASE ON COMMERCIAL INVOICE) (HAVE TURN OVER IN @prevSeason BUT NOT IN @Season)</b></h2>
+                                <div class="tilsoft-table">
+                                    <div style="width: 100%; overflow-y: hidden; height: auto; margin-top:0px" class="tilsoft-table-body">
+                                        <table>
+                                            <tbody>
+                                                <tr>
+                                                    <th style="font-weight: bold; width: 35px;">#</th>
+                                                    <th style="font-weight: bold;">
+                                                        <a href="javascript:void(0)" ng-click="sortType_CI_Losted = 'clientNM'; sortReverse_CI_Losted = !sortReverse_CI_Losted">
+                                                            CLIENT NAME
+                                                            <span ng-show="sortType_CI_Losted == 'clientNM' && sortReverse_CI_Losted" class="fa fa-caret-down"></span>
+                                                            <span ng-show="sortType_CI_Losted == 'clientNM' && !sortReverse_CI_Losted" class="fa fa-caret-up"></span>
+                                                        </a>
+                                                    </th>
+                                                    <th style="font-weight: bold; width: 40px;">
+                                                        <a href="javascript:void(0)" ng-click="sortType_CI_Losted = 'clientCountryUD'; sortReverse_CI_Losted = !sortReverse_CI_Losted">
+                                                            COUN TRY
+                                                            <span ng-show="sortType_CI_Losted == 'clientCountryUD' && sortReverse_CI_Losted" class="fa fa-caret-down"></span>
+                                                            <span ng-show="sortType_CI_Losted == 'clientCountryUD' && !sortReverse_CI_Losted" class="fa fa-caret-up"></span>
+                                                        </a>
+                                                    </th>
+                                                    <th style="font-weight: bold; width: 50px;">
+                                                        <a href="javascript:void(0)" ng-click="sortType_CI_Losted = 'saleUD'; sortReverse_CI_Losted = !sortReverse_CI_Losted">
+                                                            SALE ACC
+                                                            <span ng-show="sortType_CI_Losted == 'saleUD' && sortReverse_CI_Losted" class="fa fa-caret-down"></span>
+                                                            <span ng-show="sortType_CI_Losted == 'saleUD' && !sortReverse_CI_Losted" class="fa fa-caret-up"></span>
+                                                        </a>
+                                                    </th>
+                                                    <th style="font-weight: bold; width: 45px;" class="mi-background-last-season">
+                                                        <a href="javascript:void(0)" ng-click="sortType_CI_Losted = 'percentUSDAmount'; sortReverse_CI_Losted = !sortReverse_CI_Losted">
+                                                            % TO TAL
+                                                            <span ng-show="sortType_CI_Losted == 'percentUSDAmount' && sortReverse_CI_Losted" class="fa fa-caret-down"></span>
+                                                            <span ng-show="sortType_CI_Losted == 'percentUSDAmount' && !sortReverse_CI_Losted" class="fa fa-caret-up"></span>
+                                                        </a>
+                                                    </th>
+                                                    <th style="font-weight: bold; width: 60px;" class="mi-background-last-season">
+                                                        <a href="javascript:void(0)" ng-click="sortType_CI_Losted = 'ciCont'; sortReverse_CI_Losted = !sortReverse_CI_Losted">
+                                                            TOTAL CONT
+                                                            <span ng-show="sortType_CI_Losted == 'ciCont' && sortReverse_CI_Losted" class="fa fa-caret-down"></span>
+                                                            <span ng-show="sortType_CI_Losted == 'ciCont' && !sortReverse_CI_Losted" class="fa fa-caret-up"></span>
+                                                        </a>
+                                                    </th>
+                                                    <th style="font-weight: bold; width: 100px;" class="mi-background-last-season">
+                                                        <a href="javascript:void(0)" ng-click="sortType_CI_Losted = 'ciAmountInUSD'; sortReverse_CI_Losted = !sortReverse_CI_Losted">
+                                                            TOTAL AMOUNT (EUR)
+                                                            <span ng-show="sortType_CI_Losted == 'ciAmountInUSD' && sortReverse_CI_Losted" class="fa fa-caret-down"></span>
+                                                            <span ng-show="sortType_CI_Losted == 'ciAmountInUSD' && !sortReverse_CI_Losted" class="fa fa-caret-up"></span>
+                                                        </a>
+                                                    </th>                                                    
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="4" style="font-weight: bold;">TOTAL ({{data.eurofarCommercialInvoiceOfLostedClientThisSeason.length}} clients)</td>
+                                                    <td style="font-weight: bold;text-align: right;" class="mi-background-last-season">100%</td>
+                                                    <td style="text-align:right; font-weight:bold" class="mi-background-last-season">{{eurofarInvoiceOfLostedClient2 | sumFunc:'ciCont' | number : 1}}</td>
+                                                    <td style="text-align:right; font-weight:bold" class="mi-background-last-season">${{eurofarInvoiceOfLostedClient2 | sumFunc:'ciAmountInUSD' | number : 0}}</td>                                                    
+                                                </tr>
+                                                <tr>
+                                                    <td></td>
+                                                    <td><input type="text" ng-model="filter.clientNM" class="form-control" style="height:80%" /></td>
+                                                    <td><input type="text" ng-model="filter.clientCountryUD" class="form-control" style="height:80%" /></td>
+                                                    <td><input type="text" ng-model="filter.saleUD" class="form-control" style="height:80%" /></td>
+                                                    <td colspan="3"></td>
+                                                </tr>
+                                                <tr ng-repeat="item in eurofarInvoiceOfLostedClient2 = (data.eurofarCommercialInvoiceOfLostedClientThisSeason | orderBy : sortType_CI_Losted:sortReverse_CI_Losted | filter : {clientNM : filter.clientNM, clientCountryUD : filter.clientCountryUD, saleUD : filter.saleUD})">
+                                                    <td style="text-align: right;">{{$index+1}}</td>
+                                                    <td>{{item.clientNM}}</td>
+                                                    <td style="text-align: center">{{item.clientCountryUD}}</td>
+                                                    <td style="text-align: center">{{item.saleUD}}</td>
+                                                    <td style="text-align: right;" class="mi-background-last-season">{{item.ciAmountInUSD / (eurofarInvoiceOfLostedClient2 | sumFunc : 'ciAmountInUSD') * 100 | number : 1}}%</td>
+                                                    <td style="text-align: right;" class="mi-background-last-season">{{item.ciCont | currency:'':1}}</td>
+                                                    <td style="text-align: right;" class="mi-background-last-season">${{item.ciAmountInUSD | currency:'':0}}</td>                                                    
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-lg-6">
+                                @*new client base on commercial invoice*@
+                                <h2 style="margin-bottom: 0px;"><b>NEW CLIENTS (BASE ON COMMERCIAL INVOICE) (HAVE TURN OVER IN @prevSeason BUT NOT IN @prePrevSeason)</b></h2>
+                                <div class="tilsoft-table">
+                                    <div style="width: 100%; overflow-y: hidden; height: auto; margin-top:0px" class="tilsoft-table-body">
+                                        <table>
+                                            <tbody>
+                                                <tr>
+                                                    <th style="font-weight: bold; width: 35px;">#</th>
+                                                    <th style="font-weight: bold;">
+                                                        <a href="javascript:void(0)" ng-click="sortType_CI_New = 'clientNM'; sortReverse_CI_New = !sortReverse_CI_New">
+                                                            CLIENT NAME
+                                                            <span ng-show="sortType_CI_New == 'clientNM' && sortReverse_CI_New" class="fa fa-caret-down"></span>
+                                                            <span ng-show="sortType_CI_New == 'clientNM' && !sortReverse_CI_New" class="fa fa-caret-up"></span>
+                                                        </a>
+                                                    </th>
+                                                    <th style="font-weight: bold; width: 40px;">
+                                                        <a href="javascript:void(0)" ng-click="sortType_CI_New = 'clientCountryUD'; sortReverse_CI_New = !sortReverse_CI_New">
+                                                            COUN TRY
+                                                            <span ng-show="sortType_CI_New == 'clientCountryUD' && sortReverse_CI_New" class="fa fa-caret-down"></span>
+                                                            <span ng-show="sortType_CI_New == 'clientCountryUD' && !sortReverse_CI_New" class="fa fa-caret-up"></span>
+                                                        </a>
+                                                    </th>
+                                                    <th style="font-weight: bold; width: 50px;">
+                                                        <a href="javascript:void(0)" ng-click="sortType_CI_New = 'saleUD'; sortReverse_CI_New = !sortReverse_CI_New">
+                                                            SALE ACC
+                                                            <span ng-show="sortType_CI_New == 'saleUD' && sortReverse_CI_New" class="fa fa-caret-down"></span>
+                                                            <span ng-show="sortType_CI_New == 'saleUD' && !sortReverse_CI_New" class="fa fa-caret-up"></span>
+                                                        </a>
+                                                    </th>
+                                                    <th style="font-weight: bold; width: 60px;" class="mi-background-last-season">
+                                                        <a href="javascript:void(0)" ng-click="sortType_CI_New = 'percentUSDAmount'; sortReverse_CI_New = !sortReverse_CI_New">
+                                                            % TOTAL
+                                                            <span ng-show="sortType_CI_New == 'percentUSDAmount' && sortReverse_CI_New" class="fa fa-caret-down"></span>
+                                                            <span ng-show="sortType_CI_New == 'percentUSDAmount' && !sortReverse_CI_New" class="fa fa-caret-up"></span>
+                                                        </a>
+                                                    </th>
+                                                    <th style="font-weight: bold; width: 60px;" class="mi-background-last-season">
+                                                        <a href="javascript:void(0)" ng-click="sortType_CI_New = 'ciCont'; sortReverse_CI_New = !sortReverse_CI_New">
+                                                            TOTAL CONT
+                                                            <span ng-show="sortType_CI_New == 'ciCont' && sortReverse_CI_New" class="fa fa-caret-down"></span>
+                                                            <span ng-show="sortType_CI_New == 'ciCont' && !sortReverse_CI_New" class="fa fa-caret-up"></span>
+                                                        </a>
+                                                    </th>
+
+                                                    <th style="font-weight: bold; width: 100px;" class="mi-background-last-season">
+                                                        <a href="javascript:void(0)" ng-click="sortType_CI_New = 'ciAmountInUSD'; sortReverse_CI_New = !sortReverse_CI_New">
+                                                            TOTAL AMOUNT (EUR)
+                                                            <span ng-show="sortType_CI_New == 'ciAmountInUSD' && sortReverse_CI_New" class="fa fa-caret-down"></span>
+                                                            <span ng-show="sortType_CI_New == 'ciAmountInUSD' && !sortReverse_CI_New" class="fa fa-caret-up"></span>
+                                                        </a>
+                                                    </th>                                                    
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="4" style="font-weight: bold;">TOTAL ({{data.eurofarCommercialInvoiceOfNewClientLastSeason.length}} clients)</td>
+                                                    <td style="font-weight: bold;text-align: right;" class="mi-background-last-season">100%</td>
+                                                    <td style="text-align:right; font-weight:bold" class="mi-background-last-season">{{eurofarInvoiceOfNewClient | sumFunc:'ciCont' | number : 1}}</td>
+                                                    <td style="text-align:right; font-weight:bold" class="mi-background-last-season">${{eurofarInvoiceOfNewClient | sumFunc:'ciAmountInUSD' | number : 0}}</td>                                                    
+                                                </tr>
+                                                <tr>
+                                                    <td></td>
+                                                    <td><input type="text" ng-model="filter.clientNM" class="form-control" style="height:80%" /></td>
+                                                    <td><input type="text" ng-model="filter.clientCountryUD" class="form-control" style="height:80%" /></td>
+                                                    <td><input type="text" ng-model="filter.saleUD" class="form-control" style="height:80%" /></td>
+                                                    <td colspan="3"></td>
+                                                </tr>
+                                                <tr ng-repeat="item in eurofarInvoiceOfNewClient = (data.eurofarCommercialInvoiceOfNewClientLastSeason | orderBy : sortType_CI_New:sortReverse_CI_New | filter : {clientNM : filter.clientNM, clientCountryUD : filter.clientCountryUD, saleUD : filter.saleUD})">
+                                                    <td style="text-align: right;">{{$index+1}}</td>
+                                                    <td>{{item.clientNM}}</td>
+                                                    <td style="text-align: center">{{item.clientCountryUD}}</td>
+                                                    <td style="text-align: center">{{item.saleUD}}</td>
+                                                    <td style="text-align: right;" class="mi-background-last-season">{{item.ciAmountInUSD / (eurofarInvoiceOfNewClient | sumFunc : 'ciAmountInUSD') * 100 | number : 1}}%</td>
+                                                    <td style="text-align: right;" class="mi-background-last-season">{{item.ciCont | currency:'':1}}</td>
+                                                    <td style="text-align: right;" class="mi-background-last-season">${{item.ciAmountInUSD | currency:'':0}}</td>                                                    
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6">
+                                @*lost client base on commercial invoice*@
+                                <h2 style="margin-bottom: 0px;"><b>LOST CLIENTS (BASE ON COMMERCIAL INVOICE) (HAVE TURN OVER IN @prePrevSeason BUT NOT IN @prevSeason)</b></h2>
+                                <div class="tilsoft-table">
+                                    <div style="width: 100%; overflow-y: hidden; height: auto; margin-top:0px" class="tilsoft-table-body">
+                                        <table>
+                                            <tbody>
+                                                <tr>
+                                                    <th style="font-weight: bold; width: 35px;">#</th>
+                                                    <th style="font-weight: bold;">
+                                                        <a href="javascript:void(0)" ng-click="sortType_CI_Losted = 'clientNM'; sortReverse_CI_Losted = !sortReverse_CI_Losted">
+                                                            CLIENT NAME
+                                                            <span ng-show="sortType_CI_Losted == 'clientNM' && sortReverse_CI_Losted" class="fa fa-caret-down"></span>
+                                                            <span ng-show="sortType_CI_Losted == 'clientNM' && !sortReverse_CI_Losted" class="fa fa-caret-up"></span>
+                                                        </a>
+                                                    </th>
+                                                    <th style="font-weight: bold; width: 40px;">
+                                                        <a href="javascript:void(0)" ng-click="sortType_CI_Losted = 'clientCountryUD'; sortReverse_CI_Losted = !sortReverse_CI_Losted">
+                                                            COUN TRY
+                                                            <span ng-show="sortType_CI_Losted == 'clientCountryUD' && sortReverse_CI_Losted" class="fa fa-caret-down"></span>
+                                                            <span ng-show="sortType_CI_Losted == 'clientCountryUD' && !sortReverse_CI_Losted" class="fa fa-caret-up"></span>
+                                                        </a>
+                                                    </th>
+                                                    <th style="font-weight: bold; width: 50px;">
+                                                        <a href="javascript:void(0)" ng-click="sortType_CI_Losted = 'saleUD'; sortReverse_CI_Losted = !sortReverse_CI_Losted">
+                                                            SALE ACC
+                                                            <span ng-show="sortType_CI_Losted == 'saleUD' && sortReverse_CI_Losted" class="fa fa-caret-down"></span>
+                                                            <span ng-show="sortType_CI_Losted == 'saleUD' && !sortReverse_CI_Losted" class="fa fa-caret-up"></span>
+                                                        </a>
+                                                    </th>
+                                                    <th style="font-weight: bold; width: 45px;" class="mi-background-lastlast-season">
+                                                        <a href="javascript:void(0)" ng-click="sortType_CI_Losted = 'percentUSDAmount'; sortReverse_CI_Losted = !sortReverse_CI_Losted">
+                                                            % TO TAL
+                                                            <span ng-show="sortType_CI_Losted == 'percentUSDAmount' && sortReverse_CI_Losted" class="fa fa-caret-down"></span>
+                                                            <span ng-show="sortType_CI_Losted == 'percentUSDAmount' && !sortReverse_CI_Losted" class="fa fa-caret-up"></span>
+                                                        </a>
+                                                    </th>
+                                                    <th style="font-weight: bold; width: 60px;" class="mi-background-lastlast-season">
+                                                        <a href="javascript:void(0)" ng-click="sortType_CI_Losted = 'ciCont'; sortReverse_CI_Losted = !sortReverse_CI_Losted">
+                                                            TOTAL CONT
+                                                            <span ng-show="sortType_CI_Losted == 'ciCont' && sortReverse_CI_Losted" class="fa fa-caret-down"></span>
+                                                            <span ng-show="sortType_CI_Losted == 'ciCont' && !sortReverse_CI_Losted" class="fa fa-caret-up"></span>
+                                                        </a>
+                                                    </th>
+                                                    <th style="font-weight: bold; width: 100px;" class="mi-background-lastlast-season">
+                                                        <a href="javascript:void(0)" ng-click="sortType_CI_Losted = 'ciAmountInUSD'; sortReverse_CI_Losted = !sortReverse_CI_Losted">
+                                                            TOTAL AMOUNT (EUR)
+                                                            <span ng-show="sortType_CI_Losted == 'ciAmountInUSD' && sortReverse_CI_Losted" class="fa fa-caret-down"></span>
+                                                            <span ng-show="sortType_CI_Losted == 'ciAmountInUSD' && !sortReverse_CI_Losted" class="fa fa-caret-up"></span>
+                                                        </a>
+                                                    </th>                                                    
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="4" style="font-weight: bold;">TOTAL ({{data.eurofarCommercialInvoiceOfLostedClientLastSeason.length}} clients)</td>
+                                                    <td style="font-weight: bold;text-align: right;" class="mi-background-lastlast-season">100%</td>
+                                                    <td style="text-align:right; font-weight:bold" class="mi-background-lastlast-season">{{eurofarInvoiceOfLostedClient | sumFunc:'ciCont' | number : 1}}</td>
+                                                    <td style="text-align:right; font-weight:bold" class="mi-background-lastlast-season">${{eurofarInvoiceOfLostedClient | sumFunc:'ciAmountInUSD' | number : 0}}</td>                                                    
+                                                </tr>
+                                                <tr>
+                                                    <td></td>
+                                                    <td><input type="text" ng-model="filter.clientNM" class="form-control" style="height:80%" /></td>
+                                                    <td><input type="text" ng-model="filter.clientCountryUD" class="form-control" style="height:80%" /></td>
+                                                    <td><input type="text" ng-model="filter.saleUD" class="form-control" style="height:80%" /></td>
+                                                    <td colspan="3"></td>
+                                                </tr>
+                                                <tr ng-repeat="item in eurofarInvoiceOfLostedClient = (data.eurofarCommercialInvoiceOfLostedClientLastSeason | orderBy : sortType_CI_Losted:sortReverse_CI_Losted | filter : {clientNM : filter.clientNM, clientCountryUD : filter.clientCountryUD, saleUD : filter.saleUD})">
+                                                    <td style="text-align: right;">{{$index+1}}</td>
+                                                    <td>{{item.clientNM}}</td>
+                                                    <td style="text-align: center">{{item.clientCountryUD}}</td>
+                                                    <td style="text-align: center">{{item.saleUD}}</td>
+                                                    <td style="text-align: right;" class="mi-background-lastlast-season">{{item.ciAmountInUSD / (eurofarInvoiceOfLostedClient | sumFunc : 'ciAmountInUSD') * 100 | number : 1}}%</td>
+                                                    <td style="text-align: right;" class="mi-background-lastlast-season">{{item.ciCont | currency:'':1}}</td>
+                                                    <td style="text-align: right;" class="mi-background-lastlast-season">${{item.ciAmountInUSD | currency:'':0}}</td>                                                    
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section pagejs {
+    <script src="~/Angular/app/jsonService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script type="text/javascript">
+        jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/misalebyclient/';
+        jsonService.supportServiceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/support/';
+        jsonService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+        var context = {
+            season: '@Season'
+        }
+    </script>
+    <script src="~/Views/MISaleByClientRpt/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/MISaleByClientRpt/index.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/MISaleByClientRpt/Widget/PiConfirmed.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/MISaleByClientRpt/Widget/Expected.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/MISaleByClientRpt/Widget/EurofarCommercialInvoices.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/MISaleByClientRpt/Widget/PiTotal.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}

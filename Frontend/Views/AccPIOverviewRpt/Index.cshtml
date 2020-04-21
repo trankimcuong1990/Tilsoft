@@ -1,0 +1,106 @@
+﻿@{
+    ViewBag.Title = "P/I Overview";
+    ViewBag.Module = "P/I Overview";
+}
+
+<div class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-search-filter" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Filters</h2>
+            </header>
+
+            <div>
+                <div class="widget-body no-padding">
+                    <div class="smart-form">
+                        <fieldset>
+                            <section class="col col-4">
+                                <label class="label">Season</label>
+                                <label class="select">
+                                    <select class="form-control" ng-model="selection.season" ng-options="season.seasonValue as season.seasonText for season in seasons"></select>
+                                    <i></i>
+                                </label>
+                            </section>
+                        </fieldset>
+                        <footer >
+                            <a href="javascript:void(0)" class="btn btn-primary" ng-click="event.generateHtml($event)" style="float: none; margin-left:14px;"><i class="fa fa-bar-chart-o"></i> Html Version</a>
+                            <a href="javascript:void(0)" class="btn btn-primary" ng-click="event.generateExcel($event)" style="float: none;"><i class="fa fa-file-excel-o"></i> Excel Version</a>
+                        </footer>
+                        <fieldset ng-if="data" style="padding-top: 0px;">
+                            <div class="row">
+                                <div class="tilsoft-table">
+                                    <div style="width: 100%; overflow: scroll; height: 500px;" class="tilsoft-table-body">
+                                        <table style="width: 1700px;">
+                                            <tbody>
+                                                <tr>
+                                                    <th style="font-weight: bold; width: 60px;">ORDER NO</th>
+                                                    <th style="font-weight: bold; width: 90px;">DATE</th>
+                                                    <th style="font-weight: bold;width: 40px">&nbsp;</th>
+                                                    <th style="font-weight: bold;width: 50px">CLIENT CODE</th>
+                                                    <th style="font-weight: bold;width: 200px">CLIENT NAME</th>
+                                                    <th style="font-weight: bold;width: 30px">SALE</th>
+                                                    <th style="font-weight: bold; width: 100px;">STATUS</th>
+                                                    <th style="font-weight: bold;width: 90px;">LDS</th>
+                                                    <th style="font-weight: bold;width: 90px;">ETA</th>
+                                                    <th style="font-weight: bold;width:90px;">DELIVERY DATE</th>
+                                                    <th style="font-weight: bold;width:90px;">P/I RECEIVED DATE</th>
+                                                    <th style="font-weight: bold;width:90px;">SUPPLIER</th>
+                                                    <th style="font-weight: bold;width:70px;">USD AMOUNT</th>
+                                                    <th style="font-weight: bold;width:70px;">EUR AMOUNT</th>
+                                                    <th style="font-weight: bold;width:70px;">TOTAL CONVERTED TO EUR</th>
+                                                    <th style="font-weight: bold;width:120px;">PAYMENT TERM</th>
+                                                    <th style="font-weight: bold;width:70px;">DP RECEIVED</th>
+                                                    <th style="font-weight: bold;width:70px;">DP AMOUNT</th>
+                                                    <th style="font-weight: bold;width:60px;">LC RECEIVED</th>
+                                                    <th style="font-weight: bold;width:90px;">RECEIVED DATE</th>
+                                                    <th style="font-weight: bold;width:70px;">ORDER IN PRODUCTION</th>
+                                                </tr>
+                                                <tr ng-repeat="item in data.htmlOverviews">
+                                                    <td style="text-align:center;">{{item.proformaInvoiceNo}}</td>
+                                                    <td style="text-align:center;">{{item.invoiceDate}}</td>
+                                                    <td style="text-align:center;">{{item.currency}}</td>
+                                                    <td style="text-align:center;">{{item.clientUD}}</td>
+                                                    <td>{{item.clientNM}}</td>
+                                                    <td style="text-align:center;">{{item.saleNM}}</td>
+                                                    <td style="text-align:center;">{{item.confirmedStatus}}</td>
+                                                    <td style="text-align:center;">{{item.lds}}</td>
+                                                    <td style="text-align:center;">{{item.eta}}</td>
+                                                    <td style="text-align:center;">{{item.deliveryDate}}</td>
+                                                    <td style="text-align:center;">{{item.piReceivedDate}}</td>
+                                                    <td style="text-align:center;">{{item.suppliers}}</td>
+                                                    <td style="text-align:right;">${{item.usdAmount | currency:'':2}}</td>
+                                                    <td style="text-align:right;">&euro;{{item.eurAmount | currency:'':2}}</td>
+                                                    <td style="text-align:right;">&euro;{{item.totalEURAmount | currency:'':2}}</td>
+                                                    <td>{{item.paymentTermNM}}</td>
+                                                    <td style="text-align:center;"><input type="checkbox" disabled ng-model="item.isdpReceived" /></td>
+                                                    <td style="text-align:right;"><span ng-if="item.currency == 'EUR'">&euro;</span><span ng-if="item.currency == 'USD'">$</span>{{item.totalPDAmount | currency:'':2}}</td>
+                                                    <td style="text-align:center;"><input type="checkbox" disabled ng-model="item.islcReceived" /></td>
+                                                    <td style="text-align:center;">{{item.receivedDate}}</td>
+                                                    <td style="text-align:center;">{{item.factoryOrderUD}}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>                    
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section pagejs {
+    <script src="~/Angular/app/jsonService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script type="text/javascript">
+        jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/accpioverview/';
+        jsonService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+        var context = {
+            backendReportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]'
+        }
+    </script>
+    <script src="~/Angular/app/accPIOverviewRpt/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/accPIOverviewRpt/index.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}

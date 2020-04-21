@@ -1,0 +1,846 @@
+﻿@functions {
+    private void TryParseQueryParam<T>(string paramName, out T outValue)
+    {
+        try
+        {
+            var value = Request.Params[paramName];
+            outValue = (T)Convert.ChangeType(value, typeof(T));
+        }
+        catch
+        {
+            // throw exception here
+            outValue = default(T);
+        }
+    }
+
+}
+@{
+    ViewBag.Module = "Edit Client Complaint";
+    ViewBag.Icon = "fa-bar-chart-o";
+
+    var isNewClientComplaint = (ViewBag.ID == 0);
+    ViewBag.Title = isNewClientComplaint ? "Create new Client Complaint" : "Edit Client Complaint";
+
+    int clientId;
+    string season;
+    TryParseQueryParam("clientId", out clientId);
+    TryParseQueryParam("season", out season);
+
+    // internal vars
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var serviceReportRoot = System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"];
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+
+    string userId;
+    string userFullName;
+    try
+    {
+        var currentUserInfo = Frontend.Helper.AuthHelper.GetCurrentUserInfo(HttpContext.Current).Data;
+
+        userId = currentUserInfo.UserId.ToString();
+        userFullName = currentUserInfo.FullName;
+    }
+    catch
+    {
+        userId = string.Empty;
+        userFullName = string.Empty;
+    }
+
+    string userManualUrl = string.Empty;
+    if (System.IO.File.Exists(Server.MapPath("~/UserManual/" + ViewBag.ModuleCode + ".pdf")))
+    {
+        userManualUrl = "/UserManual/" + ViewBag.ModuleCode + ".pdf";
+    }
+}
+
+
+<style>
+    .css-inline a {
+        display: inline;
+    }
+
+    .smart-form .inline-group .checkbox {
+        width: 30% !important;
+    }
+
+    .smart-form .input-group input {
+        padding: 0px 7px !important;
+    }
+</style>
+<form class="row" name="editForm" id="main-form">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12 sortable-grid ui-sortable">
+        <div class="jarviswidget" id="wid-id-product-information" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <ul class="nav nav-tabs pull-left in">
+                    <li class="active">
+                        <a data-toggle="tab" href="#tabGeneral"> <i class="fa fa-info-circlev"></i> <span> General Information</span> </a>
+                    </li>
+                    <li>
+                        <a data-toggle="tab" href="#tabUsers"> <i class="fa fa-group"></i> <span> Assigned User(s) </span> </a>
+                    </li>
+                    <li>
+                        <a data-toggle="tab" href="#tabPI"> <i class="fa fa-life-saver"></i> <span>PI</span> </a>
+                    </li>
+                    <li>
+                        <a data-toggle="tab" href="#tabWarehouse"> <i class="fa fa-database"></i> <span>Warehouse</span> </a>
+                    </li>
+                    <li>
+                        <a data-toggle="tab" href="#tabCommunication"> <i class="fa fa-wechat"></i> <span>Communication</span> </a>
+                    </li>
+                </ul>
+            </header>
+            <div class="tab-content">
+                <!--BEGIN: tab general -->
+                <div class="col col-12 tab-pane active" id="tabGeneral">
+
+                    <div class="smart-form">
+                        <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                            <div id="general-section" class="well-sm" style="background: #fff;">
+                                <div class="smart-form">
+                                    <fieldset>
+                                        <div class="row">
+
+                                            <div class="col col-2 m-bottom-15">
+                                                <label class="label">Date Received</label>
+                                                <label class="input">
+                                                    <span class="form-control">{{ data.receivedDate | date:"dd/MM/yyyy"}}</span>
+                                                </label>
+                                            </div>
+
+                                            <div class="col col-2 m-bottom-15">
+                                                <label class="label">Complaint Number</label>
+                                                <label class="input">
+                                                    <span class="form-control">{{data.complaintNumber}}</span>
+                                                </label>
+                                            </div>
+
+                                            <div class="col col-2 m-bottom-15">
+                                                <label class="label">Client Code</label>
+                                                <label class="input">
+                                                    <span class="form-control">{{data.clientUD}}</span>
+                                                </label>
+                                            </div>
+
+                                            <div class="col col-3 m-bottom-15">
+                                                <label class="label">Client</label>
+                                                <label class="input">
+                                                    <span class="form-control">{{data.clientNM}}</span>
+                                                </label>
+                                            </div>
+
+                                            <div class="col col-2 m-bottom-15">
+                                                <label class="label">Sale Manager</label>
+                                                <label class="input">
+                                                    <span class="form-control">{{data.saleNM}}</span>
+                                                </label>
+                                            </div>
+
+                                            <div class="col col-1 m-bottom-15">
+                                                <label class="label">Season</label>
+                                                <label class="input">
+                                                    <span class="form-control">{{data.yearSeason}}</span>
+                                                </label>
+                                            </div>
+
+                                        </div>
+                                        <div class="row">
+                                            <section class="col col-4 m-bottom-15">
+                                                <label class="label">Contact Person</label>
+                                                <label class="input">
+                                                    <input type="text" id="contactPerson" ng-model="data.contactPerson" />
+                                                </label>
+                                            </section>
+
+                                            <section class="col col-2">
+                                                <label class="label">Complaint Type</label>
+                                                <label class="select">
+                                                    <select ng-model="data.complaintType" ng-options="complaintType.entryValue as complaintType.entryText for complaintType in complaintTypes">
+                                                        <option value=""></option>
+                                                    </select>
+                                                    <i></i>
+                                                </label>
+                                            </section>
+
+                                            <section class="col col-3"></section>
+
+                                            <section class="col col-3">
+                                                <label class="label">Status</label>
+                                                <label class="select">
+                                                    <select ng-model="data.complaintStatus" ng-options="complaintStatus.entryValue as complaintStatus.entryText for complaintStatus in complaintStatuses">
+                                                        <option value=""></option>
+                                                    </select>
+                                                    <i></i>
+                                                </label>
+                                            </section>
+
+                                        </div>
+                                    </fieldset>
+                                    
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+                    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="display:none;">
+                        <div class="jarviswidget" id="wid-id-details" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+                            <header>
+                                <span class="widget-icon"> <i class="fa fa-info-circle"></i> </span>
+                                <h2>Approval details</h2>
+                            </header>
+                            <div class="widget-body">
+                                <div class="well-sm">
+                                    <div class="smart-form">
+                                        <fieldset>
+                                            <div class="row">
+                                                <a href="javascript: void(0);" class="btn btn-primary btn-xs" style="margin-bottom: 10px;" ng-click="event.addDetail($event)"><i class="fa fa-plus"></i> Add Row Detail</a>
+                                            </div>
+                                        </fieldset>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+
+                    
+                </div>
+                <!--END: tab general -->
+                <!--BEGIN: tab users -->
+                <div class="col col-12 tab-pane" id="tabUsers">
+                    <div id="add-users-section" class="well-sm col-sm-12" style="background: #fff; margin-right: 5px;">
+                        <div class="row">
+                            <section class="col col-lg-12">
+                                <label class="label"><a href="javascript:void(0)" class="btn btn-primary btn-xs" ng-click="event.showAddUserDialog()"><i class="fa fa-plus"></i> Assigned users to complaint</a></label>
+                            </section>
+                            <div>&nbsp;</div>
+                        </div>
+                        <div class="row">
+                            <section class="col col-lg-12">
+                                <div id="grdClientComplaintUsers" class="tilsoft-table-wrapper">
+                                    <div class="tilsoft-table">
+                                        <div class="tilsoft-table-header">
+                                            <div style="width: 65px; text-align: center"></div>
+                                            <div style="vertical-align: middle;">Users</div>
+                                        </div>
+                                        <div class="tilsoft-table-body">
+                                            <table>
+                                                <tr ng-repeat="item in data.clientComplaintUsers">
+                                                    <td style="text-align: center; vertical-align: middle; width: 65px">
+                                                        <a ng-click="event.removeUser($event,$index)" class="btn btn-danger btn-xs font-11" href="javascript:void(0);" title="Remove"><i class=" fa fa-times"></i></a>
+                                                    </td>
+                                                    <td style="vertical-align: middle">
+                                                        <i class="fa fa-user"></i>
+                                                        <a ng-if="item.employeeID" href='@Url.Action("EmpDetail", "EmployeeMng", new {id = UrlParameter.Optional})/{{item.employeeID}}' da dat data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                            {{item.employeeNM}}
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+                <!--BEGIN: tab users -->
+
+                <div id="tabPI" class="col col-12 tab-pane">
+                    <div class="smart-form">
+                        <fieldset>
+                            <div class="row">
+                                <section class="col col-4">
+                                    <label class="label">Created PINumber Solution</label>
+                                    <div class="smart-form">
+                                        <label class="input">
+                                            <input type="text" ng-model="data.createdPINumberSolution" placeholder="Provide at least 3 chars" autocomplete="off" ng-keyup="quickSearchPIsVM.event.searchBoxKeyUp($event, 'PINumber-popup2')" ng-blur="quickSearchPIsVM.method.updateShipmentStatus(data.createdPINumberSolution, data.clientID)" id="txtPINumber2" />
+                                            <i class="icon-append fa fa-search"></i>
+                                        </label>
+                                        <div id="PINumber-popup2" class="popup-container-2">
+                                            <div style="float: right; margin-bottom: 8px;">
+                                                <a ng-click="quickSearchPIsVM.event.close($event, true)" class="btn btn-primary btn-xs" href="javascript:void(0);"><i class="fa fa-remove"></i> Close</a>
+                                            </div>
+                                            <div class="clear"></div>
+                                            <div id="quickSearchPIsTable2" class="tilsoft-table-wrapper">
+                                                <div class="tilsoft-table">
+                                                    <div class="tilsoft-table-header" style="width: 360px;">
+                                                        <div style="width: 70px;"></div>
+                                                        <div style="width: 100px;">PI Number</div>
+                                                        <div style="width: 100px;">Factory Order</div>
+                                                        <div>LDS</div>
+                                                    </div>
+                                                    <div class="tilsoft-table-body" style="width: 360px;">
+                                                        <table>
+                                                            <tr ng-repeat="pi in quickSearchPIsVM.data">
+                                                                <td style="width: 70px; text-align: center;"><a ng-click="quickSearchPIsVM.event.ok($event, pi.proformaInvoiceNo)" class="btn btn-primary btn-xs" href="javascript:void(0);"><i class="fa fa-check"></i> Select</a></td>
+                                                                <td style="width: 100px;">{{pi.proformaInvoiceNo}}</td>
+                                                                <td style="width: 100px;">{{pi.factoryOrderUD}}</td>
+                                                                <td>{{pi.lds}}</td>
+                                                            </tr>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+
+                <div id="tabWarehouse" class="col col-12 tab-pane">
+                    <div class="smart-form">
+                        <fieldset>
+                            <div class="row">
+                                <section class="col col-4">
+                                    <label class="label">EAN Code Created</label>
+                                    <label class="input">
+                                        <input type="text" id="EANCodeCreated" placeholder="" ng-model="data.eanCodeCreated" class="ng-pristine ng-valid ng-empty ng-touched">
+                                    </label>
+                                </section>
+
+                                <section class="col col-4">
+                                    <label class="label">Status Order Netherlands</label>
+                                    <label class="input">
+                                        <input type="text" id="statusOrderNetherlands" placeholder="" ng-model="data.statusOrderNetherlands" class="ng-pristine ng-valid ng-empty ng-touched">
+                                    </label>
+                                </section>
+
+                                <section class="col col-4">
+                                    <label class="label">Delivery Date Client</label>
+                                    <label class="input">
+                                        <i class="icon-append fa fa-calendar"></i>
+                                        <input name="DeliveryDateClient" type="text" class="datepicker ng-pristine ng-valid ng-empty hasDatepicker ng-touched" data-dateformat="dd/mm/yy" ng-model="data.deliveryDateClient">
+                                    </label>
+                                </section>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+                @*BEGIN: communication tabs*@
+                <div id="tabCommunication" class="col col-12 tab-pane">
+                    <div class="smart-form">
+                        <fieldset>
+                            <div class="row">
+                                <section class="col col-lg-12">
+                                    <a href="javascript:void(0);" class="btn btn-primary btn-xs" title="Add" ng-click="event.addClientCommunication($event)"><i class="fa fa-plus"></i> Add client communication</a>
+                                </section>
+                            </div>
+                            <div class="row">
+                                <div class="tilsoft-table-wrapper">
+                                    <div class="tilsoft-table" style="overflow-x: hidden !important;">
+                                        <div class="tilsoft-table-header">
+                                            <div style="width: 80px;"></div>
+                                            <div style="width: 600px;">Text Message</div>
+                                            <div style="width: 200px;">Created By</div>
+                                            <div>Created Date</div>
+                                        </div>
+                                        <div class="tilsoft-table-body auto-height">
+                                            <table class="table-responsive">
+                                                <tr ng-repeat="message in data.clientComplaintCommunications | orderBy: '-createdDate'">
+                                                    <td style="text-align: center; width: 80px; vertical-align: middle;">
+                                                        <a href="javascript:void(0)" ng-click="event.removeClientCommunication($index)" title="Remove"><i class="fa fa-times-circle grid-button"></i></a>
+                                                    </td>
+                                                    <td style="vertical-align: middle;width:600px;">
+                                                        <div class="smart-form">
+                                                            <div class="row">
+                                                                <div class="col col-sm-12">
+                                                                    <label class="textarea">
+                                                                        <i class="icon-append fa fa-comment"></i>
+                                                                        <textarea rows="3" id="message-{{message.ClientComplaintCommunicationID}}" ng-model="message.messageText"></textarea>
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td style="vertical-align: middle;width:200px;">
+                                                        <label class="input">
+                                                            <span class="form-control">
+                                                                <a href='@Url.Action("Detail", "EmployeeMng")/{{message.creatorID}}' ng-if="(!!message.creatorID  && !!message.creatorFullName)" data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600" class="ng-binding ng-scope">
+                                                                    <i class="fa fa-user"></i> {{message.creatorFullName}}
+                                                                </a>
+                                                            </span>
+                                                        </label>
+                                                    </td>
+                                                    <td style="vertical-align: middle;text-align:center">
+                                                        <label class="input">
+                                                            <span class="form-control">{{ message.createdDate | date:"dd/MM/yyyy"}}</span>
+                                                        </label>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+                @*END: communication tabs*@
+            </div>
+
+        </div>
+    </article>
+
+    <!--BEGIN: Approval Detail section -->
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-approval-details" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false"
+             data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-thumbs-up"></i> </span>
+                <h2>Approval details</h2>
+            </header>
+
+            <div class="widget-body">
+                  <div class="smart-form well-sm">
+                        <fieldset>
+                            <div class="row">
+                                <section class="col col-4">
+                                    <div class="row">
+                                        <section class="col-12">
+                                            <label class="label">Complaint Accepted</label>
+                                            <label class="select {{data.approverID?'state-disabled':''}}">
+                                                <select id="complaintAccepted" class="form-control" ng-disabled="data.approverID" ng-model="data.complaintAccepted" ng-options="o.v as o.n for o in [{ n: 'Yes', v: true }, { n: 'No', v: false }]">
+                                                    <option value=""></option>
+                                                </select>
+                                                <i></i>
+                                            </label>
+                                        </section>
+                                    </div>
+
+
+                                    <div class="row">
+                                        <div ng-class="(data.clientComplaintID > 0)? 'col col-10': 'col-12'" style="padding-left:0;">
+                                            <label class="label">Approved By</label>
+                                            <label class="input">
+                                                <span class="form-control">{{data.approverFullName}}</span>
+                                            </label>
+                                        </div>
+                                        <div class="col col-2" ng-if="data.clientComplaintID > 0">
+                                            <label class="label">&nbsp;</label>
+                                            <label class="input">
+                                                <a ng-if="!data.approverID" class="btn btn-primary btn-sm" href="javascript:void(0);" title="Approve" ng-click="event.approve($event, data.clientComplaintID)"><i class="fa fa-thumbs-o-up"></i></a>
+                                                <a ng-if="data.approverID" class="btn btn-warning btn-sm" href="javascript:void(0);" title="Reset approval status" ng-click="event.reset($event, data.clientComplaintID)"><i class="fa fa-thumbs-o-down"></i></a>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                </section>
+
+                                <div class="col col-2" style="padding: 10px 0 0 30px;">
+                                    <fieldset>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <label class="checkbox {{data.approverID?'state-disabled':''}}">
+                                                    <input type="checkbox" name="checkbox" ng-disabled="data.approverID" ng-model="data.creditNoteNeeded">
+                                                    <i></i>Creditnote needed
+                                                </label>
+
+                                                <label class="checkbox {{data.approverID?'state-disabled':''}}">
+                                                    <input type="checkbox" name="checkbox" ng-disabled="data.approverID" ng-model="data.sparepartNeeded">
+                                                    <i></i>Spare part needed
+                                                </label>
+                                                <label class="checkbox {{data.approverID?'state-disabled':''}}">
+                                                    <input type="checkbox" name="checkbox" ng-disabled="data.approverID" ng-model="data.replacementNeeded">
+                                                    <i></i>Replacement needed
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </fieldset>
+                                </div>
+
+                                <div class="col col-6">
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <label class="label">Reason</label>
+                                            <label class="textarea {{data.approverID?'state-disabled':''}}">
+                                                <i class="icon-append fa fa-comment"></i>
+                                                <textarea rows="6" id="reason" ng-model="data.reason" ng-disabled="data.approverID"></textarea>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+            </div>
+        </div>
+    </article>
+    <!--END: Approval Detail section -->
+    <!--BEGIN: Action Detail section -->
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-action-details" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false"
+             data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-tasks"></i> </span>
+                <h2>Action details</h2>
+            </header>
+
+            <div class="widget-body">
+                <div class="smart-form">
+                    <fieldset>
+                        <div class="row">
+                            <section class="col col-2">
+                                <label class="label">Action FollowUp By</label>
+                                <label class="select">
+                                    <select id="actionFollowUpBy" class="form-control" ng-model="data.actionFollowUpBy">
+                                        <option value=""></option>
+                                        <option value="Supply Chain">Supply Chain</option>
+                                        <option value="Warehouse">Warehouse</option>
+                                        <option value="Sales">Sales</option>
+                                    </select>
+                                    <i></i>
+                                </label>
+                            </section>
+
+                            <section class="col col-5">
+                                <label class="label">Action</label>
+                                <label class="textarea">
+                                    <textarea rows="6" id="action" ng-model="data.action"></textarea>
+                                    <i class="icon-append fa fa-comment"></i>
+                                </label>
+                            </section>
+
+                            <section class="col col-3">
+                                <label class="label">Created PINumber Solution</label>
+                                <div class="smart-form">
+                                    <label class="input">
+                                        <input type="text" ng-model="data.createdPINumberSolution" placeholder="Provide at least 3 chars" autocomplete="off" ng-keyup="quickSearchPIsVM.event.searchBoxKeyUp($event, 'PINumber-popup')" ng-blur="quickSearchPIsVM.method.updateShipmentStatus(data.createdPINumberSolution, data.clientID)" id="txtPINumber" />
+                                        <i class="icon-append fa fa-search"></i>
+                                    </label>
+                                    <div id="PINumber-popup" class="popup-container-2" style="width:360px;">
+                                        <div style="float: right; margin-bottom: 8px;">
+                                            <a ng-click="quickSearchPIsVM.event.close($event, true)"  class="btn btn-primary btn-xs" href="javascript:void(0);"><i class="fa fa-remove"></i> Close</a>
+                                        </div>
+                                        <div class="clear"></div>
+                                        <div id="quicksearchPIsTable" class="tilsoft-table-wrapper">
+                                            <div class="tilsoft-table">
+                                                <div class="tilsoft-table-header">
+                                                    <div style="width: 70px;"></div>
+                                                    <div style="width: 100px;">PI Number</div>
+                                                    <div style="width: 100px;">Factory Order</div>
+                                                    <div>LDS</div>
+                                                </div>
+                                                <div class="tilsoft-table-body">
+                                                    <table>
+                                                        <tr ng-repeat="pi in quickSearchPIsVM.data">
+                                                            <td style="width: 70px; text-align: center;"><a ng-click="quickSearchPIsVM.event.ok($event, pi)" class="btn btn-primary btn-xs" href="javascript:void(0);"><i class="fa fa-check"></i> Select</a></td>
+                                                            <td style="width: 100px;">{{pi.proformaInvoiceNo}}</td>
+                                                            <td style="width: 100px;">{{pi.factoryOrderUD}}</td>
+                                                            <td>{{pi.lds}}</td>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+
+                            <section class="col col-2">
+                                <label class="label">Status Order Vietnam</label>
+                                <label class="input">
+                                    <span class="form-control">{{data.statusOrderVietnam}}</span>
+                                </label>
+                            </section>
+
+                            <section class="col col-2" style="float:right;">
+                                <label class="label">Status Shipment</label>
+                                <label class="input">
+                                    <span class="form-control">{{data.statusShipment}}</span>
+                                </label>
+                            </section>
+                            
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+        </div>
+    </article>
+    <!--END: Action Detail section -->
+    <!--BEGIN: Product Detail section -->
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-production-details" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false"
+             data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Product details</h2>
+            </header>
+
+            <div class="widget-body">
+                @*BEGIN: add complaint item*@
+                <div class="smart-form" ng-if="ui.currentForm=='main-form'">
+                    <fieldset>
+                        <div class="row">
+                            
+                            <div id="add-item-section" class="well-sm col-sm-12" style="background: #fff;">
+                                <div class="row">
+                                    <section class="col col-lg-12">
+                                        <a href="#" class="btn btn-primary btn-xs" title="Add" ng-click="quickSearchFactoryOrderVM.event.openQuickSearchForm($event)"><i class="fa fa-plus"></i> Add items to complaint</a>
+                                    </section>
+                                </div>
+                                <div class="row">
+                                    <div class="col col-lg-12">
+                                        <div id="grdClientComplaintItems" class="tilsoft-table-wrapper">
+                                            <div class="tilsoft-table">
+                                                <div class="tilsoft-table-header">
+                                                    <div style="width: 95px; text-align: center"></div>
+                                                    <div style="width: 70px">ID</div>
+                                                    <div style="width: 190px">ARTICLE CODE</div>
+                                                    <div style="width: 100px">PROFORMA INVOICE</div>
+                                                    <div style="width: 100px">FACTORY</div>
+                                                    <div style="width: 100px">FACTORY ORDER</div>
+                                                    <div style="width: 100px">LDS</div>
+                                                    <div>DESCRIPTION</div>
+                                                </div>
+
+                                                <div class="tilsoft-table-body auto-height">
+                                                    <table class="table">
+
+                                                        <tbody ng-repeat="item in data.clientComplaintItems">
+
+                                                            <tr ng-class="{'success': item.clientComplaintItemID <= 0}">
+                                                                <td style="text-align: center; vertical-align: middle; width: 95px">
+                                                                    <a ng-click="event.editItem($event, item.clientComplaintItemID)" class=" btn btn-primary btn-xs font-11" href="javascript:void(0);" title="Edit"><i id="icon-edit-{{item.clientComplaintItemID}}" class="fa fa-pencil"></i></a>
+                                                                    <a ng-click="event.removeItem($event,$index)" class="btn btn-danger btn-xs font-11" href="javascript:void(0);" title="Remove"><i class=" fa fa-times"></i></a>
+                                                                    <a ng-click="event.exportExcelItem($event,item.clientComplaintItemID)" class="btn btn-primary btn-xs font-11" href="javascript:void(0);" title="Export Excel"><i class=" fa fa-file-excel-o"></i></a>
+                                                                </td>
+                                                                <td style="width: 70px; vertical-align: middle">{{item.factoryOrderDetailID}}</td>
+                                                                <td style="width: 190px; vertical-align: middle">{{item.articleCode}}</td>
+                                                                <td style="width: 100px; vertical-align: middle">{{item.proformaInvoiceNo}}</td>
+                                                                <td style="width: 100px; vertical-align: middle">{{item.factoryUD}}</td>
+                                                                <td style="width: 100px; vertical-align: middle">{{item.factoryOrderUD}}</td>
+                                                                <td style="width: 100px; vertical-align: middle">{{item.lds}}</td>
+                                                                <td style="vertical-align: middle">{{item.factoryOrderDetailDescription}}</td>
+                                                            </tr>
+                                                            <!--// BEGIN: edit form -->
+                                                            <tr style="display: none" id="{{item.clientComplaintItemID}}">
+                                                                <td style="width: 65px;"></td>
+                                                                <td colspan="7">
+                                                                    <div class="smart-form" style="margin: 15px;">
+                                                                        <fieldset>
+                                                                            <div class="row">
+                                                                                <div class="col col-6">
+                                                                                    <div class="row">
+                                                                                        <section class="col-12">
+                                                                                            <label class="label">
+                                                                                                Quantity Of Complaint
+                                                                                                <em ng-show="editForm['quantityOfComplaint_' + {{$index}}].$invalid" class="note note-error">(Invalid number format)</em>
+                                                                                            </label>
+                                                                                            <label class="input" ng-class="{'state-error': editForm['quantityOfComplaint_' + {{$index}}].$invalid}">
+                                                                                                <input type="number" min="0" name="quantityOfComplaint_{{$index}}" id="quantityOfComplaint" ng-model="item.quantityOfComplaint" />
+                                                                                            </label>
+                                                                                        </section>
+                                                                                       <section class="col-12">
+                                                                                            <label class="label">Original selling price</label>
+                                                                                            <label class="input">
+                                                                                                <span class="form-control">{{ item.originalSellingPrice | number:2 }}</span>
+                                                                                            </label>
+                                                                                        </section>
+
+                                                                                        <section class="col-12">
+                                                                                            <label class="label">Total sales value</label>
+                                                                                            <label class="input">
+                                                                                                <span style="display: none;" class="form-control">{{ item.totalSaleValue | number:2 }}</span>
+                                                                                                <span class="form-control">{{ item.originalSellingPrice * item.quantityOfComplaint | number:2 }}</span>
+                                                                                            </label>
+                                                                                        </section>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="col col-6">
+                                                                                    <section class="col-12">
+                                                                                        <label class="label">Complaint Description</label>
+                                                                                        <label class="textarea">
+                                                                                            <i class="icon-append fa fa-comment"></i>
+                                                                                            <textarea rows="6" id="complaintDescription" ng-model="item.complaintDescription"></textarea>
+                                                                                        </label>
+                                                                                    </section>
+                                                                                </div>
+                                                                            </div>
+
+                                                                        </fieldset>
+
+                                                                        <!--// BEGIN: add images -->
+                                                                        <fieldset>
+                                                                            <div class="row">
+                                                                                <section class="col col-sm-12">
+                                                                                    <label class="label">Images of Complaint</label>
+                                                                                    <div class="furnindo-image-editor">
+                                                                                        <a href="javascript:void(0);" class="btn btn-primary" ng-click="event.addClientComplaintItemImage(item)">+</a>
+                                                                                        <div class="img-item" ng-repeat="itemImage in item.clientComplaintItemImages">
+                                                                                            <a data-featherlight="image" href="{{itemImage.fileLocation}}">
+                                                                                                <img style="width: 100%;" ng-src="{{itemImage.thumbnailLocation}}">
+                                                                                            </a>
+                                                                                            <span title="Remove image" class="action" ng-click="event.removeClientComplaintItemImage(item, $index)">x</span>
+                                                                                        </div>
+                                                                                        <div class="clear"></div>
+                                                                                    </div>
+                                                                                </section>
+                                                                            </div>
+                                                                        </fieldset>
+                                                                        <!--// END: add images -->
+
+
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                            <!--// END: edit form -->
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </fieldset>
+                </div>
+                @*END: add complaint item*@
+
+                @*BEGIN: quick search factory order items*@
+                <div class="smart-form" ng-if="ui.currentForm=='quicksearch-factory-form'">
+                    <div class="row">
+                        <section class="col col-lg-6">
+                            <label>Factory Order</label>
+                            <label class="input">
+                                <input type="text" class="form-control" ng-model="quickSearchFactoryOrderVM.filters.filters.searchQuery"
+                                       placeholder="Please input factory order number to search" />
+                                <i class="icon-append fa fa-search"></i>
+                            </label>
+                        </section>
+                    </div>
+                    <div class="row">
+                        <section class="col col-lg-12">
+                            <a href="#" class="btn btn-primary btn-xs" title="Search" ng-click="quickSearchFactoryOrderVM.event.search($event)"><i class="fa fa-search"></i> Search</a>
+                            <a href="#" class="btn btn-success btn-xs" title="Select" ng-click="quickSearchFactoryOrderVM.event.itemSelected($event)" ng-disabled="!quickSearchFactoryOrderVM.event.canSelect()"><i class="fa fa-check"></i> Select</a>
+                            <a href="#" class="btn btn-warning btn-xs" title="Back" ng-click="quickSearchFactoryOrderVM.event.closeQuickSearchForm($event)"><i class="fa fa-arrow-left"></i> Back</a>
+                        </section>
+                    </div>
+                    <div class="row">
+                        <section class="col col-lg-12">
+                            <div id="quickSearchFactoryOrderItemsGrid" class="tilsoft-table-wrapper">
+                                <div class="tilsoft-table" style="width: 1100px;">
+                                    <div class="tilsoft-table-header">
+                                        <div style="width: 65px; text-align: center"></div>
+                                        <div style="width: 70px" class="sorting" data-colname="factoryOrderDetailID">ID</div>
+                                        <div style="width: 190px" class="sorting" data-colname="articleCode">Article Code</div>
+                                        <div style="width: 100px" class="sorting" data-colname="proformaInvoiceNo">Proforma Invoice</div>
+                                        <div style="width: 100px" class="sorting" data-colname="factoryUd">Factory</div>
+                                        <div style="width: 100px" class="sorting" data-colname="factoryOrderUD">Factory Order</div>
+                                        <div style="width: 100px" class="sorting" data-colname="lds">LDS</div>
+                                        <div>Description</div>
+                                    </div>
+
+                                    <div class="tilsoft-table-body auto-height" style="width: 1100px;max-height:300px;">
+                                        <table>
+                                            <tr ng-repeat="item in quickSearchFactoryOrderVM.data">
+                                                <td style="width: 65px; text-align: center; vertical-align: middle">
+                                                    <label class="checkbox" style="margin-left: 15px; margin-bottom: 20px">
+                                                        <input type="checkbox" ng-model="item.isSelected">
+                                                        <i></i>
+                                                    </label>
+                                                </td>
+                                                <td style="width: 70px; vertical-align: middle">{{item.factoryOrderDetailID}}</td>
+                                                <td style="width: 190px; vertical-align: middle">{{item.articleCode}}</td>
+                                                <td style="width: 100px; vertical-align: middle">{{item.proformaInvoiceNo}}</td>
+                                                <td style="width: 100px; vertical-align: middle">{{item.factoryUd}}</td>
+                                                <td style="width: 100px; vertical-align: middle">{{item.factoryOrderUD}}</td>
+                                                <td style="width: 100px; vertical-align: middle">{{item.lds}}</td>
+                                                <td style="vertical-align: middle">{{item.description}}</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+                @*END: quick search factory order items*@
+            </div>
+        </div>
+    </article>
+    <!--END: Product Detail section -->
+</form>
+
+<!--add users dialog -->
+<div id="addUserDialog" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static" style="z-index: 1400;">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title" id="myModalLabel">Select employee</h4>
+            </div>
+            <div class="modal-body">
+                <div class="smart-form">
+                    <fieldset>
+                        <div class="row">
+                            <select id="selectedUsersId" ng-model="selectedUserIds" multiple="multiple">
+                                <option ng-repeat="item in employees" ng-value="item.employeeID" ng-selected="item.selected">{{item.employeeNM}}</option>
+                            </select>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" ng-click="event.updateSelectedUsers(selectedUsers)">
+                    OK
+                </button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section FormAction {
+<ul id="sparks">
+    <li class="sparks-info">
+        <a href='@Url.Action("Index", "ClientComplaint")' class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="event.update($event)" ng-disabled="editForm.$invalid"><i class="fa fa-save"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current))" title="Delete" ng-click="event.deleteItem()" style="color: #ff0000;" ng-disabled="data.isConfirmed"><i class="fa fa-times"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0)" class="btn btn-default disabled" title="Print" ng-click="event.print()"><i class="fa fa-print"></i></a>
+    </li>
+    @if (!string.IsNullOrEmpty(userManualUrl))
+    {
+        <li class="sparks-info">
+            <a target="_blank" href="@userManualUrl" class="btn btn-default" title="Help"><i class="fa fa-info"></i></a>
+        </li>
+    }
+</ul>
+}
+
+@section pagejs {
+    <script type="text/javascript">
+        var context = {
+            id: @ViewBag.ID,
+            clientId : @clientId,
+            season : '@season',
+            errMsg: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED',
+            backUrl: '@Url.Action("Index", "ClientComplaint")',
+            refreshUrl: '@Url.Action("Index", "ClientComplaint", new { id = UrlParameter.Optional })/',
+
+            reportUrl: '@serviceReportRoot',
+            serviceUrl: '@(serviceRoot)api/clientcomplaints/',
+            supportServiceUrl: '@(serviceRoot)api/support/',
+            token: '@token',
+            userId: @userId,
+            userFullname: '@userFullName'
+        };
+    </script>
+    <script src="~/Angular/app/clientComplaint/module.config.js?v=@guid" type="text/javascript"></script>
+    <script src="~/Angular/app/jsonService2.js?v=@guid" type="text/javascript"></script>
+    <script src="~/Angular/app/clientComplaint/service.js?v=@guid" type="text/javascript"></script>
+    <script src="~/Angular/app/clientComplaint/edit.js?v=@guid" type="text/javascript"></script>
+}

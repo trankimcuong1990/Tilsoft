@@ -1,0 +1,285 @@
+﻿@{
+    ViewBag.Title = "Planning";
+    ViewBag.Module = "Planning";
+
+    string BOMID = "-1";
+    if (Request.Params["bomID"] != null)
+    {
+        BOMID = Request.Params["bomID"];
+    }
+}
+
+<style>
+    .piece {
+        background-color: #70eef2
+    }
+
+    .modal {
+        top: 110px !important;
+    }
+</style>
+
+
+<form class="row" name="editForm">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>Planning</h2>
+            </header>
+            <div>
+                <div class="widget-body">
+                    <div class="smart-form">
+                        <div class="row">
+                            <section class="col col-lg-2">
+                                <label>WorkOrder Code</label>
+                                <span class="form-control">{{workOrder.workOrderUD}}</span>
+                            </section>
+                            <section class="col col-2">
+                                <label>WorkOrder Status</label>
+                                <span class="form-control">{{workOrder.workOrderStatusNM}}</span>
+                            </section>
+                            <section class="col col-2">
+                                <label>WorkOrder Type</label>
+                                <span class="form-control">{{workOrder.workOrderTypeNM}}</span>
+                            </section>
+                            <section class="col col-lg-2">
+                                <label>Production Qnt</label>
+                                <span class="form-control" style="text-align:right">{{workOrder.quantity}}</span>
+                            </section>
+                        </div>
+                        <div class="row">
+                            <section class="col col-2">
+                                <label>Start Date</label>
+                                <label class="input">
+                                    <i class="icon-append fa fa-calendar"></i>
+                                    <input type="text" class="form-control datepicker" data-dateformat="dd/mm/yy" ng-model="workOrder.startDate" name="startDate" />
+                                </label>
+
+                            </section>
+                            <section class="col col-2">
+                                <label>Finish Date</label>
+                                <label class="input">
+                                    <i class="icon-append fa fa-calendar"></i>
+                                    <input type="text" class="form-control datepicker" data-dateformat="dd/mm/yy" ng-model="workOrder.finishDate" name="startDate"  />
+                                </label>
+                            </section>
+                            <section class="col col-8">
+                                <label>OP Sequence</label>
+                                <span class="form-control">{{workOrder.opSequenceNM}}</span>
+                            </section>
+                        </div>
+                        <a class="btn btn-primary btn-xs m-bottom-15" ng-click="event.changeWorkOrderFinishDate()" href="#">Apply Date</a>
+                        <div class="row">
+                            <section class="col col-lg-12">
+                                <div avs-scroll grid-handler="gridHandler" class="tilsoft-table-wrapper">
+                                    <div class="tilsoft-table">
+                                        <div class="tilsoft-table-header" style="width:1500px">
+                                            <div style="width:30px">No.</div>
+                                            <div style="width:130px"></div>
+                                            <div style="width:80px">Type</div>
+                                            <div style="width:200px">Code</div>
+                                            <div style="width:400px">Name</div>
+                                            <div style="width:100px">Work Center</div>
+                                            <div style="width:80px">Plan</div>
+                                            <div style="width:80px">Received</div>
+                                            <div style="width:80px">Produced</div>
+                                            <div style="width:80px">Remain</div>
+                                            <div style="width:80px">Started Date</div>
+                                            <div style="width:80px">Finished Date</div>
+                                            <div></div>
+                                        </div>
+                                        <div class="tilsoft-table-body" style="margin-top:0px;width:1500px;height:auto">
+                                            <table>
+                                                <tr>
+                                                    <td colspan="14"><b>{{workOrder.productArticleCode}} ({{workOrder.productDescription}}) </b></td>
+                                                </tr>
+                                                <tbody ng-repeat="pItem in data_listFormated">
+                                                    <tr class="{{pItem.productionItemTypeNM}}" ng-class="!pItem.workCenterID?'piece':''">
+                                                        <td style="width:30px">{{pItem.pieceIndex}}</td>
+                                                        <td style="width:130px; text-align:right">
+                                                            <a ng-if="pItem.workCenterID" ng-click="event.addNodeByPlanningProductionID(pItem.planningProductionID)" class="btn btn-primary btn-xs">Insert</a>
+                                                            <a ng-if="pItem.workCenterID" ng-click="event.editNodeByPlanningProductionID(pItem.planningProductionID)" class="btn btn-warning btn-xs">Edit</a>
+                                                            <a ng-if="!pItem.bomid" ng-click="event.deleteNode(pItem)" class="btn btn-danger btn-xs">Del</a>
+                                                        </td>
+                                                        <td style="width:80px;">{{pItem.productionItemTypeNM}}</td>
+                                                        <td style="width:200px;">{{pItem.productionItemUD}}</td>
+                                                        <td style="width:400px;">
+                                                            {{pItem.productionItemNM}}
+                                                        </td>
+                                                        <td style="width:100px;">{{pItem.workCenterNM}}</td>
+                                                        <td style="width:80px;text-align:right">
+                                                            <span ng-show="pItem.bomid">{{pItem.planQnt | number : 2}}</span>
+                                                            <span ng-show="!pItem.bomid">{{method.getTotalPlanOfNode(pItem) | number : 2}}</span>
+                                                        </td>
+                                                        <td style="width:80px;text-align:right">{{pItem.receivedQnt | number : 2}}</td>
+                                                        <td style="width:80px;text-align:right">{{pItem.producedQnt | number : 2}}</td>
+                                                        <td style="width:80px;text-align:right">{{pItem.remainQnt | number : 2}}</td>
+                                                        @*<td style="width:150px;">
+                                            <div ng-if="!pItem.bomid">
+                                                <ul ng-repeat="teamItem in pItem.planningProductionTeamDTOs" style="padding-left:15px">
+                                                    <li>{{teamItem.productionTeamNM}}</li>
+                                                </ul>
+                                            </div>
+                                            <br />
+                                            <div ng-if="pItem.bomid">
+                                                <ul ng-repeat="teamItem in pItem.arisingProductionTeamDTOs" style="padding-left:15px">
+                                                    <li>{{teamItem.productionTeamNM}}</li>
+                                                </ul>
+                                            </div>
+                                        </td>*@
+                                                        <td style="width:80px;">{{pItem.startDate}}</td>
+                                                        <td style="width:80px">{{pItem.finishDate}}</td>
+                                                        <td></td>
+                                                    </tr>
+                                                    <tr ng-repeat="teamItem in pItem.planningProductionTeamDTOs">
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td colspan="4" style="text-align:right">{{teamItem.productionTeamNM}}</td>
+                                                        <td style="text-align:right">{{teamItem.planQnt | number : 2}}</td>
+                                                        <td style="text-align:right">{{method.getArisingItemByProductionTeam(pItem,teamItem.productionTeamID).receivedQnt | number : 2}}</td>
+                                                        <td style="text-align:right">{{method.getArisingItemByProductionTeam(pItem,teamItem.productionTeamID).producedQnt | number : 2}}</td>
+                                                        <td style="text-align:right">{{teamItem.planQnt - method.getArisingItemByProductionTeam(pItem,teamItem.productionTeamID).producedQnt | number : 2}}</td>
+                                                        <td colspan="3"></td>
+                                                    </tr>
+
+                                                    <tr ng-repeat="teamItem in pItem.arisingProductionTeamDTOs | arisingTeamFilter : pItem.planningProductionTeamDTOs">
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td colspan="4" style="text-align:right">{{teamItem.productionTeamNM}}</td>
+                                                        <td style="text-align:right"></td>
+                                                        <td style="text-align:right">{{teamItem.receivedQnt | number : 2}}</td>
+                                                        <td style="text-align:right">{{teamItem.producedQnt | number : 2}}</td>
+                                                        <td style="text-align:right"></td>
+                                                        <td colspan="3"></td>
+                                                    </tr>
+
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+
+    <div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="frmEditNodeForm_ListViewFormat" class="modal fade" style="display: none; z-index:110" data-backdrop="static">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button aria-hidden="true" data-dismiss="modal" class="close" type="button">
+                        ×
+                    </button>
+                    <h4 id="myModalLabel" class="modal-title">{{editNodeForm_ListViewFormat.isAddNew?'Add Item':'Edit Item'}} Planning</h4>
+                </div>
+                <div class="modal-body smart-form">
+                    <fieldset>
+                        <div class="row">
+                            <section class="col col-sm-4">
+                                <label>Work Center</label>
+                                <select ng-if="!(editNodeForm_ListViewFormat.copyOfcurrentNode.bomid || editNodeForm_ListViewFormat.copyOfcurrentNode.planningProductionID > 0)" class="form-control" ng-model="editNodeForm_ListViewFormat.copyOfcurrentNode.workCenterID" ng-options="item.workCenterID as item.workCenterNM for item in workCenters" ng-change="editNodeForm_ListViewFormat.event.selectedWorkCenter()">
+                                    <option value=""></option>
+                                </select>
+                                <input ng-if="editNodeForm_ListViewFormat.copyOfcurrentNode.bomid || editNodeForm_ListViewFormat.copyOfcurrentNode.planningProductionID > 0" readonly class="form-control" ng-model="editNodeForm_ListViewFormat.copyOfcurrentNode.workCenterNM"/>
+                            </section>
+                            <section class="col col-sm-4">
+                                <label>Start Date</label>
+                                <label class="input">
+                                    <i class="icon-append fa fa-calendar"></i>
+                                    <input type="text" class="form-control datepicker" data-dateformat="dd/mm/yy" ng-model="editNodeForm_ListViewFormat.copyOfcurrentNode.startDate"/>
+                                </label>
+
+                            </section>
+                            <section class="col col-sm-4">
+                                <label>Finish Date</label>
+                                <label class="input">
+                                    <i class="icon-append fa fa-calendar"></i>
+                                    <input type="text" class="form-control datepicker" data-dateformat="dd/mm/yy" ng-model="editNodeForm_ListViewFormat.copyOfcurrentNode.finishDate"/>
+                                </label>
+                            </section>
+                        </div>
+                        <div class="row">
+                            <section class="col col-sm-4">
+                                <label>Team</label>
+                                <input type="text" class="form-control"  placeholder="Typing here to add team" avs-remote-auto-complete ng-request-param="editNodeForm_ListViewFormat.productionTeamAPI" ng-init-param="editNodeForm_ListViewFormat.searchTeamQuery" ng-model="editNodeForm_ListViewFormat.searchTeamQuery" ng-item-value="editNodeForm_ListViewFormat.productionTeam" ng-item-selected="editNodeForm_ListViewFormat.event.addProductionTeam(editNodeForm_ListViewFormat.productionTeam)" data-method="POST" data-format-function="formatData" />
+                            </section>
+                            <section class="col col-sm-8">
+                                <label>&nbsp;</label>
+                                <div class="tilsoft-table">
+                                    <div class="tilsoft-table-body" style="margin-top:0px;width:100%;height:200px">
+                                        <table>
+                                            <tbody>
+                                                <tr>
+                                                    <th style="width:30px">#</th>
+                                                    <th>Team</th>
+                                                    <th style="width:70px">Plan Qnt</th>
+                                                </tr>
+                                                <tr ng-repeat="teamItem in editNodeForm_ListViewFormat.copyOfcurrentNode.planningProductionTeamDTOs">
+                                                    <td style="text-align:center"><a ng-click="editNodeForm_ListViewFormat.event.removeProductionTeam(teamItem)" href="#" class="btn btn-danger btn-xs"><i class="fa fa-times"></i></a>  </td>
+                                                    <td>
+                                                        {{teamItem.productionTeamNM}}
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" ng-model="teamItem.planQnt" style="text-align:right"/>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+                    </fieldset>
+                </div>
+                <div class="modal-footer">
+                    <button data-dismiss="modal" class="btn btn-default" type="button" ng-click="editNodeForm_ListViewFormat.event.cancel()">
+                        Cancel
+                    </button>
+                    <button class="btn btn-primary" type="button" ng-click="editNodeForm_ListViewFormat.event.ok()">
+                        OK
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section FormAction {
+<ul id="sparks">
+    <li class="sparks-info">
+        <a href="@Url.Action("Index", "PlanningProductionMng")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="#" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="event.update()"><i class="fa fa-save"></i></a>
+    </li>
+</ul>
+}
+
+@section pagejs {
+    <script src="~/Views/PlanningProductionMng/Edit.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/planning-production/',
+            supportServiceUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/support/',
+            token: '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]',
+
+            backendReportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]',
+            refreshUrl: '@Url.Action("Edit", "PlanningProductionMng", new { id = UrlParameter.Optional })/',
+            indexUrl: '@Url.Action("Index", "PlanningProductionMng")',
+
+            id: @ViewBag.ID,
+            bomID: @BOMID,
+            errMsg: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED',
+        }
+    </script>
+    <script src="~/Angular/app/jsonService2.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/PlanningProductionMng/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}

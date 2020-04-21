@@ -1,0 +1,132 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    var pageSize = System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"];
+    var cookieID = HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString();
+
+    ViewBag.Title = "Search Work Center";
+    ViewBag.Module = "Work Center";
+}
+
+<div class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-table"></i>
+                </span>
+                <h2>Search Results</h2>
+            </header>
+            <div>
+                <div class="jarviswidget-editbox"></div>
+                <div class="widget-body">
+                    <div class="tilsoft-table-wrapper" avs-scroll grid-handler="gridHandler">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header" style="width:1200px">
+                                <div style="width: 101px">Found(s)<br /><strong style="color:blue">{{totalRows}}</strong>/<strong style="color:maroon">{{totalRows}}</strong></div>
+                                <div style="width: 150px">Code</div>
+                                <div style="width: 150px">Name</div>
+                                <div style="width: 100px">Operating<br />Time(hour)</div>
+                                <div style="width: 121px">Default Cost<br />(USD)</div>
+                                <div style="width: 100px">Capacity<br />(Per day)</div>
+                                <div style="width: 200px">Defaut warehouse</div>
+                                <div style="width: 170px">Person<br />Responsible</div>
+                                <div></div>
+                            </div>
+                            <div class="tilsoft-table-filter" style="width:1200px">
+                                <div style="width: 101px">
+                                    <a href="javascript:void(0)" class="btn btn-{{isDefaultFilter ? 'default' : 'primary'}} btn-xs font-11" ng-click="event.refreshWorkCenter()"><i class="fa fa-filter"></i></a>
+                                    <a href="javascript:void(0)" class="btn btn-default btn-xs font-11" ng-click="event.clearFiltersWorkCenter()"><i class="fa fa-ban"></i></a>
+                                </div>
+                                <div style="width: 150px">
+                                    <input class="form-control search-filter" style="width: 100%" ng-model="filters.workCenterUD" />
+                                </div>
+                                <div style="width: 150px">
+                                    <input class="form-control search-filter" style="width: 100%" ng-model="filters.workCenterNM" />
+                                </div>
+                                <div style="width: 100px">
+                                    <input id="operatingTime" class="form-control search-filter" style="width: 100%; text-align: right" ng-data-source="filters.operatingTime" avs-number />
+                                </div>
+                                <div style="width: 121px">
+                                    <input id="defaultCost" class="form-control search-filter" style="width: 100%; text-align: right" ng-data-source="filters.defaultCost" avs-number />
+                                </div>
+                                <div style="width: 100px">
+                                    <input id="capacity" class="form-control search-filter" style="width: 100%; text-align: right" ng-data-source="filters.capacity" avs-number />
+                                </div>
+                                <div style="width: 200px">
+                                    <select class="form-control search-filter" style="width: 100%" ng-model="filters.defaultFactoryWarehouseID" ng-options="wItem.factoryWarehouseID as wItem.factoryWarehouseNM for wItem in factoryWarehouses">
+                                        <option value=""></option>
+                                    </select>
+                                </div>
+                                <div style="width: 170px">
+                                    <select class="form-control search-filter" style="width: 100%" ng-model="filters.responsibleBy" ng-options="employee.employeeID as employee.employeeNM for employee in employees">
+                                        <option value=""></option>
+                                    </select>
+                                </div>
+                                <div></div>
+                            </div>
+                            <div class="tilsoft-table-body" style="width:1200px">
+                                <table>
+                                    <tr ng-repeat="workCenter in data">
+                                        <td style="width: 100px">
+                                            <a href="@Url.Action("Edit", "WorkCenterMng")/{{workCenter.workCenterID}}" class="btn btn-default btn-xs font-11 btn-primary" target="_blank"><i class="fa fa-pencil-square-o"></i> Edit</a>
+                                            <a href="javascript:void(0)" class="btn btn-default btn-xs font-11 btn-danger" ng-click="event.deleteWorkCenter(workCenter)"><i class="fa fa-times-circle-o"></i> Del</a>
+                                        </td>
+                                        <td style="width: 150px; text-align: left">{{workCenter.workCenterUD}}</td>
+                                        <td style="width: 150px">{{workCenter.workCenterNM}}</td>
+                                        <td style="width: 100px; text-align: right">{{workCenter.operatingTime | number}}</td>
+                                        <td style="width: 121px; text-align: right">{{workCenter.defaultCost | number}}</td>
+                                        <td style="width: 100px; text-align: right">{{workCenter.capacity | number}}</td>
+                                        <td style="width: 200px">
+                                            <div ng-repeat="sItem in detailData | filter : { workCenterID: workCenter.workCenterID } : true">
+                                                {{sItem.factoryWarehouseNM}}
+                                            </div>
+                                        </td>
+                                        <td style="width: 170px">{{workCenter.responsiblor}}</td>
+                                        <td></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction{
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default" title="Search" ng-click="event.refreshWorkCenter()">
+                <i class="fa fa-search"></i>
+            </a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default" title="Refresh" ng-click="event.refreshWorkCenter()">
+                <i class="fa fa-refresh"></i>
+            </a>
+        </li>
+        <li class="sparks-info">
+            <a href="@Url.Action("Edit", "WorkCenterMng")/0" class="btn btn-default" title="New" target="_blank">
+                <i class="fa fa-file-o"></i>
+            </a>
+        </li>
+    </ul>
+}
+
+@section pagejs{
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(serviceRoot)/api/workCenterMng/',
+            token: '@token',
+            pageSize: '@pageSize',
+            cookieID: '@cookieID',
+            urlNewWorkCenter: '@Url.Action("Edit", "WorkCenterMng")/'
+        };
+    </script>
+    <script type="text/javascript" src="~/Angular/app/workCenter/index.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/workCenter/service.js?v=@guid"></script>
+}

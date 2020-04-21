@@ -1,0 +1,88 @@
+﻿@using Frontend.Helper;
+@{
+    ViewBag.Title = "Acc Manager Performance";
+    ViewBag.Icon = "fa-bar-chart-o";
+    Frontend.APIDTO.APIUserInformation userInfo = (Frontend.APIDTO.APIUserInformation)ViewBag.CurrentLoginUserInfo;
+    bool canViewAllSaleData = false;
+    if (userInfo.Data.ModuleSpecialPermissionAccesses.Count(o => o.ModuleSpecialPermissionUD == Frontend.Helper.ConstantIdentifier.SPECIAL_PERMISSION_VIEW_ALL_SALES_DATA) > 0)
+    {
+        canViewAllSaleData = true;
+    }
+}
+<style>
+    h2 {
+        font-size: 18px;
+    }
+
+    .tilsoft-table .tilsoft-table-body {
+        height: auto !important;
+        max-height: none !important;
+    }
+</style>
+
+<div class="row">
+    <div class="col-sm-12">
+        <div class="well no-padding">
+            <div class="smart-form">
+                <fieldset>
+                    <section style="margin-bottom: 0px;">
+                        <label class="label" style="height: 32px; line-height: 30px; display: inline-block; margin-right: 10px;">Select Account Manager</label>
+                        <label class="select" style="height: 32px; display: inline-block; margin-right: 10px; width: 180px;">
+                            <select ng-model="data.selectedSaleID" ng-options="sale.userID as sale.employeeNM for sale in supportData.sales"></select>
+                            <i></i>
+                        </label>
+                        <a href="javascript:void(0)" class="btn btn-default" style="padding: 7px 14px;" ng-click="event.onSelectSale()">Refresh</a>
+                    </section>
+                </fieldset>
+            </div>
+        </div>
+    </div>
+
+    @Html.Partial("~/Views/AccManagerPerformanceRpt/partialView/_Performance.cshtml")
+    @if (canViewAllSaleData)
+    {
+        Html.RenderPartial("~/Views/AccManagerPerformanceRpt/partialView/_SalesPerformance.cshtml");
+    }
+    @Html.Partial("~/Views/AccManagerPerformanceRpt/partialView/_SalesByCountry.cshtml")
+    @Html.Partial("~/Views/AccManagerPerformanceRpt/partialView/_SalesConclusion.cshtml")
+    @if (canViewAllSaleData)
+    {
+        Html.RenderPartial("~/Views/AccManagerPerformanceRpt/partialView/_SalesManagement.cshtml");
+    }
+</div>
+
+@section FormAction {
+    <ul id="sparks"></ul>
+}
+
+@section pagejs {
+    <script src="~/TemplateResource/js/plugin/highcharts-more.js"></script>
+    <script src="~/TemplateResource/js/plugin/map.js"></script>
+    <script src="~/TemplateResource/js/plugin/world-highres3.js"></script>
+
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/',
+            token: '@ViewBag.Token',
+            season: '@Library.Helper.GetCurrentSeason()',
+            saleId: @(canViewAllSaleData ? -1 : userInfo.Data.UserId)
+        }
+    </script>
+    <script src="~/Views/AccManagerPerformanceRpt/index.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/jsonService2.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/AccManagerPerformanceRpt/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+
+    <script src="~/Views/AccManagerPerformanceRpt/partialView/_Performance.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/AccManagerPerformanceRpt/partialView/_SalesByCountry.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/AccManagerPerformanceRpt/partialView/_SalesConclusion.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/AccManagerPerformanceRpt/partialView/_SalesPerformance.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/AccManagerPerformanceRpt/partialView/_SalesManagement.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+
+    @if (canViewAllSaleData)
+    {
+        <script src="~/Views/Dashboard/Widget/SalePerformance.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+
+        <script src="~/Views/MIMarginOverviewRpt/Index/SaleByAccManager.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+        <script src="~/Views/MIMarginOverviewRpt/Index/SaleByAccManagerPreSeason.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    }
+}

@@ -1,0 +1,328 @@
+﻿@{
+    if (ViewBag.ID == 0)
+    {
+        ViewBag.Title = "Create Sales Quotation";
+    }
+    else
+    {
+        ViewBag.Title = "Edit Sales Quotation";
+    }
+    ViewBag.Module = "Sales Quotation";
+    Frontend.APIDTO.APIUserInformation userInfo = (Frontend.APIDTO.APIUserInformation)Session[Frontend.Customize.Common.ProjectDefinition.USER_INFO_SESSION];
+    var supportServiceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+
+    string userManualUrl = string.Empty;
+    if (System.IO.File.Exists(Server.MapPath("~/UserManual/" + ViewBag.ModuleCode + ".pdf")))
+    {
+        userManualUrl = "/UserManual/" + ViewBag.ModuleCode + ".pdf";
+    }
+
+}
+<style>
+
+    .css-inline a {
+        display: inline;
+    }
+
+    .smart-form .inline-group .checkbox {
+        width: 30% !important;
+    }
+
+    .smart-form {
+        padding: 0px 7px !important;
+    }
+       
+
+    .inline-cus {
+        display: inline-block !important;
+    }
+
+
+    .format-row-hearder {
+        background-color: rgba(69,69,69,.6) !important;
+        color: white !important
+    }
+
+    .productionitemdetail {
+        margin-top: 20px 0 !important;
+    }
+   
+</style>
+<div class="se-pre-con"></div>
+
+<form class="row" name="editForm" id="main-form">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-product-information" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <ul class="nav nav-tabs pull-left in">
+                    <li class="active">
+                        <a data-toggle="tab" href="#tabGeneral"> <i class="fa fa-database"></i> <span> Factory Sale Quotation Information </span> </a>
+                    </li>
+                </ul>
+            </header>
+            <div class="widget-body">
+                <div class="smart-form">
+                    <div id="general-section" class="well-sm" style="background: #fff;">
+                        <div class="smart-form m-bottom-15s">
+                            <fieldset>
+                                <!----Sales Quotation-->
+                                <div class="row">
+                                    @*-- Customer--*@
+                                    <section class="col col-sm-2">
+                                        <label>
+                                            Customer
+                                            <em class="note note-error" ng-show="(editForm.customer.$error.required) && !factorySaleQuotation.isConfirmed && !factorySaleQuotation.isDeleted"> (Required)</em>
+                                        </label>
+                                        <label class="input" ng-show="!factorySaleQuotation.isConfirmed && !factorySaleQuotation.isDeleted">
+                                            <input type="text" ng-model="factorySaleQuotation.factoryRawMaterialShortNM" id="factoryRawMaterialOfficialNM" placeholder="Input customer code that you want to find..." class="form-control search-filter" style="font-family: Arial;" name="customer" required>
+                                        </label>
+                                        <label class="input" ng-show="factorySaleQuotation.isConfirmed || factorySaleQuotation.isDeleted">
+                                            <span class="form-control">{{factorySaleQuotation.factoryRawMaterialShortNM}}</span>
+                                        </label>
+                                    </section>
+                                    <section class="col col-sm-6">
+                                        <label>Name</label>
+                                        <label class="input">
+                                            <input class="form-control" style="background-color:#fff4a6" disabled="disabled" type="text" id="factoryRawMaterialOfficialNM" ng-model="factorySaleQuotation.factoryRawMaterialOfficialNM">
+                                        </label>
+                                    </section>
+                                    @*-- Customer Ref. No--*@
+                                    <section class="col col-sm-2">
+                                        <label>Customer Ref. No:</label>
+                                        <label class="input" ng-show="!factorySaleQuotation.isConfirmed && !factorySaleQuotation.isDeleted">
+                                            <input class="form-control" type="text" ng-model="factorySaleQuotation.factoryRawMaterialDocumentRefNo" maxlength="50">
+                                        </label>
+                                        <label class="input" ng-show="factorySaleQuotation.isConfirmed || factorySaleQuotation.isDeleted">
+                                            <span class="form-control">{{factorySaleQuotation.factoryRawMaterialDocumentRefNo}}</span>
+                                        </label>
+                                    </section>
+                                    <section class="col col-sm-2">
+                                        <label>No</label>
+                                        <label class="input">
+                                            <input class="form-control" style="background-color:#fff4a6" type="text" disabled="disabled" ng-model="factorySaleQuotation.factorySaleQuotationUD">
+                                        </label>
+                                    </section>
+                                </div>
+                                <div class="row">
+                                    @*-- Contact Person--*@
+                                    <section class="col col-sm-2">
+                                        <label>
+                                            Contact Person
+                                        </label>
+                                        <select ng-disabled="factorySaleQuotation.supplierContactQuickInfoId > 0 && factorySaleQuotation.factorySaleQuotationID > 0" class="form-control" ng-model="factorySaleQuotation.supplierContactQuickInfoId" ng-options="item.supplierContactQuickInfoId as item.fullName for item in supplierContact">
+                                            <option value=""></option>
+                                        </select>
+                                    </section>
+                                    <section class="col col-sm-2">
+                                        <label>Valid Until</label>
+                                        <label class="input" ng-show="!factorySaleQuotation.isConfirmed && !factorySaleQuotation.isDeleted">
+                                            <input type="datetime" class="form-control" placeholder="" id="validUntil" ng-model="factorySaleQuotation.validUntil" avs-date />
+                                            <i class="icon-append fa fa-calendar"></i>
+                                        </label>
+                                        <label class="input" ng-show="factorySaleQuotation.isConfirmed || factorySaleQuotation.isDeleted">
+                                            <span class="form-control">{{factorySaleQuotation.validUntil}}</span>
+                                        </label>
+                                    </section>
+                                    <section class="col col-sm-2">
+                                        <label>Posting Date</label>
+                                        <label class="input" ng-show="!factorySaleQuotation.isConfirmed && !factorySaleQuotation.isDeleted">
+                                            <input type="datetime" class="form-control" placeholder="" id="createdDate" ng-model="factorySaleQuotation.createdDate" avs-date />
+                                            <i class="icon-append fa fa-calendar"></i>
+                                        </label>
+                                        <label class="input" ng-show="factorySaleQuotation.isConfirmed || factorySaleQuotation.isDeleted">
+                                            <span class="form-control">{{factorySaleQuotation.createdDate}}</span>
+                                        </label>
+                                    </section>
+                                    <section class="col col-sm-2">
+                                        <label>Manually Input</label>
+                                        <label class="input" ng-show="!factorySaleQuotation.isConfirmed && !factorySaleQuotation.isDeleted">
+                                            <input class="form-control" type="datetime" id="expectedPaidDate" placeholder="" ng-model="factorySaleQuotation.expectedPaidDate" avs-date>
+                                            <i class="icon-append fa fa-calendar"></i>
+                                        </label>
+                                        <label class="input" ng-show="factorySaleQuotation.isConfirmed || factorySaleQuotation.isDeleted">
+                                            <span class="form-control">{{factorySaleQuotation.expectedPaidDate}}</span>
+                                        </label>
+                                    </section>
+                                    <section class="col col-sm-2">
+                                        <label>
+                                            Document Date
+                                            <em class="note note-error" ng-if="(factorySaleQuotation.documentDate == null  || factorySaleQuotation.documentDate == '') && !factorySaleQuotation.isConfirmed && !factorySaleQuotation.isDeleted">(Required)</em>
+                                        </label>
+                                        <div class="input" ng-show="!factorySaleQuotation.isConfirmed && !factorySaleQuotation.isDeleted">
+                                            <input type="datetime" class="form-control" placeholder="" id="documentDate" ng-model="factorySaleQuotation.documentDate" avs-date required />
+                                            <i class="icon-append fa fa-calendar"></i>
+                                        </div>
+                                        <label class="input" ng-show="factorySaleQuotation.isConfirmed || factorySaleQuotation.isDeleted">
+                                            <span class="form-control">{{factorySaleQuotation.documentDate}}</span>
+                                        </label>
+                                    </section>
+                                    <section class="col col-sm-1">
+                                        <label>Currency</label>
+                                        <label class="input" ng-show="!factorySaleQuotation.isConfirmed && !factorySaleQuotation.isDeleted">
+                                            <select ng-model="factorySaleQuotation.currency" class="form-control" ng-options="item.currencyValue as item.currencyText for item in lstTypeOfCurrency">
+                                                <option value=""></option>
+                                            </select>
+                                        </label>
+                                        <label class="input" ng-show="factorySaleQuotation.isConfirmed || factorySaleQuotation.isDeleted">
+                                            <span class="form-control">{{factorySaleQuotation.currency}}</span>
+                                        </label>
+                                    </section>
+                                    <section class="col col-sm-1">
+                                        <label>Status</label>
+                                        <label class="input">
+                                            <span class="form-control">{{factorySaleQuotation.factorySaleQuotationStatusNM}}</span>
+                                        </label>
+                                    </section>
+                                </div>
+                                <div class="row">
+                                    <section class="col col-sm-2">
+                                        <label>Shipping Type</label>
+                                        <em class="note note-error" ng-show="(factorySaleQuotation.factoryShippingMethodID === null || factorySaleQuotation.factoryShippingMethodID === '') && !factorySaleQuotation.isConfirmed && !factorySaleQuotation.isDeleted"> (Required)</em>
+                                        <label class="input" ng-show="!factorySaleQuotation.isConfirmed && !factorySaleQuotation.isDeleted">
+                                            <select id="ShippingType" class="form-control" placeholder="Please choose Shipping Type" ng-model="factorySaleQuotation.factoryShippingMethodID" ng-options="item.shipmentTypeOptionID as item.shipmentTypeOptionNM for item in lstShipmentTypeOption" required></select>
+                                        </label>
+                                        <label class="input" ng-show="factorySaleQuotation.isConfirmed || factorySaleQuotation.isDeleted">
+                                            <span class="form-control">{{factorySaleQuotation.factoryShippingMethodNM}}</span>
+                                        </label>
+                                    </section>
+                                    <section class="col col-sm-2">
+                                        <label>Payment Terms</label>
+                                        <em class="note note-error" ng-show="(factorySaleQuotation.factoryPaymentTermID === null || factorySaleQuotation.factoryPaymentTermID === '') && !factorySaleQuotation.isConfirmed && !factorySaleQuotation.isDeleted"> (Required)</em>
+                                        <label class="input" ng-show="!factorySaleQuotation.isConfirmed && !factorySaleQuotation.isDeleted">
+                                            <select class="form-control" ng-model="factorySaleQuotation.factoryPaymentTermID" ng-options="item.paymentTermID as item.paymentTermNM for item in lstPaymentTerm" required></select>
+                                        </label>
+                                        <label class="input" ng-show="factorySaleQuotation.isConfirmed || factorySaleQuotation.isDeleted">
+                                            <span class="form-control">{{factorySaleQuotation.factoryPaymentTermNM}}</span>
+                                        </label>
+                                    </section>
+                                    <section class="col col-sm-4">
+                                        <label>Ship to</label>
+                                        <em class="note note-error" ng-show="(editForm.shippingAddress.$error.required) && !factorySaleQuotation.isConfirmed && !factorySaleQuotation.isDeleted"> (Required)</em>
+                                        <label class="input" ng-show="!factorySaleQuotation.isConfirmed && !factorySaleQuotation.isDeleted">
+                                            <input maxlength="500" class="form-control" type="text" ng-model="factorySaleQuotation.shippingAddress" name="shippingAddress" required>
+                                        </label>
+                                        <label class="input" ng-show="factorySaleQuotation.isConfirmed || factorySaleQuotation.isDeleted">
+                                            <span class="form-control">{{factorySaleQuotation.shippingAddress}}</span>
+                                        </label>
+                                    </section>
+                                    <section class="col col-sm-4">
+                                        <label>Bill to</label>
+                                        <em class="note note-error" ng-show="(editForm.billingAddress.$error.required) && !factorySaleQuotation.isConfirmed && !factorySaleQuotation.isDeleted"> (Required)</em>
+                                        <label class="input" ng-show="!factorySaleQuotation.isConfirmed && !factorySaleQuotation.isDeleted">
+                                            <input maxlength="500" class="form-control" type="text" ng-model="factorySaleQuotation.billingAddress" name="billingAddress" required>
+                                        </label>
+                                        <label class="input" ng-show="factorySaleQuotation.isConfirmed || factorySaleQuotation.isDeleted">
+                                            <span class="form-control">{{factorySaleQuotation.billingAddress}}</span>
+                                        </label>
+                                    </section>
+                                </div>
+                                <div class="row">
+                                    <section class="col col-sm-12">
+                                        <label>Remarks</label>
+                                        <label class="input" ng-show="!factorySaleQuotation.isConfirmed && !factorySaleQuotation.isDeleted">
+                                            <input type="text" class="form-control" ng-model="factorySaleQuotation.remark" />
+                                        </label>
+                                        <label class="input" ng-show="factorySaleQuotation.isConfirmed || factorySaleQuotation.isDeleted">
+                                            <span class="form-control">{{factorySaleQuotation.remark}}</span>
+                                        </label>
+                                    </section>
+                                </div>
+
+                                <div class="col col-sm-12">
+                                    <section>
+                                        <div class="note">
+                                            Updated By
+                                            <a ng-show="(factorySaleQuotation.updatedBy != null && factorySaleQuotation.creator != null)" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{factorySaleQuotation.updatedBy}}" data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                {{factorySaleQuotation.creator}}
+                                            </a>
+                                            <span ng-show="(factorySaleQuotation.updatedBy != null && factorySaleQuotation.creator == null && factorySaleQuotation.creator != null)"> <i class="fa fa-user"></i> {{factorySaleQuotation.creator}}</span>
+                                            on {{factorySaleQuotation.updatedDate}}
+                                        </div>
+                                        <div class="note">
+                                            Approved By
+                                            <a ng-show="(factorySaleQuotation.confirmedBy != null && factorySaleQuotation.approver != null)" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{factorySaleQuotation.confirmedBy}}" data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                {{factorySaleQuotation.approver}}
+                                            </a>
+                                            <span ng-show="(factorySaleQuotation.confirmedBy != null && factorySaleQuotation.approver == null && factorySaleQuotation.approver != null)"> <i class="fa fa-user"></i> {{factorySaleQuotation.approver}}</span>
+                                            on {{factorySaleQuotation.confirmedDate}}
+                                        </div>
+                                    </section>
+                                </div>
+                                <!----End Sales QuotationSales Quotation-->
+                                <!----Contents-->
+                                <div class="row">
+                                    <br ng-show="factorySaleQuotation.isConfirmed || factorySaleQuotation.isDeleted" />
+                                    <span class="input-group-btn">
+                                        <a class="btn btn-primary btn-xs" style="margin:20px 0;width: 150px;height: 25px;line-height:20px; border-radius:3px" title="Add user" ng-click="event.addProductionItems()" ng-show="!factorySaleQuotation.isConfirmed"><i class="fa fa-plus"></i>  Add Production Item</a>
+                                    </span>
+                                </div>
+                                <div class="row">
+                                    @Html.Partial("_Contents")
+                                </div>
+
+                                <!----End Contents-->
+                                <!----Attached Files
+        @Html.Partial("_AttachedFiles")
+        <!---End Attached Files-->
+                            </fieldset>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+
+@section FormAction {
+<ul id="sparks">
+    <li class="sparks-info">
+        <a href="@Url.Action("Index", "FactorySalesQuotationMng")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+    </li>
+    <li class="sparks-info" ng-show="!factorySaleQuotation.isConfirmed && !factorySaleQuotation.isDeleted">
+        <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="event.update()"><i class="fa fa-save"></i></a>
+    </li>
+    @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Approve, HttpContext.Current) != "disabled")
+    {
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default" title="Cancel" ng-click="event.cancel()" ng-disabled="(factorySaleQuotation.isConfirmed == null || !factorySaleQuotation.isConfirmed) || (factorySaleQuotation.isDeleted != null && factorySaleQuotation.isDeleted)" style="color: red">
+                <i class="fa fa-close"></i>
+            </a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default" ng-disabled="(factorySaleQuotation.factorySaleQuotationID == null || factorySaleQuotation.factorySaleQuotationID == 0) || (factorySaleQuotation.isConfirmed != null && factorySaleQuotation.isConfirmed)" title="Approve" ng-click="event.approve()" style="color: red">
+                <i class="fa fa-check"></i>
+            </a>
+        </li>
+    }
+    @if (!string.IsNullOrEmpty(userManualUrl))
+    {
+        <li class="sparks-info">
+            <a target="_blank" href="@userManualUrl" class="btn btn-default" title="Help"><i class="fa fa-info"></i></a>
+        </li>
+    }
+</ul>
+}
+
+
+@section pagejs {
+    <script type="text/javascript">
+        var context = {
+            id: @ViewBag.ID,
+            serviceUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/FactorySalesQuotationMng/',
+            token: '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]',
+            pageSize: @System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"],
+            cookieId: '@HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString()',
+            backendReportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]',
+            title: 'Calculate Price',
+            refreshUrl: '@Url.Action("Edit", "FactorySalesQuotationMng", new { id = UrlParameter.Optional })/',
+            supportServiceUrl: '@(supportServiceRoot)/api/support/',
+        }
+    </script>
+    <script src="~/Views/FactorySalesQuotationMng/Edit.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/jsonService2.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/FactorySalesQuotationMng/Service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+
+
+
+}

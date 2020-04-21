@@ -1,0 +1,253 @@
+﻿@{
+    ViewBag.Title = "Work Order Cost";
+    ViewBag.Module = "Work Order Cost";
+    string workOrderID = Request.Params["workOrderID"];
+}
+
+<style>
+    .append1 {
+        right: 35px !important;
+    }
+
+    .append2 {
+        right: 5px !important;
+    }
+
+    .modal {
+        top: 110px !important;
+    }
+
+    .icon-append-dialog {
+        top: 24px !important;
+    }
+
+    .append1-dialog {
+        right: 48px !important;
+    }
+
+    .append2-dialog {
+        right: 18px !important;
+    }
+
+    .Piece {
+        background-color: #70eef2
+    }
+
+    .Component {
+        background-color: #f8e3d7
+    }
+
+    .tilsoft-table .tilsoft-table-body {
+        height: auto !important;
+        max-height: none;
+    }
+
+    .missing-unit {
+        background-color: #f20d0d
+    }
+</style>
+<form class="row" name="editForm">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>Work Order Cost Infomation</h2>
+            </header>
+            <div>
+                <div class="widget-body">
+                    <div class="smart-form">
+                        <div class="row">
+                            <section class="col col-lg-2">
+                                <label>WorkOrder Code</label>
+                                <span class="form-control">{{data.workOrderUD}}</span>
+                            </section>
+                            <section class="col col-lg-7">
+                                <label>WorkOrder Description</label>
+                                <span class="form-control">{{data.workOrderDescription}}</span>
+                            </section>
+                            <section class="col col-lg-2">
+                                <label>Production Qnt</label>
+                                <span class="form-control" style="text-align:right">{{data.workOrderQnt}}</span>
+                            </section>
+                            <section class="col col-lg-1">
+                                <label>%Wastage</label>
+                                <span class="form-control" style="text-align:right">{{data.workOrderWastagePercent}}</span>
+                            </section>
+                        </div>
+                        <div class="row">
+                            <section class="col col-2">
+                                <label>WorkOrder Status</label>
+                                <span class="form-control">{{data.workOrderStatusNM}}</span>
+                            </section>
+                            <section class="col col-2">
+                                <label>WorkOrder Type</label>
+                                <span class="form-control">{{data.workOrderTypeNM}}</span>
+                            </section>
+                            <section class="col col-2">
+                                <label>Start Date</label>
+                                <span class="form-control">{{data.startDate}}</span>
+                            </section>
+                            <section class="col col-2">
+                                <label>Finish Date</label>
+                                <span class="form-control">{{data.finishDate}}</span>
+                            </section>
+                            <section class="col col-4">
+                                <label>OP Sequence</label>
+                                <span class="form-control">{{data.opSequenceNM}}</span>
+                            </section>
+                        </div>                      
+                        <div class="row">
+                            <div class="col col-lg-2" style="vertical-align:text-bottom">
+                                <a class="btn btn-primary btn-xs m-bottom-15" ng-click="event.addNode($event)" href="#">Add item</a>
+                            </div>
+                            <div class="col col-lg-10 text-right">
+                                <span style="font-weight:bold">Total Number : {{getTotal() | number : 2}}VNĐ</span>
+                            </div>
+                            <section class="col col-lg-12">
+                                <div class="tilsoft-table">
+                                    <div class="tilsoft-table-body" style="margin-top:0px;width:100%;height:auto">
+                                        <table>
+                                            <tr>
+                                                <th style="width:30px">No</th>
+                                                <th style="width:105px"></th>
+                                                <th style="width:110px">Code</th>
+                                                <th>Name</th>
+                                                <th style="width:50px">Unit</th>
+                                                <th style="width:70px">Quantity</th>
+                                                <th style="width:50px">Price</th>
+                                                <th style="width:70px">Total</th>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="13"><b>{{data.productArticleCode}} ({{data.productDescription}}) </b></td>
+                                            </tr>
+                                            <tbody ng-repeat="pItem in Cost">
+                                                <tr class="{{pItem.productionItemTypeNM}}">
+                                                    <td>{{$index+1}}</td>
+                                                    <td style="text-align:right">
+                                                        <a ng-click="event.edit(pItem)" href="#" class="btn btn-warning btn-xs" ng-disabled="pItem.workOrderStatusID==2 || pItem.workOrderStatusID==3 || pItem.workOrderStatusID==4 || pItem.workOrderStatusID==5">Edit</a>
+                                                        <a ng-click="event.delete(pItem)" href="#" class="btn btn-danger btn-xs" ng-disabled="pItem.workOrderStatusID==2 || pItem.workOrderStatusID==3 || pItem.workOrderStatusID==4 || pItem.workOrderStatusID==5">Del</a>
+                                                    </td>
+                                                    <td>{{pItem.productionItemUD}}</td>
+                                                    <td>
+                                                        {{pItem.productionItemNM}}
+                                                        <div class="note" ng-if="pItem.productionItemTypeID==2">
+                                                            {{pItem.description}}
+                                                        </div>
+                                                    </td>
+                                                    <td ng-class="pItem.unitID?'':'missing-unit'">{{pItem.unitNM}}</td>
+                                                    <td style="text-align:right">{{pItem.qty}}</td>
+                                                    <td style="text-align:right">{{pItem.costPrice}}</td>
+                                                    <td style="text-align:right">{{pItem.qty * pItem.costPrice | number : 2}}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+    </article>
+    <div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="frmEditNodeForm_ListViewFormat" class="modal fade" style="display: none;z-index:50" data-backdrop="static">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button aria-hidden="true" data-dismiss="modal" class="close" type="button">
+                        ×
+                    </button>
+                    <h4 id="myModalLabel" class="modal-title">Edit Cost</h4>
+                </div>
+                <div class="modal-body smart-form">
+                    <fieldset>
+                        <div class="row">
+                            <div class="row">
+                                <section class="col col-lg-12">
+                                    <label>Item Name</label>
+                                    <input id="productItem" type="text" ng-model="editNodeForm_ListViewFormat.copyOfcurrentNode.productionItemNM" style="width:100%" class="form-control" placeholder="Enter text to search product" ng-show="editNodeForm_ListViewFormat.isNew" />
+                                    <span class="form-control" ng-if="!editNodeForm_ListViewFormat.isNew">{{editNodeForm_ListViewFormat.copyOfcurrentNode.productionItemNM}}</span>
+                                </section>
+                                <section class="col col-lg-6">
+                                    <label>Item Code</label>
+                                    <span class="form-control">{{editNodeForm_ListViewFormat.copyOfcurrentNode.productionItemUD}}</span>
+                                </section>
+                                <section class="col col-lg-2">
+                                    <label>Item Type</label>
+                                    <span class="form-control">{{editNodeForm_ListViewFormat.copyOfcurrentNode.productionItemTypeNM}}</span>
+                                </section>
+                                <section class="col col-lg-2">
+                                    <label>Unit</label>
+                                    <select ng-model="editNodeForm_ListViewFormat.copyOfcurrentNode.unitID" ng-options="unitItem.unitID as unitItem.unitNM for unitItem in editNodeForm_ListViewFormat.copyOfcurrentNode.productionItemUnitDTOs" class="form-control">
+                                        <option value=""></option>
+                                    </select>
+                                </section>
+                                <section class="col col-lg-2">
+                                    <label>Quantity</label>
+                                    <input ng-model="editNodeForm_ListViewFormat.copyOfcurrentNode.qty" class="form-control" style="text-align:right" />
+                                </section>
+                                <section class="col col-lg-2">
+                                    <label>Price</label>
+                                    <input ng-model="editNodeForm_ListViewFormat.copyOfcurrentNode.costPrice" class="form-control" style="text-align:right" />
+                                </section>
+                            </div>                           
+                        </div>
+                    </fieldset>
+                </div>
+                <div class="modal-footer">
+                    <button data-dismiss="modal" class="btn btn-default" type="button" ng-click="editNodeForm_ListViewFormat.event.cancel()">
+                        Cancel
+                    </button>
+                    <button class="btn btn-primary" type="button" ng-click="editNodeForm_ListViewFormat.event.ok()">
+                        OK
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "WorkOrder")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+        </li>
+
+        <li class="sparks-info">
+            <a href="#" class="btn btn-default" title="Save" ng-click="event.update()"><i class="fa fa-save"></i></a>
+        </li>
+
+    </ul>
+}
+@section pagejs {
+    <script src="~/Angular/app/jsonService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/support/service.js?c=@System.Guid.NewGuid().ToString().Replace("-","")"></script>
+    <script type="text/javascript">
+        jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/WorkOrderCost/';
+        jsonService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+        supportService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/support/';
+        supportService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+        var context = {
+            id: '@ViewBag.ID',
+            backUrl: '@Url.Action("Index", "WorkOrder")',
+            refreshUrl: '@Url.Action("Edit", "BOM", new { id = UrlParameter.Optional })/',
+            errMsg: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED',
+            reportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]',
+
+            token: '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]',
+            workOrderID: '@workOrderID',
+            getProductionItemUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/WorkOrderCost/' + 'getProductionItemTypeCost'
+
+        }
+    </script>
+    <script src="~/Views/WorkOrderCost/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/WorkOrderCost/edit.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+
+}

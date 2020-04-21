@@ -1,0 +1,207 @@
+﻿
+@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    var pageSize = System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"];
+    var cookieID = HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString();
+
+    ViewBag.Title = "Search Factory Breakdown";
+    ViewBag.Module = "Client Factory Breakdown";
+    Frontend.APIDTO.APIUserInformation userInfo = (Frontend.APIDTO.APIUserInformation)Session[Frontend.Customize.Common.ProjectDefinition.USER_INFO_SESSION];
+    int userID = userInfo.Data.UserId;
+    ViewBag.Icon = "fa-search";
+}
+
+<form class="row" id="main-form">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Statistics</h2>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div class="col-sm-2" ng-repeat="stat in statistic" style="font-weight:bold">
+                        {{event.getfactoryNM(stat.factoryID)}} (<span style="color: green">{{stat.countFactory}}</span>)
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-search-result" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Search Result</h2>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+
+                    <div avs-scroll grid-handler="gridHandler" class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table">
+                            <div style="width:1480px" class="tilsoft-table-header">
+                                <div style="width:74px">Found(s)<br /><strong style="color:maroon">{{totalRows}} <font style="color:maroon; text-transform:none"></font></strong></div>
+                                <div style="width:70px">Con firmed</div>
+                                <div style="width:80px">Season</div>
+                                <div style="width:160px">Code</div>
+                                <div style="width:100px">Factory</div>
+                                <div style="width: 100px">Image</div>
+                                <div style="width: 70px">Client</div>
+                                <div style="width:100px">Sample Order</div>
+                                <div style="width: 450px">Description</div>
+                                <div style="width: 85px;">Indicated Price</div>
+                                <div style="width: 125px;">Tracking</div>
+                                <div></div>
+                            </div>
+                            <div style="width:1480px" class="tilsoft-table-filter">
+                                <div style="width:74px; text-align:center">
+                                    <a href="javascript:void(0)" class="btn btn-default btn-xs" title="Apply Filter" ng-click="event.refresh()"><i class="fa fa-filter"></i></a>
+                                    <a href="javascript:void(0)" class="btn btn-default btn-xs" title="Clear Filter" ng-click="event.clear()"><i class="fa fa-ban"></i></a>
+                                </div>
+                                <div style="width:70px">
+                                    <select class="form-control search-filter" ng-model="filters.IsConfirmed">
+                                        <option value=""></option>
+                                        <option value="true">YES</option>
+                                        <option value="false">NO</option>
+                                    </select>
+                                </div>
+                                <div style="width: 80px">
+                                    <select class="form-control search-filter" style="width: 100%" ng-model="filters.Season" ng-options="season.seasonValue as season.seasonText for season in season">
+                                        <option value=""></option>
+                                    </select>
+                                    <i></i>
+                                </div>
+                                <div style="width: 160px">
+                                    <input type="text" class="form-control search-filter" style="width:100%; font-size:12px" ng-model="filters.SampleProductUD" />
+                                </div>
+                                <div style="width: 100px">
+                                    <select class="form-control search-filter" style="width: 100%" ng-model="filters.FactoryID" ng-options="factory.factoryID as factory.factoryUD for factory in factory">
+                                        <option value=""></option>
+                                    </select>
+                                    <i></i>
+                                </div>
+                                <div style="width: 100px"></div>
+                                <div style="width:70px">
+                                    <input type="text" class="form-control search-filter" style="width:100%; font-size:12px" ng-model="filters.ClientUD" />
+                                </div>
+                                <div style="width:100px">
+                                    <input type="text" class="form-control search-filter" style="width:100%; font-size:12px" ng-model="filters.SampleOrderUD" />
+                                </div>
+                                <div style="width: 450px">
+                                    <input type="text" class="form-control search-filter" style="width:100%; font-size:12px" ng-model="filters.ArticleDescription" />
+                                </div>
+                                <div style="width: 85px;"></div>
+                                <div style="width: 125px;"></div>
+                                <div></div>
+                            </div>
+                            <div style="width:1480px" class="tilsoft-table-body">
+                                <table>
+                                    <tbody>
+                                        <tr ng-repeat="item in data">
+                                            <td style="width:74px; text-align:center">
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current) == "disabled")
+                                                {
+                                                    <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "FactoryBreakdownMng")/{{item.factoryBreakdownID}}?sampleProductID={{item.sampleProductID}}&modelID={{item.modelID}}" title="View (Read Only)" style="width: 60px" target="_blank"><i class="fa fa-folder-open"></i>View</a>
+                                                }
+                                                else
+                                                {
+                                                    <div ng-show="item.sampleProductID!=null">
+                                                        <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "FactoryBreakdownMng")/{{item.factoryBreakdownID}}?sampleProductID={{item.sampleProductID}}&modelID={{item.modelID}}" title="Edit" target="_blank" style="width: 60px" ng-show="item.isConfirmed != true"><i class="fa fa-pencil-square-o"></i>Edit</a>
+                                                        <a class="btn btn-default btn-xs font-11" href="@Url.Action("Edit", "FactoryBreakdownMng")/{{item.factoryBreakdownID}}?sampleProductID={{item.sampleProductID}}&modelID={{item.modelID}}" title="View (Read Only)" target="_blank" style="width: 60px" ng-show="item.isConfirmed == true"><i class="fa fa-folder-open"></i> View</a>
+                                                    </div>
+                                                    <div ng-show="item.modelID!=null">
+                                                        <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "FactoryBreakdownMng")/{{item.factoryBreakdownID}}?sampleProductID=0&modelID={{item.modelID}}" title="Edit" target="_blank" style="width: 60px" ng-show="item.isConfirmed != true"><i class="fa fa-pencil-square-o"></i>Edit</a>
+                                                        <a class="btn btn-default btn-xs font-11" href="@Url.Action("Edit", "FactoryBreakdownMng")/{{item.factoryBreakdownID}}?sampleProductID=0&modelID={{item.modelID}}" title="View (Read Only)" target="_blank" style="width: 60px" ng-show="item.isConfirmed == true"><i class="fa fa-folder-open"></i> View</a>
+                                                    </div>
+                                                }
+                                            </td>
+                                            <td style="width:70px; text-align: center"><i ng-if="item.isConfirmed" class="fa fa-check"></i></td>
+                                            <td style="width:80px">{{item.season}}</td>
+                                            <td ng-if="item.sampleProductID!=null" style="width: 160px; text-align: center; vertical-align: top">
+                                                {{item.sampleProductUD}}
+                                            </td>
+                                            <td ng-if="item.modelID!=null" style="width: 160px; text-align: center; vertical-align: top">
+                                                {{item.modelUD}}
+                                            </td>
+                                            <td style="width:100px">
+                                                {{item.factoryUD}}
+                                            </td>
+                                            <td style="width: 100px; text-align: center; vertical-align: middle">
+                                                <a href="{{item.fileLocation}}" data-featherlight="image">
+                                                    <img style="width: 95%" ng-src="{{item.thumbnailLocation}}" />
+                                                </a>
+                                            </td>
+                                            <td style="width:70px">{{item.clientUD}}</td>
+                                            <td style="width:100px;">{{item.sampleOrderUD}}</td>
+                                            <td ng-if="item.sampleProductID!=null" style="width: 450px; vertical-align: middle">
+                                                {{item.articleDescription}}
+                                            </td>
+                                            <td ng-if="item.modelID!=null" style="width: 450px; vertical-align: middle">
+                                                {{item.modelNM}}
+                                            </td>
+                                            <td style="width: 85px; text-align: right;">{{item.indicatedPrice | currency:'$':2}}</td>
+                                            <td style="width: 125px;">
+                                                <div ng-show="(item.confirmerName!=null)">
+                                                    <span class="box">
+                                                        <i class="fa fa-user"></i> <strong>Confirmed By: </strong>
+                                                        <a ng-show="item.confirmerName != null" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.confirmedBy}}" data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">{{item.confirmerName}}</a>
+                                                        on {{item.confirmedDate}}
+                                                    </span>
+                                                </div>
+                                                <div ng-show="(item.updatorName!=null)">
+                                                    <span class="box">
+                                                        <i class="fa fa-user"></i> <strong>Updated By: </strong>
+                                                        <a ng-show="item.updatorName != null" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.updatedBy}}" data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">{{item.updatorName}}</a>
+                                                        on {{item.updatedDate}}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Search" ng-click="event.refresh()"><i class="fa fa-search"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Clear" ng-click="event.clear()"><i class="fa fa-refresh"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="#" class="btn btn-default" title="Export to excel" ng-click="event.exportExcel()" style="color: #31B404"><i class="fa fa-file-excel-o"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="#" class="btn btn-default" title="Import to from excel" ng-click="event.importExcel()" style="color: blue"><i class="fa fa-file-excel-o"></i></a>
+        </li>
+    </ul>
+}
+
+
+@section pagejs {
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(serviceRoot)/api/factory-breakdown/',
+            token: '@token',
+            pageSize: '@pageSize',
+            cookieID: '@cookieID',
+            userID: @userID,
+            backendReportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]'
+        }
+    </script>
+    <script type="text/javascript" src="~/Views/FactoryBreakdownMng/index.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Views/FactoryBreakdownMng/service.js?v=@guid"></script>
+}
+
+

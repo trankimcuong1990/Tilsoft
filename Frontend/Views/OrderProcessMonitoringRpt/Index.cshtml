@@ -1,0 +1,88 @@
+﻿@{
+    ViewBag.Title = "Order Process";
+    ViewBag.Module = "Order Process";
+    ViewBag.Icon = "fa-sitemap";
+
+    string offerViewUrl = Url.Action("Overview", "Offer", new { id = UrlParameter.Optional });
+    string saleOrderViewUrl = Url.Action("Overview", "SaleOrder", new { id = UrlParameter.Optional });
+    string factoryOrderViewUrl = Url.Action("Overview", "FactoryOrder", new { id = UrlParameter.Optional });
+    string loadingPlanViewUrl = Url.Action("Overview", "LoadingPlan", new { id = UrlParameter.Optional });
+    string eCommercialInvoiceViewUrl = string.Empty;
+}
+
+<div class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-1" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-sitemap"></i> </span>
+                <h2>Order Process</h2>
+            </header>
+            <div>
+                <div class="widget-body">
+                    <div class="tree smart-form">
+                        <ul>
+                            <li>
+                                <span class="label label-success"><i class="fa fa-lg fa-folder-open"></i> {{data.offerUD}}</span>
+                                <a target="_blank" href="@offerViewUrl/{{data.offerID}}/0">Detail &raquo;</a>
+                                <ul>
+                                    <li ng-repeat="saleorder in data.saleOrderDTOs">
+                                        <span class="{{saleorder.isSelected ? 'label label-success' : ''}}"><i class="fa fa-lg fa-plus-circle"></i> {{saleorder.proformaInvoiceNo}}</span>
+                                        <a target="_blank" href="@saleOrderViewUrl/{{saleorder.saleOrderID}}/2">Detail &raquo;</a>
+                                        <ul>
+                                            <li style="{{saleorder.isSelected ? '' : 'display: none;'}}">
+                                                <span class="{{$parent.factoryOrderSelected && saleorder.isSelected ? 'label label-success' : ''}}"><i class="fa fa-lg fa-plus-circle"></i> Factory Order</span>
+                                                <ul>
+                                                    <li style="{{$parent.factoryOrderSelected && saleorder.isSelected ? '' : 'display: none;'}}" ng-repeat="factoryorder in saleorder.factoryOrderDTOs">
+                                                        <span class="{{saleorder.isSelected ? 'label label-success' : ''}}"><i class="icon-leaf"></i> {{factoryorder.factoryOrderUD}}</span>
+                                                        <a target="_blank" href="@factoryOrderViewUrl/{{factoryorder.factoryOrderID}}/0">Detail &raquo;</a>
+                                                    </li>
+                                                </ul>
+                                            </li>
+                                            <li style="{{saleorder.isSelected ? '' : 'display: none;'}}">
+                                                <span title="Collapse this branch"><i class="fa fa-lg fa-plus-circle"></i> Loading Plan</span>
+                                                <ul>
+                                                    <li style="display: none;" ng-repeat="loadingplan in saleorder.loadingPlanDTOs">
+                                                        <span><i class="icon-leaf"></i> {{loadingplan.loadingPlanUD}}</span>
+                                                        <a target="_blank" href="@loadingPlanViewUrl/{{loadingplan.loadingPlanID}}">Detail &raquo;</a>
+                                                    </li>
+                                                </ul>
+                                            </li>
+                                            <li style="{{saleorder.isSelected ? '' : 'display: none;'}}">
+                                                <span title="Collapse this branch"><i class="fa fa-lg fa-plus-circle"></i> Commercial Invoice</span>
+                                                <ul>
+                                                    <li style="display: none;" ng-repeat="commercialinvoice in saleorder.eCommercialInvoiceDTOs">
+                                                        <span><i class="icon-leaf"></i> {{commercialinvoice.invoiceNo}}</span>
+                                                        <a target="_blank" href="@eCommercialInvoiceViewUrl/{{commercialinvoice.eCommercialInvoiceID}}">Detail &raquo;</a>
+                                                    </li>
+                                                </ul>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction {
+    <ul id="sparks">
+    </ul>
+}
+
+@section pagejs {
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/orderprocessmonitoringrpt/',
+            token: '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]',
+            id: @ViewBag.ID,
+            type: '@ViewBag.Type'
+        }
+    </script>
+    <script src="~/Views/OrderProcessMonitoringRpt/index.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/jsonService2.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/OrderProcessMonitoringRpt/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}

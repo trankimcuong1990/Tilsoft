@@ -1,0 +1,407 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+    <Schema Namespace="CashBookBalanceMngModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="CashBook">
+          <Key>
+            <PropertyRef Name="CashBookID" />
+          </Key>
+          <Property Name="CashBookID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="CashBookUD" Type="varchar" MaxLength="15" />
+          <Property Name="BookDate" Type="date" />
+          <Property Name="CashBookTypeID" Type="int" />
+          <Property Name="CashBookSourceOfFlowID" Type="int" />
+          <Property Name="CashBookLocationID" Type="int" />
+          <Property Name="CashBookPaidByID" Type="int" />
+          <Property Name="CashBookPostCostID" Type="int" />
+          <Property Name="CashBookCostItemID" Type="int" />
+          <Property Name="CashBookCostItemDetailID" Type="int" />
+          <Property Name="CashBookReceiverName" Type="varchar" MaxLength="155" />
+          <Property Name="CashBookOtherCostItemDetail" Type="varchar" MaxLength="255" />
+          <Property Name="VNDAmount" Type="numeric" Precision="18" Scale="2" />
+          <Property Name="VNDUSDExRate" Type="numeric" Precision="18" Scale="2" />
+          <Property Name="UpdatedBy" Type="int" />
+          <Property Name="UpdatedDate" Type="datetime" />
+        </EntityType>
+        <EntityType Name="CashBookBalance">
+          <Key>
+            <PropertyRef Name="CashBookBalanceID" />
+          </Key>
+          <Property Name="CashBookBalanceID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="BalanceMonth" Type="int" />
+          <Property Name="BalanceYear" Type="int" />
+          <Property Name="UpdatedBy" Type="int" />
+          <Property Name="UpdatedDate" Type="datetime" />
+        </EntityType>
+        <EntityType Name="CashBookBalanceDetail">
+          <Key>
+            <PropertyRef Name="CashBookBalanceDetailID" />
+          </Key>
+          <Property Name="CashBookBalanceDetailID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="CashBookBalanceID" Type="int" />
+          <Property Name="CashBookPaidByID" Type="int" />
+          <Property Name="VNDAmount" Type="numeric" Precision="18" Scale="2" />
+        </EntityType>
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'Tilsoft.dbo.CashBookBalanceMng_CashBookBalance_View' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="CashBookBalanceMng_CashBookBalance_View">
+          <Key>
+            <PropertyRef Name="CashBookBalanceID" />
+          </Key>
+          <Property Name="CashBookBalanceID" Type="int" Nullable="false" StoreGeneratedPattern="Identity" />
+          <Property Name="BalanceMonth" Type="int" />
+          <Property Name="BalanceYear" Type="int" />
+          <Property Name="UpdatedBy" Type="int" />
+          <Property Name="UpdatedDate" Type="datetime" />
+          <Property Name="UpdatorName" Type="nvarchar" MaxLength="500" />
+        </EntityType>
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'Tilsoft.dbo.CashBookBalanceMng_CashBookBalanceDetail_View' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="CashBookBalanceMng_CashBookBalanceDetail_View">
+          <Key>
+            <PropertyRef Name="CashBookBalanceDetailID" />
+          </Key>
+          <Property Name="CashBookBalanceDetailID" Type="int" Nullable="false" />
+          <Property Name="CashBookBalanceID" Type="int" />
+          <Property Name="CashBookPaidByID" Type="int" />
+          <Property Name="VNDAmount" Type="numeric" Precision="18" Scale="2" />
+          <Property Name="PaidByNM" Type="varchar" MaxLength="500" />
+        </EntityType>
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'Tilsoft.dbo.CashBookBalanceMng_CashBookBalanceDetailData_View' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="CashBookBalanceMng_CashBookBalanceDetailData_View">
+          <Key>
+            <PropertyRef Name="PrimaryID" />
+          </Key>
+          <Property Name="PrimaryID" Type="bigint" Nullable="false" />
+          <Property Name="CashBookPaidByID" Type="int" />
+          <Property Name="VNDAmount" Type="numeric" Precision="18" Scale="2" />
+        </EntityType>
+        <Association Name="FK_CashBookBalanceDetail_CashBookBalance">
+          <End Role="CashBookBalance" Type="Self.CashBookBalance" Multiplicity="0..1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="CashBookBalanceDetail" Type="Self.CashBookBalanceDetail" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="CashBookBalance">
+              <PropertyRef Name="CashBookBalanceID" />
+            </Principal>
+            <Dependent Role="CashBookBalanceDetail">
+              <PropertyRef Name="CashBookBalanceID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Function Name="CashBookBalanceMng_function_CloseEntryCashBookBalance" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="Month" Type="int" Mode="In" />
+          <Parameter Name="Year" Type="int" Mode="In" />
+        </Function>
+        <Function Name="CashBookBalanceMng_function_CloseEntryCashBookBalance2" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="Month" Type="int" Mode="In" />
+          <Parameter Name="Year" Type="int" Mode="In" />
+          <Parameter Name="UserId" Type="int" Mode="In" />
+        </Function>
+        <Function Name="CashBookBalanceMng_function_SearchCashBookBalance" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="BalanceMonth" Type="int" Mode="In" />
+          <Parameter Name="BalanceYear" Type="int" Mode="In" />
+          <Parameter Name="SortedBy" Type="varchar" Mode="In" />
+          <Parameter Name="SortedDirection" Type="varchar" Mode="In" />
+        </Function>
+        <EntityContainer Name="CashBookBalanceMngModelStoreContainer">
+          <EntitySet Name="CashBook" EntityType="Self.CashBook" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="CashBookBalance" EntityType="Self.CashBookBalance" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="CashBookBalanceDetail" EntityType="Self.CashBookBalanceDetail" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="CashBookBalanceMng_CashBookBalance_View" EntityType="Self.CashBookBalanceMng_CashBookBalance_View" store:Type="Views" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+    [CashBookBalanceMng_CashBookBalance_View].[CashBookBalanceID] AS [CashBookBalanceID], 
+    [CashBookBalanceMng_CashBookBalance_View].[BalanceMonth] AS [BalanceMonth], 
+    [CashBookBalanceMng_CashBookBalance_View].[BalanceYear] AS [BalanceYear], 
+    [CashBookBalanceMng_CashBookBalance_View].[UpdatedBy] AS [UpdatedBy], 
+    [CashBookBalanceMng_CashBookBalance_View].[UpdatedDate] AS [UpdatedDate], 
+    [CashBookBalanceMng_CashBookBalance_View].[UpdatorName] AS [UpdatorName]
+    FROM [dbo].[CashBookBalanceMng_CashBookBalance_View] AS [CashBookBalanceMng_CashBookBalance_View]</DefiningQuery>
+          </EntitySet>
+          <EntitySet Name="CashBookBalanceMng_CashBookBalanceDetail_View" EntityType="Self.CashBookBalanceMng_CashBookBalanceDetail_View" store:Type="Views" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+    [CashBookBalanceMng_CashBookBalanceDetail_View].[CashBookBalanceDetailID] AS [CashBookBalanceDetailID], 
+    [CashBookBalanceMng_CashBookBalanceDetail_View].[CashBookBalanceID] AS [CashBookBalanceID], 
+    [CashBookBalanceMng_CashBookBalanceDetail_View].[CashBookPaidByID] AS [CashBookPaidByID], 
+    [CashBookBalanceMng_CashBookBalanceDetail_View].[VNDAmount] AS [VNDAmount], 
+    [CashBookBalanceMng_CashBookBalanceDetail_View].[PaidByNM] AS [PaidByNM]
+    FROM [dbo].[CashBookBalanceMng_CashBookBalanceDetail_View] AS [CashBookBalanceMng_CashBookBalanceDetail_View]</DefiningQuery>
+          </EntitySet>
+          <EntitySet Name="CashBookBalanceMng_CashBookBalanceDetailData_View" EntityType="Self.CashBookBalanceMng_CashBookBalanceDetailData_View" store:Type="Views" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+    [CashBookBalanceMng_CashBookBalanceDetailData_View].[PrimaryID] AS [PrimaryID], 
+    [CashBookBalanceMng_CashBookBalanceDetailData_View].[CashBookPaidByID] AS [CashBookPaidByID], 
+    [CashBookBalanceMng_CashBookBalanceDetailData_View].[VNDAmount] AS [VNDAmount]
+    FROM [dbo].[CashBookBalanceMng_CashBookBalanceDetailData_View] AS [CashBookBalanceMng_CashBookBalanceDetailData_View]</DefiningQuery>
+          </EntitySet>
+          <AssociationSet Name="FK_CashBookBalanceDetail_CashBookBalance" Association="Self.FK_CashBookBalanceDetail_CashBookBalance">
+            <End Role="CashBookBalance" EntitySet="CashBookBalance" />
+            <End Role="CashBookBalanceDetail" EntitySet="CashBookBalanceDetail" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema></edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="CashBookBalanceMngModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="CashBook">
+          <Key>
+            <PropertyRef Name="CashBookID" />
+          </Key>
+          <Property Name="CashBookID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="CashBookUD" Type="String" MaxLength="15" FixedLength="false" Unicode="false" />
+          <Property Name="BookDate" Type="DateTime" Precision="0" />
+          <Property Name="CashBookTypeID" Type="Int32" />
+          <Property Name="CashBookSourceOfFlowID" Type="Int32" />
+          <Property Name="CashBookLocationID" Type="Int32" />
+          <Property Name="CashBookPaidByID" Type="Int32" />
+          <Property Name="CashBookPostCostID" Type="Int32" />
+          <Property Name="CashBookCostItemID" Type="Int32" />
+          <Property Name="CashBookCostItemDetailID" Type="Int32" />
+          <Property Name="CashBookReceiverName" Type="String" MaxLength="155" FixedLength="false" Unicode="false" />
+          <Property Name="CashBookOtherCostItemDetail" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="VNDAmount" Type="Decimal" Precision="18" Scale="2" />
+          <Property Name="VNDUSDExRate" Type="Decimal" Precision="18" Scale="2" />
+          <Property Name="UpdatedBy" Type="Int32" />
+          <Property Name="UpdatedDate" Type="DateTime" Precision="3" />
+        </EntityType>
+        <EntityType Name="CashBookBalance">
+          <Key>
+            <PropertyRef Name="CashBookBalanceID" />
+          </Key>
+          <Property Name="CashBookBalanceID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="BalanceMonth" Type="Int32" />
+          <Property Name="BalanceYear" Type="Int32" />
+          <Property Name="UpdatedBy" Type="Int32" />
+          <Property Name="UpdatedDate" Type="DateTime" Precision="3" />
+          <NavigationProperty Name="CashBookBalanceDetail" Relationship="Self.FK_CashBookBalanceDetail_CashBookBalance" FromRole="CashBookBalance" ToRole="CashBookBalanceDetail" />
+        </EntityType>
+        <EntityType Name="CashBookBalanceDetail">
+          <Key>
+            <PropertyRef Name="CashBookBalanceDetailID" />
+          </Key>
+          <Property Name="CashBookBalanceDetailID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="CashBookBalanceID" Type="Int32" />
+          <Property Name="CashBookPaidByID" Type="Int32" />
+          <Property Name="VNDAmount" Type="Decimal" Precision="18" Scale="2" />
+          <NavigationProperty Name="CashBookBalance" Relationship="Self.FK_CashBookBalanceDetail_CashBookBalance" FromRole="CashBookBalanceDetail" ToRole="CashBookBalance" />
+        </EntityType>
+        <EntityType Name="CashBookBalanceMng_CashBookBalance_View">
+          <Key>
+            <PropertyRef Name="CashBookBalanceID" />
+          </Key>
+          <Property Name="CashBookBalanceID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="BalanceMonth" Type="Int32" />
+          <Property Name="BalanceYear" Type="Int32" />
+          <Property Name="UpdatedBy" Type="Int32" />
+          <Property Name="UpdatedDate" Type="DateTime" Precision="3" />
+          <NavigationProperty Name="CashBookBalanceMng_CashBookBalanceDetail_View" Relationship="CashBookBalanceMngModel.CashBookBalanceMng_CashBookBalance_ViewCashBookBalanceMng_CashBookBalanceDetail_View" FromRole="CashBookBalanceMng_CashBookBalance_View" ToRole="CashBookBalanceMng_CashBookBalanceDetail_View" />
+          <Property Name="UpdatorName" Type="String" MaxLength="500" FixedLength="false" Unicode="true" />
+        </EntityType>
+        <EntityType Name="CashBookBalanceMng_CashBookBalanceDetail_View">
+          <Key>
+            <PropertyRef Name="CashBookBalanceDetailID" />
+          </Key>
+          <Property Name="CashBookBalanceDetailID" Type="Int32" Nullable="false" />
+          <Property Name="CashBookBalanceID" Type="Int32" />
+          <Property Name="CashBookPaidByID" Type="Int32" />
+          <Property Name="VNDAmount" Type="Decimal" Precision="18" Scale="2" />
+          <Property Name="PaidByNM" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="CashBookBalanceMng_CashBookBalance_View" Relationship="CashBookBalanceMngModel.CashBookBalanceMng_CashBookBalance_ViewCashBookBalanceMng_CashBookBalanceDetail_View" FromRole="CashBookBalanceMng_CashBookBalanceDetail_View" ToRole="CashBookBalanceMng_CashBookBalance_View" />
+        </EntityType>
+        <Association Name="FK_CashBookBalanceDetail_CashBookBalance">
+          <End Role="CashBookBalance" Type="Self.CashBookBalance" Multiplicity="0..1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="CashBookBalanceDetail" Type="Self.CashBookBalanceDetail" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="CashBookBalance">
+              <PropertyRef Name="CashBookBalanceID" />
+            </Principal>
+            <Dependent Role="CashBookBalanceDetail">
+              <PropertyRef Name="CashBookBalanceID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="CashBookBalanceMngEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="CashBook" EntityType="Self.CashBook" />
+          <EntitySet Name="CashBookBalance" EntityType="Self.CashBookBalance" />
+          <EntitySet Name="CashBookBalanceDetail" EntityType="Self.CashBookBalanceDetail" />
+          <EntitySet Name="CashBookBalanceMng_CashBookBalance_View" EntityType="Self.CashBookBalanceMng_CashBookBalance_View" />
+          <EntitySet Name="CashBookBalanceMng_CashBookBalanceDetail_View" EntityType="Self.CashBookBalanceMng_CashBookBalanceDetail_View" />
+          <AssociationSet Name="FK_CashBookBalanceDetail_CashBookBalance" Association="Self.FK_CashBookBalanceDetail_CashBookBalance">
+            <End Role="CashBookBalance" EntitySet="CashBookBalance" />
+            <End Role="CashBookBalanceDetail" EntitySet="CashBookBalanceDetail" />
+          </AssociationSet>
+          <AssociationSet Name="CashBookBalanceMng_CashBookBalance_ViewCashBookBalanceMng_CashBookBalanceDetail_View" Association="CashBookBalanceMngModel.CashBookBalanceMng_CashBookBalance_ViewCashBookBalanceMng_CashBookBalanceDetail_View">
+            <End Role="CashBookBalanceMng_CashBookBalance_View" EntitySet="CashBookBalanceMng_CashBookBalance_View" />
+            <End Role="CashBookBalanceMng_CashBookBalanceDetail_View" EntitySet="CashBookBalanceMng_CashBookBalanceDetail_View" />
+          </AssociationSet>
+          <FunctionImport Name="CashBookBalanceMng_function_SearchCashBookBalance" EntitySet="CashBookBalanceMng_CashBookBalance_View" ReturnType="Collection(CashBookBalanceMngModel.CashBookBalanceMng_CashBookBalance_View)">
+            <Parameter Name="BalanceMonth" Mode="In" Type="Int32" />
+            <Parameter Name="BalanceYear" Mode="In" Type="Int32" />
+            <Parameter Name="SortedBy" Mode="In" Type="String" />
+            <Parameter Name="SortedDirection" Mode="In" Type="String" />
+          </FunctionImport>
+          <EntitySet Name="CashBookBalanceMng_CashBookBalanceDetailData_View" EntityType="CashBookBalanceMngModel.CashBookBalanceMng_CashBookBalanceDetailData_View" />
+          <FunctionImport Name="CashBookBalanceMng_function_CloseEntryCashBookBalance" EntitySet="CashBookBalanceMng_CashBookBalanceDetailData_View" ReturnType="Collection(CashBookBalanceMngModel.CashBookBalanceMng_CashBookBalanceDetailData_View)">
+            <Parameter Name="Month" Mode="In" Type="Int32" />
+            <Parameter Name="Year" Mode="In" Type="Int32" />
+          </FunctionImport>
+          <FunctionImport Name="CashBookBalanceMng_function_CloseEntryCashBookBalance2" ReturnType="Collection(Int32)">
+            <Parameter Name="Month" Mode="In" Type="Int32" />
+            <Parameter Name="Year" Mode="In" Type="Int32" />
+            <Parameter Name="UserId" Mode="In" Type="Int32" />
+          </FunctionImport>
+        </EntityContainer>
+        <Association Name="CashBookBalanceMng_CashBookBalance_ViewCashBookBalanceMng_CashBookBalanceDetail_View">
+          <End Type="CashBookBalanceMngModel.CashBookBalanceMng_CashBookBalance_View" Role="CashBookBalanceMng_CashBookBalance_View" Multiplicity="0..1" />
+          <End Type="CashBookBalanceMngModel.CashBookBalanceMng_CashBookBalanceDetail_View" Role="CashBookBalanceMng_CashBookBalanceDetail_View" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="CashBookBalanceMng_CashBookBalance_View">
+              <PropertyRef Name="CashBookBalanceID" />
+            </Principal>
+            <Dependent Role="CashBookBalanceMng_CashBookBalanceDetail_View">
+              <PropertyRef Name="CashBookBalanceID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <ComplexType Name="CashBookBalanceMng_function_CloseEntryCashBookBalance_Result">
+          <Property Type="Int32" Name="CashBookPaidByID" Nullable="true" />
+          <Property Type="Decimal" Name="VNDAmount" Nullable="true" Precision="38" Scale="2" />
+        </ComplexType>
+        <ComplexType Name="CashBookBalanceMng_function_CloseEntryCashBookBalance_Result1">
+          <Property Type="Int32" Name="CashBookPaidByID" Nullable="true" />
+          <Property Type="Decimal" Name="VNDAmount" Nullable="true" Precision="38" Scale="2" />
+        </ComplexType>
+        <EntityType Name="CashBookBalanceMng_CashBookBalanceDetailData_View">
+          <Key>
+            <PropertyRef Name="PrimaryID" />
+          </Key>
+          <Property Name="PrimaryID" Type="Int64" Nullable="false" />
+          <Property Name="CashBookPaidByID" Type="Int32" />
+          <Property Name="VNDAmount" Type="Decimal" Precision="18" Scale="2" />
+        </EntityType>
+        <ComplexType Name="CashBookBalanceMng_function_CloseEntryCashBookBalance_Result2">
+          <Property Type="Int64" Name="PrimaryID" Nullable="false" />
+          <Property Type="Int32" Name="CashBookPaidByID" Nullable="true" />
+          <Property Type="Decimal" Name="VNDAmount" Nullable="true" Precision="38" Scale="2" />
+        </ComplexType>
+        <ComplexType Name="CashBookBalanceMng_function_CloseEntryCashBookBalance2_Result">
+          <Property Type="Decimal" Name="Column1" Nullable="true" Precision="18" Scale="2" />
+          <Property Type="Decimal" Name="Column2" Nullable="true" Precision="18" Scale="2" />
+        </ComplexType>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="CashBookBalanceMngModelStoreContainer" CdmEntityContainer="CashBookBalanceMngEntities">
+          <EntitySetMapping Name="CashBook">
+            <EntityTypeMapping TypeName="CashBookBalanceMngModel.CashBook">
+              <MappingFragment StoreEntitySet="CashBook">
+                <ScalarProperty Name="CashBookID" ColumnName="CashBookID" />
+                <ScalarProperty Name="CashBookUD" ColumnName="CashBookUD" />
+                <ScalarProperty Name="BookDate" ColumnName="BookDate" />
+                <ScalarProperty Name="CashBookTypeID" ColumnName="CashBookTypeID" />
+                <ScalarProperty Name="CashBookSourceOfFlowID" ColumnName="CashBookSourceOfFlowID" />
+                <ScalarProperty Name="CashBookLocationID" ColumnName="CashBookLocationID" />
+                <ScalarProperty Name="CashBookPaidByID" ColumnName="CashBookPaidByID" />
+                <ScalarProperty Name="CashBookPostCostID" ColumnName="CashBookPostCostID" />
+                <ScalarProperty Name="CashBookCostItemID" ColumnName="CashBookCostItemID" />
+                <ScalarProperty Name="CashBookCostItemDetailID" ColumnName="CashBookCostItemDetailID" />
+                <ScalarProperty Name="CashBookReceiverName" ColumnName="CashBookReceiverName" />
+                <ScalarProperty Name="CashBookOtherCostItemDetail" ColumnName="CashBookOtherCostItemDetail" />
+                <ScalarProperty Name="VNDAmount" ColumnName="VNDAmount" />
+                <ScalarProperty Name="VNDUSDExRate" ColumnName="VNDUSDExRate" />
+                <ScalarProperty Name="UpdatedBy" ColumnName="UpdatedBy" />
+                <ScalarProperty Name="UpdatedDate" ColumnName="UpdatedDate" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="CashBookBalance">
+            <EntityTypeMapping TypeName="CashBookBalanceMngModel.CashBookBalance">
+              <MappingFragment StoreEntitySet="CashBookBalance">
+                <ScalarProperty Name="CashBookBalanceID" ColumnName="CashBookBalanceID" />
+                <ScalarProperty Name="BalanceMonth" ColumnName="BalanceMonth" />
+                <ScalarProperty Name="BalanceYear" ColumnName="BalanceYear" />
+                <ScalarProperty Name="UpdatedBy" ColumnName="UpdatedBy" />
+                <ScalarProperty Name="UpdatedDate" ColumnName="UpdatedDate" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="CashBookBalanceDetail">
+            <EntityTypeMapping TypeName="CashBookBalanceMngModel.CashBookBalanceDetail">
+              <MappingFragment StoreEntitySet="CashBookBalanceDetail">
+                <ScalarProperty Name="CashBookBalanceDetailID" ColumnName="CashBookBalanceDetailID" />
+                <ScalarProperty Name="CashBookBalanceID" ColumnName="CashBookBalanceID" />
+                <ScalarProperty Name="CashBookPaidByID" ColumnName="CashBookPaidByID" />
+                <ScalarProperty Name="VNDAmount" ColumnName="VNDAmount" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="CashBookBalanceMng_CashBookBalance_View">
+            <EntityTypeMapping TypeName="CashBookBalanceMngModel.CashBookBalanceMng_CashBookBalance_View">
+              <MappingFragment StoreEntitySet="CashBookBalanceMng_CashBookBalance_View">
+                <ScalarProperty Name="UpdatorName" ColumnName="UpdatorName" />
+                <ScalarProperty Name="CashBookBalanceID" ColumnName="CashBookBalanceID" />
+                <ScalarProperty Name="BalanceMonth" ColumnName="BalanceMonth" />
+                <ScalarProperty Name="BalanceYear" ColumnName="BalanceYear" />
+                <ScalarProperty Name="UpdatedBy" ColumnName="UpdatedBy" />
+                <ScalarProperty Name="UpdatedDate" ColumnName="UpdatedDate" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="CashBookBalanceMng_CashBookBalanceDetail_View">
+            <EntityTypeMapping TypeName="CashBookBalanceMngModel.CashBookBalanceMng_CashBookBalanceDetail_View">
+              <MappingFragment StoreEntitySet="CashBookBalanceMng_CashBookBalanceDetail_View">
+                <ScalarProperty Name="CashBookBalanceDetailID" ColumnName="CashBookBalanceDetailID" />
+                <ScalarProperty Name="CashBookBalanceID" ColumnName="CashBookBalanceID" />
+                <ScalarProperty Name="CashBookPaidByID" ColumnName="CashBookPaidByID" />
+                <ScalarProperty Name="VNDAmount" ColumnName="VNDAmount" />
+                <ScalarProperty Name="PaidByNM" ColumnName="PaidByNM" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <FunctionImportMapping FunctionImportName="CashBookBalanceMng_function_SearchCashBookBalance" FunctionName="CashBookBalanceMngModel.Store.CashBookBalanceMng_function_SearchCashBookBalance" />
+          <EntitySetMapping Name="CashBookBalanceMng_CashBookBalanceDetailData_View">
+            <EntityTypeMapping TypeName="CashBookBalanceMngModel.CashBookBalanceMng_CashBookBalanceDetailData_View">
+              <MappingFragment StoreEntitySet="CashBookBalanceMng_CashBookBalanceDetailData_View">
+                <ScalarProperty Name="VNDAmount" ColumnName="VNDAmount" />
+                <ScalarProperty Name="CashBookPaidByID" ColumnName="CashBookPaidByID" />
+                <ScalarProperty Name="PrimaryID" ColumnName="PrimaryID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <FunctionImportMapping FunctionImportName="CashBookBalanceMng_function_CloseEntryCashBookBalance" FunctionName="CashBookBalanceMngModel.Store.CashBookBalanceMng_function_CloseEntryCashBookBalance">
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="CashBookBalanceMng_function_CloseEntryCashBookBalance2" FunctionName="CashBookBalanceMngModel.Store.CashBookBalanceMng_function_CloseEntryCashBookBalance2">
+          </FunctionImportMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="false" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="False" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

@@ -1,0 +1,32 @@
+﻿@{
+    ViewBag.Module = "User Dashboard";
+    Frontend.APIDTO.APIUserInformation userInfo = (Frontend.APIDTO.APIUserInformation)ViewBag.CurrentLoginUserInfo;
+}
+
+<div class="row">
+    @{
+        foreach (var widget in userInfo.Data.Permissions.Where(o => o.NavType == "W" && o.ParentID > 0 && o.CanRead == true).OrderBy(o => o.DisplayOrder))
+        {
+            Html.RenderPartial("~/Views/Dashboard/Widget/" + widget.ModuleUD + ".cshtml");
+        }
+    }
+</div>
+
+@section pagejs{
+    <script src="~/Angular/app/jsonService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script type="text/javascript">
+        var context = {
+            token: '@ViewBag.Token',
+            serviceUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/dashboardmng/'
+        }
+        $('.page-title').hide();
+    </script>
+    <script src="~/Views/Dashboard/user.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+
+    @{
+        foreach (var widget in userInfo.Data.Permissions.Where(o => o.NavType == "W" && o.ParentID > 0 && o.CanRead == true).OrderBy(o => o.DisplayOrder))
+        {
+            <script src="~/Views/Dashboard/Widget/@(widget.ModuleUD).js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+        }
+    }
+}

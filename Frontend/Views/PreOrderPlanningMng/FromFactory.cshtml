@@ -1,0 +1,223 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var pageSize = System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"];
+
+    var factoryID = ViewBag.FactoryID;
+}
+
+<style>
+    .tilsoft-table-header, .tilsoft-table-totalrow, .tilsoft-table-body {
+        width: 1673px;
+    }
+
+        .tilsoft-table-header > div {
+            height: 50px !important;
+            text-align: center !important;
+            background-color: #eee;
+        }
+
+    .tilsoft-table-totalrow {
+        margin-top: 50px;
+    }
+
+        .tilsoft-table-totalrow > div {
+        }
+
+    .tilsoft-table-body {
+        margin-top: 80px !important;
+    }
+
+        .tilsoft-table-header > div:nth-child(1),
+        .tilsoft-table-totalrow > div:nth-child(1),
+        .tilsoft-table-body table > tbody > tr > td:nth-child(1) {
+            width: 60px;
+            text-align: center;
+        }
+
+        .tilsoft-table-header > div:nth-child(2),
+        .tilsoft-table-totalrow > div:nth-child(2),
+        .tilsoft-table-body table > tbody > tr > td:nth-child(2) {
+            width: 150px;
+            text-align: center;
+        }
+
+        .tilsoft-table-header > div:nth-child(3),
+        .tilsoft-table-totalrow > div:nth-child(3),
+        .tilsoft-table-body table > tbody > tr > td:nth-child(3) {
+            width: 80px;
+            text-align: right;
+        }
+
+        .tilsoft-table-header > div:nth-child(4),
+        .tilsoft-table-totalrow > div:nth-child(4),
+        .tilsoft-table-body table > tbody > tr > td:nth-child(4) {
+            width: 80px;
+            text-align: right;
+        }
+
+        .tilsoft-table-header > div:nth-child(5),
+        .tilsoft-table-totalrow > div:nth-child(5),
+        .tilsoft-table-body table > tbody > tr > td:nth-child(5) {
+            width: 60px;
+            text-align: right;
+        }
+
+        .tilsoft-table-header > div:nth-child(6),
+        .tilsoft-table-totalrow > div:nth-child(6),
+        .tilsoft-table-body table > tbody > tr > td:nth-child(6) {
+            width: 80px;
+            text-align: right;
+        }
+
+        .tilsoft-table-header > div:nth-child(7),
+        .tilsoft-table-totalrow > div:nth-child(7),
+        .tilsoft-table-body table > tbody > tr > td:nth-child(7) {
+            width: 80px;
+            text-align: right;
+        }
+
+        .tilsoft-table-header > div:nth-child(8),
+        .tilsoft-table-totalrow > div:nth-child(8),
+        .tilsoft-table-body table > tbody > tr > td:nth-child(8) {
+            width: 80px;
+            text-align: right;
+        }
+
+        .tilsoft-table-header > div:nth-child(9),
+        .tilsoft-table-totalrow > div:nth-child(9),
+        .tilsoft-table-body table > tbody > tr > td:nth-child(9) {
+            width: 120px;
+            text-align: right;
+        }
+
+        .tilsoft-table-header > div:nth-child(10),
+        .tilsoft-table-totalrow > div:nth-child(10),
+        .tilsoft-table-body table > tbody > tr > td:nth-child(10) {
+            width: 100px;
+            text-align: right;
+        }
+
+        .tilsoft-table-header > div:nth-child(11),
+        .tilsoft-table-totalrow > div:nth-child(11),
+        .tilsoft-table-body table > tbody > tr > td:nth-child(11) {
+            width: 150px;
+            text-align: right;
+        }
+</style>
+
+<div class="row" style="margin-top: 10px!important">
+    <article class="col-sm-12">
+        <div class="jarviswidget" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-bar-chart-o txt-color-darken"></i> </span>
+                <h2>Pre-Order Planning Overview</h2>
+            </header>
+            <div class="no-padding">
+                <div class="widget-body" style="padding-bottom: 0px;">
+                    <div class="smart-form">
+                        <fieldset>
+                            <section class="col col-sm-2">
+                                Season <em class="note note-error" ng-if="filters.season == null">(Required)</em>
+                                <select class="form-control" style="height: 30px" ng-model="filters.season" ng-options="item.seasonValue as item.seasonText for item in supportSeason" required>
+                                    <option value=""></option>
+                                </select>
+                            </section>
+                            <section class="col col-sm-2">
+                                Factory <em class="note note-error" ng-if="filters.factoryID == null">(Required)</em>
+                                <select avs-select ng-data-source="filters.factoryID" required>
+                                    <option value=""></option>
+                                    <option ng-repeat="item in supportFactory" value="{{item.factoryID}}">{{item.factoryUD}}</option>
+                                </select>
+                            </section>
+                            <section class="col col-sm-2">
+                                <br />
+                                <a href="javascript:void(0);" class="btn btn-default btn-sm" ng-click="event.search()" title="Search Pre-Order Planning"><i class="fa fa-search"></i></a>
+                                <a href="javascript:void(0);" class="btn btn-default btn-sm" ng-click="event.update()" title="Update Pre-Order Planning"><i class="fa fa-floppy-o"></i></a>
+                            </section>
+                        </fieldset>
+                    </div>
+                    <div avs-scrollable-table class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header">
+                                <div>Month</div>
+                                <div>Week</div>
+                                <div>Capacity</div>
+                                <div>Total Order</div>
+                                <div>Delta</div>
+                                <div>Order</div>
+                                <div>Order<br />(Scaled)</div>
+                                <div>Pre Orders</div>
+                                <div>Pre Orders<br />(Scaled)</div>
+                                <div>Pre Production</div>
+                                <div>Pre Production<br />(Scaled)</div>
+                                <div style="border-bottom: none">&nbsp;</div>
+                            </div>
+                            <div class="tilsoft-table-totalrow">
+                                <div style="width: 210px">Total</div>
+                                <div style="width: 80px; text-align: right">{{method.getTotalCapacity() | number : 2}}</div>
+                                <div style="width: 80px; text-align: right">{{method.getTotalOrder() | number : 2}}</div>
+                                <div style="width: 60px; text-align: right">{{method.getTotalDelta() | number : 2}}</div>
+                                <div style="width: 80px; text-align: right">{{method.getTotalOfficalOrder() | number : 2}}</div>
+                                <div style="width: 80px; text-align: right">{{method.getTotalOrderScale() | number : 2}}</div>
+                                <div style="width: 80px; text-align: right">{{method.getTotalPreOrder() | number : 2}}</div>
+                                <div style="width: 120px; text-align: right">{{method.getTotalPreOrderScale() | number : 2}}</div>
+                                <div style="width: 100px; text-align: right">{{method.getTotalPreProduction() | number : 2}}</div>
+                                <div style="width: 150px; text-align: right">{{method.getTotalPreProductionScale() | number : 2}}</div>
+                                <div>&nbsp;</div>
+                            </div>
+                            <div class="tilsoft-table-body">
+                                <table>
+                                    <tbody>
+                                        <tr ng-repeat="item in data" ng-style="{'background' : (item.weekIndex == 6) ? '#ffcc00' : 'none'}">
+                                            <td>{{item.month}}</td>
+                                            <td>{{item.weekIndex}} ({{item.displayWeekStart}} - {{item.displayWeekEnd}})</td>
+                                            <td>{{item.totalCapacityByWeekly | number : 2}}</td>
+                                            <td>{{event.getSubTotalOrder(item) | number : 2}}</td>
+                                            <td ng-style="{'color': event.getSubDelta(item) < 0 ? '#f84343' : 'none'}">{{event.getSubDelta(item) | number : 2}}</td>
+                                            <td>{{item.totalOfficalOrder | number : 2}}</td>
+                                            <td>
+                                                <input class="form-control" style="text-align: right" avs-number ng-data-source="item.officialOrderScaledQnt" ng-decimal="2" maxlength="18" />
+                                            </td>
+                                            <td>
+                                                <input class="form-control" style="text-align: right" avs-number ng-data-source="item.preOrderQnt" ng-decimal="2" maxlength="17" />
+                                            </td>
+                                            <td>
+                                                <input class="form-control" style="text-align: right" avs-number ng-data-source="item.preOrderScaledQnt" ng-decimal="2" maxlength="18" />
+                                            </td>
+                                            <td>
+                                                <input class="form-control" style="text-align: right" avs-number ng-data-source="item.preProducedQnt" ng-decimal="2" maxlength="18" />
+                                            </td>
+                                            <td>
+                                                <input class="form-control" style="text-align: right" avs-number ng-data-source="item.preProducedScaledQnt" ng-decimal="2" maxlength="18" />
+                                            </td>
+                                            <td style="border-bottom: none; background: white"></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction {
+}
+
+@section pagejs {
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(serviceRoot)/api/preOrderPlanningMng/',
+            token: '@token',
+            pageSize: '@pageSize',
+            factoryID: '@factoryID'
+        }
+    </script>
+    <script type="text/javascript" src="~/Views/PreOrderPlanningMng/index.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Views/PreOrderPlanningMng/service.js?=@guid"></script>
+}

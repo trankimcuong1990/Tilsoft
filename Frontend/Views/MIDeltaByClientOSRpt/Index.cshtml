@@ -1,0 +1,364 @@
+﻿@{
+    ViewBag.Title = "Delta by Client OS";
+    ViewBag.Module = "Delta by Client OS";
+    ViewBag.Icon = "fa-search";
+    Frontend.APIDTO.APIUserInformation userInfo = (Frontend.APIDTO.APIUserInformation)Session[Frontend.Customize.Common.ProjectDefinition.USER_INFO_SESSION];
+}
+<style>
+    .tilsoft-table .tilsoft-table-header div {
+        height: 75px !important;
+    }
+</style>
+
+<div class="row">
+    <article class="col-sm-12">
+        <div class="jarviswidget" id="widget-filter" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-filter txt-color-darken"></i> </span>
+                <h2>Filter</h2>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div class="smart-form">
+                        <fieldset>
+                            <div class="row">
+                                <section class="col col-3">
+                                    <label class="label">Season</label>
+                                    <label class="select">
+                                        <select class="search-filter" ng-model="filters.Season" ng-options="season.seasonValue as season.seasonText for season in seasons">
+                                            <option></option>
+                                        </select>
+                                        <i></i>
+                                    </label>
+                                </section>
+                                <section class="col col-3" ng-if="@userInfo.Data.ModuleSpecialPermissionAccesses.Count(o => o.ModuleSpecialPermissionUD == Frontend.Helper.ConstantIdentifier.SPECIAL_PERMISSION_CLIENTOVERVIEW_CI) > 0">
+                                    <label class="label">Account Manager</label>
+                                    <label class="select">
+                                        <select class="search-filter" ng-model="filters.SaleID" ng-options="sale.userID as sale.saleUD for sale in saleFilter">
+                                            <option></option>
+                                        </select>
+                                        <i></i>
+                                    </label>
+                                </section>
+                                <section class="col col-6">
+                                    <label class="label">&nbsp;</label>
+                                    <label class="input">
+                                        <a href="javascript:void(0)" class="btn btn-default" ng-click="event.search()" style="padding: 6px 12px;"><i class="fa fa-file-code-o"></i> Refresh</a>
+                                        <a href="javascript:void(0)" class="btn btn-default" ng-click="event.exportExcel()" style="padding: 6px 12px;"><i class="fa fa-file-excel-o"></i> Export to Excel</a>
+                                    </label>
+                                </section>
+                            </div>
+                            <section>
+                                <div class="note">
+                                    <span style="background-color: orange; display: inline-block; width: 15px;">&nbsp;</span> data without the purchasing price (either from factory quotation confirmed or estimated purchasing price)
+                                </div>
+                                <div class="note">
+                                    <span style="background-color: black; display: inline-block; width: 15px;">&nbsp;</span> data with the purchasing price (either from factory quotation confirmed or estimated purchasing price), margin only calculated from this type of data
+                                </div>
+                            </section>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12" ng-show="canShowGeneral">
+        <div class="jarviswidget" id="wid-id-overview" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Overview</h2>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div class="avs-table-wrapper" avs-table grid-handler="nullHandler">
+                        <div class="avs-table-header">
+                            <div class="avs-table-header-container">
+                                <table>
+                                    <tr class="header-row" style="height: 75px;">
+                                        <td style="width: 40px; font-weight: bold;"><font style="color: #a90329;">{{totalRows | number}}</font> / {{summary.clientLastSeason | number}}</td>
+                                        <td style="width: 200px;" class="sorting" data-colname="cientNM">Client</td>
+                                        <td style="width: 60px;" class="sorting" data-colname="saleUD">Acc Mng</td>
+                                        <td style="width: 70px;" class="sorting" data-colname="actualGrossMarginPercentLastSeason">% Delta ({{method.getPrevSeason()}})</td>
+                                        <td style="width: 70px;" class="sorting" data-colname="grossMarginPercent">% Delta (6)</td>
+                                        <td style="width: 100px;" class="sorting" data-colname="grossMarginAmount">Delta (6)</td>
+                                        <td style="width: 70px;" class="sorting" data-colname="grossMarginPercent7">% Delta (8)</td>
+                                        <td style="width: 100px;" class="sorting" data-colname="grossMarginAmount7">Delta (8)</td>
+                                        <td style="width: 60px;" class="sorting" data-colname="totalOrderQnt">Qnt</td>
+                                        <td style="width: 60px;" class="sorting" data-colname="totalOrderedQnt40HC">Qnt / 40HC</td>
+                                        <td style="width: 100px;" class="sorting" data-colname="delta40HC">Delta / 40HC</td>
+                                        <td style="width: 110px;" class="sorting" data-colname="purchasingAmountUSD">Purchasing ($)</td>
+                                        <td style="width: 110px;" class="sorting_desc" data-colname="saleAmountInUSD">Offer ($)</td>
+                                        <td style="width: 110px;" class="sorting" data-colname="piTotalSaleAmountUSD">P/I ($)</td>
+                                        <td style="width: 110px;" class="sorting" data-colname="piConfirmedSaleAmountUSD">P/I Confirmed ($)</td>
+                                        <td style="width: 90px;" class="sorting" data-colname="totalTransportUSD">Trans Cost</td>
+                                        <td style="width: 90px;" class="sorting" data-colname="lcCostAmount">LC Cost</td>
+                                        <td style="width: 90px;" class="sorting" data-colname="interestAmount">Interest</td>
+                                        <td style="width: 90px;" class="sorting" data-colname="commissionAmount">Comm</td>
+                                        <td style="width: 90px;" class="sorting" data-colname="bonusAmount">Bonus</td>
+                                        <td style="width: 90px;" class="sorting" data-colname="damagesCost">Damage</td>
+                                        <td style="width: 90px;" class="sorting" data-colname="inspectionCostUSD">Testing</td>
+                                        <td style="width: 90px;" class="sorting" data-colname="sampleCostUSD">Sample</td>
+                                        <td style="width: 90px;" class="sorting" data-colname="sparepartCostUSD">Sparepart</td>
+                                    </tr>
+                                    <tr class="total-row">
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td>{{summary.purchasingAmountLastSeason ? summary.grossMarginLastSeason * 100 / summary.purchasingAmountLastSeason : 0 | number:1}}%</td>
+                                        <td>{{summary.purchasingAmount ? summary.grossMargin * 100 / summary.purchasingAmount : 0 | number:1}}%</td>
+                                        <td>{{summary.grossMargin | currency:'$':2}}</td>
+                                        <td>{{summary.purchasingAmount ? summary.grossMargin7 * 100 / summary.purchasingAmount : 0 | number:1}}%</td>
+                                        <td>{{summary.grossMargin7 | currency:'$':2}}</td>
+                                        <td>{{summary.orderQnt | number}}</td>
+                                        <td>{{summary.orderQnt40HC | number:2}}</td>
+                                        <td>(AVG) {{summary.delta40HC | currency:'$':2}}</td>
+                                        <td>{{summary.purchasingAmount | currency:'$':2}}</td>
+                                        <td>{{summary.saleAmount | currency:'$':2}}</td>
+                                        <td>{{summary.piTotalSaleAmountUSD | currency:'$':2}}</td>
+                                        <td>{{summary.piConfirmedSaleAmountUSD | currency:'$':2}}</td>                                        
+                                        <td>{{summary.transportCost | currency:'$':2}}</td>
+                                        <td>{{summary.lcCost | currency:'$':2}}</td>
+                                        <td>{{summary.interest | currency:'$':2}}</td>
+                                        <td>{{summary.commission | currency:'$':2}}</td>
+                                        <td>{{summary.bonus | currency:'$':2}}</td>
+                                        <td>{{summary.damage | currency:'$':2}}</td>
+                                        <td>{{summary.inspectionCostUSD | currency:'$':2}}</td>
+                                        <td>{{summary.sampleCostUSD | currency:'$':2}}</td>
+                                        <td>{{summary.sparepartCostUSD | currency:'$':2}}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="avs-table-body">
+                            <table>
+                                <tr ng-repeat="item in data | orderBy : orderByColumn" ">
+                                    <td style="text-align: center;">{{$index + 1}}</td>
+                                    <td>
+                                        @if (Frontend.Helper.AuthHelper.GetActionButtonStatus("ClientMng", Frontend.Helper.ActionEnum.Read, HttpContext.Current) != "disabled")
+                                        {
+                                            <a target="_blank" href="@Url.Action("Overview", "Client")/{{item.clientID}}"><strong>{{item.clientUD}}</strong></a>
+                                        }
+                                        else
+                                        {
+                                            <strong>{{item.clientUD}}</strong>
+                                        }
+                                        <br />
+                                        {{item.clientNM}}
+                                    </td>
+                                    <td style="text-align: center;">{{item.saleUD}}</td>
+                                    <td style="text-align: right;">{{item.actualGrossMarginPercentLastSeason | number:1}}%</td>
+                                    <td style="text-align: right; {{item.grossMarginAmount < 0 ? 'color: #ff0000 !important;' : ''}}">
+                                        @if (Frontend.Helper.AuthHelper.GetActionButtonStatus("ClientMng", Frontend.Helper.ActionEnum.Read, HttpContext.Current) != "disabled")
+                                        {
+                                            <a target="_blank" style="{{item.grossMarginAmount < 0 ? 'color: #ff0000 !important;' : ''}}" href="@Url.Action("Overview", "Client")/{{item.clientID}}?tab=offermargintab&season={{$parent.filters.Season}}">{{item.grossMarginPercent | number:1}}%</a>
+                                        }
+                                        else
+                                        {
+                                            <text>{{item.grossMarginPercent | number:1}}%</text>
+                                        }
+                                    </td>
+                                    <td style="text-align: right; {{item.grossMarginAmount < 0 ? 'color: #ff0000;' : ''}}">{{item.grossMarginAmount | currency:'$':2}}</td>
+                                    <td style="text-align: right; {{item.grossMarginAmount < 0 ? 'color: #ff0000 !important;' : ''}}">
+                                        @if (Frontend.Helper.AuthHelper.GetActionButtonStatus("ClientMng", Frontend.Helper.ActionEnum.Read, HttpContext.Current) != "disabled")
+                                        {
+                                            <a target="_blank" style="{{item.grossMarginAmount7 < 0 ? 'color: #ff0000 !important;' : ''}}" href="@Url.Action("Overview", "Client")/{{item.clientID}}?tab=offermargintab&season={{$parent.filters.Season}}">{{item.grossMarginPercent7 | number:1}}%</a>
+                                        }
+                                        else
+                                        {
+                                            <text>{{item.grossMarginPercent7 | number:1}}%</text>
+                                        }
+                                    </td>
+                                    <td style="text-align: right; {{item.grossMarginAmount7 < 0 ? 'color: #ff0000;' : ''}}">{{item.grossMarginAmount7 | currency:'$':2}}</td>
+                                    <td style="text-align: right;">{{item.totalOrderQnt | number}}</td>
+                                    <td style="text-align: right;">{{item.totalOrderedQnt40HC | number:2}}</td>
+                                    <td style="text-align: right;">{{item.delta40HC | currency:'$':2}}</td>
+                                    <td style="text-align: right;">{{item.purchasingAmountUSD | currency:'$':2}}</td>
+                                    <td style="text-align: right;">{{item.saleAmountInUSD | currency:'$':2}}</td>
+                                    <td style="text-align: right;">{{item.piTotalSaleAmountUSD | currency:'$':2}}</td>
+                                    <td style="text-align: right;">{{item.piConfirmedSaleAmountUSD | currency:'$':2}}</td>                                    
+                                    <td style="text-align: right;">{{item.totalTransportUSD | currency:'$':2}}</td>
+                                    <td style="text-align: right;">{{item.lcCostAmount | currency:'$':2}}</td>
+                                    <td style="text-align: right;">{{item.interestAmount | currency:'$':2}}</td>
+                                    <td style="text-align: right;">{{item.commissionAmount | currency:'$':2}}</td>
+                                    <td style="text-align: right;">{{item.bonusAmount | currency:'$':2}}</td>
+                                    <td style="text-align: right;">{{item.damagesCost | currency:'$':2}}</td>
+                                    <td style="text-align: right;">{{item.inspectionCostUSD | currency:'$':2}}</td>
+                                    <td style="text-align: right;">{{item.sampleCostUSD | currency:'$':2}}</td>
+                                    <td style="text-align: right;">{{item.sparepartCostUSD | currency:'$':2}}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12" ng-show="canShowIndividual">
+        <div class="jarviswidget" id="wid-id-{{sale}}-info" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false" ng-repeat="sale in sales">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>{{sale}}</h2>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div class="avs-table-wrapper" avs-table grid-handler="nullHandler">
+                        <div class="avs-table-header">
+                            <div class="avs-table-header-container">
+                                <table>
+                                    <tr class="header-row" style="height: 75px;">
+                                        <td style="width: 40px; font-weight: bold;"><font style="color: #a90329;">{{$parent.summaryBySales[sale].count | number}}</font> / {{$parent.summaryBySales[sale].clientLastSeason | number}}</td>
+                                        <td style="width: 200px;" class="sorting" data-colname="clientNM">Client</td>
+                                        <td style="width: 60px;" class="sorting" data-colname="saleUD">Acc Mng</td>
+                                        <td style="width: 70px;" class="sorting" data-colname="actualGrossMarginPercentLastSeason">% Delta ({{method.getPrevSeason()}})</td>
+                                        <td style="width: 70px;" class="sorting" data-colname="grossMarginPercent">% Delta (6)</td>
+                                        <td style="width: 100px;" class="sorting_desc" data-colname="grossMarginAmount">Delta (6)</td>
+                                        <td style="width: 70px;" class="sorting" data-colname="grossMarginPercent7">% Delta (8)</td>
+                                        <td style="width: 100px;" class="sorting" data-colname="grossMarginAmount7">Delta (8)</td>
+                                        <td style="width: 60px;" class="sorting" data-colname="totalOrderQnt">Qnt</td>
+                                        <td style="width: 60px;" class="sorting" data-colname="totalOrderedQnt40HC">Qnt / 40HC</td>
+                                        <td style="width: 100px;" class="sorting" data-colname="delta40HC">Delta / 40HC</td>
+                                        <td style="width: 110px;" class="sorting" data-colname="purchasingAmountUSD">Purchasing (USD)</td>
+                                        <td style="width: 110px;" class="sorting" data-colname="saleAmountInUSD">Offer (USD)</td>
+                                        <td style="width: 110px;" class="sorting" data-colname="piTotalSaleAmountUSD">P/I ($)</td>
+                                        <td style="width: 110px;" class="sorting" data-colname="piConfirmedSaleAmountUSD">P/I Confirmed ($)</td>
+                                        <td style="width: 90px;" class="sorting" data-colname="totalTransportUSD">Trans Cost</td>
+                                        <td style="width: 90px;" class="sorting" data-colname="lcCostAmount">LC Cost</td>
+                                        <td style="width: 90px;" class="sorting" data-colname="interestAmount">Interest</td>
+                                        <td style="width: 90px;" class="sorting" data-colname="commissionAmount">Comm</td>
+                                        <td style="width: 90px;" class="sorting" data-colname="bonusAmount">Bonus</td>
+                                        <td style="width: 90px;" class="sorting" data-colname="damagesCost">Damage</td>
+                                        <td style="width: 90px;" class="sorting" data-colname="inspectionCostUSD">Testing</td>
+                                        <td style="width: 90px;" class="sorting" data-colname="sampleCostUSD">Sample</td>
+                                        <td style="width: 90px;" class="sorting" data-colname="sparepartCostUSD">Sparepart</td>
+                                    </tr>
+                                    <tr class="total-row">
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td>{{$parent.summaryBySales[sale].purchasingAmountLastSeason ? $parent.summaryBySales[sale].grossMarginLastSeason * 100 / $parent.summaryBySales[sale].purchasingAmountLastSeason : 0 | number:1}}%</td>
+                                        <td>{{$parent.summaryBySales[sale].purchasingAmount ? $parent.summaryBySales[sale].grossMargin * 100 / $parent.summaryBySales[sale].purchasingAmount : 0 | number:1}}%</td>
+                                        <td>{{$parent.summaryBySales[sale].grossMargin | currency:'$':2}}</td>
+                                        <td>{{$parent.summaryBySales[sale].purchasingAmount ? $parent.summaryBySales[sale].grossMargin7 * 100 / $parent.summaryBySales[sale].purchasingAmount : 0 | number:1}}%</td>
+                                        <td>{{$parent.summaryBySales[sale].grossMargin7 | currency:'$':2}}</td>
+                                        <td>{{$parent.summaryBySales[sale].orderQnt | number}}</td>
+                                        <td>{{$parent.summaryBySales[sale].orderQnt40HC | number:2}}</td>
+                                        <td>(AVG) {{$parent.summaryBySales[sale].delta40HC | currency:'$':1}}</td>
+                                        <td>{{$parent.summaryBySales[sale].purchasingAmount | currency:'$':2}}</td>
+                                        <td>{{$parent.summaryBySales[sale].saleAmount | currency:'$':2}}</td>
+                                        <td>{{$parent.summaryBySales[sale].piTotalSaleAmountUSD | currency:'$':2}}</td>
+                                        <td>{{$parent.summaryBySales[sale].piConfirmedSaleAmountUSD | currency:'$':2}}</td>
+                                        <td>{{$parent.summaryBySales[sale].transportCost | currency:'$':2}}</td>
+                                        <td>{{$parent.summaryBySales[sale].lcCost | currency:'$':2}}</td>
+                                        <td>{{$parent.summaryBySales[sale].interest | currency:'$':2}}</td>
+                                        <td>{{$parent.summaryBySales[sale].commission | currency:'$':2}}</td>
+                                        <td>{{$parent.summaryBySales[sale].bonus | currency:'$':2}}</td>
+                                        <td>{{$parent.summaryBySales[sale].damage | currency:'$':2}}</td>
+                                        <td>{{$parent.summaryBySales[sale].inspectionCostUSD | currency:'$':2}}</td>
+                                        <td>{{$parent.summaryBySales[sale].sampleCostUSD | currency:'$':2}}</td>
+                                        <td>{{$parent.summaryBySales[sale].sparepartCostUSD | currency:'$':2}}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="avs-table-body">
+                            <table>
+                                <tr ng-repeat="item in data | filter : {saleUD: sale} | orderBy : orderByColumn">
+                                    <td style="text-align: center;">{{$index + 1}}</td>
+                                    <td>
+                                        @if (Frontend.Helper.AuthHelper.GetActionButtonStatus("ClientMng", Frontend.Helper.ActionEnum.Read, HttpContext.Current) != "disabled")
+                                        {
+                                            <a target="_blank" href="@Url.Action("Overview", "Client")/{{item.clientID}}"><strong>{{item.clientUD}}</strong></a>
+                                        }
+                                        else
+                                        {
+                                            <strong>{{item.clientUD}}</strong>
+                                        }
+                                        <br />
+                                        {{item.clientNM}}
+                                    </td>
+                                    <td style="text-align: center;">{{item.saleUD}}</td>
+                                    <td style="text-align: right;">{{item.actualGrossMarginPercentLastSeason | number:1}}%</td>
+                                    <td style="text-align: right; {{item.grossMarginAmount < 0 ? 'color: #ff0000 !important;' : ''}}">
+                                        @if (Frontend.Helper.AuthHelper.GetActionButtonStatus("ClientMng", Frontend.Helper.ActionEnum.Read, HttpContext.Current) != "disabled")
+                                        {
+                                            <a target="_blank" style="{{item.grossMarginAmount < 0 ? 'color: #ff0000 !important;' : ''}}" href="@Url.Action("Overview", "Client")/{{item.clientID}}?tab=offermargintab&season={{$parent.filters.Season}}">{{item.grossMarginPercent | number:1}}%</a>
+                                        }
+                                        else
+                                        {
+                                            <text>{{item.grossMarginPercent | number:1}}%</text>
+                                        }
+                                    </td>
+                                    <td style="text-align: right; {{item.grossMarginAmount < 0 ? 'color: #ff0000;' : ''}}">{{item.grossMarginAmount | currency:'$':2}}</td>
+                                    <td style="text-align: right; {{item.grossMarginAmount < 0 ? 'color: #ff0000 !important;' : ''}}">
+                                        @if (Frontend.Helper.AuthHelper.GetActionButtonStatus("ClientMng", Frontend.Helper.ActionEnum.Read, HttpContext.Current) != "disabled")
+                                        {
+                                            <a target="_blank" style="{{item.grossMarginAmount7 < 0 ? 'color: #ff0000 !important;' : ''}}" href="@Url.Action("Overview", "Client")/{{item.clientID}}?tab=offermargintab&season={{$parent.filters.Season}}">{{item.grossMarginPercent7 | number:1}}%</a>
+                                        }
+                                        else
+                                        {
+                                            <text>{{item.grossMarginPercent7 | number:1}}%</text>
+                                        }
+                                    </td>
+                                    <td style="text-align: right; {{item.grossMarginAmount7 < 0 ? 'color: #ff0000;' : ''}}">{{item.grossMarginAmount7 | currency:'$':2}}</td>
+                                    <td style="text-align: right;">{{item.totalOrderQnt | number}}</td>
+                                    <td style="text-align: right;">{{item.totalOrderedQnt40HC | number:2}}</td>
+                                    <td style="text-align: right;">{{item.delta40HC | currency:'$':2}}</td>
+                                    <td style="text-align: right;">{{item.purchasingAmountUSD | currency:'$':2}}</td>
+                                    <td style="text-align: right;">{{item.saleAmountInUSD | currency:'$':2}}</td>
+                                    <td style="text-align: right;">{{item.piTotalSaleAmountUSD | currency:'$':2}}</td>
+                                    <td style="text-align: right;">{{item.piConfirmedSaleAmountUSD | currency:'$':2}}</td>
+                                    <td style="text-align: right;">{{item.totalTransportUSD | currency:'$':2}}</td>
+                                    <td style="text-align: right;">{{item.lcCostAmount | currency:'$':2}}</td>
+                                    <td style="text-align: right;">{{item.interestAmount | currency:'$':2}}</td>
+                                    <td style="text-align: right;">{{item.commissionAmount | currency:'$':2}}</td>
+                                    <td style="text-align: right;">{{item.bonusAmount | currency:'$':2}}</td>
+                                    <td style="text-align: right;">{{item.damagesCost | currency:'$':2}}</td>
+                                    <td style="text-align: right;">{{item.inspectionCostUSD | currency:'$':2}}</td>
+                                    <td style="text-align: right;">{{item.sampleCostUSD | currency:'$':2}}</td>
+                                    <td style="text-align: right;">{{item.sparepartCostUSD | currency:'$':2}}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12" ng-if="canShowNoData">
+        <div class="jarviswidget" id="wid-id-no-data-info" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Report Empty</h2>
+            </header>
+            <div>
+                <div class="widget-body">
+                    There's no data return when apply the selected filters!
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction {
+    <ul id="sparks"></ul>
+}
+
+@section pagejs {
+    <script type="text/javascript">
+        var context = {
+            serviceUrl : '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/mi-delta-by-client-os/',
+            token : '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]',
+            pageSize : 50,
+            cookieId: '@HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString()',
+            backendReportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]',
+            userId: @userInfo.Data.UserId,
+            isAdmin: @(userInfo.Data.ModuleSpecialPermissionAccesses.Count(o => o.ModuleSpecialPermissionUD == Frontend.Helper.ConstantIdentifier.SPECIAL_PERMISSION_CLIENTOVERVIEW_CI) > 0 ? "true" : "false")
+        }
+    </script>
+    <script src="~/Views/MIDeltaByClientOSRpt/index.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/jsonService2.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/MIDeltaByClientOSRpt/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}

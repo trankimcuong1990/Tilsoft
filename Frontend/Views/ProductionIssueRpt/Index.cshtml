@@ -1,0 +1,168 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    var pageSize = System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"];
+    var cookieID = HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString();
+    var errorNoItems = "No Items have updated, please input data";
+
+    ViewBag.Title = "Production Issue Overview";
+    ViewBag.Module = "Production Issue Overview";
+    ViewBag.Icon = "fa-database";
+}
+
+<form name="mainForm">
+    <div class="row">
+        <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+            <div class="jarviswidget" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+                <header>
+                    <span class="widget-icon">
+                        <i class="fa fa-table"></i>
+                    </span>
+                    <h2>Production Issue Overview</h2>
+                </header>
+                <div>
+                    <div class="widget-body no-padding">
+                        <div class="smart-form">
+                            <fieldset>
+                                <section class="col col-sm-2">
+                                    <label>
+                                        Work Order <em class="note-error note" ng-if="mainForm.workOrder.$error.required">(Required)</em>
+                                    </label>
+                                    <label class="input" ng-class="{'state-error': mainForm.workOrder.$error.required}">
+                                        <input id="workOrder" name="workOrder" type="text" class="form-control search-filter" style="font-family: Arial;" required avs-remote-auto-complete ng-request-param="workOrder.api" ng-init-param="workOrder.param" ng-model="workOrder.param" ng-item-value="workOrder.data" ng-item-selected="event.selectWorkOrder(workOrder.data)" ng-change="event.changeWorkOrder(workOrder.data)" data-method="POST" data-format-function="formatWorkOrder" />
+                                    </label>
+                                </section>
+                                <section class="col col-sm-2">
+                                    <label>Work Center</label>
+                                    <label class="input">
+                                        <select style="height: 30px;" avs-select ng-data-source="filters.workCenterID">
+                                            <option value=""></option>
+                                            <option value="{{item.workCenterID}}" ng-repeat="item in support.workCenter">{{item.workCenterNM}}</option>
+                                        </select>
+                                    </label>
+                                </section>
+                                <section class="col col-sm-2">
+                                    <label>Production Team</label>
+                                    <label class="input">
+                                        <select style="height: 30px;" avs-select ng-data-source="filters.productionTeamID" ng-on-change="event.setProductionTeam(filters.productionTeamID)">
+                                            <option value=""></option>
+                                            <option value="{{item.productionTeamID}}" ng-repeat="item in support.productionTeam">{{item.productionTeamNM}}</option>
+                                        </select>
+                                    </label>
+                                </section>
+                            </fieldset>
+                        </div>
+                        <div class="tilsoft-table-wrapper" avs-scrollable-table>
+                            <div class="tilsoft-table">
+                                <div class="tilsoft-table-header" style="width: 1495px;">
+                                    <div style="width: 65px; height: 60px;">TOTAL<br /><b style="color: #0026ff">{{data.totalRows | number : 0}}</b></div>
+                                    <div style="width: 80px; height: 60px;">WORK<br />ORDER</div>
+                                    <div style="width: 80px; height: 60px;">TYPE</div>
+                                    <div style="width: 150px; height: 60px;">CODE</div>
+                                    <div style="width: 250px; height: 60px;">NAME</div>
+                                    <div style="width: 70px; height: 60px;">UNIT</div>
+                                    <div style="width: 90px; height: 60px;">NORM<br />QUANTITY</div>
+                                    <div class="no-padding" style="width: 240px; height: 60px;">
+                                        <div class="no-padding" style="width: 100%; height: 30px; border-right: none; line-height: 30px; text-align: center;">TOTAL QUANTITY</div>
+                                        <div class="no-padding" style="width: 100%; height: 30px; border-right: none;">
+                                            <div class="no-padding" style="width: 150px; height: 30px; line-height: 30px; text-align: center;">TEAM</div>
+                                            <div class="no-padding" style="height: 30px; line-height: 30px; text-align: center;">QUANTITY</div>
+                                        </div>
+                                    </div>
+                                    <div style="width: 90px; height: 60px;">REMAIN<br />QUANTITY</div>
+                                    <div style="width: 90px; height: 60px;">ISSUED<br />QUANTITY</div>
+                                    <div style="width: 280px; height: 60px;">FROM<br />FACTORY WAREHOUSE</div>
+                                    <div style="border-bottom: none;"></div>
+                                </div>
+                                <div class="tilsoft-table-body" style="width: 1495px; margin-top: 60px;">
+                                    <table>
+                                        <tbody ng-repeat="item in data.data">
+                                            <tr>
+                                                <td style="width: 65px; text-align: center; background: #95c6f6;">{{($index + 1)}}</td>
+                                                <td style="width: 80px; text-align: center; background: #95c6f6;">{{item.workOrderUD}}</td>
+                                                <td style="width: 80px; text-align: center; background: #95c6f6;">{{item.productionItemTypeNM}}</td>
+                                                <td style="width: 150px; text-align: center; background: #95c6f6;">{{item.productionItemUD}}</td>
+                                                <td style="width: 250px; background: #95c6f6;">{{item.productionItemNM}}</td>
+                                                <td style="width: 70px; text-align: center; background: #95c6f6;">{{item.unitNM}}</td>
+                                                <td style="width: 90px; text-align: right; background: #95c6f6;">{{item.normQuantity | number : 2}}</td>
+                                                <td style="width: 700px; background: #95c6f6;" colspan="4"></td>
+                                                <td style="border-bottom: none;"></td>
+                                            </tr>
+                                            <tr ng-repeat="detailItem in item.productionIssueDetail | orderBy: 'bomid'">
+                                                <td></td>
+                                                <td></td>
+                                                <td style="text-align: center;">{{detailItem.productionItemTypeNM}}</td>
+                                                <td style="text-align: center;">{{detailItem.productionItemUD}}</td>
+                                                <td style="text-align: left;">{{detailItem.productionItemNM}}</td>
+                                                <td style="text-align: center;">{{detailItem.unitNM}}</td>
+                                                <td style="text-align: right;">{{detailItem.normQuantity | number : 2}}</td>
+                                                <td class="no-padding" style="width: 240px;">
+                                                    <table>
+                                                        <tr>
+                                                            <td style="width:240px;text-align:right;" colspan="2">{{method.getTotalHistoryQnt(detailItem.productionIssueDetailHistory) | number : 2}}</td>
+                                                        </tr>
+                                                        <tr ng-repeat="historyItem in detailItem.productionIssueDetailHistory">
+                                                            <td style="width:150px;">{{historyItem.productionTeamNM}}</td>
+                                                            <td style="text-align:right;">{{historyItem.historyQnt | number : 2}}</td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                                <td style="width: 90px; text-align:right;">{{method.getRemainQnt(detailItem.normQuantity, detailItem.productionIssueDetailHistory) | number : 2}}</td>
+                                                <td style="width: 90px;">
+                                                    <input type="text" class="form-control" style="width: 100%; font-family: Arial; text-align: right; height: 30px;" maxlength="18" avs-number ng-data-source="detailItem.issueQuantity" ng-decimal="2" ng-on-change="method.checkValidQuantity(detailItem);" />
+                                                </td>
+                                                <td style="width: 280px;">
+                                                    <div class="smart-form">
+                                                        <label class="input" ng-class="{'state-error': detailItem.issueQuantity != null && detailItem.issueQuantity != ''}">
+                                                            <select avs-select ng-data-source="detailItem.fromFactoryWarehouseID" ng-required="detailItem.issueQuantity != null && detailItem.issueQuantity != ''">
+                                                                <option value=""></option>
+                                                                <option value="{{supportItem.factoryWarehouseID}}" ng-repeat="supportItem in support.fromFactoryWarehouse">{{supportItem.factoryWarehouseNM}}</option>
+                                                            </select>
+                                                        </label>
+                                                    </div>
+                                                </td>
+                                                <td style="border-bottom: none;"></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </article>
+    </div>
+</form>
+
+@section FormAction{
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default btn-sm" ng-click="event.search()">
+                <i class="fa fa-search"></i> Search
+            </a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default btn-sm" ng-click="event.update()">
+                <i class="fa fa-save"></i> Save
+            </a>
+        </li>
+    </ul>
+}
+
+@section pagejs{
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(serviceRoot)/api/productionIssueMng/',
+            token: '@token',
+            pageSize: '@pageSize',
+            cookieID: '@cookieID',
+            message: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED',
+            messageNoItems: '@errorNoItems'
+        }
+    </script>
+    <script type="text/javascript" src="~/Angular/app/productionIssue/index.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/productionIssue/service.js?v=@guid"></script>
+}

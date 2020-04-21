@@ -1,0 +1,248 @@
+﻿@{
+    ViewBag.Title = "Report Delivery Shedule";
+    ViewBag.Module = "Report Delivery Shedule";
+}
+
+<div class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-search-filter" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Filters</h2>
+            </header>
+
+            <div>
+                <div class="jarviswidget-editbox"></div>
+
+                <div class="widget-body">
+                    <fieldset>
+                        <div class="form-group">
+                            <label>Season</label><br />
+                            <select class="form-control" style="width: 150px;" ng-model="model.season" ng-options="item.seasonValue as item.seasonText for item in supportModel.seasons"></select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Client Name</label><br />
+                            <input class="form-group" style="width: 150px;" type="text" ng-model="model.clientNM">
+                        </div>
+
+
+                        <div class="input-group">
+                            <label>ETA</label><br />
+                            <input type="text" style="width: 150px;" class="form-control datepicker" data-dateformat="dd/mm/yy" ng-model="model.eta">
+                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                        </div>
+                   
+
+                        <div class="form-group">
+                            <label>Container No</label><br />
+                            <input style="width: 150px;" class="form-group" type="text" ng-model="model.containerNo">
+                        </div>
+
+                       
+
+                        <div class="form-group">
+                            <label>Sale 1</label><br />
+                            <select style="width: 150px;" class="form-group" ng-model="model.saleID" ng-options="item.saleID as item.saleNM for item in supportModel.salers  | orderBy : saleUD">
+                                <option value=""></option>
+                            </select>
+                        </div>
+
+                        
+                        <div class="form-group">
+                            <button class="btn btn-primary" ng-click="event.ok($event)">Print</button>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction {
+}
+@section pagejs {
+    <script src="~/Angular/app/reportDeliveryShedule/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script type="text/javascript">
+        reportDeliverySheduleService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/reportdeliveryshedule/';
+        reportDeliverySheduleService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+
+
+
+
+        var reportDeliverySheduleApp = angular.module('tilsoftApp', []);
+        reportDeliverySheduleApp.controller('tilsoftController', ['$scope', function ($scope) {
+            $scope.supportModel = null;
+            $scope.model = {
+                season: '@Frontend.Helper.Common.GetCurrentSeason()',
+                clientNM: '',
+                eta: '',
+                containerNo: '',
+               saleID: 0
+                //sale2ID: 0
+            };
+
+            //
+            // event defined
+            //
+            $scope.event = {
+                ok: function ($event) {
+                    $event.preventDefault();
+
+                    season = $scope.model.season;
+                    clientNM = $scope.model.clientNM;
+                    eta = $scope.model.eta;
+                                       
+                    containerNo = $scope.model.containerNo;
+                    saleID = $scope.model.saleID;
+                    //sale2ID = $scope.model.sale2ID;
+
+                    reportDeliverySheduleService.getReport(
+                        season,
+                        clientNM,
+                        eta,
+                        containerNo,
+                        saleID,
+                        //sale2ID,
+                         function (data) {
+                             window.location = '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]' + data.data + '.xlsm';
+
+                         },
+                        function (error) {
+                            jsHelper.showMessage('warning', error);
+                        }
+                    );
+                }
+            }
+
+
+            //
+            // private function defined
+            //
+            $scope.prepareForm = function () {
+
+                reportDeliverySheduleService.getFilterData(
+                    function (data) {
+                        $scope.supportModel = data.data;
+                        $scope.$apply();
+
+                        jQuery('#content').show();
+                    },
+                    function (error) {
+                        $scope.supportModel = null;
+                        $scope.$apply();
+                    }
+                );
+            }
+
+            //
+            // INIT
+            //
+            $scope.prepareForm();
+        }]);
+    </script>
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@*var reportDeliverySheduleApp = angular.module('tilsoftApp', []);
+            reportPlcProductsApp.controller('tilsoftController', ['$scope', function ($scope) {
+                $scope.supportModel = null;
+                $scope.model = {
+
+
+                    ClientNM: '',
+                    Eta:'',
+                    ContainerNo: '',
+                    Season: '@Frontend.Helper.Common.GetCurrentSeason()',
+                    SaleID: 0,
+                    Sale2ID: 0
+
+                };
+
+                //
+                // event defined
+                //
+                $scope.event = {
+                    ok: function ($event) {
+                        $event.preventDefault();
+
+
+                        reportDeliverySheduleService.getReport(
+
+                           season, ClientNM, saleID, sale2ID,
+                            function (data) {
+                                window.location = '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]' + data.data + '.xlsm';
+
+                    },
+                    function (error) {
+                        jsHelper.showMessage('warning', error);
+                    }
+                    );
+                }
+            }
+
+            //
+            // private function defined
+            //
+            $scope.prepareForm = function () {
+
+                reportDeliverySheduleService.getFilterData(
+                    function (data) {
+                        $scope.supportModel = data.data;
+                        $scope.$apply();
+
+                        jQuery('#content').show();
+
+                    },
+                    function (error) {
+                        $scope.supportModel = null;
+                        $scope.$apply();
+                    }
+                );
+            }
+
+            //
+            // INIT
+            //
+            $scope.prepareForm();
+        }]);
+        </script>
+    }*@

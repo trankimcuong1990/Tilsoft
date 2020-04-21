@@ -1,0 +1,114 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var pageSize = System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"];
+    var cookieID = HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString();
+    ViewBag.Title = "Search POD";
+    ViewBag.Module = "POD";
+}
+
+<div class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-0" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Search Result</h2>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div avs-scroll grid-handler="gridHandler" class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header" style="width: 480px;">
+                                <div style="width: 100px;"></div>
+                                <div style="width: 80px; text-align: center;" class="sorting" data-colname="PoDUD">Code</div>
+                                <div class="sorting_asc" data-colname="PoDName">Name</div>
+                            </div>
+
+                            <div class="tilsoft-table-filter" style="top:50px">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>
+                                                <div style="width:100px;text-align:center;vertical-align:middle;border-right:solid 1px #ddd">
+                                                    <a href="javascript:void(0)" class="btn btn-{{isDefaultFilter?'default':'primary'}} btn-xs" title="Apply Filter" ng-click="event.refresh()"><i class="fa fa-filter"></i></a>
+                                                    <a href="javascript:void(0)" class="btn btn-default btn-xs" title="Clear Filter" ng-click="event.clear()"><i class="fa fa-ban"></i></a>
+                                                </div>
+                                            </th>
+                                            <th>
+                                                <div style="width:80px;text-align:center;vertical-align:middle;border-right:solid 1px #ddd">
+                                                    <input class="search-filter" style="text-align:center;font-weight:normal" type="text" maxlength="3" ng-model="filters.PoDUD" />
+                                                </div>
+                                            </th>
+                                            <th style="width:100%">
+                                                <div style="text-align:center;vertical-align:middle">
+                                                    <input class="search-filter" style="text-align:left;float:left;width:100%;font-weight:normal" type="text" maxlength="255" ng-model="filters.PoDName" />
+                                                </div>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+
+                            <div class="tilsoft-table-body" style="width: 480px;">
+                                <table>
+                                    <tr ng-repeat="item in data">
+                                        <td style="text-align: center; width: 99px;">
+                                            @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current) == "disabled")
+                                            {
+                                                <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "POD")/{{item.podid}}" title="View (Read Only)"><i class="fa fa-folder-open"></i> View</a>
+                                            }
+                                            else
+                                            {
+                                                <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "POD")/{{item.podid}}" title="Edit"><i class="fa fa-pencil"></i> Edit</a>
+                                            }
+
+                                            @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current) != "disabled")
+                                            {
+                                                <a class="btn btn-danger btn-xs font-11" href="javascript:void(0)" ng-click="event.remove(item)" title="Delete"><i class=" fa fa-times"></i> Del</a>
+                                            }
+                                        </td>
+                                        <td style="text-align: center; width: 80px;">{{item.podud}}</td>
+                                        <td>{{item.podName}}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <span>Found: <b>{{totalRows}}</b> record(s).</span>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Search" ng-click="event.refresh()"><i class="fa fa-search"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Refresh" ng-click="event.refresh()"><i class="fa fa-refresh"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="@Url.Action("Edit", "POD")/0" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="New"><i class="fa fa-file-o"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default disabled" title="Print"><i class="fa fa-print"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script type="text/javascript" src="~/Views/POD/index.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Views/POD/service.js?v=@guid"></script>
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(serviceRoot)/api/pod/',
+            token: '@token',
+            pageSize: '@pageSize',
+            cookieID: '@cookieID'
+        }
+    </script>
+    }

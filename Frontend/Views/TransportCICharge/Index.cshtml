@@ -1,0 +1,189 @@
+﻿@{
+    ViewBag.Title = "Search Transport CI Charge";
+    ViewBag.Module = "TransportCICharge";
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var serviceReportRoot = System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"];
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    var pageSize = System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"];
+    var cookieId = HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString();
+}
+
+<div class="row">
+
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-0" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-search"></i> </span>
+                <h2>Search Filters</h2>
+            </header>
+
+            <div>
+                <div class="jarviswidget-editbox"></div>
+                <div class="widget-body">
+                    <div class="row">
+                        <section class="col col-lg-2">
+                            <label>
+                                <strong>Client</strong>
+                            </label>
+                            <input type="text" class="form-control search-filter" placeholder="Please input client name." ng-model="filters.ClientNM">
+                        </section>
+                        <section class="col col-lg-2">
+                            <label>
+                                <strong>Booking</strong>
+                            </label>
+                            <input type="text" class="form-control search-filter" placeholder="Please input booking code." ng-model="filters.BookingUD">
+                        </section>
+                        <section class="col col-lg-2">
+                            <label>
+                                <strong>Eurofar Invoice nr.</strong>
+                            </label>
+                            <input type="text" class="form-control search-filter" placeholder="Please input eurofar invoice nr." ng-model="filters.EurofarInvoiceNr">
+                        </section>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-search-result" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Search Results</h2>
+            </header>
+            <div>
+                <div class="jarviswidget-editbox"></div>
+                <div class="widget-body">
+                    <div avs-scroll grid-handler="gridHandler" id="transportCIChargeGrid" class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header" style="width: 1410px;">
+                                <div style="width: 180px;"></div>
+                                <div style="width: 350px;" class="sorting" data-colname="ClientNM">Client</div>
+                                <div style="width: 350px;" class="sorting_asc" data-colname="BookingUD">Booking</div>
+                                <div style="width: 350px;" class="sorting" data-colname="EurofarInvoiceNo">Transport CI Charge</div>
+                                <div>More Information</div>
+                            </div>
+                            <div class="tilsoft-table-body" style="width: 1410px; ">
+                                <table>
+                                    <tr ng-repeat="item in data">
+                                        <td style="text-align: center; width: 179px;">
+                                            @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current) == "disabled")
+                                            {
+                                                <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "TransportCICharge")/{{item.transportCIChargeID}}/1" title="View (Read Only)" target="_blank"><i class="fa fa-folder-open"></i> View</a>
+                                            }
+                                            else
+                                            {
+                                                <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "TransportCICharge")/{{item.transportCIChargeID}}/1" title="Edit" target="_blank"><i class="fa fa-pencil"></i> Edit</a>
+                                            }
+
+                                            @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current) != "disabled")
+                                            {
+                                                <a class="btn btn-danger btn-xs font-11" href="#" title="Delete" ng-click="event.delete(item.transportCIChargeID)"><i class="fa fa-times"></i> Del</a>
+                                            }
+
+                                            @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Print, HttpContext.Current) != "disabled")
+                                            {
+                                                <a class="btn btn-primary btn-xs font-11" href="#" title="CIS"><i class="fa fa-times"></i> CIS</a>
+                                            }
+                                        </td>
+                                        <td style="width: 350px; text-align: left;">
+                                            <span class="box">
+                                                <strong>Code:</strong>&nbsp;{{item.clientUD}}
+                                                <br />
+                                                <strong>Name:</strong>&nbsp;{{item.clientNM}}
+                                            </span>
+                                        </td>
+                                        <td style="width: 350px;">
+                                            <span class="box">
+                                                <strong>Code:</strong>&nbsp;{{item.bookingUD}}
+                                                <br />
+                                                <strong>BL No.:</strong>&nbsp;{{item.blNo}}
+                                            </span>
+                                        </td>
+                                        <td style="width: 350px;">
+                                            <span class="box">
+                                                <strong>Eurofar Invoice Nr.:</strong>&nbsp;{{item.eurofarInvoiceNo}}
+                                                <br />
+                                                <strong>Invoice Date:</strong>&nbsp;{{item.invoiceDate}}
+                                                <br />
+                                                <strong>Payment Term:</strong>&nbsp;{{item.paymentTermNM}}
+                                                <br>
+                                                <strong>VAT Rate(%):</strong>&nbsp;{{item.vatRate | number:0}}
+                                                <br>
+                                                <strong>Net Amount:</strong>&nbsp;{{item.netAmount | number:0}}
+                                                <br>
+                                                <strong>VAT Amount:</strong>&nbsp;{{item.vatAmount | number:0}}
+                                                <br>
+                                                <strong>Total Amount:</strong>&nbsp;{{item.totalAmount | number:0}}
+                                            </span>
+                                        </td>
+                                        <td style="text-align: left;">
+                                            <span class="box">
+                                                <i class="fa fa-user"></i> <strong>Created By:</strong>&nbsp;
+                                                <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.createdBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600" ng-if="(item.createdBy != null && item.createEmployeeNM != null)">
+                                                    {{item.createEmployeeNM}}
+                                                </a>
+                                                <br />
+                                                <i class="fa fa-calendar"></i> <strong>Created Date:</strong>&nbsp;{{item.createdDate}}
+                                                <br />
+                                                <i class="fa fa-user"></i> <strong>Updated By:</strong>&nbsp;
+                                                <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.updatedBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600" ng-if="(item.updatedBy != null && item.updateEmployeeNM != null)">
+                                                    {{item.updateEmployeeNM}}
+                                                </a>
+                                                <br />
+                                                <i class="fa fa-calendar"></i> <strong>Updated Date:</strong>&nbsp;{{item.updatedDate}}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+    </article>
+</div>
+
+
+@section pagepopup
+{
+}
+
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Search" ng-click="event.reload()"><i class="fa fa-search"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Refresh" ng-click="event.reload()"><i class="fa fa-refresh"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="@Url.Action("Edit", "TransportCICharge")/0" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="New"><i class="fa fa-file-o"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Export Excel" style="color: #31B404" ng-click="event.exportExcel($event)"><i class="fa fa-file-excel-o"></i></a>
+        </li>
+    </ul>
+}
+
+
+@section pagejs {
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(serviceRoot)/api/transportcicharge/',
+            serviceSupportUrl: '@(serviceRoot)/api/support/',
+            token: '@token',
+            pageSize: '@pageSize',
+            cookieId: '@cookieId'
+        };
+    </script>
+    <script src="~/Angular/app/transportCICharge/index.js?v=@guid" type="text/javascript"></script>
+    <script src="~/Angular/app/jsonService2.js?v=@guid" type="text/javascript"></script>
+    <script src="~/Angular/app/transportCICharge/service.js?v=@guid" type="text/javascript"></script>
+}
+

@@ -1,0 +1,180 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    var pageSize = System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"];
+    var cookieID = HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString();
+
+    ViewBag.Title = "Search QC Report";
+    ViewBag.Module = "QC Report";
+
+    string userManualUrl = string.Empty;
+    if (System.IO.File.Exists(Server.MapPath("~/UserManual/" + ViewBag.ModuleCode + ".pdf")))
+    {
+        userManualUrl = "/UserManual/" + ViewBag.ModuleCode + ".pdf";
+    }
+
+}
+
+<div class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"><i class="fa fa-table"></i></span>
+                <h2>Search Result</h2>
+            </header>
+            <div>
+                <div class="widget-body">
+                    <div class="tilsoft-table-wrapper" avs-scroll grid-handler="gridHandler">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header" style="width: 2530px">
+                                <div style="width: 75px">Found <font style="color:sienna; text-transform:none"><strong>{{totalRows}} row(s)</strong></font></div>
+                                <div style="width: 100px">CODE</div>
+                                <div style="width: 110px">Factory</div>
+                                <div style="width: 100px">P/I</div>
+                                <div style="width: 190px">Article Code</div>
+                                <div style="width: 250px">Article Description</div>
+                                <div style="width: 100px">Customer</div>
+                                <div style="width: 100px">Inspected Date</div>
+                                <div style="width: 80px">QTY</div>
+                                <div style="width: 100px">Sample Size</div>
+                                <div style="width: 100px">Assemmply Size</div>
+                                <div style="width: 150px">QCName</div>
+                                <div style="width: 100px">Location</div>
+                                <div style="width: 100px">Inspection Stage</div>
+                                <div style="width: 200px">Pakaging Type</div>
+                                <div style="width: 100px">Conformity</div>
+                                <div style="width: 80px">AQL Critical</div>
+                                <div style="width: 80px">AQL Major</div>
+                                <div style="width: 80px">AQL Minor</div>
+                                <div style="width: 100px">Inspection Result</div>
+                                <div style="width: 150px">Update By</div>
+                                <div>Update Date</div>
+                            </div>
+                            <div class="tilsoft-table-filter" style="width: 2530px">
+                                <div style="width: 75px">
+                                    <a href="javascript:void(0)" class="btn btn-default btn-xs font-11" title="Apply Filter" ng-click="event.refresh()">
+                                        <i class="fa fa-filter"></i>
+                                    </a>
+                                    <a href="javascript:void(0)" class="btn btn-default btn-xs font-11" title="Clear Filter" ng-click="event.clear()">
+                                        <i class="fa fa-ban"></i>
+                                    </a>
+                                </div>
+                                <div style="width: 100px"><input type="text" class="search-filter" style="width:100%" ng-model="filters.QCReportUD" /></div>
+                                <div style="width: 110px">
+                                    <select class="search-filter" ng-model="filters.FactoryID" ng-options="factory.factoryID as factory.factoryUD for factory in factories">
+                                        <option value=""></option>
+                                    </select>                                                          
+                                </div>
+                                <div style="width: 100px"><input type="text" class="search-filter" style="width:100%" ng-model="filters.ProformaInvoiceNo" /></div>
+                                <div style="width: 190px"><input type="text" class="search-filter" style="width:100%" ng-model="filters.ArticleCode" /></div>
+                                <div style="width: 250px"></div>
+                                <div style="width: 100px"><input type="text" class="search-filter" style="width:100%" ng-model="filters.ClientUD" /></div>
+                                <div style="width: 100px"></div>
+                                <div style="width: 80px"></div>
+                                <div style="width: 100px"></div>
+                                <div style="width: 100px"></div>
+                                <div style="width: 150px"></div>
+                                <div style="width: 100px"></div>
+                                <div style="width: 100px"></div>
+                                <div style="width: 200px"></div>
+                                <div style="width: 100px"></div>
+                                <div style="width: 80px"></div>
+                                <div style="width: 80px"></div>
+                                <div style="width: 80px"></div>
+                                <div style="width: 100px"></div>
+                                <div style="width: 150px"></div>
+                                <div></div>
+                            </div>
+                            <div class="tilsoft-table-body" style="width: 2530px">
+                                <table>
+                                    <tbody>
+                                        <tr ng-repeat="item in data">
+                                            <td style="width:74px; text-align:center;">
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current) == "disabled")
+                                                {
+                                                    <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "QCReportMng")/{{item.qcReportID}}" title="View (Read Only)" target="_blank"><i class="fa fa-folder-open"></i>View</a>
+                                                }
+                                                else
+                                                {
+                                                    <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "QCReportMng")/{{item.qcReportID}}" style="width:40px;" title="Edit" target="_blank"><i class="fa fa-pencil-square-o"></i>Edit</a>
+                                                }
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current) != "disabled")
+                                                {
+                                                    <a class="btn btn-danger btn-xs font-11" href="#" title="Delete" style="width:40px; margin-top:3px;" ng-click="event.remove(item)"><i class="fa fa-times"></i>Del</a>
+                                                }
+                                            </td>
+                                            <td style="width: 100px">{{item.qcReportUD}}</td>
+                                            <td style="width: 110px">{{item.factoryUD}}</td>
+                                            <td style="width: 100px">{{item.proformaInvoiceNo}}</td>
+                                            <td style="width: 190px">{{item.articleCode}}</td>
+                                            <td style="width: 250px">{{item.description}}</td>
+                                            <td style="width: 100px">{{item.clientUD}}</td>
+                                            <td style="width: 100px">{{item.inspectedDate}}</td>
+                                            <td style="width: 80px; text-align:center">{{item.quantity}}</td>
+                                            <td style="width: 100px; text-align:center">{{item.sampleSize}}</td>
+                                            <td style="width: 100px; text-align:center">{{item.assemplySampleSize}}</td>
+                                            <td style="width: 150px">{{item.qcName}}</td>
+                                            <td style="width: 100px">{{item.location}}</td>
+                                            <td style="width: 100px">{{item.inspectionStageNM}}</td>
+                                            <td style="width: 200px">{{item.packagingMethodNM}}</td>
+                                            <td style="width: 100px; text-align:center"><input type="checkbox" ng-model="item.isConformed" disabled /></td>
+                                            <td style="width: 80px; text-align:center">{{item.aqlCritical}}</td>
+                                            <td style="width: 80px; text-align:center">{{item.aqlMajor}}</td>
+                                            <td style="width: 80px; text-align:center">{{item.aqlMinor}}</td>
+                                            <td style="width: 100px">{{item.inspectionResultNM}}</td>
+                                            <td style="width: 150px">
+                                                <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.updatedBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600" ng-show="item.updatedBy != null && item.updaterName != null">
+                                                    <i class="fa fa-user"></i> {{item.updaterName}}
+                                                </a>
+                                                <span ng-show="item.updatedBy != null && item.updaterName == null">
+                                                    <i class="fa fa-user"></i> {{item.updaterName}}
+                                                </span>
+                                            </td>
+                                            <td>{{item.updatedDate}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction{
+<ul id="sparks">
+    <li class="sparks-info">
+        <a href="javascript:void(0)" class="btn btn-default btn-sm" title="Search" ng-click="event.refresh()"><i class="fa fa-search"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0)" class="btn btn-default btn-sm" title="Clear Page" ng-click="event.clear()"><i class="fa fa-refresh"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="@Url.Action("Init", "QCReportMng")" class="btn btn-default btn-sm" target="_blank"><i class="fa fa-file-o"></i></a>
+    </li>
+
+    @if (!string.IsNullOrEmpty(userManualUrl))
+    {
+        <li class="sparks-info">
+            <a target="_blank" href="@userManualUrl" class="btn btn-default" title="Help"><i class="fa fa-info"></i></a>
+        </li>
+    }
+</ul>
+}
+
+@section pagejs{
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(serviceRoot)/api/qcReportMng/',
+            token: '@token',
+            pageSize: '@pageSize',
+            cookieID: '@cookieID'
+        }
+    </script>
+    <script type="text/javascript" src="~/Views/QCReportMng/index.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Views/QCReportMng/service.js?v=@guid"></script>
+}

@@ -1,0 +1,585 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    var pageSize = System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"];
+    var cookieID = HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString();
+    var supportServiceRoot = (System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"]);
+
+
+    ViewBag.Title = "Edit Factory Breakdown";
+    ViewBag.Module = "Factory Breakdown";
+    ViewBag.Icon = "fa-pencil-square-o";
+
+    string sampleProductId = "0";
+    if (Request.Params.AllKeys.Contains("sampleProductId"))
+    {
+        sampleProductId = Request.Params["sampleProductId"].ToString();
+    }
+}
+<form name="editForm" class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <ul class="nav nav-tabs pull-left in">
+                    <li class="active">
+                        <a data-toggle="tab" href="#tabGeneral" name="gtab"> <span> <i class="fa fa-database"></i> General </span> </a>
+                    </li>
+                    <li ng-if="data.modelID">
+                        <a data-toggle="tab" href="#tabModel"> <span> <i class="fa fa-database"></i> Model </span> </a>
+                    </li>
+                </ul>
+            </header>
+            <div>
+                <div class="jarviswidget-editbox"></div>
+                <div class="widget-body">
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="tabGeneral">
+                            <div class="smart-form" style="padding:0px">
+                                <div class="row" ng-show="data.sampleProductID!=null">
+                                    <section class="col col-sm-3">
+                                        <label class="label">
+                                            Sample Order
+                                        </label>
+                                        <span class="form-control">
+                                            {{data.sampleOrderUD}}
+                                        </span>
+                                    </section>
+                                    <section class="col col-sm-3">
+                                        <label class="label">
+                                            Sample Product
+                                        </label>
+                                        <label class="input">
+                                            <span class="form-control">
+                                                {{data.sampleProductUD}}
+                                            </span>
+                                        </label>
+                                    </section>
+                                    <section class="col col-sm-3">
+                                        <label class="label">
+                                            Factory Price ($)
+                                        </label>
+                                        <label class="input">
+                                            <input avs-currency ng-data-source="data.indicatedPrice" ng-decimal="2" style="text-align:right" />
+                                        </label>
+                                    </section>
+                                </div>
+                                <div class="row" ng-show="data.modelUD!=null">
+                                    <section class="col col-sm-3">
+                                        <label class="label">
+                                            Model Code
+                                        </label>
+                                        <label class="input">
+                                            <span class="form-control">
+                                                {{data.modelUD}}
+                                            </span>
+                                        </label>
+                                    </section>
+                                    <section class="col col-sm-3">
+                                        <label class="label">
+                                            Factory Price ($)
+                                        </label>
+                                        <label class="input">
+                                            <input avs-currency ng-data-source="data.indicatedPrice" ng-decimal="2" style="text-align:right" />
+                                        </label>
+                                    </section>
+                                </div>
+                                <div class="row">
+                                    <section class="col col-2">
+                                        <a href="{{data.fileLocation}}" data-featherlight="image">
+                                            <img style="width: 100%; border: solid 1px #ddd;" ng-src="{{data.thumbnailLocation}}" />
+                                        </a>
+                                    </section>
+                                    <section class="col col-10" ng-show="data.sampleProductID!=null">
+                                        <p>
+                                            <strong>{{data.sampleProductUD}} </strong><a class="btn btn-info btn-xs font-11" href="javascript:void(0);" ng-click="event.openSampleDetail();"><i class="fa fa-info-circle"></i> Sample detail</a>
+                                            <br />
+                                            {{data.articleDescription}}
+                                        </p>
+                                        <ul style="list-style-position: inside;">
+                                            <li>Material 1: {{(data.materialDescription ? data.materialDescription : '') + ' ' + (data.materialTypeDescription ? data.materialTypeDescription : '') + ' ' + (data.materialColorDescription ? data.materialColorDescription : '')}}</li>
+                                            <li>Material 2: {{(data.material2Description ? data.material2Description : '') + ' ' + (data.material2TypeDescription ? data.material2TypeDescription : '') + ' ' + (data.material2ColorDescription ? data.material2ColorDescription : '')}}</li>
+                                            <li>Material 3: {{(data.material3Description ? data.material3Description : '') + ' ' + (data.material3TypeDescription ? data.material3TypeDescription : '') + ' ' + (data.material3ColorDescription ? data.material3ColorDescription : '')}}</li>
+                                            <li>Back Cushion: {{(data.backCushionDescription ? data.backCushionDescription : '')}}</li>
+                                            <li>Seat Cushion: {{(data.seatCushionDescription ? data.seatCushionDescription : '')}}</li>
+                                            <li>Cushion Color: {{(data.cushionColorDescription ? data.cushionColorDescription : '')}}</li>
+                                        </ul>
+                                    </section>
+                                    <section class="col col-10" ng-show="data.modelUD!=null">
+                                        <p>
+                                            <strong>{{data.modelUD}}</strong>
+                                            <br />
+                                            {{data.modelNM}}
+                                        </p>
+                                        <ul style="list-style-position: inside;">
+                                            <li>Material: {{(data.materialNM ? data.materialNM : '') + ' ' + (data.materialTypeNM ? data.materialTypeNM : '') + ' ' + (data.materialColorNM ? data.materialColorNM : '')}}</li>
+                                            <li>Frame: {{(data.frameMaterialNM? data.frameMaterialNM+' / ':'')+' '+(data.frameMaterialColorNM? data.frameMaterialColorNM: '')}}</li>
+                                            <li>Sub Material: {{(data.subMaterialNM ? data.subMaterialNM+' / ' : '') + ' ' + (data.material2TypeDescription ? data.material2TypeDescription : '') + ' ' + (data.subMaterialColorNM ? data.subMaterialColorNM : '')}}</li>
+                                            <li>Cushion: {{(data.backCushionNM ? data.backCushionNM+' / ' : '')+(data.seatCushionNM ? data.seatCushionNM+' / ' : '')+(data.cushionColorNM ? data.cushionColorNM : '')}}</li>
+                                            <li>FSC Claim: {{(data.fscPercentNM ? data.fscPercentNM+' / ' : '')+(data.fscTypeNM ? data.fscTypeNM : '')}}</li>
+                                        </ul>
+                                    </section>
+                                </div>
+                                <div class="row">
+                                    <section class="col col-sm-12">
+                                        <div class="widget-body">
+                                            <div class="tilsoft-table-wrapper" avs-scrollable-table>
+                                                <div class="tilsoft-table">
+                                                    <div class="tilsoft-table-header" style="width: 890px;">
+                                                        <div style="width: 60px; height: 60px;">#</div>
+                                                        <div class="no-padding" style="width: 370px; height: 60px;">
+                                                            <div class="no-padding" style="width: 100%; height: 30px; border-right: none; line-height: 30px;">Factory Breakdown</div>
+                                                            <div class="no-padding" style="width: 100%; height: 30px;">
+                                                                <div class="no-padding" style="width: 200px; height: 30px; line-height: 30px;">Name</div>
+                                                                <div class="no-padding" style="width: 80px; height: 30px; line-height: 30px;">Unit</div>
+                                                                <div class="no-padding" style="width: 100%; height: 30px; line-height: 30px;">Quantity</div>
+                                                            </div>
+                                                        </div>
+                                                        @*<div class="no-padding" style="width: 370px; height: 60px;">
+                                                                <div class="no-padding" style="width: 100%; height: 30px; border-right: none; line-height: 30px;">Model Detail</div>
+                                                                <div class="no-padding" style="width: 100%; height: 30px;">
+                                                                    <div class="no-padding" style="width: 200px; height: 30px; line-height: 30px;">Name</div>
+                                                                    <div class="no-padding" style="width: 80px; height: 30px; line-height: 30px;">Code</div>
+                                                                    <div class="no-padding" style="width: 100%; height: 30px; line-height: 30px;">Quantity</div>
+                                                                </div>
+                                                            </div>*@
+                                                        <div style="width: 450px; height: 60px;">Remark</div>
+                                                        <div style="border-bottom: none;"></div>
+                                                    </div>
+                                                    <div class="tilsoft-table-body" style="width: 890px; margin-top: 60px;">
+                                                        <table>
+                                                            <tbody>
+                                                                <tr ng-repeat="item in data.factoryBreakdownDetailDTOs">
+                                                                    <td style="width: 59px; text-align: center;">{{$index + 1}}</td>
+                                                                    <td style="width: 200px; text-transform: uppercase;">{{item.breakdownCategoryNM}}</td>
+                                                                    <td style="width: 80px;">
+                                                                        <label class="input">
+                                                                            <input type="text" class="form-control" style="font-family: Arial; font-size: 12px; text-align: center;" ng-model="item.unitNM" ng-if="!data.isConfirmed" />
+                                                                        </label>
+                                                                        <label ng-if="data.isConfirmed" style="text-align: center;">{{item.unitNM}}</label>
+                                                                    </td>
+                                                                    <td style="width: 90px;">
+                                                                        <label class="input">
+                                                                            <input type="text" class="form-control" style="font-family: Arial; font-size: 12px; text-align: right;" avs-number-2 ng-model="item.quantity" ng-decimal="4" ng-if="!data.isConfirmed" />
+                                                                        </label>
+                                                                        <label ng-if="data.isConfirmed" style="text-align: center;">{{item.quantity | number : 4}}</label>
+                                                                    </td>
+                                                                    <td style="width: 450px;">
+                                                                        <label class="input">
+                                                                            <input type="text" class="form-control" style="font-family: Arial; font-size: 12px; text-align: left;" ng-model="item.remark" ng-if="!data.isConfirmed" />
+                                                                        </label>
+                                                                        <label ng-if="data.isConfirmed" style="text-align: center; text-transform: uppercase;">{{item.remark}}</label>
+                                                                    </td>
+                                                                    <td style="border-bottom: none;"></td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+                                </div>
+                                <div class="row">
+                                    <section class="col col-4">
+                                        <label class="label">Packing Dimension (L/W/H)</label>
+                                        <label class="input">
+                                            <input style="width: 30%; margin-right: 3%; float: left; text-align: right;" placeholder="Length" type="text" ng-model="data.packingDimensionL" />
+                                            <input style="width: 30%; margin-right: 3%; float: left; text-align: right;" placeholder="Width" type="text" ng-model="data.packingDimensionW" />
+                                            <input style="width: 30%; margin-right: 3%; float: left; text-align: right;" placeholder="Height" type="text" ng-model="data.packingDimensionH" />
+                                        </label>
+                                    </section>
+                                    <section class="col col-4">
+                                        <label class="label">Cushion Dimension (L/W/H)</label>
+                                        <label class="input">
+                                            <input style="width: 30%; margin-right: 3%; float: left; text-align: right;" placeholder="Length" type="text" ng-model="data.cushionDimensionL" />
+                                            <input style="width: 30%; margin-right: 3%; float: left; text-align: right;" placeholder="Width" type="text" ng-model="data.cushionDimensionW" />
+                                            <input style="width: 30%; margin-right: 3%; float: left; text-align: right;" placeholder="Height" type="text" ng-model="data.cushionDimensionH" />
+                                        </label>
+                                    </section>
+                                </div>
+                                <div class="row">
+                                    <section class="col col-4">
+                                        <label class="label">Remark</label>
+                                        <label class="input">
+                                            <textarea name="remark" cols="150" rows="5" ng-model="data.remark"></textarea>
+                                        </label>
+                                    </section>
+                                </div>
+                                <div class="row">
+                                    <section class="col col-sm-4">
+                                        <div class="note">
+                                            <strong ng-show="data.updatedBy != null">Updated By</strong>
+                                            <a ng-show="data.updatedBy != null" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{data.updatedBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                <i class="fa fa-user"></i> {{data.updatorName}}
+                                            </a>
+                                            <span ng-show="data.updatedBy != null"> <i class="fa fa-user"></i> {{data.updatorName}}</span>
+
+                                            <span ng-show="data.updatedBy != null">on {{data.updatedDate}}</span>
+                                        </div>
+                                    </section>
+                                    <section class="col col-sm-4">
+                                        <div class="note">
+                                            <strong ng-show="data.confirmedBy != null">Confirmed By</strong>
+                                            <a ng-show="data.confirmedBy != null" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{data.confirmedBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                <i class="fa fa-user"></i> {{data.confirmerName}}
+                                            </a>
+                                            <span ng-show="data.confirmedBy != null"> <i class="fa fa-user"></i> {{data.confirmerName}}</span>
+                                            <span ng-show="data.confirmedBy != null">on {{data.confirmedDate}}</span>
+                                        </div>
+                                    </section>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="tabModel">
+                            <div class="smart-form">
+                                <div class="row" ng-if="!data.isConfirmed">
+                                    <section class="col col-sm-2">
+                                        <a href="javascript:void(0);" class="btn btn-default btn-sm btn-primary" ng-click="event.addModel(data.modelUD);"><i class="fa fa-plus"></i> Add model detail</a>
+                                    </section>
+                                </div>
+                                <div class="row">
+                                    <section class="col col-sm-12">
+                                        <div class="tilsoft-table-wrapper" avs-scrollable-table>
+                                            <div class="tilsoft-table">
+                                                <div class="tilsoft-table-header" style="width: 1090px;">
+                                                    <div style="width: 60px;">Total<br /><b style="color: blue;">{{data.factoryBreakdownModels.length | number}}</b></div>
+                                                    <div style="width: 180px;">Code</div>
+                                                    <div style="width: 300px;">Name</div>
+                                                    <div style="width: 90px;">Quantity</div>
+                                                    <div style="width: 450px;">Remark</div>
+                                                    <div style="border-bottom: none;"></div>
+                                                </div>
+                                                <div class="tilsoft-table-body" style="width: 1090px;">
+                                                    <table>
+                                                        <tbody>
+                                                            <tr ng-repeat="model in data.factoryBreakdownModels">
+                                                                <td style="width: 59px; text-align: center;">
+                                                                    <a href="javascript:void(0);" class="btn btn-default btn-danger btn-xs font-11" ng-if="!data.isConfirmed" ng-click="event.removeModel(model);"><i class="fa fa-times"></i> Del</a>
+                                                                    <label ng-if="data.isConfirmed">1</label>
+                                                                </td>
+                                                                <td style="width: 180px;">
+                                                                    <label style="text-align: center;">{{model.modelUD}}</label>
+                                                                </td>
+                                                                <td style="width: 300px;">
+                                                                    <input type="text" class="form-control" style="font-size: 12px; font-family: Arial;" ng-if="!data.isConfirmed" ng-model="model.modelNM" />
+                                                                    <label ng-if="data.isConfirmed">{{model.modelNM}}</label>
+                                                                </td>
+                                                                <td style="width: 90px;">
+                                                                    <input type="text" class="form-control" style="font-size: 12px; font-family: Arial; text-align: right;" avs-number-2 ng-if="!data.isConfirmed" ng-model="model.quantity" ng-decimal="0" />
+                                                                    <label ng-if="data.isConfirmed" style="text-align: right;">{{mode.quantity | number}}</label>
+                                                                </td>
+                                                                <td style="width: 450px;">
+                                                                    <input type="text" class="form-control" style="font-size: 12px; font-family: Arial;" ng-if="!data.isConfirmed" ng-model="model.remark" />
+                                                                    <label ng-if="data.isConfirmed" style="text-align: right;">{{model.remark}}</label>
+                                                                </td>
+                                                                <td style="border-bottom: none;"></td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+<div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="frmSampleDetail" class="modal fade" style="display: none;" data-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="padding: 5px;">
+                <button style="margin-top: 2px; margin-right: 5px;" aria-hidden="true" data-dismiss="modal" class="close" type="button">
+                    ×
+                </button>
+                <h4 id="myModalLabel" class="modal-title"><i class="fa fa-cog"></i> Sample detail </h4>
+            </div>
+            <div class="modal-body no-padding">
+                <div class="smart-form">
+                    <fieldset>
+                        <fieldset>
+                            <section>
+                                <ul class="ulcols-4">
+                                    <li>
+                                        <div class="content" ng-if="sampleData.finishedImage!=null" style="width:300px">
+                                            <a href="{{sampleData.finishedImageFileLocation}}" data-featherlight="image">
+                                                <div class="img" style="background: url('{{sampleData.finishedImageThumbnailLocation}}') no-repeat center center; background-size: contain;"></div>
+                                            </a>
+                                        </div>
+                                        <div class="content" ng-if="sampleData.finishedImage==null" style="width:300px">
+                                            <a href="{{sampleData.fileLocation}}" data-featherlight="image">
+                                                <div class="img" style="background: url('{{sampleData.thumbnailLocation}}') no-repeat center center; background-size: contain;"></div>
+                                            </a>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </section>
+                        </fieldset>
+                        <fieldset>
+                            <div class="row">
+                                <section class="col col-8">
+                                    <label class="label">Model <span ng-if="sampleData.modelID">(Code: {{sampleData.modelUD}})</span></label>
+                                    <label class="input">
+                                        <input type="text" readonly value="{{sampleData.articleDescription}}">
+                                    </label>
+                                </section>
+                                <section class="col col-4">
+                                    <label class="label">Status</label>
+                                    <label class="input">
+                                        <input type="text" readonly value="{{sampleData.sampleProductStatusNM}}" />
+                                    </label>
+                                </section>
+                            </div>
+                            <div class="row">
+                                <section class="col col-4">
+                                    <label class="label">Material <span ng-if="sampleData.materialID">(Code: {{sampleData.materialUD}})</span></label>
+                                    <label class="input">
+                                        <input type="text" readonly value="{{sampleData.materialDescription}}" />
+                                    </label>
+                                </section>
+                                <section class="col col-4">
+                                    <label class="label">Material Type <span ng-if="sampleData.materialTypeID">(Code: {{sampleData.materialTypeUD}})</span></label>
+                                    <label class="input">
+                                        <input type="text" readonly value="{{sampleData.materialTypeDescription}}" />
+                                    </label>
+                                </section>
+                                <section class="col col-4">
+                                    <label class="label">Material Color <span ng-if="sampleData.materialColorID">(Code: {{sampleData.materialColorUD}})</span></label>
+                                    <label class="input">
+                                        <input type="text" readonly value="{{sampleData.materialColorDescription}}" />
+                                    </label>
+                                </section>
+                            </div>
+
+                            <div class="row">
+                                <section class="col col-4">
+                                    <label class="label">Material 2 <span ng-if="sampleData.materialID">(Code: {{sampleData.material2UD}})</span></label>
+                                    <label class="input">
+                                        <input type="text" readonly value="{{sampleData.material2Description}}" />
+                                    </label>
+                                </section>
+                                <section class="col col-4">
+                                    <label class="label">Material 2 Type <span ng-if="sampleData.material2TypeID">(Code: {{sampleData.material2TypeUD}})</span></label>
+                                    <label class="input">
+                                        <input type="text" readonly value="{{sampleData.material2TypeDescription}}" />
+                                    </label>
+                                </section>
+                                <section class="col col-4">
+                                    <label class="label">Material 2 Color <span ng-if="sampleData.material2ColorID">(Code: {{sampleData.material2ColorUD}})</span></label>
+                                    <label class="input">
+                                        <input type="text" readonly value="{{sampleData.material2ColorDescription}}" />
+                                    </label>
+                                </section>
+                            </div>
+
+                            <div class="row">
+                                <section class="col col-4">
+                                    <label class="label">Material 3 <span ng-if="sampleData.materialID">(Code: {{sampleData.material3UD}})</span></label>
+                                    <label class="input">
+                                        <input type="text" readonly value="{{sampleData.material3Description}}" />
+                                    </label>
+                                </section>
+                                <section class="col col-4">
+                                    <label class="label">Material 3 Type <span ng-if="sampleData.material3TypeID">(Code: {{sampleData.material3TypeUD}})</span></label>
+                                    <label class="input">
+                                        <input type="text" readonly value="{{sampleData.material3TypeDescription}}" />
+                                    </label>
+                                </section>
+                                <section class="col col-4">
+                                    <label class="label">Material 3 Color <span ng-if="sampleData.material3ColorID">(Code: {{sampleData.material3ColorUD}})</span></label>
+                                    <label class="input">
+                                        <input type="text" readonly value="{{sampleData.material3ColorDescription}}" />
+                                    </label>
+                                </section>
+                            </div>
+
+                            <div class="row">
+                                <section class="col col-3">
+                                    <label class="label">Back Cushion <span ng-if="sampleData.backCushionID">(Code: {{sampleData.backCushionUD}})</span></label>
+                                    <label class="input">
+                                        <input type="text" readonly value="{{sampleData.backCushionDescription}}" />
+                                    </label>
+                                </section>
+                                <section class="col col-3">
+                                    <label class="label">Seat Cushion <span ng-if="sampleData.seatCushionID">(Code: {{sampleData.seatCushionUD}})</span></label>
+                                    <label class="input">
+                                        <input type="text" readonly value="{{sampleData.seatCushionDescription}}" />
+                                    </label>
+                                </section>
+                                <section class="col col-4">
+                                    <label class="label">Cushion Color <span ng-if="sampleData.cushionColorID">(Code: {{sampleData.cushionColorUD}})</span></label>
+                                    <label class="input">
+                                        <input type="text" readonly value="{{sampleData.cushionColorDescription}}" />
+                                    </label>
+                                </section>
+                                <section class="col col-2">
+                                    <label class="label">Quantity</label>
+                                    <label class="input">
+                                        <input readonly type="text" style="text-align: right;" ng-model="sampleData.quantity" />
+                                    </label>
+                                </section>
+                            </div>
+                        </fieldset>
+                        <fieldset>
+                            <section>
+                                <label class="checkbox state-disabled">
+                                    <input name="checkbox" type="checkbox" ng-model="sampleData.isDevelopment" disabled>
+                                    <i></i>Development Item ?
+                                </label>
+                            </section>
+                        </fieldset>
+                        <fieldset>
+                            <div class="row">
+                                <section class="col col-4">
+                                    <label class="label">Factory Deadline</label>
+                                    <label class="input">
+                                        <input readonly type="text" ng-model="sampleData.factoryDeadline" />
+                                    </label>
+                                </section>
+                                <section class="col col-4">
+                                    <label class="label">Factory</label>
+                                    <label class="input">
+                                        <input readonly type="text" ng-model="sampleData.vnSuggestedFactoryUD" />
+                                    </label>
+                                </section>
+                                <section class="col col-8" ng-if="sampleData.sampleProductSubFactories.length > 0">
+                                    <label class="label">Sub Factory</label>
+                                    <div class="input-group">
+                                        <div class="bootstrap-tagsinput" style="box-sizing: border-box;">
+                                            <span class="tag label label-info" style="margin: 2px !important; padding: 3px 28px 3px 8px;" ng-repeat="factory in sampleData.sampleProductSubFactories">
+                                                {{factory.factoryUD}}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </section>
+                            </div>
+                        </fieldset>
+                        <fieldset>
+                            <div class="row">
+                                <section class="col col-4">
+                                    <label class="label" style="white-space:pre-wrap">Overall Dimension    (L/W/H)</label>
+                                    <label class="input">
+                                        <input readonly style="width: 30%; margin-right: 3%; float: left; text-align: right;" type="text" ng-model="sampleData.overallDimL" />
+                                        <input readonly style="width: 30%; margin-right: 3%; float: left; text-align: right;" type="text" ng-model="sampleData.overallDimW" />
+                                        <input readonly style="width: 30%; margin-right: 3%; float: left; text-align: right;" type="text" ng-model="sampleData.overallDimH" />
+                                    </label>
+                                </section>
+                                <section class="col col-4">
+                                    <label class="label">Load Ability (20DC/40DC/40HC)</label>
+                                    <label class="input">
+                                        <input readonly style="width: 30%; margin-right: 3%; float: left; text-align: right;" type="text" ng-model="sampleData.loadAbility20DC" />
+                                        <input readonly style="width: 30%; margin-right: 3%; float: left; text-align: right;" type="text" ng-model="sampleData.loadAbility40DC" />
+                                        <input readonly style="width: 30%; margin-right: 3%; float: left; text-align: right;" type="text" ng-model="sampleData.loadAbility40HC" />
+                                    </label>
+                                </section>
+                                <section class="col col-4">
+                                    <label class="label">Carton Box Dimension (L/W/H)</label>
+                                    <label class="input">
+                                        <input readonly style="width: 30%; margin-right: 3%; float: left; text-align: right;" type="text" ng-model="sampleData.cartonBoxDimL" />
+                                        <input readonly style="width: 30%; margin-right: 3%; float: left; text-align: right;" type="text" ng-model="sampleData.cartonBoxDimW" />
+                                        <input readonly style="width: 30%; margin-right: 3%; float: left; text-align: right;" type="text" ng-model="sampleData.cartonBoxDimH" />
+                                    </label>
+                                </section>
+                            </div>
+                            <div class="row">
+                                <section class="col col-3">
+                                    <label class="label">Net Weight</label>
+                                    <label class="input">
+                                        <input readonly type="text" style="text-align: right;" ng-model="sampleData.netWeight" />
+                                    </label>
+                                </section>
+                                <section class="col col-3">
+                                    <label class="label">Gross Weight</label>
+                                    <label class="input">
+                                        <input readonly type="text" style="text-align: right;" ng-model="sampleData.grossWeight" />
+                                    </label>
+                                </section>
+                                <section class="col col-3">
+                                    <label class="label">Item/Box</label>
+                                    <label class="input">
+                                        <input readonly type="text" style="text-align: right;" ng-model="sampleData.itemPerBox" />
+                                    </label>
+                                </section>
+                                <section class="col col-3">
+                                    <label class="label">Box/Set</label>
+                                    <label class="input">
+                                        <input readonly type="text" style="text-align: right;" ng-model="sampleData.boxPerSet" />
+                                    </label>
+                                </section>
+                            </div>
+                            <div class="row">
+                                <section class="col col-3">
+                                    <label class="label">Factory Breakdown</label>
+                                    <label class="input">
+                                        <span class="form-control" style="text-align: right;">
+                                            <a target="_blank" ng-if="!sampleData.factoryBreakdownID" href="@Url.Action("View", "BreakDownMng")/0?modelId=0&sampleProductId={{sampleData.sampleProductID}}&offerLineId=0&factoryId={{sampleData.vnSuggestedFactoryID}}">{{sampleData.factoryBreakdownPriceUSD | currency:'$':2}}</a>
+                                            <a target="_blank" ng-if="sampleData.factoryBreakdownID" href="@Url.Action("Edit", "FactoryBreakdownMng")/{{sampleData.factoryBreakdownID}}">{{sampleData.factoryBreakdownPriceUSD | currency:'$':2}}</a>
+                                        </span>
+                                    </label>
+                                </section>
+                            </div>
+                        </fieldset>
+                    </fieldset>
+                </div>
+            </div>
+            <div class="modal-footer" style="padding: 5px;">
+                <a href="javascript:void(0);" class="btn btn-default btn-sm" data-dismiss="modal"><i class="fa fa-reply"></i> Close</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section FormAction{
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "FactoryBreakdownMng")" class="btn btn-default btn-sm"><i class="fa fa-arrow-left"></i></a>
+        </li>
+        <li class="sparks-info" ng-show="data.isConfirmed != true">
+            <a href="javascript:void(0)" class="btn btn-default btn-sm @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="event.update()">
+                <i class="fa fa-floppy-o"></i>
+            </a>
+        </li>
+        <li class="sparks-info" ng-show="data.isConfirmed != true">
+            <a href="javascript:void(0)" class="btn btn-default btn-sm @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Approve, HttpContext.Current))" title="Approve" ng-click="event.approve()" style="color: red">
+                <i class="fa fa-check"></i>
+            </a>
+        </li>
+        <li class="sparks-info" ng-show="data.isConfirmed == true">
+            <a href="javascript:void(0)" class="btn btn-default btn-sm @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Reset, HttpContext.Current))" title="Reset" ng-click="event.reset()" style="color: blue">
+                <i class="fa fa-refresh"></i>
+            </a>
+        </li>
+        <li class="sparks-info">
+            <a href="#" class="btn btn-default" title="Export to excel" ng-click="event.exportExcelDetail()" style="color: #31B404"><i class="fa fa-file-excel-o"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs{
+    <script type="text/javascript">
+        var context = {
+            saleOrderDetailID: '@ViewBag.SaleOrderDetailID',
+            factoryID: '@ViewBag.FactoryID',
+            id: '@ViewBag.ID',
+            sampleProductID: @sampleProductId,
+            backUrl: '@Url.Action("Index", "FactoryBreakdownMng")',
+            serviceUrl: '@(serviceRoot)/api/factory-breakdown/',
+            serviceSampleUrl: '@(serviceRoot)/api/sample2/',
+            refreshUrl: '@Url.Action("Edit", "FactoryBreakdownMng", new { id = UrlParameter.Optional })/',
+            token: '@token',
+            supportServiceUrl: '@(supportServiceRoot)/api/support/',
+            msgValid: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED',
+            backendReportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]',
+            modelID: '@Request.Params["modelID"]',
+        }
+    </script>
+    <script type="text/javascript" src="~/Views/FactoryBreakdownMng/edit.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Views/FactoryBreakdownMng/service.js?v=@guid"></script>
+}

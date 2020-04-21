@@ -1,0 +1,162 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    var supportServiceRoot = (System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"]);
+    ViewBag.Title = (ViewBag.ID == 0) ? "Create Receiving Note Repair Assembly" : "Edit Receiving Note Repair Assembly";
+    ViewBag.SubTitle = (ViewBag.ID == 0) ? "Create" : "Edit";
+    ViewBag.Module = " Receiving Note Repair Assembly";
+}
+
+<form name="editForm" class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>@(ViewBag.ID == 0 ? "Create Receiving Note Repair Assembly" : "Edit Receiving Note Repair Assembly")</h2>
+            </header>
+            <div>
+                <div class="jarviswidget-editbox"></div>
+                <div class="widget-body">
+                    <div class="smart-form">
+                        <div class="row">
+                            <section class="col col-sm-2">
+                                <label class="label">Receiving Note Nr.</label>
+                                <label class="input">
+                                    <input type="text" class="form-control" ng-model="data.receivingNoteUD" style="font-family:Arial" maxlength="50" readonly />
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label class="label">Receiving Note Date</label>
+                                <label class="input-group">
+                                    <input type="text" class="form-control" name="receivingNoteDate" ng-data-source="data.receivingNoteDate" style="font-family:Arial" avs-calendar />
+                                    <span class="input-group-addon">
+                                        <i class="fa fa-calendar"></i>
+                                    </span>
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label class="label">Related Document Nr.</label>
+                                <label class="input">
+                                    <input type="text" class="form-control" name="relatedDocumentNo" ng-model="data.relatedDocumentNo" style="font-family:Arial" maxlength="50" />
+                                </label>
+                            </section>
+                            <section class="col col-sm-6">
+                                <label class="label">Description</label>
+                                <label class="input">
+                                    <input type="text" class="form-control" name="description" ng-model="data.description" style="font-family:Arial" maxlength="500" />
+                                </label>
+                            </section>
+                        </div>
+                        <div class="row">
+                            <section class="col col-sm-2">
+                                <label class="label" style="text-align: right">Search product:</label>
+                            </section>
+                            <section class="col col-sm-10">
+                                <label class="input-group">
+                                    <input type="text" class="form-control" style="font-family:Arial" autocomplete="off" ng-model="searchString" ng-change="event.scan($event)" />
+                                    <span class="input-group-addon">
+                                        <i class="fa fa-search"></i>
+                                    </span>
+                                </label>
+                            </section>
+                        </div>
+                        <div class="row" style="margin-top:0px">
+                            <section class="col col-sm-12">
+                                <div avs-scroll grid-handler="gridHandler" class="tilsoft-table-wrapper">
+                                    <div class="tilsoft-table">
+                                        <div class="tilsoft-table-header" style="width:1000px">
+                                            <div style="width:82px">
+                                                Found(s)
+                                                <span style="color: maroon"><b>{{totalRowsScan}}</b></span>
+                                            </div>
+                                            <div style="width:110px">Code</div>
+                                            <div style="width:250px">Name</div>
+                                            <div style="width:100px">Type</div>
+                                            <div style="width:90px">Quantity</div>
+                                            <div style="width:100px">To Warehouse</div>
+                                            <div>Remark</div>
+                                        </div>
+                                        <div class="tilsoft-table-body" style="width:1000px">
+                                            <table>
+                                                
+                                                <tbody>
+                                                    <tr>
+                                                        <td colspan="4" style="text-align:right;vertical-align:central;">Total:</td>
+                                                        <td style="text-align:right; width: 90px; background-color:yellow">{{event.getTotalQty()}}</td>
+                                                        <td colspan="2" width="34px"></td>
+                                                    </tr>
+                                                    <tr ng-repeat="item in data.receivingNoteDetailDTOs">
+                                                        <td style="width:82px; text-align:center">
+                                                            <a href="javascript:void(0)" class="btn btn-danger btn-xs font-11" ng-click="event.removeDetail(item)">
+                                                                <i class="fa fa-times"></i> Delete
+                                                            </a>
+                                                        </td>
+                                                        <td style="width:110px; text-align:center"> {{item.productionItemUD}}</td>
+                                                        <td style="width:250px; text-align:left">{{item.productionItemNM}}</td>
+                                                        <td style="width:100px; text-align:center">{{item.productionItemTypeNM}}</td>
+                                                        <td style="width:90px; text-align:center">
+                                                            <input type="text" class="form-control" avs-number style="text-align:right" ng-data-source="item.quantity" ng-keypress="event.getTotalQty()" />
+                                                        </td>
+                                                        <td style="width:100px">
+                                                            <select id="toFactoryWarehouseID" name="toFactoryWarehouseID" class="form-control" ng-model="item.toFactoryWarehouseID" ng-options="warehouseItem.factoryWarehouseID as warehouseItem.factoryWarehouseNM for warehouseItem in factoryWarehouses">
+                                                                <option value=""></option>
+                                                            </select>
+                                                        </td>
+                                                        <td>
+                                                            <input type="text" class="form-control" ng-model="item.description" />
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "ReceivingNoteRepairAssemblyMng")" class="btn btn-default" title="Back">
+                <i class="fa fa-arrow-left"></i>
+            </a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default" title="Delete" ng-click="event.remove(data.receivingNoteID)">
+                <i class="fa fa-times"></i>
+            </a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default" title="Save" ng-click="event.update()">
+                <i class="fa fa-floppy-o"></i>
+            </a>
+        </li>
+    </ul>
+}
+
+@section pagejs{
+    <script type="text/javascript">
+        var context = {
+            id: @ViewBag.ID,
+            backUrl: '@Url.Action("Index", "ReceivingNoteRepairAssemblyMng")',
+            refreshUrl: '@Url.Action("Edit", "ReceivingNoteRepairAssemblyMng", new { id = UrlParameter.Optional })/',
+            serviceUrl: '@(serviceRoot)/api/receivingNoteRepairAssemblyMng/',
+            supportServiceUrl: '@(supportServiceRoot)/api/support/',
+            token: '@token',
+            msgValid: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED'
+        };
+    </script>
+    <script type="text/javascript" src="~/Angular/app/receivingNoteRepairAssemblyMng/edit.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/receivingNoteRepairAssemblyMng/service.js?v=@guid"></script>
+}
+

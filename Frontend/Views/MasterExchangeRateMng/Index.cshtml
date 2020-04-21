@@ -1,0 +1,130 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var pageSize = System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"];
+    var cookieID = HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString();
+
+
+    ViewBag.Title = "Master Exchange Rate";
+    ViewBag.Module = "Master Exchange Rate";
+    ViewBag.Icon = "fa-bar-chart-o";
+}
+
+<div class="row">
+    <article class="col-xs-12 col-sm-12 col-lg-12 col-md-12">
+        <div class="jarviswidget" id="wid-id-search-filter" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Search Result</h2>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div avs-scroll grid-handler="gridHandler" class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header" style="width:800px">
+                                <div style="width:80px; font-weight:bold">Found(s)  <font style="color:deeppink; text-transform:none">{{totalRows}}</font></div>
+                                <div style="width:100px;">Valid Date</div>
+                                <div style="width:100px;">Currency</div>
+                                <div>ExchangeRate</div>
+                            </div>
+                            <div class="tilsoft-table-filter" style="width:800px">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>
+                                                <div style="width:80px; border-right:1px solid #ccc">
+                                                    <a href="javascript:void(0)" class="btn btn-default btn-xs" title="Apply Filter" ng-click="event.refresh()"><i class="fa fa-filter"></i></a>
+                                                    <a href="javascript:void(0)" class="btn btn-default btn-xs" title="Clear Filter" ng-click="event.clear()"><i class="fa fa-ban"></i></a>
+                                                </div>
+                                            </th>
+                                            <th>
+                                                <div style="width:100px; border-right:1px solid #ccc">
+                                                    <input type="text" avs-calendar ng-data-source="filters.validDate" class="search-filter" />
+                                                </div>
+                                            </th>
+                                            <th>
+                                                <div style="width:100px; border-right:1px solid #ccc">
+                                                    <select class="select search-filter" ng-model="filters.currency" ng-options="xxx.currency as xxx.name for xxx in currencyArr" style="width:100%;text-align:center">
+                                                        <option value="">
+                                                    </select>
+                                                </div>
+                                            </th>
+                                            <th style="width:100%;">
+                                                <div>
+                                                </div>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                            <div class="tilsoft-table-body" style="width:800px">
+                                <table>
+                                    <tbody>
+                                        <tr ng-repeat="item in data">
+                                            <td style="width:79px">
+                                                <a href="javascript:void(0)" class="btn btn-default btn-xs" ng-show="!item.isEditValue " ng-click="event.editValue(item)" title="Edit" style="width:52px; margin-left:15px"><i class="fa fa-pencil"></i> Edit</a>
+                                                <a href="javascript:void(0)" class="btn btn-primary btn-xs" ng-show="item.isEditValue" ng-click="event.updateValue(item)" title="Update" style="width:55px"><i class="fa fa-floppy-o"> Save</i></a>
+                                                <a href="javascript:void(0)" class="btn btn-danger btn-xs" ng-show="item.isEditValue" ng-click="event.cancelEditValue(item)" title="Cancel" style="width:55px"><i class="fa fa-times"> Cancel</i></a>
+                                            </td>
+                                            <td style="width:100px; text-align:center">
+                                                <span ng-if="!item.isEditValue">{{item.validDate}}</span>
+                                                <div class="input-group" ng-if="item.isEditValue">
+                                                    <input type="text" class="form-control" avs-calendar ng-data-source="item.validDate" style="width:100%; text-align:center" ng-on-change="event.onUnitValue(item)"/>
+                                                </div>
+                                            </td>
+                                            <td style="width:100px; text-align:center">
+                                                <span ng-if="!item.isEditValue">{{item.currency}}</span>
+                                                <div class="input-group" ng-if="item.isEditValue">
+                                                    <select class="select form-control" ng-model="item.currency" ng-options="xxx.currency as xxx.name for xxx in currencyArr" style="width:100%;text-align:center" ng-change="event.onUnitValue(item)">
+                                                        <option value="">
+                                                    </select>
+                                                    @*<input type="text" class="form-control" ng-model="item.currency" style="width:275px; text-align:center" />*@
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span ng-if="!item.isEditValue">{{item.exchangeRate | number : 0}}</span>
+                                                <div class="input-group" ng-if="item.isEditValue">
+                                                    <input type="text" class="form-control" avs-number ng-decimal="0" ng-data-source="item.exchangeRate" style="width:100%; text-align:center" ng-on-change="event.onUnitValue(item)"/>
+                                                </div>
+
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" ng-click="event.refresh()" title="Search"><i class="fa fa-search"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" ng-click="event.clear()" title="Refresh Page"><i class="fa fa-refresh"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="@Url.Action("Edit", "MasterExchangeRateMng", new { id = UrlParameter.Optional })/0" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="Create new " target="_blank"><i class="fa fa-file-o"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(serviceRoot)/api/MasterExchangeRateMng/',
+            token: '@token',
+            pageSize: '@pageSize',
+            cookieID: '@cookieID'
+        }
+    </script>
+    <script type="text/javascript" src="~/Views/MasterExchangeRateMng/index.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Views/MasterExchangeRateMng/services.js?=@guid"></script>
+}

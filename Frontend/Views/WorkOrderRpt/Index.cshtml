@@ -1,0 +1,358 @@
+﻿@{
+    ViewBag.Title = "Work Order History";
+    ViewBag.Module = "Work Order History";
+    ViewBag.Icon = "fa-history";
+}
+
+<style>
+    .last-row-no-border tr:last-child td {
+        border-bottom: none;
+    }
+</style>
+
+<form class="row" name="editForm" id="main-form">
+    <div class="col-sm-12">
+        <div class="well">
+            <h1>#{{data.workOrderUD}} - {{data.quantity}} {{data.description}} (Client: {{data.clientUD}})</h1>
+        </div>
+    </div>
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <ul class="nav nav-tabs pull-left in">
+                    <li class="active">
+                        <a data-toggle="tab" href="#tabSequence"> <span> View by OP sequence </span> </a>
+                    </li>
+                    <li>
+                        <a data-toggle="tab" href="#tabReceipt"> <span> View by receipt </span> </a>
+                    </li>
+                    <li>
+                        <a data-toggle="tab" href="#tabWorkCenter"> <span> View by work center </span> </a>
+                    </li>
+                </ul>
+            </header>
+            <div>
+                <div class="widget-body">                    
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="tabSequence">
+                            <div class="smart-form">
+                                <fieldset>                                    
+                                    <div class="tilsoft-table-wrapper">
+                                        <div class="tilsoft-table">
+                                            <div class="tilsoft-table-body" style="width: 100%; overflow-y: hidden; height: auto; margin-top: 0px;">
+                                                <table>
+                                                    <tbody ng-repeat="sequence in opSequenceDetails">
+                                                        <tr>
+                                                            <th style="text-align: left;"><h3>SEQUENCE: {{sequence.opSequenceDetailNM}}</h3></th>
+                                                        </tr>
+                                                        <tr ng-repeat="team in $parent.productionTeams | filter: {opSequenceDetailID: sequence.opSequenceDetailID}">
+                                                            <td>
+                                                                <strong>TEAM: {{team.productionTeamNM}}</strong>
+                                                                <table style="border: solid 1px #ddd;">
+                                                                    <tr>
+                                                                        <th>Code</th>
+                                                                        <th>Name</th>
+                                                                        <th style="width: 100px;">In</th>
+                                                                        <th style="width: 100px;">Out</th>
+                                                                        <th style="width: 100px;">Unit</th>
+                                                                        <th style="width: 150px;">Receipts</th>
+                                                                    </tr>
+                                                                    <tr ng-repeat="item in $parent.details | filter: {opSequenceDetailID: sequence.opSequenceDetailID, toProductionTeamID: team.productionTeamID}">
+                                                                        <td>{{item.productionItemUD}}</td>
+                                                                        <td>{{item.productionItemNM}}</td>
+                                                                        <td style="text-align: right;">{{item.totalQuantity | number: 2}}</td>
+                                                                        <td style="text-align: right;"></td>
+                                                                        <td>{{item.unit}}</td>
+                                                                        <td style="padding: 0px;">
+                                                                            <table class="last-row-no-border">
+                                                                                <tr ng-repeat="receipt in $parent.receipts | filter: {opSequenceDetailID: sequence.opSequenceDetailID, toProductionTeamID: team.productionTeamID, productionItemID: item.productionItemID}">
+                                                                                    <td>
+                                                                                        <strong><a href="javascript:void(0)">{{receipt.deliveryNoteUD}}</a></strong> ({{receipt.receiptDate}})
+                                                                                    </td>
+                                                                                </tr>
+                                                                            </table>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr ng-repeat="item in $parent.details | filter: {opSequenceDetailID: sequence.opSequenceDetailID, fromProductionTeamID: team.productionTeamID}">
+                                                                        <td>{{item.productionItemUD}}</td>
+                                                                        <td>{{item.productionItemNM}}</td>
+                                                                        <td style="text-align: right;"></td>
+                                                                        <td style="text-align: right;">{{item.totalQuantity | number: 2}}</td>
+                                                                        <td>{{item.unit}}</td>
+                                                                        <td style="padding: 0px;">
+                                                                            <table class="last-row-no-border">
+                                                                                <tr ng-repeat="receipt in $parent.receipts | filter: {opSequenceDetailID: sequence.opSequenceDetailID, fromProductionTeamID: team.productionTeamID, productionItemID: item.productionItemID}">
+                                                                                    <td ng-if="receipt.deliveryNoteUD">
+                                                                                        <strong><a href="javascript:void(0)">{{receipt.deliveryNoteUD}}</a></strong> ({{receipt.receiptDate}})
+                                                                                    </td>
+                                                                                    <td ng-if="receipt.receivingNoteUD">
+                                                                                        <strong><a href="javascript:void(0)">{{receipt.receivingNoteUD}}</a></strong> ({{receipt.receiptDate}})
+                                                                                    </td>
+                                                                                </tr>
+                                                                            </table>
+                                                                        </td>
+                                                                    </tr>
+                                                                </table>
+                                                            </td>
+                                                        </tr>
+                                                        <tr ng-repeat="warehouse in $parent.factoryWarehouses | filter: {opSequenceDetailID: sequence.opSequenceDetailID}">
+                                                            <td>
+                                                                <strong>WAREHOUSE: {{warehouse.factoryWarehouseNM}}</strong>
+                                                                <table style="border: solid 1px #ddd;">
+                                                                    <tr>
+                                                                        <th>Code</th>
+                                                                        <th>Name</th>
+                                                                        <th style="width: 100px;">In</th>
+                                                                        <th style="width: 100px;">Out</th>
+                                                                        <th style="width: 100px;">Unit</th>
+                                                                        <th style="width: 150px;">Receipts</th>
+                                                                    </tr>
+                                                                    <tr ng-repeat="item in $parent.details | filter: {opSequenceDetailID: sequence.opSequenceDetailID, toFactoryWarehouseID: warehouse.factoryWarehouseID}">
+                                                                        <td>{{item.productionItemUD}}</td>
+                                                                        <td>{{item.productionItemNM}}</td>
+                                                                        <td style="text-align: right;">{{item.totalQuantity | number: 2}}</td>
+                                                                        <td style="text-align: right;"></td>
+                                                                        <td>{{item.unit}}</td>
+                                                                        <td style="padding: 0px;">
+                                                                            <table class="last-row-no-border">
+                                                                                <tr ng-repeat="receipt in $parent.receipts | filter: {opSequenceDetailID: sequence.opSequenceDetailID, toFactoryWarehouseID: warehouse.factoryWarehouseID, productionItemID: item.productionItemID}">
+                                                                                    <td>
+                                                                                        <strong><a href="javascript:void(0)">{{receipt.receivingNoteUD}}</a></strong> ({{receipt.receiptDate}})
+                                                                                    </td>
+                                                                                </tr>
+                                                                            </table>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr ng-repeat="item in $parent.details | filter: {opSequenceDetailID: sequence.opSequenceDetailID, fromFactoryWarehouseID: warehouse.factoryWarehouseID}">
+                                                                        <td>{{item.productionItemUD}}</td>
+                                                                        <td>{{item.productionItemNM}}</td>
+                                                                        <td style="text-align: right;"></td>
+                                                                        <td style="text-align: right;">{{item.totalQuantity | number: 2}}</td>
+                                                                        <td>{{item.unit}}</td>
+                                                                        <td style="padding: 0px;">
+                                                                            <table class="last-row-no-border">
+                                                                                <tr ng-repeat="receipt in $parent.receipts | filter: {opSequenceDetailID: sequence.opSequenceDetailID, fromFactoryWarehouseID: warehouse.factoryWarehouseID, productionItemID: item.productionItemID}">
+                                                                                    <td>
+                                                                                        <strong><a href="javascript:void(0)">{{receipt.deliveryNoteUD}}</a></strong> ({{receipt.receiptDate}})
+                                                                                    </td>
+                                                                                </tr>
+                                                                            </table>
+                                                                        </td>
+                                                                    </tr>
+                                                                </table>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane" id="tabReceipt">
+                            <div class="smart-form">
+                                <fieldset>
+                                    <div class="tilsoft-table-wrapper">
+                                        <div class="tilsoft-table">
+                                            <div class="tilsoft-table-body" style="width: 100%; overflow-y: hidden; height: auto; margin-top: 0px;">
+                                                <table>
+                                                    <tr>
+                                                        <th rowspan="2">Receipt</th>
+                                                        <th style="width: 80px;" rowspan="2">Date</th>
+                                                        <th colspan="2">From</th>
+                                                        <th colspan="2">To</th>
+                                                        <th rowspan="2">Description</th>
+                                                    </tr>
+                                                    <tr>
+                                                        <th style="width: 150px;">Warehouse</th>
+                                                        <th style="width: 150px;">Team</th>
+                                                        <th style="width: 150px;">Warehouse</th>
+                                                        <th style="border-right: solid 1px #ddd;width: 150px;">Team</th>
+                                                    </tr>
+                                                    <tbody ng-repeat="receipt in receiptOverviews">
+                                                        <tr>
+                                                            <td>{{receipt.receiptUD}} <a href="javascript:void(0)" class="btn btn-primary btn-xs" onclick="jQuery(this).parent().parent().next().toggle(); jQuery(this).find('i.fa-plus-square-o').toggle(); jQuery(this).find('i.fa-minus-square-o').toggle();"><i class="fa fa-plus-square-o"></i><i class="fa fa-minus-square-o" style="display: none;"></i></a></td>
+                                                            <td>{{receipt.receiptDate}}</td>
+                                                            <td>{{receipt.fromFactoryWarehouseNM}}</td>
+                                                            <td>{{receipt.fromProductionTeamNM}}</td>
+                                                            <td>{{receipt.toFactoryWarehouseNM}}</td>
+                                                            <td>{{receipt.toProductionTeamNM}}</td>
+                                                            <td>{{receipt.description}}</td>
+                                                        </tr>
+                                                        <tr style="display: none;">
+                                                            <td></td>
+                                                            <td colspan="6" style="padding: 0px;">
+                                                                <table class="last-row-no-border">
+                                                                    <tr>
+                                                                        <th>Code</th>
+                                                                        <th>Name</th>
+                                                                        <th style="width: 100px;">Qty</th>
+                                                                        <th style="width: 100px;">Unit</th>
+                                                                    </tr>
+                                                                    <tr ng-repeat="item in $parent.receiptOverviewDetails | filter : {receiptType: receipt.receiptType, receiptID: receipt.receiptID}">
+                                                                        <td style="text-align: center;">{{item.productionItemUD}}</td>
+                                                                        <td>{{item.productionItemNM}}</td>
+                                                                        <td style="text-align: right;">{{item.quantity | number: 2}}</td>
+                                                                        <td style="text-align: center;">{{item.unit}}</td>
+                                                                    </tr>
+                                                                </table>
+                                                            </td>
+                                                        </tr>                                                       
+                                                    </tbody>                                                    
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane" id="tabWorkCenter">
+                            <div class="smart-form">
+                                <fieldset>
+                                    <div class="tilsoft-table-wrapper">
+                                        <div class="tilsoft-table">
+                                            <div class="tilsoft-table-body" style="width: 100%; overflow-y: hidden; height: auto; margin-top: 0px;">
+                                                <table>
+                                                    <tbody ng-repeat="team in productionTeams | unique: 'productionTeamID' | orderBy: 'opSequenceDetailID'">
+                                                        <tr>
+                                                            <th style="text-align: left;"><h3>TEAM: {{team.productionTeamNM}}</h3></th>
+                                                        </tr>
+                                                        <tr>
+                                                            <td style="padding: 0px;">
+                                                                <table class="last-row-no-border">
+                                                                    <tr>
+                                                                        <th>Code</th>
+                                                                        <th>Name</th>
+                                                                        <th style="width: 100px;">In</th>
+                                                                        <th style="width: 100px;">Out</th>
+                                                                        <th style="width: 100px;">Unit</th>
+                                                                        <th style="width: 150px;">Receipts</th>
+                                                                    </tr>
+                                                                    <tr ng-repeat="item in $parent.details | filter: {toProductionTeamID: team.productionTeamID}">
+                                                                        <td>{{item.productionItemUD}}</td>
+                                                                        <td>{{item.productionItemNM}}</td>
+                                                                        <td style="text-align: right;">{{item.totalQuantity | number: 2}}</td>
+                                                                        <td style="text-align: right;"></td>
+                                                                        <td>{{item.unit}}</td>
+                                                                        <td style="padding: 0px;">
+                                                                            <table class="last-row-no-border">
+                                                                                <tr ng-repeat="receipt in $parent.receipts | filter: {toProductionTeamID: team.productionTeamID, productionItemID: item.productionItemID}">
+                                                                                    <td>
+                                                                                        <strong><a href="javascript:void(0)">{{receipt.deliveryNoteUD}}</a></strong> ({{receipt.receiptDate}})
+                                                                                    </td>
+                                                                                </tr>
+                                                                            </table>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr ng-repeat="item in $parent.details | filter: {fromProductionTeamID: team.productionTeamID}">
+                                                                        <td>{{item.productionItemUD}}</td>
+                                                                        <td>{{item.productionItemNM}}</td>
+                                                                        <td style="text-align: right;"></td>
+                                                                        <td style="text-align: right;">{{item.totalQuantity | number: 2}}</td>
+                                                                        <td>{{item.unit}}</td>
+                                                                        <td style="padding: 0px;">
+                                                                            <table class="last-row-no-border">
+                                                                                <tr ng-repeat="receipt in $parent.receipts | filter: {fromProductionTeamID: team.productionTeamID, productionItemID: item.productionItemID}">
+                                                                                    <td ng-if="receipt.deliveryNoteUD">
+                                                                                        <strong><a href="javascript:void(0)">{{receipt.deliveryNoteUD}}</a></strong> ({{receipt.receiptDate}})
+                                                                                    </td>
+                                                                                    <td ng-if="receipt.receivingNoteUD">
+                                                                                        <strong><a href="javascript:void(0)">{{receipt.receivingNoteUD}}</a></strong> ({{receipt.receiptDate}})
+                                                                                    </td>
+                                                                                </tr>
+                                                                            </table>
+                                                                        </td>
+                                                                    </tr>
+                                                                </table>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                    <tbody ng-repeat="warehouse in factoryWarehouses | unique: 'factoryWarehouseID' | orderBy: 'opSequenceDetailID'">
+                                                        <tr>
+                                                            <th style="text-align: left;"><h3>WAREHOUSE: {{warehouse.factoryWarehouseNM}}</h3></th>
+                                                        </tr>
+                                                        <tr>
+                                                            <td style="padding: 0px;">
+                                                                <table class="last-row-no-border">
+                                                                    <tr>
+                                                                        <th>Code</th>
+                                                                        <th>Name</th>
+                                                                        <th style="width: 100px;">In</th>
+                                                                        <th style="width: 100px;">Out</th>
+                                                                        <th style="width: 100px;">Unit</th>
+                                                                        <th style="width: 150px;">Receipts</th>
+                                                                    </tr>                                                                   
+                                                                    <tr ng-repeat="item in $parent.details | filter: {fromFactoryWarehouseID: warehouse.factoryWarehouseID}">
+                                                                        <td>{{item.productionItemUD}}</td>
+                                                                        <td>{{item.productionItemNM}}</td>
+                                                                        <td style="text-align: right;"></td>
+                                                                        <td style="text-align: right;">{{item.totalQuantity | number: 2}}</td>
+                                                                        <td>{{item.unit}}</td>
+                                                                        <td style="padding: 0px;">
+                                                                            <table class="last-row-no-border">
+                                                                                <tr ng-repeat="receipt in $parent.receipts | filter: {fromFactoryWarehouseID: warehouse.factoryWarehouseID, productionItemID: item.productionItemID}">
+                                                                                    <td>
+                                                                                        <strong><a href="javascript:void(0)">{{receipt.deliveryNoteUD}}</a></strong> ({{receipt.receiptDate}})
+                                                                                    </td>
+                                                                                </tr>
+                                                                            </table>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr ng-repeat="item in $parent.details | filter: {toFactoryWarehouseID: warehouse.factoryWarehouseID}">
+                                                                        <td>{{item.productionItemUD}}</td>
+                                                                        <td>{{item.productionItemNM}}</td>
+                                                                        <td style="text-align: right;">{{item.totalQuantity | number: 2}}</td>
+                                                                        <td style="text-align: right;"></td>
+                                                                        <td>{{item.unit}}</td>
+                                                                        <td style="padding: 0px;">
+                                                                            <table class="last-row-no-border">
+                                                                                <tr ng-repeat="receipt in $parent.receipts | filter: {toFactoryWarehouseID: warehouse.factoryWarehouseID, productionItemID: item.productionItemID}">
+                                                                                    <td>
+                                                                                        <strong><a href="javascript:void(0)">{{receipt.receivingNoteUD}}</a></strong> ({{receipt.receiptDate}})
+                                                                                    </td>
+                                                                                </tr>
+                                                                            </table>
+                                                                        </td>
+                                                                    </tr>
+                                                                </table>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Refresh" ng-click="event.reload()"><i class="fa fa-refresh"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script type="text/javascript">
+        var context = {
+            serviceUrl : '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/workorderrpt/',
+            token: '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]',
+            id: @ViewBag.ID
+        }
+    </script>
+    <script src="~/Angular/app/workOrderRpt/index.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/workOrderRpt/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/jsonService2.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}

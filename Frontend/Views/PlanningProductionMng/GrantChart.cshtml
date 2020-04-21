@@ -1,0 +1,192 @@
+﻿@{
+    ViewBag.Title = "Planning Grant Chart";
+    ViewBag.Module = "Planning Grant Chart";
+}
+
+<style>
+    .work-center {
+        background-color: #93e2d6
+    }
+
+    .component {
+        background-color: #e4d5c7
+    }
+
+    .team {
+        background-color: #d0ccc8
+    }
+
+    .over-time {
+        background-color: #ff0000
+    }
+
+    .enought {
+        background-color: #00b050
+    }
+
+    .not-arising {
+        background-color: #b4c6e7
+    }
+
+    .not-enought {
+        background-color: #00b0f0
+    }
+
+    .current-date {
+        background-color: #ffff00
+    }
+
+    .selected-row {
+        background-color: #ecf3f8
+    }
+</style>
+
+<form class="row" name="editForm">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>Planning Grant Chart</h2>
+            </header>
+            <div>
+                <div class="widget-body">
+                    <div class="smart-form">
+                        <div class="row">
+                            <section class="col col-lg-2">
+                                <label>WorkOrder Code</label>
+                                <span class="form-control">{{workOrder.workOrderUD}}</span>
+                            </section>
+                            <section class="col col-2">
+                                <label>WorkOrder Status</label>
+                                <span class="form-control">{{workOrder.workOrderStatusNM}}</span>
+                            </section>
+                            <section class="col col-2">
+                                <label>WorkOrder Type</label>
+                                <span class="form-control">{{workOrder.workOrderTypeNM}}</span>
+                            </section>
+                            <section class="col col-lg-2">
+                                <label>Production Qnt</label>
+                                <span class="form-control" style="text-align:right">{{workOrder.quantity}}</span>
+                            </section>
+                        </div>
+                        <div class="row">
+                            <section class="col col-2">
+                                <label>Start Date</label>
+                                <span class="form-control">{{workOrder.startDate}}</span>
+                            </section>
+                            <section class="col col-2">
+                                <label>Finish Date</label>
+                                <span class="form-control">{{workOrder.finishDate}}</span>
+                            </section>
+                            <section class="col col-8">
+                                <label>OP Sequence</label>
+                                <span class="form-control">{{workOrder.opSequenceNM}}</span>
+                            </section>
+                        </div>
+
+                        <div class="row">
+                            <section class="col col-lg-12">
+                                <a class="btn btn-primary btn-xs m-bottom-15" ng-click="event.showHideTeam($event)">Show Team</a>
+                                <div avs-scroll grid-handler="gridHandler" class="tilsoft-table-wrapper">
+                                    <div class="tilsoft-table">
+                                        <div class="tilsoft-table-header" style="width:{{1500 + durationDates.length*80}}px">
+                                            <div style="width:30px"></div>
+                                            <div style="width:30px">No.</div>
+                                            <div style="width:100px">Work Center</div>
+                                            <div style="width:150px" ng-show="isShowTeam">Team</div>
+                                            <div style="width:200px">Code</div>
+                                            <div style="width:400px">Name</div>
+                                            <div style="width:80px">Started Date</div>
+                                            <div style="width:80px">Finished Date</div>
+                                            <div style="width:80px">Plan</div>
+                                            <div style="width:80px">Received</div>
+                                            <div style="width:80px">Produced</div>
+                                            <div style="width:80px">Remain</div>
+                                            <div style="width:80px" ng-repeat="durationDateItem in durationDates">
+                                                {{durationDateItem}}
+                                            </div>
+                                            <div></div>
+                                        </div>
+                                        <div class="tilsoft-table-body" style="margin-top:0px;height:auto;width:{{1500 + durationDates.length*80}}px">
+                                            <table>
+                                                <tr>
+                                                    <td colspan="{{13+durationDates.length}}"><b>{{workOrder.productArticleCode}} ({{workOrder.productDescription}}) </b></td>
+                                                </tr>
+                                                <tbody ng-repeat="pItem in plannings">
+                                                    <tr ng-class="method.getSelectedRowClass(pItem)" ng-if="method.getShowHideTeamStatus(pItem,isShowTeam)">
+                                                        <td style="width:30px;" ng-class="method.getGroupClass(pItem)">
+                                                            <label class="checkbox">
+                                                                <input type="checkbox" ng-model="pItem.isSelected">
+                                                                <i></i>
+                                                            </label>                                                            
+                                                        </td>
+                                                        <td style="width:30px" ng-class="method.getGroupClass(pItem)">
+                                                            {{$index+1}}
+                                                        </td>
+                                                        <td style="width:100px;" ng-class="method.getGroupClass(pItem)">
+                                                            {{pItem.workCenterIndex == 1 ? pItem.workCenterNM : ""}}
+                                                        </td>
+                                                        <td style="width:150px;" ng-class="method.getGroupClass(pItem)" ng-show="isShowTeam">
+                                                            {{pItem.teamIndex == 1 ? pItem.productionTeamNM : ""}}
+                                                        </td>
+                                                        <td style="width:200px;" ng-class="method.getGroupClass(pItem)">{{pItem.productionItemUD}}</td>
+                                                        <td style="width:400px;" ng-class="method.getGroupClass(pItem)">
+                                                            {{pItem.productionItemNM}}
+                                                        </td>
+                                                        <td style="width:80px;" ng-class="method.getGroupClass(pItem)">{{pItem.startDate}}</td>
+                                                        <td style="width:80px" ng-class="method.getGroupClass(pItem)">{{pItem.finishDate}}</td>
+                                                        <td style="width:80px;text-align:right" ng-class="method.getGroupClass(pItem)">{{pItem.planQnt | number : 2}}</td>
+                                                        <td style="width:80px;text-align:right" ng-class="method.getGroupClass(pItem)">{{pItem.receivedQnt | number : 2}}</td>
+                                                        <td style="width:80px;text-align:right" ng-class="method.getGroupClass(pItem)">{{pItem.producedQnt | number : 2}}</td>
+                                                        <td style="width:80px;text-align:right" ng-class="method.getGroupClass(pItem)">{{pItem.remainQnt | number : 2}}</td>
+                                                        <td style="width:80px;text-align:right" ng-repeat="durationDateItem in durationDates" ng-class="method.getStatusClass(pItem,durationDateItem)">
+                                                            {{(method.getProducedQnt(pItem, durationDateItem) | number : 0)==0 ? "":(method.getProducedQnt(pItem, durationDateItem) | number : 0)}}
+                                                        </td>
+                                                        <td></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "PlanningProductionMng")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="#" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="event.update()"><i class="fa fa-save"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script src="~/Views/PlanningProductionMng/GrantChart.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/planning-production/',
+            supportServiceUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/support/',
+            token: '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]',
+
+            backendReportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]',
+            refreshUrl: '@Url.Action("Edit", "PlanningProductionMng", new { id = UrlParameter.Optional })/',
+            indexUrl: '@Url.Action("Index", "PlanningProductionMng")',
+
+            id: @ViewBag.ID,
+            errMsg: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED',
+        }
+    </script>
+    <script src="~/Angular/app/jsonService2.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/PlanningProductionMng/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}

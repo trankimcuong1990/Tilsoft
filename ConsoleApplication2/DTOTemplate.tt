@@ -1,0 +1,63 @@
+﻿<#@ template hostspecific="false" language="C#" #>
+<#@ output extension=".txt" #>
+<#@ assembly name="System.Data" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="System.Data.SqlClient" #>
+<#
+	string _moduleName = "PurchasingInvoiceMng";
+	string _objectName = "PurchasingInvoiceExtraDetail";
+	string _viewName = "EurofarPurchasingPriceMng_DevView";
+
+	bool _generateValidateAttr = false;
+
+	string connectionString = @"Data Source=.;Initial Catalog=Tilsoft;Persist Security Info=True;User ID=sa;Password=123";
+	string queryString = "SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '" + _viewName + "'";
+#>
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Runtime.Serialization;
+using System.ComponentModel.DataAnnotations;
+
+namespace DTO.<#=_moduleName#>
+{
+    public class <#=_objectName#>
+    {
+<#
+    SqlCommand comm = new SqlCommand(queryString, new SqlConnection(connectionString));
+    comm.Connection.Open();
+    SqlDataReader re = comm.ExecuteReader();
+    while (re.Read())
+    {
+		string objectFieldType = string.Empty;
+
+        if (re["DATA_TYPE"].ToString() == "int")
+            objectFieldType = "int?";
+        else if (re["DATA_TYPE"].ToString() == "bit")
+            objectFieldType = "bool?";
+        else if (re["DATA_TYPE"].ToString() == "nvarchar" || re["DATA_TYPE"].ToString() == "varchar" || re["DATA_TYPE"].ToString() == "char" || re["DATA_TYPE"].ToString() == "text")
+		{
+			objectFieldType = "string";
+			if(_generateValidateAttr)
+			{
+				#>
+				[MaxLength(<#=re["CHARACTER_MAXIMUM_LENGTH"].ToString()#>, ErrorMessage = "<#=re["COLUMN_NAME"].ToString()#> can not exceed <#=re["CHARACTER_MAXIMUM_LENGTH"].ToString()#> chars!")]
+				<#
+			}
+		}   
+        else if (re["DATA_TYPE"].ToString() == "numeric")
+            objectFieldType = "decimal?";
+        else if (re["DATA_TYPE"].ToString() == "smalldatetime" || re["DATA_TYPE"].ToString() == "datetime" || re["DATA_TYPE"].ToString() == "date")
+            objectFieldType = "DateTime?";
+        else
+            objectFieldType = "object";
+		#>
+		public <#=objectFieldType#> <#=re["COLUMN_NAME"].ToString()#>{get;set;}
+		<#
+    }
+    re.Close();
+    comm.Connection.Close();
+#>
+    }
+}

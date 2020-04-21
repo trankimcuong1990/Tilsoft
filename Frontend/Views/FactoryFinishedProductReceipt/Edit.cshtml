@@ -1,0 +1,497 @@
+﻿@{
+    if (ViewBag.ID == 0)
+    {
+        ViewBag.Title = "Create Component Receipt";
+    }
+    else
+    {
+        ViewBag.Title = "Edit Component Receipt";
+    }
+
+    ViewBag.Module = "Component Receipt";
+}
+
+<form name="editForm" id="main-form" class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+
+        <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>{{ui.title}}</h2>
+            </header>
+            <div>
+                <div class="widget-body">
+
+                    @*receipt*@
+                    <div class="smart-form" ng-show="ui.screenName=='receipt'">
+
+                        @*master*@
+                        <div class="row">
+                            <section class="col col-lg-2">
+                                <label>Receipt No</label>
+                                <span class="form-control">{{data.receiptNo}}</span>
+                            </section>
+                           
+
+                            <section class="col col-lg-2">
+                                <label>Receipt Date</label>
+                                <label class="input">
+                                    <input type="text" class="datepicker" ng-model="data.receiptDate" data-dateformat="dd/mm/yy" />
+                                    <i class="icon-append fa fa-calendar"></i>
+                                </label>
+                            </section>
+
+                            <section class="col col-lg-1">
+                                <label>Season</label>
+                                <select name="season" class="form-control" ng-model="data.season" ng-options="season.seasonValue as season.seasonText for season in seasons">
+                                    <option value=""></option>
+                                </select>
+                            </section>
+
+                            <section class="col col-lg-3">
+                                <label>Remark</label>
+                                <input type="text" ng-model="data.remark" class="form-control" />
+                            </section>
+
+                            <section class="col col-2">
+                                <label>Updated By</label>
+                                <span class="form-control">{{data.updatorName}}</span>
+                            </section>
+                            <section class="col col-2">
+                                <label>Updated Date</label>
+                                <span class="form-control">{{data.updatedDate}}</span>
+                            </section>
+                        </div>
+                        
+                        <div class="row">
+
+                            <section class="col col-lg-4">
+                                <label>Type</label>
+                                <span class="form-control">{{data.receiptTypeText}} - {{data.baseOnTypeText}} - {{data.inProgressOrBuyDirectlyText}}</span>
+                            </section>
+
+                            <section class="col col-lg-2">
+                                <label>{{data.receiptTypeID==1?'Import From Team':'Export To Team'}}</label>
+                                <span class="form-control">{{data.factoryTeamNM}}</span>
+                            </section>
+                            <section class="col col-lg-2">
+                                <label>At Step</label>
+                                <span class="form-control">{{data.factoryStepNM}}</span>
+                            </section>
+                            <section class="col col-lg-4">
+                                <label>At Procedure</label>
+                                <span class="form-control">{{data.factoryGoodsProcedureNM}}</span>
+                            </section>
+                            
+                           
+                        </div>
+
+                        @*button add product*@
+                        <div class="row" >
+                            @*import-free(without orders)-inprogress*@
+                            <section class="col col-lg-12" ng-if="data.receiptTypeID==1&&data.baseOnTypeID==1&&data.inProgressOrBuyDirectlyID==1">
+                                <a href="#" class="btn btn-success btn-xs" title="Add" ng-click="searchComponentScreen_WithoutOrders.event.openScreen($event)"><i class="fa fa-plus"></i> Import component from team (import-free-inprogress) </a>
+                            </section>
+
+                            @*import-free(without orders)-buy directly from supplier*@
+                            <section class="col col-lg-12" ng-if="data.receiptTypeID==1&&data.baseOnTypeID==1&&data.inProgressOrBuyDirectlyID==2">
+                                <a href="#" class="btn btn-success btn-xs" title="Add" ng-click="searchComponentScreen_WithoutOrders.event.openScreen($event)"><i class="fa fa-plus"></i> Import component from team (import-free-buy directly) </a>
+                            </section>
+
+                           @*import-orders-inprogress*@
+                            <section class="col col-lg-12" ng-if="data.receiptTypeID==1&&data.baseOnTypeID==2&&data.inProgressOrBuyDirectlyID==1">
+                                <a href="#" class="btn btn-success btn-xs" title="Add" ng-click="searchComponentScreen.event.openScreen($event)"><i class="fa fa-plus"></i> Import component from team (import-orders-inprogress) </a>
+                            </section>
+
+                            @*import-orders-buy directly from supplier*@
+                            <section class="col col-lg-12" ng-if="data.receiptTypeID==1&&data.baseOnTypeID==2&&data.inProgressOrBuyDirectlyID==2">
+                                <a href="#" class="btn btn-success btn-xs" title="Add" ng-click="searchComponentScreen.event.openScreen($event)"><i class="fa fa-plus"></i> Import component from team (import-orders-buy directly) </a>
+                            </section>
+                           
+                            @*
+                                Export command : (export then alway in progress, so user no need select inprogress or buy directly from supplier)
+                            *@
+
+                            @*export-free(without orders)*@
+                            <section class="col col-lg-12" ng-if="data.receiptTypeID==2&&data.baseOnTypeID==1">
+                                <a href="#" class="btn btn-success btn-xs" title="Add" ng-click="searchComponentScreen_WithoutOrders.event.openScreen($event)"><i class="fa fa-plus"></i> Export component to team (without orders) </a>
+                            </section>
+
+                            @*export*@
+                            <section class="col col-lg-12" ng-if="data.receiptTypeID==2&&data.baseOnTypeID==2">
+                                <a href="#" class="btn btn-success btn-xs" title="Add" ng-click="searchComponentScreen.event.openScreen($event)"><i class="fa fa-plus"></i> Export component to team (orders)</a>
+                            </section>
+                        </div>
+
+                        @*detail*@
+                        <div class="row">
+                            <section class="col col-lg-12">
+
+                                @*free(without orders)*@
+                                <div id="grdReceiptDetail" class="tilsoft-table-wrapper" ng-show="data.baseOnTypeID==1">
+                                    <div class="tilsoft-table">
+                                        <div class="tilsoft-table-header" style="width: 1500px;">
+                                            <div style="width:50px"></div>
+                                            <div style="width:200px" class="sorting" data-colname="factoryFinishedProductUD">Component Code</div>
+                                            <div style="width:350px" class="sorting" data-colname="factoryFinishedProductNM">Component Code</div>
+                                            <div style="width:200px" class="sorting" data-colname="articleCode">Article Code</div>
+                                            <div style="width:400px" class="sorting" data-colname="description">Description</div>
+                                            <div style="width:70px" class="sorting" data-colname="quantity">Qnt</div>
+                                            <div style="width:100px" class="sorting" data-colname="unitPrice">Price</div>
+                                            <div style="" class="sorting" data-colname="unitPrice">Amount</div>
+                                        </div>
+                                        <div class="tilsoft-table-body" style="width: 1500px;">
+                                            <table>
+                                                <tr ng-repeat="item in data.factoryFinishedProductReceiptDetails">
+                                                    <td style="width:49px; text-align:center; vertical-align:middle">
+                                                        <a ng-click="event.removeMaterial($event,$index)" class="btn btn-danger btn-xs font-11" href="javascript:void(0);"><i class=" fa fa-times"></i>Del</a>
+                                                    </td>
+                                                    <td style="width:200px; vertical-align:middle; text-align:left">{{item.factoryFinishedProductUD}}</td>
+                                                    <td style="width:350px; vertical-align:middle; text-align:left">{{item.factoryFinishedProductNM}}</td>
+                                                    <td style="width:200px; vertical-align:middle; text-align:left">{{item.articleCode}}</td>
+                                                    <td style="width:400px; vertical-align:middle; text-align:left">{{item.description}}</td>
+                                                    <td style="width:70px; vertical-align:middle"><input type="text" ng-model="item.quantity" style="width: 100%;text-align:right" /></td>
+                                                    <td style="width:100px; vertical-align:middle"><input type="text" ng-model="item.unitPrice" style="width: 100%;text-align:right" /></td>
+                                                    <td style="vertical-align:middle; text-align:right">
+                                                        <span class="form-control">{{item.quantity * item.unitPrice | number : 2}}</span>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                @*orders*@
+                                <div id="grdReceiptDetail" class="tilsoft-table-wrapper" ng-show="data.baseOnTypeID==2">
+                                    <div class="tilsoft-table">
+                                        <div class="tilsoft-table-header" style="width: 1500px;">
+                                            <div style="width:50px"></div>
+                                            <div style="width:200px" class="sorting" data-colname="factoryFinishedProductUD">Component</div>
+                                            <div style="width:70px" class="sorting" data-colname="stockQnt">Stock Qnt</div>
+                                            <div style="width:70px" class="sorting" data-colname="quantity">Qnt</div>
+                                            <div style="width:100px" class="sorting" data-colname="unitPrice">Price</div>
+                                            <div style="width:150px" class="sorting" data-colname="unitPrice">Amount</div>
+                                            <div style="width:90px" class="sorting" data-colname="factoryUD">Factory</div>
+                                            <div style="width:80px" class="sorting" data-colname="lds">LDS</div>
+                                            <div style="width:70px" class="sorting" data-colname="proformaInvoiceNo">Order</div>
+                                            <div style="width:60px" class="sorting" data-colname="clientUD">Client</div>
+                                            <div class="sorting" data-colname="articleCode">Order Product</div>
+                                        </div>
+                                        <div class="tilsoft-table-body" style="width: 1500px;">
+                                            <table>
+                                                <tr ng-repeat="item in data.factoryFinishedProductReceiptDetails">
+                                                    <td style="width:49px; text-align:center; vertical-align:middle">
+                                                        <a ng-click="event.removeMaterial($event,$index)" class="btn btn-danger btn-xs font-11" href="javascript:void(0);"><i class=" fa fa-times"></i>Del</a>
+                                                    </td>
+                                                    <td style="width:200px;text-align:left;"><span style="font-weight:bold;">{{item.factoryFinishedProductUD}}</span><br />{{item.factoryFinishedProductNM}}</td>
+                                                    <td style="width:70px; vertical-align:middle; text-align:center">{{item.stockQnt | number : 0}}</td>
+                                                    <td style="width:70px; vertical-align:middle"><input type="text" ng-model="item.quantity" style="width: 100%;text-align:right" /></td>
+                                                    <td style="width:100px; vertical-align:middle"><input type="text" ng-model="item.unitPrice" style="width: 100%;text-align:right" /></td>
+                                                    <td style="width:150px; vertical-align:middle; text-align:right">
+                                                        <span class="form-control">{{item.quantity * item.unitPrice | number : 2}}</span>
+                                                    </td>
+                                                    <td style="width:90px; vertical-align:middle; text-align:left">{{item.factoryUD}}</td>
+                                                    <td style="width:80px; vertical-align:middle; text-align:left">{{item.lds}}</td>
+                                                    <td style="width:70px; vertical-align:middle; text-align:left">{{item.proformaInvoiceNo}}</td>
+                                                    <td style="width:60px; vertical-align:middle; text-align:left">{{item.clientUD}}</td>
+                                                    <td style="text-align:left"><span style="font-weight:bold">{{item.articleCode}}</span><br />{{item.description}}</td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </section>
+                        </div>
+
+                    </div>
+                    
+                    @*search product form base on orders*@
+                    <div class="smart-form" ng-show="ui.screenName=='component-search-result'">
+
+                        <div class="row">
+                            <section class="col col-lg-2">
+                                <label>Component Code</label>
+                                <input type="text" class="form-control" ng-model="searchComponentScreen.filters.filters.factoryFinishedProductUD" />
+                            </section>
+
+                            <section class="col col-lg-2">
+                                <label>ArticleCode</label>
+                                <input type="text" class="form-control" ng-model="searchComponentScreen.filters.filters.articleCode" />
+                            </section>
+
+                            <section class="col col-lg-1">
+                                <label>Client</label>
+                                <input type="text" class="form-control" ng-model="searchComponentScreen.filters.filters.clientUD" />
+                            </section>
+
+                            <section class="col col-lg-1">
+                                <label>Order</label>
+                                <input type="text" class="form-control" ng-model="searchComponentScreen.filters.filters.proformaInvoiceNo" />
+                            </section>
+
+                            <section class="col col-lg-3">
+                                <label>Component Name</label>
+                                <input type="text" class="form-control" ng-model="searchComponentScreen.filters.filters.factoryFinishedProductNM" />
+                            </section>
+
+                            <section class="col col-lg-3">
+                                <label>Description</label>
+                                <input type="text" class="form-control" ng-model="searchComponentScreen.filters.filters.description" />
+                            </section>
+                        </div>
+
+                        <div class="row">
+                            <section class="col col-lg-12">
+                                <a href="#" class="btn btn-primary btn-xs" title="Search" ng-click="searchComponentScreen.event.search($event)"><i class="fa fa-search"></i> Search</a>
+                                <a href="#" class="btn btn-success btn-xs" title="Select" ng-click="searchComponentScreen.event.itemSelected($event)"><i class="fa fa-check"></i> Select</a>
+                                <a href="#" class="btn btn-warning btn-xs" title="Back" ng-click="searchComponentScreen.event.close($event)"><i class="fa fa-arrow-left"></i> Back</a>
+                            </section>
+                        </div>
+
+                        <div id="grdComponentSearchResult" class="tilsoft-table-wrapper">
+                            <div class="tilsoft-table">
+                                <div class="tilsoft-table-header" style="width: 1500px;">
+                                    <div style="width:60px"></div>
+                                    <div style="width:200px" class="sorting" data-colname="factoryFinishedProductUD">Component</div>
+                                    <div style="width:70px" class="sorting" data-colname="quantity">Qnt</div>
+                                    <div style="width:100px" class="sorting" data-colname="unitPrice">Price</div>
+                                    <div style="width:150px" class="sorting" data-colname="unitPrice">Amount</div>
+                                    <div style="width:90px" class="sorting" data-colname="factoryUD">Factory</div>
+                                    <div style="width:80px" class="sorting" data-colname="lds">LDS</div>
+                                    <div style="width:70px" class="sorting" data-colname="proformaInvoiceNo">Order</div>
+                                    <div style="width:60px" class="sorting" data-colname="clientUD">Client</div>
+                                    <div class="sorting" data-colname="articleCode">Order Product</div>
+                                </div>
+
+                                <div class="tilsoft-table-body" style="width: 1500px;">
+                                    <table>
+                                        <tr ng-repeat="item in searchComponentScreen.data">
+                                            <td style="width: 60px; text-align: center">
+                                                <label class="checkbox" style="margin-left:15px; margin-bottom:20px">
+                                                    <input type="checkbox" ng-model="item.isSelected">
+                                                    <i></i>
+                                                </label>
+                                            </td>
+                                            <td style="width:200px;text-align:left;"><span style="font-weight:bold;">{{item.factoryFinishedProductUD}}</span><br />{{item.factoryFinishedProductNM}}</td>
+                                            <td style="width:70px; vertical-align:middle; text-align:center">{{item.quantity | number : 0}}</td>
+                                            <td style="width:100px; vertical-align:middle; text-align:center">{{item.unitPrice | number : 2}}</td>
+                                            <td style="width:150px; vertical-align:middle; text-align:right">
+                                                <span class="form-control">{{item.quantity * item.unitPrice | number : 2}}</span>
+                                            </td>
+                                            <td style="width:90px; vertical-align:middle; text-align:left">{{item.factoryUD}}</td>
+                                            <td style="width:80px; vertical-align:middle; text-align:left">{{item.lds}}</td>
+                                            <td style="width:70px; vertical-align:middle; text-align:left">{{item.proformaInvoiceNo}}</td>
+                                            <td style="width:60px; vertical-align:middle; text-align:left">{{item.clientUD}}</td>
+                                            <td style="text-align:left"><span style="font-weight:bold">{{item.articleCode}}</span><br />{{item.description}}</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    @*search product form base on free(without orders)*@
+                    <div class="smart-form" ng-show="ui.screenName=='component-search-result-without-orders'">
+
+                        <div class="row">
+                            <section class="col col-lg-2">
+                                <label>Component Code</label>
+                                <input type="text" class="form-control" ng-model="searchComponentScreen_WithoutOrders.filters.filters.factoryFinishedProductUD" />
+                            </section>
+
+                            <section class="col col-lg-4">
+                                <label>Component Name</label>
+                                <input type="text" class="form-control" ng-model="searchComponentScreen_WithoutOrders.filters.filters.factoryFinishedProductNM" />
+                            </section>
+
+                            <section class="col col-lg-2">
+                                <label>ArticleCode</label>
+                                <input type="text" class="form-control" ng-model="searchComponentScreen_WithoutOrders.filters.filters.articleCode" />
+                            </section>
+
+                            <section class="col col-lg-4">
+                                <label>Description</label>
+                                <input type="text" class="form-control" ng-model="searchComponentScreen_WithoutOrders.filters.filters.description" />
+                            </section>
+                        </div>
+
+                        <div class="row">
+                            <section class="col col-lg-12">
+                                <a href="#" class="btn btn-primary btn-xs" title="Search" ng-click="searchComponentScreen_WithoutOrders.event.search($event)"><i class="fa fa-search"></i> Search</a>
+                                <a href="#" class="btn btn-success btn-xs" title="Select" ng-click="searchComponentScreen_WithoutOrders.event.itemSelected($event)"><i class="fa fa-check"></i> Select</a>
+                                <a href="#" class="btn btn-warning btn-xs" title="Back" ng-click="searchComponentScreen_WithoutOrders.event.close($event)"><i class="fa fa-arrow-left"></i> Back</a>
+                            </section>
+                        </div>
+
+                        <div id="grdComponentSearchResult_WithoutOrders" class="tilsoft-table-wrapper">
+                            <div class="tilsoft-table">
+                                <div class="tilsoft-table-header" style="width: 1500px;">
+                                    <div style="width:60px"></div>
+                                    <div style="width:200px" class="sorting" data-colname="factoryFinishedProductUD">Component Code</div>
+                                    <div style="width:300px" class="sorting" data-colname="factoryFinishedProductNM">Component Code</div>
+                                    <div style="width:200px" class="sorting" data-colname="articleCode">Article Code</div>
+                                    <div style="width:700px" class="sorting" data-colname="description">Description</div>
+                                    <div style="" class="sorting" data-colname="quantity">Quantity</div>
+                                </div>
+
+                                <div class="tilsoft-table-body" style="width: 1500px;">
+                                    <table>
+                                        <tr ng-repeat="item in searchComponentScreen_WithoutOrders.data">
+                                            <td style="width: 60px; text-align: center">
+                                                <label class="checkbox" style="margin-left:15px; margin-bottom:20px">
+                                                    <input type="checkbox" ng-model="item.isSelected">
+                                                    <i></i>
+                                                </label>
+                                            </td>
+                                            <td style="width:200px; vertical-align:middle; text-align:left">{{item.factoryFinishedProductUD}}</td>
+                                            <td style="width:300px; vertical-align:middle; text-align:left">{{item.factoryFinishedProductNM}}</td>
+                                            <td style="width:200px; vertical-align:middle; text-align:left">{{item.articleCode}}</td>
+                                            <td style="width:700px; vertical-align:middle; text-align:left">{{item.description}}</td>
+                                            <td style="vertical-align:middle; text-align:right"><input type="text" ng-model="item.quantity" style="text-align:right"/></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </article>
+
+</form>
+
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "FactoryFinishedProductReceipt")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="#"  class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="event.update($event)"><i class="fa fa-save"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="#"  class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="Delete" style="color: #ff0000;" ng-click="event.delete($event)"><i class="fa fa-times"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagepopup2{
+<div id="receiptTypeForm" style="display:none" class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header></header>
+            <div>
+                <div class="widget-body no-padding">
+                    <form class="smart-form">
+                        <fieldset>
+                            <section class="col col-lg-12">
+                                <div class="inline-group">
+                                    <label class="radio" ng-repeat="item in receiptTypes">
+                                        <input type="radio" name="radio-inline-receipt-type" ng-model="$parent.selectedReceiptTypeID" ng-value="item.receiptTypeID">
+                                        <i></i>{{item.receiptTypeName}}
+                                    </label>
+                                </div>
+                            </section>
+                        </fieldset>
+
+                        <fieldset>
+                            <section class="col col-lg-12">
+                                <div class="inline-group">
+                                    <label class="radio" ng-repeat="item in baseOnTypes">
+                                        <input type="radio" name="radio-inline-baseon-type" ng-model="$parent.selectedBaseOnTypeID" ng-value="item.baseOnTypeID">
+                                        <i></i>{{item.baseOnTypeName}}
+                                    </label>
+                                </div>
+                            </section>
+                        </fieldset>
+
+                        <fieldset ng-show="selectedReceiptTypeID==1">
+                            <section class="col col-lg-12">
+                                <div class="inline-group">
+                                    <label class="radio" ng-repeat="item in inProgressOrBuyDirectlies">
+                                        <input type="radio" name="radio-inline-inprogress-buydirectly" ng-model="$parent.selectedInProgressOrBuyDirectlyID" ng-value="item.inProgressOrBuyDirectlyID">
+                                        <i></i>{{item.inProgressOrBuyDirectlyName}}
+                                    </label>
+                                </div>
+                            </section>
+                        </fieldset>
+
+                        @*in progress*@ 
+                        <fieldset ng-show="selectedInProgressOrBuyDirectlyID==1">
+                            <section class="col col-lg-2">
+                                <label class="label">{{selectedReceiptTypeID==1?'Import From Team':'Export To Team'}}</label>
+                                <select name="teamID" class="form-control" ng-model="selectedTeamItem" ng-options="item as item.factoryTeamNM for item in factoryTeams">
+                                    <option value=""></option>
+                                </select>
+                            </section>
+
+                            <section class="col col-lg-2">
+                                <label class="label">At Step</label>
+                                <select name="stepID" class="form-control" ng-model="selectedStepItem" ng-options="item as item.factoryStepNM for item in selectedTeamItem.factoryTeamSteps">
+                                    <option value=""></option>
+                                </select>
+                            </section>
+
+                            <section class="col col-lg-4">
+                                <label class="label">In Procedure</label>
+                                <select name="goodsProcedure" class="form-control" ng-model="selectdGoodsProcedureItem" ng-options="item as item.factoryGoodsProcedureNM for item in selectedStepItem.factoryGoodsProcedureDetails">
+                                    <option value=""></option>
+                                </select>
+                            </section>
+                        </fieldset>
+
+                        @*buy directly from supplier*@
+                        <fieldset ng-show="selectedInProgressOrBuyDirectlyID==2">
+                            <section class="col col-lg-2">
+                                <label class="label">At Step</label>
+                                <select name="stepID" class="form-control" ng-model="selectedStepItem" ng-options="item as item.factoryStepNM for item in factorySteps">
+                                    <option value=""></option>
+                                </select>
+                            </section>
+
+                            <section class="col col-lg-4">
+                                <label class="label">In Procedure</label>
+                                <select name="goodsProcedure" class="form-control" ng-model="selectdGoodsProcedureItem" ng-options="item as item.factoryGoodsProcedureNM for item in selectedStepItem.factoryGoodsProcedureDetails">
+                                    <option value=""></option>
+                                </select>
+                            </section>
+                        </fieldset>
+
+                        <footer style="">
+                            <a href="javascript:void(0);" class="btn btn-primary" ng-click="event.onNextButtonClick()">Next</a>
+                        </footer>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+    
+}
+
+@section pagejs {
+    <script src="~/Angular/app/jsonService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/support/service.js?c=@System.Guid.NewGuid().ToString().Replace("-","")"></script>
+    <script type="text/javascript">
+        jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/factoryFinishedProductReceipt/';
+        jsonService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+        supportService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/support/';
+        supportService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+        var context = {
+            id: '@ViewBag.ID',
+            backUrl: '@Url.Action("Index", "FactoryFinishedProductReceipt")',
+            refreshUrl: '@Url.Action("Edit", "FactoryFinishedProductReceipt", new { id = UrlParameter.Optional })/',
+            errMsg: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED',
+        }
+    </script>
+    <script src="~/Angular/app/factoryFinishedProductReceipt/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/factoryFinishedProductReceipt/edit.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}
+

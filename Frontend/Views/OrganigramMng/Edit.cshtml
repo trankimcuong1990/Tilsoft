@@ -1,0 +1,184 @@
+﻿@{
+    if (ViewBag.ID == 0)
+    {
+        ViewBag.Title = "Create New Organization Chart";
+    }
+    else
+    {
+        ViewBag.Title = "Edit Organization Chart";
+    }
+
+    ViewBag.Module = "Organization Chart Management ";
+    int companyID = ViewBag.ID;
+}
+<style>
+    .css-inline a {
+        display: inline;
+    }
+
+    .smart-form .inline-group .checkbox {
+        width: 30% !important;
+    }
+
+    .smart-form .input-group input {
+        padding: 0px 7px !important;
+    }
+
+    .tree li {
+    }
+
+    .department-style {
+        width: 16%;
+        margin-bottom: 40px !important;
+    }
+
+    .tree li:nth-child(3n) {
+    }
+
+    .pic {
+        color: #eee
+    }
+
+    .department-group > li:nth-child(1) span {
+        background-color: #ece25d;
+    }
+
+    .department-group > li:nth-child(2) span {
+        background-color: #5decdd;
+    }
+
+    .department-group > li:nth-child(3) span {
+        background-color: #66ec57;
+    }
+
+    .department-group > li:nth-child(4) span {
+        background-color: #ffadad;
+    }
+
+    .department-group > li:nth-child(5) span {
+        background-color: #f5bf6c;
+    }
+
+    .department-group > li:nth-child(6) span {
+        background-color: #6cc8f5;
+    }
+
+    .department-group > li:nth-child(7) span {
+        background-color: #d5b4ff;
+    }
+
+    .department-group > li:nth-child(8) span {
+        background-color: #59d5dc;
+    }
+
+    .department-group > li:nth-child(9) span {
+        background-color: #fd8ff4;
+    }
+
+    .department-group > li:nth-child(10) span {
+        background-color: #c5f796;
+    }
+
+    .department-group > li:nth-child(11) span {
+        background-color: #f7e296;
+    }
+
+    @@media screen and (max-width: 1400px) {
+        .department-style {
+            width: 24%;
+            margin-bottom: 20px !important;
+        }
+    }
+</style>
+<form class="row" name="editForm" id="main-form">
+    <div class="col-sm-12">
+        <div id="general-section" class="well well-sm" style="background: #fff;">
+            <div class="smart-form">
+                <h1 style="text-align: center;border: 1px solid #eee;width: 100%;padding: 20px;background-color: #686868;color: #fff;font-weight: 700;">{{data[0].internalCompanyNM}}</h1>
+                <br />
+                <hr>
+                <fieldset>
+                    <section class="col col-6">
+                        <div class="row" style="margin-bottom:20px;">
+                            <h2>Organization Chart</h2><br />
+                            <div class="col-sm-12" style="text-align:center;margin-bottom:15px;">
+                                <a href="{{organizationChart.fileLocation}}" target="_blank">
+                                    <img style="max-width: 100%;" ng-src="{{organizationChart.fileLocation}}" />
+                                </a>
+                                <button style="width:100px; height:100px;font-size:25px;" ng-if="!organizationChart.fileLocation" title="Upload file" class='btn btn-primary btn-xs' data-original-title='Upload' ng-click="event.addImage($event)"><i class="fa fa-plus"></i></button>
+                            </div>
+                            <div ng-if="organizationChart.fileLocation" class="input-group css-inline" style="width: 100%;">
+                                <a title="Change" href="javascript:void(0);" ng-click="event.changeImage($event)" class="btn btn-default btn-sm"><i class="fa fa-folder-open-o"></i> Change</a>
+                            </div>
+                        </div>
+                    </section>
+                    <section class="col col-6">
+                        <div class="row" style="margin-bottom:20px;">
+                            <h2>Work Space</h2><br />
+                            <div class="col-sm-12" style="text-align:center;margin-bottom:15px;">
+                                <a href="{{organizationChart.workSpaceFileLocation}}" target="_blank">
+                                    <img style="max-width: 100%;" ng-src="{{organizationChart.workSpaceFileLocation}}" />
+                                </a>
+                                <button style="width:100px; height:100px;font-size:25px;" ng-if="!organizationChart.workSpaceFileLocation" title="Upload file" class='btn btn-primary btn-xs' data-original-title='Upload' ng-click="event.addWorkSpaceImage($event)"><i class="fa fa-plus"></i></button>
+                            </div>
+                            <div ng-if="organizationChart.workSpaceFileLocation" class="input-group css-inline" style="width: 100%;">
+                                <a title="Change" href="javascript:void(0);" ng-click="event.changeWorkSpaceImage($event)" class="btn btn-default btn-sm"><i class="fa fa-folder-open-o"></i> Change</a>
+                            </div>
+                        </div>
+                    </section>                    
+                </fieldset>
+                <fieldset ng-if="@companyID !== 4">
+                    <div class="row">
+                        <h2> Detail</h2><br />
+                        <div class="col-sm-12">
+                            <div class="tree">
+                                <ul class="department-group" role="tree">
+                                    <li ng-repeat="item in departments" class="col-sm-2 parent_li department-style" role="treeitem" style="min-height:300px;">
+                                        <span style="text-align:center;" class="label label-success"><i class="fa fa-building"></i><b style="text-transform:uppercase;"> {{item.internalDepartmentNM}} DEPARTMENT</b></span>
+                                        <ul role="group">
+                                            <li ng-repeat="employee in data | filter:{ internalDepartmentNM:item.internalDepartmentNM } | orderBy: 'jobLevelID'" class="parent_li" role="treeitem">
+                                                <p class="label pic">
+                                                    <i class="fa fa-user"></i> <b>
+                                                        <a ng-if="employee.employeeID" href="@Url.Action("EmpDetail", "EmployeeMng", new { id = UrlParameter.Optional })/{{employee.employeeID}}" data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                            <span> {{employee.employeeNM}}</span>
+                                                        </a>
+                                                    </b>
+                                                </p>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "OrganigramMng")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="event.update($event)"><i class="fa fa-save"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script type="text/javascript">
+        var context = {
+            id: @ViewBag.ID,
+            serviceUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/OrganigramMng/',
+            token: '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]',
+            backUrl: '@Url.Action("Index", "OrganigramMng")',
+            refreshUrl: '@Url.Action("Edit", "OrganigramMng", new { id = UrlParameter.Optional })/'
+        }
+    </script>
+    <script src="~/Angular/app/organigramMng/edit.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/jsonService2.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/organigramMng/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}

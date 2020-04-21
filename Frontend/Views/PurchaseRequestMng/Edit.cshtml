@@ -1,0 +1,312 @@
+﻿@{
+    string title = (ViewBag.ID == 0) ? "Create Purchase Request" : "Edit Purchase Request";
+    ViewBag.Title = title;
+    ViewBag.Module = title;
+    //get param
+    string workOrderIDs = null;
+    if (Request.Params["workOrderIDs"] != null)
+    {
+        workOrderIDs = Request.Params["workOrderIDs"];
+    }
+    Frontend.APIDTO.APIUserInformation userInfo = (Frontend.APIDTO.APIUserInformation)Session[Frontend.Customize.Common.ProjectDefinition.USER_INFO_SESSION];
+}
+
+<style>
+    .ui-autocomplete {
+        max-height: 500px;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+</style>
+
+<div class="row">
+    <article class="col col-sm-12">
+        <div class="jarviswidget" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <ul class="nav nav-tabs pull-left in">
+                    <li class="active">
+                        <a data-toggle="tab" href="#tabGeneral" name="gtab"> <span> <i class="fa fa-database"></i> General </span> </a>
+                    </li>
+                </ul>
+            </header>
+            <div>
+                <div class="widget-body">
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="tabGeneral">
+                            <div class="smart-form">
+                                <div class="row">
+                                    <!-- General Information -->
+                                    <section class="col col-sm-{{(data != null && data.workOrderIDs != '') ? 8 : 12}}">
+                                        <h2><i class="fa fa-database"></i> General Information</h2>
+                                        <hr style="margin-top: 5px;" />
+                                    </section>
+                                    <section class="col col-sm-2" ng-if="(data != null && data.workOrderIDs != '')">
+                                        <h2><i class="fa fa-database"></i> Client Information</h2>
+                                        <hr style="margin-top: 5px;" />
+                                    </section>
+                                    <section class="col col-sm-2" ng-if="(data != null && data.workOrderIDs != '')">
+                                        <h2><i class="fa fa-database"></i> PI Information</h2>
+                                        <hr style="margin-top: 5px;" />
+                                    </section>
+                                    <!-- Request Number -->
+                                    <section class="col col-sm-2">
+                                        <label>Request Nr</label>
+                                        <label class="input">
+                                            <input type="text" class="form-control" style="font-family: Arial; font-size: 12px;" readonly ng-model="data.purchaseRequestUD" />
+                                        </label>
+                                    </section>
+                                    <!-- Request Date -->
+                                    <section class="col col-sm-2">
+                                        <label>Request Date</label>
+                                        <label class="input" ng-if="(isApproved == null || !isApproved)">
+                                            <input type="text" class="form-control" style="font-family: Arial; font-size: 12px;" avs-date ng-model="data.purchaseRequestDate" />
+                                        </label>
+                                        <label class="input" ng-if="(isApproved)">
+                                            <input type="text" class="form-control" style="font-family: Arial; font-size: 12px;" readonly ng-model="data.purchaseRequestDate" />
+                                        </label>
+                                    </section>
+                                    <!-- ETA -->
+                                    <section class="col col-sm-2">
+                                        <label>ETA</label>
+                                        <label class="input" ng-if="(isApproved == null || !isApproved)">
+                                            <input type="text" class="form-control" style="font-family: Arial; font-size: 12px;" avs-date ng-model="data.eta" />
+                                        </label>
+                                        <label class="input" ng-if="(isApproved)">
+                                            <input type="text" class="form-control" style="font-family: Arial; font-size: 12px;" readonly ng-model="data.eta" />
+                                        </label>
+                                    </section>
+                                    <!-- Request Status -->
+                                    <section class="col col-sm-2">
+                                        <label>Request Status</label>
+                                        <label class="input" ng-if="(isApproved == null || !isApproved)">
+                                            <select class="form-control" style="font-family: Arial; font-size: 12px;" ng-model="data.purchaseRequestStatusID" ng-options="requestStatus.purchaseRequestStatusID as requestStatus.purchaseRequestStatusNM for requestStatus in support.purchasingRequestStatuses">
+                                                <option value=""></option>
+                                            </select>
+                                        </label>
+                                        <label class="input" ng-if="(isApproved)">
+                                            <input type="text" class="form-control" style="font-family: Arial; font-size: 12px;" readonly ng-model="requestStatusNM" />
+                                        </label>
+                                    </section>
+                                    <!-- Client Information -->
+                                    <section class="col col-sm-2" ng-if="(data != null && data.workOrderIDs != '')">
+                                        <label class="label" ng-repeat="client in clients">
+                                            <i class="fa fa-square font-11"></i> {{client.clientUD}}
+                                        </label>
+                                    </section>
+                                    <!-- PI Information -->
+                                    <section class="col col-sm-2" ng-if="(data != null && data.workOrderIDs != '')">
+                                        <label class="label" ng-repeat="pi in saleOrders">
+                                            <i class="fa fa-square font-11"></i> {{pi.proformaInvoiceNo}}
+                                        </label>
+                                    </section>
+                                    <!-- Remark -->
+                                    <section class="col col-sm-{{(data != null && data.workOrderIDs != '') ? 8 : 12}}">
+                                        <label>Remark</label>
+                                        <label class="input">
+                                            <input type="text" class="form-control" style="font-family: Arial; font-size: 12px;" ng-model="data.remark" ng-readonly="(isApproved)" />
+                                        </label>
+                                    </section>
+                                    <!-- Request, Approval by(date) -->
+                                    <section class="col col-sm-12" ng-if="(data.requestedBy !== null)">
+                                        Requested by <i class="fa fa-user"></i> {{data.requestorName}} on {{data.requestedDate}}
+                                    </section>
+                                    <section class="col col-sm-12" ng-if="(data.approvedBy !== null)">
+                                        Approved by <i class="fa fa-user"></i> {{data.approverName}} on {{data.approvedDate}}
+                                    </section>
+                                    <!-- Material Group -->
+                                    <section class="col col-sm-12" ng-if="(data != null && data.workOrderIDs != '')">
+                                        <h2><i class="fa fa-database"></i> Material Groups</h2>
+                                        <hr style="margin-top: 5px;" />
+                                    </section>
+                                    <section class="col col-sm-2" ng-repeat="productionItemGroup in support.productionItemGroups" ng-if="(data != null && data.workOrderIDs != '')">
+                                        <label class="checkbox">
+                                            <input type="checkbox" ng-model="productionItemGroup.isSelected" ng-click="event.filterItemGroup();" ng-disabled="isApproved" /> <i></i>{{productionItemGroup.productionItemGroupNM}}
+                                        </label>
+                                    </section>
+                                    <section class="col col-sm-12 hide" style="text-align: right;">
+                                        <a href="javascript:void(0);" class="btn btn-default btn-primary btn-sm"><i class="fa fa-check"></i> OK</a>
+                                        <a href="javascript:void(0);" class="btn btn-default btn-success btn-sm"><i class="fa fa-floppy-o"></i> Update</a>
+                                    </section>
+                                    <!-- Detail Information -->
+                                    <section class="col col-sm-12">
+                                        <h2><i class="fa fa-database"></i> Detail Information</h2>
+                                        <hr style="margin-top: 5px;" />
+                                    </section>
+                                    <section class="col col-sm-12" ng-if="(isApproved == null || !isApproved)">
+                                        <a href="javascript:void(0);" class="btn btn-default btn-primary btn-sm" ng-if="(data != null && data.workOrderIDs == '')" ng-click="event.addItem(0);">
+                                            <i class="fa fa-plus"></i> Add blank material(component)
+                                        </a>
+                                        <a href="javascript:void(0);" class="btn btn-default btn-primary btn-sm" ng-if="(data != null && data.workOrderIDs != '')" ng-click="event.addItem(1);">
+                                            <i class="fa fa-plus"></i> Add material(component) by WorkOrder
+                                        </a>
+                                    </section>
+                                    <section class="col col-sm-12">
+                                        <div class="tilsoft-table-wrapper" avs-scrollable-table>
+                                            <div class="tilsoft-table">
+                                                <div class="tilsoft-table-header" style="width: {{(data != null && data.workOrderIDs != '') ? '1040' : '920'}}px;">
+                                                    <div style="width: 60px; height: 60px;">Total<br /><b style="color: blue;">{{purchaseRequestDetails.length | number}}</b></div>
+                                                    <div style="width: 230px; height: 60px;">Production Item</div>
+                                                    <div style="width: 65px; height: 60px;">Unit</div>
+                                                    <div style="width: 120px; height: 60px;">ETA</div>
+                                                    <div style="width: 85px; height: 60px;">Status<br />Price</div>
+                                                    <div style="width: 75px; height: 60px;">Request<br />Qnt</div>
+                                                    <div style="width: 75px; height: 60px;">Order<br />Qnt</div>
+                                                    <div style="width: 75px; height: 60px;">Remain<br />Qnt</div>
+                                                    <div style="width: 75px; height: 60px;">Stock<br />Qnt</div>
+                                                    <div style="width: 85px; height: 60px;" ng-if="(data != null && data.workOrderIDs != '')">Work Order</div>
+                                                    <div style="width: 85px; height: 60px;" ng-if="(data != null && data.workOrderIDs != '')">Proforma<br />Invoice</div>
+                                                    <div style="border-bottom: none;"></div>
+                                                </div>
+                                                <div class="tilsoft-table-body" style="margin-top: 59px; width: 920px;" ng-if="(data == null || data.workOrderIDs == '')">
+                                                    <table>
+                                                        <tbody ng-repeat="item in purchaseRequestDetails">
+                                                            <tr>
+                                                                <td style="width: 59px; text-align: center;">
+                                                                    <a href="javascript:void(0);" class="btn btn-default btn-danger btn-xs font-11" title="Remove item not use" ng-click="event.removeItem(item);" ng-if="(isApproved == null || !isApproved)"><i class="fa fa-times"></i></a>
+                                                                    <a href="javascript:void(0);" class="btn btn-default btn-primary btn-xs font-11 hide" title="View detail in item"><i class="fa fa-folder"></i></a>
+                                                                    <label ng-if="(isApproved)">{{($index + 1)}}</label>
+                                                                </td>
+                                                                <td style="width: 230px;">
+                                                                    <a href="@Url.Action("Edit", "ProductionItem")/{{item.productionItemID}}" target="_blank">{{item.productionItemUD}}</a>
+                                                                    <br />
+                                                                    <label class="input" ng-if="(isApproved == null || !isApproved)">
+                                                                        <input type="text" class="form-control" style="font-family: Arial; font-size: 12px;" avs-remote-auto-complete ng-request-param="quickSearchItem.apiService" ng-model="item.productionItemNM" ng-init-param="item.productionItemNM" ng-init-param-2="@userInfo.Data.BranchID" ng-init-param-3="data.workOrderIDs" ng-item-value="quickSearchItem.dataTemp" ng-item-selected="event.selectedItem(quickSearchItem.dataTemp, item, data.workOrderIDs);" data-method="POST" data-format-function="formatProductionItem" />
+                                                                    </label>
+                                                                    <label ng-if="(isApproved)">{{item.productionItemNM}}</label>
+                                                                </td>
+                                                                <td style="width: 65px; text-align: center;">{{item.unitNM}}</td>
+                                                                <td style="width: 120px; text-align: center;">
+                                                                    <label class="input" ng-if="item.productionItemID != null && (isApproved == null || !isApproved)">
+                                                                        <input type="text" class="form-control" style="font-family: Arial; font-size: 12px; text-align: center;" avs-calendar ng-data-source="item.eta" />
+                                                                    </label>
+                                                                    <label ng-if="(isApproved)">{{item.eta}}</label>
+                                                                </td>
+                                                                <td style="width: 85px; text-align: center;">
+                                                                    <i class="fa fa-check-square-o" ng-if="item.isApproved"></i>
+                                                                </td>
+                                                                <td style="width: 75px; text-align: right;">
+                                                                    <label class="input" ng-if="item.productionItemID != null && (isApproved == null || !isApproved)">
+                                                                        <input type="text" class="form-control" style="font-family: Arial; font-size: 12px; text-align: right;" avs-number-2 ng-model="item.requestQnt" ng-decimal="2" />
+                                                                    </label>
+                                                                    <label ng-if="(isApproved)">{{item.requestQnt|number}}</label>
+                                                                </td>
+                                                                <td style="width: 75px; text-align: right;">{{item.orderQnt | number}}</td>
+                                                                <td style="width: 75px; text-align: right;">{{((item.requestQnt - item.orderQnt) == 0) ? null : (item.requestQnt - item.orderQnt) | number}}</td>
+                                                                <td style="width: 75px; text-align: right;">{{item.stockQnt | number}}</td>
+                                                                <td style="width: 85px; text-align: center;" ng-if="(data != null && data.workOrderIDs != '')"></td>
+                                                                <td style="width: 85px; text-align: center;" ng-if="(data != null && data.workOrderIDs != '')"></td>
+                                                                <td style="border-bottom: none;"></td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                                <div class="tilsoft-table-body" style="margin-top: 59px; width: 920px;" ng-if="(data != null && data.workOrderIDs != '')">
+                                                    <table>
+                                                        <tbody ng-repeat="item in purchaseRequestDetails">
+                                                            <tr>
+                                                                <td style="width: 59px; text-align: center;">
+                                                                    <a href="javascript:void(0);" class="btn btn-default btn-danger btn-xs font-11" title="Remove item not use" ng-click="event.removeItem(item);" ng-if="(isApproved == null || !isApproved)"><i class="fa fa-times"></i></a>
+                                                                    <a href="javascript:void(0);" class="btn btn-default btn-primary btn-xs font-11 hide" title="View detail in item"><i class="fa fa-folder"></i></a>
+                                                                    <label ng-if="(isApproved)">{{($index + 1)}}</label>
+                                                                </td>
+                                                                <td style="width: 230px;">
+                                                                    <a href="@Url.Action("Edit", "ProductionItem")/{{item.productionItemID}}" target="_blank">{{item.productionItemUD}}</a>
+                                                                    <br />
+                                                                    <label class="input" ng-if="(isApproved == null || !isApproved)">
+                                                                        <input type="text" class="form-control" style="font-family: Arial; font-size: 12px;" avs-remote-auto-complete ng-request-param="quickSearchItem.apiService" ng-model="item.productionItemNM" ng-init-param="item.productionItemNM" ng-init-param-2="@userInfo.Data.BranchID" ng-init-param-3="data.workOrderIDs" ng-item-value="quickSearchItem.dataTemp" ng-item-selected="event.selectedItem(quickSearchItem.dataTemp, item, data.workOrderIDs);" data-method="POST" data-format-function="formatProductionItem" @*ng-if="!data.isConfirm" ng-change="event.changeProductionItem(item);"*@ />
+                                                                    </label>
+                                                                    <label ng-if="(isApproved)">{{item.productionItemNM}}</label>
+                                                                </td>
+                                                                <td style="width: 65px; text-align: center;">{{item.unitNM}}</td>
+                                                                <td style="width: 120px; text-align: center;">
+                                                                    <label class="input" ng-if="item.productionItemID != null && (isApproved == null || !isApproved)">
+                                                                        <input type="text" class="form-control" style="font-family: Arial; font-size: 12px; text-align: center;" avs-calendar ng-data-source="item.eta" />
+                                                                    </label>
+                                                                    <label ng-if="(isApproved)">{{item.eta}}</label>
+                                                                </td>
+                                                                <td style="width: 85px; text-align: center;">
+                                                                    <i class="fa fa-check-square-o" ng-if="item.isApproved"></i>
+                                                                </td>
+                                                                <td style="width: 470px; text-align: right;">
+                                                                    <table style="border: 1px solid #ccc;" ng-if="item.productionItemID != null">
+                                                                        <tbody>
+                                                                            <tr style="background: #eff7f7;">
+                                                                                <td style="width: 69px; text-align: right;">{{event.totalRequest(item) | number}}</td>
+                                                                                <td style="width: 75px; text-align: right;">{{item.orderQnt | number}}</td>
+                                                                                <td style="width: 75px; text-align: right;">{{(event.totalRequest(item) - item.orderQnt) | number}}</td>
+                                                                                <td style="width: 75px; text-align: right;">{{item.stockQnt | number}}</td>
+                                                                                <td colspan="2"></td>
+                                                                            </tr>
+                                                                            <tr ng-repeat="subItem in item.workOrderByItems">
+                                                                                <td style="width: 69px;">
+                                                                                    <label class="input" ng-if="item.productionItemID != null && (isApproved == null || !isApproved)">
+                                                                                        <input type="text" class="form-control" style="font-family: Arial; font-size: 12px; text-align: right;" avs-number-2 ng-model="subItem.requestQnt" ng-decimal="2" />
+                                                                                    </label>
+                                                                                    <label ng-if="(isApproved)">{{subItem.requestQnt|number}}</label>
+                                                                                </td>
+                                                                                <td colspan="3" style="width: 225px;"></td>
+                                                                                <td style="width: 85px; text-align: center;">
+                                                                                    <a href="@Url.Action("Edit", "WorkOrder")/{{subItem.workOrderID}}" target="_blank">{{subItem.workOrderUD}}</a>
+                                                                                </td>
+                                                                                <td style="text-align: center;">{{subItem.proformaInvoiceNo}}</td>
+                                                                            </tr>
+                                                                        </tbody>
+                                                                    </table>
+                                                                </td>
+                                                                <td style="border-bottom: none;"></td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "PurchaseRequestMng")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+        </li>
+        <li class="sparks-info" ng-if="(isApproved == null || !isApproved)">
+            <a href="javascript:void(0);" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="event.update()"><i class="fa fa-save"></i></a>
+        </li>
+        <li class="sparks-info" ng-if="(isApproved == null || !isApproved)">
+            <a href="javascript:void(0);" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="Delete" style="color: #ff0000;" ng-click="event.delete($event)"><i class="fa fa-times"></i></a>
+        </li>
+        <li class="sparks-info hide">
+            <a href="javascript:void(0);" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Print, HttpContext.Current))" title="Confirm" ng-click="event.confirm()"><i class="fa fa-check"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script src="~/Views/PurchaseRequestMng/edit.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/purchase-request/',
+            supportServiceUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/support/',
+            token: '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]',
+
+            backendReportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]',
+            refreshUrl: '@Url.Action("Edit", "PurchaseRequestMng", new { id = UrlParameter.Optional })/',
+            indexUrl: '@Url.Action("Index", "PurchaseRequestMng")',
+
+            id: @ViewBag.ID,
+            errMsg: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED',
+
+            workOrderIDs: '@workOrderIDs',
+            branchID: '@userInfo.Data.BranchID',
+        }
+    </script>
+    <script src="~/Angular/app/jsonService2.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/PurchaseRequestMng/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}

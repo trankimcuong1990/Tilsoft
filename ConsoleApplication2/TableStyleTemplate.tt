@@ -1,0 +1,111 @@
+﻿<#@ template hostspecific="false" language="C#" #>
+<#@ output extension=".txt" #>
+<#@ assembly name="System.Data" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="System.Data.SqlClient" #>
+<#
+	string _viewName = "EurofarPurchasingPriceMng_FactoryQuotationSearchResult_View";
+	List<string> colNames = new List<string>();
+	int index = 1;
+	string connectionString = @"Data Source=.;Initial Catalog=TILSOFT;Persist Security Info=True;User ID=sa;Password=123";
+	string queryString = "SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '" + _viewName + "'";
+    SqlCommand comm = new SqlCommand(queryString, new SqlConnection(connectionString));
+    comm.Connection.Open();
+    SqlDataReader re = comm.ExecuteReader();
+    while (re.Read())
+    {
+		colNames.Add(re["COLUMN_NAME"].ToString());
+    }
+    re.Close();
+    comm.Connection.Close();
+#>
+<style>
+    .tilsoft-table-header, .tilsoft-table-filter, .tilsoft-table-body {
+        width: 5000px;
+    }
+    .tilsoft-table-header > div {
+        height: 50px !important;
+    }
+    .tilsoft-table-body {
+        margin-top: 50px !important;
+    }
+        .tilsoft-table-header > div:nth-child(1),
+        .tilsoft-table-filter > div:nth-child(1),
+        .tilsoft-table-body table > tbody > tr > td:nth-child(1) {
+            width: 100px;
+            text-align: left;
+        }
+
+<#
+	index = 2;
+    foreach (string colName in colNames)
+    {
+#>
+		/* column: <#=colName#> */
+        .tilsoft-table-header > div:nth-child(<#=index#>),
+        .tilsoft-table-filter > div:nth-child(<#=index#>),
+        .tilsoft-table-body table > tbody > tr > td:nth-child(<#=index#>) {
+            width: 100px;
+            text-align: left;
+        }
+<#
+		index++;
+    }
+#>
+</style>
+<div avs-scrollable-table class="tilsoft-table-wrapper">
+    <div class="tilsoft-table">
+        <div class="tilsoft-table-header">
+			<div><strong>Found</strong>: {{totalRows}}</div>
+<#
+	index = 1;
+    foreach (string colName in colNames)
+    {
+#>
+			<div class="sorting" data-colname="<#=colName#>"><#=colName#></div>
+<#
+		index++;
+    }
+#>
+            <div>&nbsp;</div>
+        </div>
+		<div class="tilsoft-table-filter">
+			<div>
+                <a href="javascript:void(0)" class="btn btn-{{isDefaultFilter?'default':'primary'}} btn-xs" title="Apply Filter" ng-click="event.reload()"><i class="fa fa-filter"></i></a>
+                <a href="javascript:void(0)" class="btn btn-default btn-xs" title="Clear Filter" ng-click="event.clearFilter()"><i class="fa fa-ban"></i></a>
+            </div>
+<#
+	index = 1;
+    foreach (string colName in colNames)
+    {
+#>
+			<div><input class="search-filter" type="text" ng-model="filters.<#=colName#>" /></div>
+<#
+		index++;
+    }
+#>
+			<div>&nbsp;</div>
+		</div>
+        <div class="tilsoft-table-body">
+            <table>
+                <tr>
+					<td>
+						<a href="javascript:void(0)" class="btn btn-primary btn-xs" title="Edit"><i class="fa fa-pencil"></i> Edit</a>
+						<a href="javascript:void(0)" class="btn btn-danger btn-xs" title="Delete"><i class="fa fa-times"></i> Delete</a>
+					</td>
+<#
+	index = 1;
+    foreach (string colName in colNames)
+    {
+#>
+					<td><#=colName#></td>
+<#
+		index++;
+    }
+#>
+                    <td>&nbsp;</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>

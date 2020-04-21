@@ -1,0 +1,139 @@
+﻿@using Frontend.Helper;
+
+<div class="avs-table-wrapper" avs-table grid-handler="frmQuotationRequestJs.gridHandler">
+    <div class="avs-table-header">
+        <div class="avs-table-header-container">
+            <table>
+                <tr class="header-row" style="height: 75px;">
+                    <td style="width: 100px; font-weight: bold;"><font style="color: #a90329;">{{frmQuotationRequestJs.totalRow | number}}</font></td>
+                    <td style="width: 100px;" class="sorting" data-colname="Season">Season</td>
+                    <td style="width: 120px;" class="sorting" data-colname="OfferSeasonUD">Offer</td>
+                    <td style="width: 150px;" class="sorting" data-colname="ClientNM">Client</td>
+                    <td style="width: 100px;">Image</td>
+                    <td style="width: 350px;" class="sorting" data-colname="Description">Item</td>
+                    <td style="width: 80px;" class="sorting" data-colname="Quantity">Qnt</td>
+                    <td style="width: 250px;">Factory Assigned</td>
+
+                    <td style="width: 60px;">Best Price</td>
+                    <td style="width: 80px;">Best Price Status</td>
+                    <td style="width: 100px;" class="sorting" data-colname="Delta5Percent">Delta5</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>
+                        <select class="sub-search-filter" ng-model="frmQuotationRequestJs.searchFilter.filters.Season" ng-options="item.seasonValue as item.seasonText for item in frmQuotationRequestJs.supportData.seasons">
+                            <option></option>
+                        </select>
+                    </td>
+                    <td><input class="sub-search-filter" type="text" ng-model="frmQuotationRequestJs.searchFilter.filters.OfferSeasonUD" /></td>
+                    <td><input class="sub-search-filter" type="text" ng-model="frmQuotationRequestJs.searchFilter.filters.ClientUD" /></td>
+                    <td></td>
+                    <td><input class="sub-search-filter" type="text" ng-model="frmQuotationRequestJs.searchFilter.filters.Description" /></td>
+                    <td></td>
+                    <td>
+                        <select class="sub-search-filter" ng-model="frmQuotationRequestJs.searchFilter.filters.HasFactoryQuotation" ng-options="item.Value as item.Text for item in frmQuotationRequestJs.supportData.yesNoValues">
+                            <option></option>
+                        </select>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td>
+                        <select ng-model="frmQuotationRequestJs.searchFilter.filters.DeltaRate" ng-options="item.value as item.text for item in frmQuotationRequestJs.supportData.deltaRateValues">
+                            <option></option>
+                        </select>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div class="avs-table-body">
+        <table>
+            <tr ng-repeat="item in frmQuotationRequestJs.data">
+                <td>
+                    <a href="javascript:void(0)" class="btn btn-default btn-xs" ng-click="frmQuotationRequestJs.event.frmAssignFactory_show(item)">Assign Factory</a>
+                </td>
+                <td style="text-align: center;">{{item.season}}</td>
+                <td style="text-align: center;">{{item.offerSeasonUD}}</td>
+                <td>
+                    <strong>{{item.clientUD}}</strong>
+                    <br />
+                    {{item.clientNM}}
+                    <br />
+                    {{item.offerSeasonQuotationRequestID}}
+                </td>
+                <td>
+                    <a href="{{item.fileLocation}}" data-featherlight="image">
+                        <img style="width: 95%;" ng-src="{{item.thumbnailLocation}}" />
+                    </a>
+                </td>
+                <td>
+                    <strong>{{item.articleCode}}</strong>
+                    <br />
+                    {{item.description}}
+                </td>
+                <td style="text-align: right;">{{item.quantity | number:0}}</td>
+                <td>
+                    <span class="label bg-color-green font-sm" style="margin-right: 5px;" ng-repeat="factory in $parent.frmQuotationRequestJs.factoryQuotationSearchResultDTOs | filter: {offerSeasonQuotationRequestID : item.offerSeasonQuotationRequestID} : true">{{factory.factoryUD}}</span>
+                </td>
+
+                <td style="text-align:right">
+                    {{item.purchasingPrice | currency : '$' : 2}}
+                </td>
+
+                <td style="text-align:left">
+                    {{item.quotationStatusNM}}
+                </td>
+
+                <td style="text-align:right">
+                    <span style="color:red" ng-if="item.delta5Percent < 0">{{item.delta5Percent | number : 1}}%</span>
+                    <span style="color:orange" ng-if="item.delta5Percent < 10 && item.delta5Percent > 0">{{item.delta5Percent | number : 1}}%</span>
+                    <span ng-if="item.delta5Percent >= 10">{{item.delta5Percent | number : 1}}%</span>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="frmAssignFactory" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel">Assign Factory</h4>
+            </div>
+            <div class="modal-body">
+                <div class="avs-table-wrapper" avs-table grid-handler="frmQuotationRequestJs.nullHandler">
+                    <div class="avs-table-header">
+                        <div class="avs-table-header-container">
+                            <table>
+                                <tr class="header-row" style="height: 75px;">
+                                    <td style="width: 50px;"></td>
+                                    <td style="width: 200px;">Factory</td>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td><input type="text" ng-model="frmQuotationRequestJs.nullHandler.factoryUD" /></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="avs-table-body">
+                        <table>
+                            <tr style="{{item.isPrefered === 1 ? 'background-color: #88e034;' : ''}}" ng-repeat="item in frmQuotationRequestJs.supportData.factories | filter : {factoryUD : frmQuotationRequestJs.nullHandler.factoryUD, isHidden: false} | orderBy: ['-isPrefered','factoryUD']">
+                                <td><label style="width: 100%; text-align: center;"><input type="checkbox" ng-model="item.isSelected" /></label></td>
+                                <td style="text-align: center;">{{item.factoryUD}}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" ng-click="frmQuotationRequestJs.event.frmAssignFactory_ok()">
+                    OK
+                </button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,102 @@
+﻿@{
+    ViewBag.Title = "Report Plc Products";
+    ViewBag.Module = "ReportPlcProducts";
+}
+
+<div class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-search-filter" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Filters</h2>
+            </header>
+
+            <div>
+                <div class="jarviswidget-editbox"></div>
+
+                <div class="widget-body">
+                    <fieldset>
+                    
+                        <div class="form-group">
+                            <label>Factory</label>
+                            <select class="form-control" ng-model="model.factoryID" ng-options="item.factoryID as item.factoryUD for item in supportModel.factories | orderBy : factoryUD"></select>
+                        </div>
+
+                        <div class="form-group">
+                            <button ng-click="event.ok($event)">OK</button>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction {
+}
+
+@section pagejs {
+    <script src="~/Angular/app/reportPlcProducts/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script type="text/javascript">
+        reportPlcProductsService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/reportplcProducts/';
+        reportPlcProductsService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+        var reportPlcProductsApp = angular.module('tilsoftApp', []);
+        reportPlcProductsApp.controller('tilsoftController', ['$scope', function ($scope) {
+            $scope.supportModel = null;
+            $scope.model = {
+               
+                factoryID : 0
+            };
+
+            //
+            // event defined
+            //
+            $scope.event = {
+                ok: function ($event) {
+                    $event.preventDefault();
+                    
+                  
+                    factoryID = $scope.model.factoryID;
+                    
+                    reportPlcProductsService.getReport(
+                    
+                        factoryID,
+                        function (data) {
+                            window.location = '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]' + data.data + '.xlsm';
+                            
+                        },
+                        function (error) {
+                            jsHelper.showMessage('warning', error);
+                        }
+                    );
+                }
+            }
+
+            //
+            // private function defined
+            //
+            $scope.prepareForm = function () {
+                
+                reportPlcProductsService.getFilterData(
+                    function (data) {
+                        $scope.supportModel = data.data;
+                        $scope.$apply();
+
+                        jQuery('#content').show();
+                        
+                    },
+                    function (error) {
+                        $scope.supportModel = null;
+                        $scope.$apply();
+                    }
+                );
+            }
+
+            //
+            // INIT
+            //
+            $scope.prepareForm();
+        }]);
+    </script>
+}

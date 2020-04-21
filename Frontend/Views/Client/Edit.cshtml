@@ -1,0 +1,2162 @@
+﻿@{
+    if (ViewBag.ID == 0)
+    {
+        ViewBag.Title = "Create client";
+    }
+    else
+    {
+        ViewBag.Title = "Edit client";
+    }
+
+    ViewBag.Module = "Client";
+    Frontend.APIDTO.APIUserInformation userInfo = (Frontend.APIDTO.APIUserInformation)Session[Frontend.Customize.Common.ProjectDefinition.USER_INFO_SESSION];
+
+    string canViewAllSaleData = "false";
+    if (userInfo.Data.ModuleSpecialPermissionAccesses.Count(o => o.ModuleSpecialPermissionUD == Frontend.Helper.ConstantIdentifier.SPECIAL_PERMISSION_CLIENTSPECIAL) > 0)
+    {
+        canViewAllSaleData = "true";
+    }
+
+    string userManualUrl = string.Empty;
+    if (System.IO.File.Exists(Server.MapPath("~/UserManual/" + ViewBag.ModuleCode + ".pdf")))
+    {
+        userManualUrl = "/UserManual/" + ViewBag.ModuleCode + ".pdf";
+    }
+
+}
+<form name="editForm">
+    <div class="row">
+        <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+            <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+                <header>
+                    <ul class="nav nav-tabs pull-left in">
+                        <li class="active">
+                            <a data-toggle="tab" href="#hb1"> <i class="fa fa-database"></i> <span class="hidden-mobile hidden-tablet">General</span> </a>
+                        </li>
+
+                        <li>
+                            <a data-toggle="tab" href="#hb2"> <i class="fa fa-database"></i> <span class="hidden-mobile hidden-tablet">GIC</span> </a>
+                        </li>
+
+                        <li>
+                            <a data-toggle="tab" href="#hb9"> <i class="fa fa-calendar-o"></i> <span class="hidden-mobile hidden-tablet">Meeting</span> </a>
+                        </li>
+
+                        @*<li>
+            <a data-toggle="tab" href="#hb3"> <i class="fa fa-database"></i> <span class="hidden-mobile hidden-tablet">Contact History</span> </a>
+        </li>*@
+
+                        <li>
+                            <a data-toggle="tab" href="#hb4"> <i class="fa fa-user"></i> <span class="hidden-mobile hidden-tablet">Contact Person</span> </a>
+                        </li>
+
+                        <li>
+                            <a data-toggle="tab" href="#hb5"> <i class="fa fa-database"></i> <span class="hidden-mobile hidden-tablet">DDC</span> </a>
+                        </li>
+
+                        <li>
+                            <a data-toggle="tab" href="#hb6"> <i class="fa fa-file-text-o"></i> <span class="hidden-mobile hidden-tablet">Documents</span> </a>
+                        </li>
+
+                        <li>
+                            <a data-toggle="tab" href="#hb61"> <i class="fa fa-file-text-o"></i> <span class="hidden-mobile hidden-tablet">Contracts</span> </a>
+                        </li>
+
+                        <li>
+                            <a data-toggle="tab" href="#hb7"> <i class="fa fa-file-text-o"></i> <span class="hidden-mobile hidden-tablet">Report Template</span> </a>
+                        </li>
+
+                        <li>
+                            <a data-toggle="tab" href="#hb10"> <i class="fa fa-file-text"></i> <span class="hidden-mobile hidden-tablet">Special packaging</span> </a>
+                        </li>
+
+                        <li>
+                            <a data-toggle="tab" href="#hb11"> <i class="fa fa-file-text"></i> <span class="hidden-mobile hidden-tablet">Est. Cost</span> </a>
+                        </li>
+                        <li>
+                            <a data-toggle="tab" href="#hb12" ng-click="clickClientAdditionalCondition()"> <i class="fa fa-file-text"></i> <span class="hidden-mobile hidden-tablet">Client Requirements</span> </a>
+                        </li>
+                        <li>
+                            <a data-toggle="tab" href="#hb13"> <i class="fa fa-file-text"></i> <span class="hidden-mobile hidden-tablet">Business Card</span> </a>
+                        </li>
+                    </ul>
+                </header>
+                <div>
+                    <div class="jarviswidget-editbox"></div>
+
+                    <div class="widget-body">
+                        <div class="tab-content">
+
+                            <div class="tab-pane active" id="hb1">
+                                <div class="row">
+                                    <div class="col-sm-2 m-bottom-15">
+                                        <label>Logo</label>
+                                        <div style="text-align: center;">
+                                            <a ng-if="editData.client.thumbnailLocation" href="{{editData.client.fileLocation}}" data-featherlight="image">
+                                                <img src="{{editData.client.thumbnailLocation}}" style="width: 100%; border: solid 1px #ddd; margin-bottom: 5px;" />
+                                            </a>
+                                            <div ng-if="!editData.client.thumbnailLocation" style="width: 100%; border: solid 1px #ddd; margin-bottom: 5px; height: 150px; line-height: 150px; font-weight: bold;">
+                                                NO IMAGE
+                                            </div>
+                                            <br />
+                                            <a href="javascript:void(0)" class="btn btn-default btn-xs" ng-click="event.changeLogo()"><i class="fa fa-folder"></i> Change</a>
+                                            <a href="javascript:void(0)" class="btn btn-danger btn-xs" ng-click="event.removeLogo()"><i class="fa fa-times"></i> Remove</a>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-sm-10 m-bottom-15">
+                                        <div class="row">
+                                            <div class="col-sm-2 m-bottom-15">
+                                                <label>Client Code</label>
+                                                <input class="form-control" type="text" id="clientUD" ng-model="editData.client.clientUD" ng-disabled="editData.client.autoGenerateCode || editData.client.clientID > 0">
+                                            </div>
+                                            <div class="col-sm-2 m-bottom-15" ng-hide="editData.client.clientID > 0">
+                                                <label></label>
+                                                <br />
+                                                <label class="checkbox" >
+                                                    <input type="checkbox" ng-model="editData.client.autoGenerateCode">
+                                                    <i></i> Auto generate
+                                                </label>
+                                            </div>
+                                              
+                                            <div class="col-sm-6 m-bottom-15">
+                                                <label>Client Name</label>
+                                                <input class="form-control" type="text" id="clientNM" ng-model="editData.client.clientNM">
+                                            </div>
+
+                                            <div class="col-sm-2 m-bottom-15">
+                                                <label></label>
+                                                <br />
+                                                <label>Active</label>
+                                                <span class="onoffswitch">
+                                                    <input name="onoffswitch" class="onoffswitch-checkbox" id="myonoffswitch" type="checkbox" ng-model="editData.client.isActive" />
+                                                    <label class="onoffswitch-label" for="myonoffswitch"> <span class="onoffswitch-inner" data-swchon-text="YES" data-swchoff-text="NO"></span> <span class="onoffswitch-switch"></span> </label>
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                            <div class="row">
+
+                                                <div class="col-sm-4 m-bottom-15">
+                                                    <label>Tel</label>
+                                                    <input class="form-control" type="text" id="telephone" ng-model="editData.client.telephone">
+                                                </div>
+
+                                                <div class="col-sm-4 m-bottom-15">
+                                                    <label>Fax</label>
+                                                    <input class="form-control" type="text" id="fax" ng-model="editData.client.fax">
+                                                </div>
+
+                                                <div class="col-sm-4 m-bottom-15">
+                                                    <label>Email</label>
+                                                    <input class="form-control" type="text" id="email" ng-model="editData.client.email">
+                                                </div>
+
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col-sm-6 m-bottom-15">
+                                                    <label>Website 1: <a href="http://{{editData.client.website}}" target="_blank">{{editData.client.website}}</a></label>
+                                                    <input class="form-control" type="text" id="website" ng-model="editData.client.website">
+                                                </div>
+                                                <div class="col-sm-6 m-bottom-15">
+                                                    <label>Website 2: <a href="http://{{editData.client.website2}}" target="_blank">{{editData.client.website2}}</a></label>
+                                                    <input class="form-control" type="text" id="website2" ng-model="editData.client.website2">
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="smart-form">
+                                                    <div class="col-sm-2 m-bottom-15" style="padding-left:13px">
+                                                        <label class="label">&nbsp;</label>
+                                                        <label class="checkbox">
+                                                            <input type="checkbox" ng-model="editData.client.isBuyingOrangePie">
+                                                            <i></i> Orange Pine client
+                                                        </label>
+                                                    </div>
+                                                    <div class="col-sm-2 m-bottom-15" style="padding-left:13px">
+                                                        <label class="label">&nbsp;</label>
+                                                        <label class="checkbox">
+                                                            <input type="checkbox" ng-model="editData.client.isExcludedInDeltaReport">
+                                                            <i></i> Exclude in delta report
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                </div>
+
+
+
+                                <div class="row">
+                                    <div class="col-sm-2 m-bottom-15">
+                                        <label>Client Type</label>
+                                        <select class="form-control" ng-model="editData.client.clientTypeID" ng-options="item.clientTypeID as item.clientTypeNM for item in editData.clientTypes">
+                                            <option value=""></option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-sm-2 m-bottom-15">
+                                        <label>Client Group</label>
+                                        <select class="form-control" ng-model="editData.client.clientGroupID" ng-options="item.clientGroupID as item.clientGroupNM for item in editData.clientGroups">
+                                            <option value=""></option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-sm-2 m-bottom-15">
+                                        <label>Qnt Store</label>
+                                        <input class="form-control" type="text" id="qntOfStore" ng-model="editData.client.qntOfStore">
+                                    </div>
+
+                                    <div class="col-sm-2 m-bottom-15">
+                                        <label>First Bussiness year</label>
+                                        <select class="form-control" ng-model="editData.client.haveBusinessRelationshipFromYear" ng-options="item.seasonValue as item.seasonText for item in editData.seasons">
+                                            <option value=""></option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-sm-2 m-bottom-15">
+                                        <label>Relationship Type</label>
+                                        <select class="form-control" ng-model="editData.client.relationshipTypeID" ng-options="item.clientRelationshipTypeID as item.clientRelationshipTypeNM for item in editData.clientRelationshipTypes">
+                                            <option value=""></option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-sm-2 m-bottom-15">
+                                        <label>Payment Term</label>
+                                        <select class="form-control" ng-model="editData.client.paymentTermID" ng-options="item.paymentTermID as item.paymentTermNM for item in editData.paymentTerms">
+                                            <option value=""></option>
+                                        </select>
+                                    </div>
+
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-sm-4 m-bottom-15">
+                                        <label>Delivery Term</label>
+                                        <select class="form-control" name="deliveryTermID" ng-model="editData.client.deliveryTermID" ng-options="item.deliveryTermID as item.deliveryTermNM for item in editData.deliveryTerms" required>
+                                            <option value=""></option>
+                                        </select>
+                                        <span class="help-block" ng-show="editForm.deliveryTermID.$error.required"><i class="fa fa-warning"></i>Delivery Term is require</span>
+                                    </div>
+
+                                    <div class="col-sm-4 m-bottom-15">
+                                        <label>VAT No</label>
+                                        <input class="form-control" type="text" ng-model="editData.client.vatNo">
+                                    </div>
+
+                                    <div class="col-sm-4 m-bottom-15">
+                                        <label>Buying Organization</label>
+                                        <input class="form-control" type="text" ng-model="editData.client.buyingOrganization">
+                                    </div>
+
+                                    <!--
+                <div class="col-sm-2 m-bottom-15">
+                    <label></label>
+                    <br />
+                    <label>Buying Org</label>
+                    <span class="onoffswitch">
+                        <input name="onoffswitch1" class="onoffswitch-checkbox" id="myonoffswitch1" type="checkbox" ng-model="editData.client.isBuyingOrangePie"/>
+                        <label class="onoffswitch-label" for="myonoffswitch1"> <span class="onoffswitch-inner" data-swchon-text="YES" data-swchoff-text="NO"></span> <span class="onoffswitch-switch"></span> </label>
+                    </span>
+                </div>
+            -->
+
+                                    <div class="col-sm-2 m-bottom-15">
+                                        <label>GLN Number</label>
+                                        <input class="form-control" type="text" id="glnNumber" ng-model="editData.client.glnNumber">
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-sm-3 m-bottom-15">
+                                        <label>Account Manager</label>
+                                        <select class="form-control" ng-model="editData.client.saleID" ng-options="item.userID as item.employeeNM for item in editData.accountManagerDTOs | filter : {isAccountManager: true}" ng-if="editData.client.hasSpecialPermission">
+                                            <option value=""></option>
+                                        </select>
+                                        <span class="form-control" ng-if="!editData.client.hasSpecialPermission">{{editData.client.saleNM}}</span>
+                                    </div>
+
+                                    <div class="col-sm-3 m-bottom-15">
+                                        <label>Account Manager Assistant</label>
+                                        <select class="form-control" ng-model="editData.client.sale2ID" ng-options="item.userID as item.employeeNM for item in editData.accountManagerDTOs | filter: {isAccountManagerAssistant: true}" ng-if="editData.client.hasSpecialPermission">
+                                            <option value=""></option>
+                                        </select>
+                                        <span class="form-control" ng-if="!editData.client.hasSpecialPermission">{{editData.client.saler2NM}}</span>
+                                    </div>
+
+                                    <div class="col-sm-3 m-bottom-15">
+                                        <label>VN Merchandiser</label>
+                                        <select class="form-control" ng-model="editData.client.saleVNID" ng-options="item.userID as item.employeeNM for item in editData.accountManagerDTOs | filter: {isvnAssistant: true}" ng-if="editData.client.hasSpecialPermission">
+                                            <option value=""></option>
+                                        </select>
+                                        <span class="form-control" ng-if="!editData.client.hasSpecialPermission">{{editData.client.salerVNNM}}</span>
+                                    </div>
+
+                                    <div class="col-sm-3 m-bottom-15">
+                                        <label>VN merchandiser assistant</label>
+                                        <select class="form-control" ng-model="editData.client.saleMerAssistID" ng-options="item.userID as item.employeeNM for item in editData.accountManagerDTOs | filter: {isvnAssistant: true}" ng-if="editData.client.hasSpecialPermission">
+                                            <option value=""></option>
+                                        </select>
+                                        <span class="form-control" ng-if="!editData.client.hasSpecialPermission">{{editData.client.salerVNNM}}</span>
+                                    </div>
+
+
+                                    <div class="col-sm-3 m-bottom-15">
+                                        <label>VN Log. Assistant</label>
+                                        <select class="form-control" ng-model="editData.client.saleVN2ID" ng-options="item.userID as item.employeeNM for item in editData.accountManagerDTOs | filter: {isvnLogisticAssistant: true}" ng-if="editData.client.hasSpecialPermission">
+                                            <option value=""></option>
+                                        </select>
+                                        <span class="form-control" ng-if="!editData.client.hasSpecialPermission">{{editData.client.saler2VNNM}}</span>
+                                    </div>
+
+                                    <div class="col-sm-3 m-bottom-15">
+                                        <label>Agent</label>
+                                        <select class="form-control" ng-model="editData.client.agentID" ng-options="item.agentID as item.agentNM for item in editData.agents" ng-if="editData.client.hasSpecialPermission">
+                                            <option value=""></option>
+                                        </select>
+                                        <span class="form-control" ng-if="!editData.client.hasSpecialPermission">{{editData.client.agentNM}}</span>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+
+                                    <div class="col-sm-2">
+                                        <label>Credit Sale URL</label>
+                                        <input class="form-control" type="text" id="creditSafeURL" ng-model="editData.client.creditSafeURL">
+                                    </div>
+
+                                    <div class="col-sm-6">
+                                        <label>Remark</label>
+                                        <input class="form-control" type="text" ng-model="editData.client.remark">
+                                    </div>
+
+                                    <div class="col-sm-2">
+                                        <label>Rating</label>
+                                        <ul style="padding: 0px;">
+                                            <li style="display: inline" ng-repeat="item in editData.clientRatings"><input type="radio" name="radio-rating" id="client-rating-{{item.ratingValue}}" ng-value="item.ratingValue" ng-model="editData.client.rating" /><i>{{item.ratingText}}&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp</i></li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <label>SI Submission NL</label>
+                                        <select class="form-control" ng-model="editData.client.submissionNL" ng-options="item for item in YesNoOption">
+                                            <option value=""></option>
+                                        </select>
+                                    </div>
+
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-sm-12 m-bottom-15">
+                                        <label>Addtional Condition</label>
+                                        <textarea class="form-control" ng-model="editData.client.additionalCondition" rows="3"></textarea>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-2 m-bottom-15">
+                                        <label>Shipping window length</label>
+                                        <input avs-number class="form-control" type="text" ng-data-source="editData.client.shippingLength">
+                                    </div>
+                                    <div class="smart-form">
+                                        <div class="col-sm-1 m-bottom-15">
+                                            <label class="label">&nbsp;</label>
+                                            <label class="checkbox">
+                                                <input type="checkbox" ng-model="editData.client.crf">
+                                                <i></i> FCR
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <fieldset>
+                                    <legend>Address</legend>
+                                    <div class="row">
+                                        <div class="col-sm-6 m-bottom-15">
+                                            <label>Street address 1</label>
+                                            <input class="form-control" type="text" id="streetAddress1" ng-model="editData.client.streetAddress1">
+                                        </div>
+
+                                        <div class="col-sm-6 m-bottom-15">
+                                            <label>Street address 2</label>
+                                            <input class="form-control" type="text" id="streetAddress2" ng-model="editData.client.streetAddress2">
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+
+                                        <div class="col-sm-2 m-bottom-15">
+                                            <label>Zip Code</label>
+                                            <input class="form-control" type="text" id="zipCode" ng-model="editData.client.zipCode">
+                                        </div>
+
+                                        <div class="col-sm-2 m-bottom-15">
+                                            <label>City</label>
+                                            <select class="form-control" ng-model="editData.client.clientCityID" ng-options="item.clientCityID as item.clientCityNM for item in editData.clientCities">
+                                                <option value=""></option>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-sm-2 m-bottom-15">
+                                            <label>Country</label>
+                                            <select class="form-control" ng-model="editData.client.clientCountryID" ng-options="item.clientCountryID as item.clientCountryNM for item in editData.clientCountries">
+                                                <option value=""></option>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-sm-2 m-bottom-15">
+                                            <label>Language1</label>
+                                            <select class="form-control" ng-model="editData.client.language1ID" ng-options="item.languageID as item.languageNM for item in editData.languages">
+                                                <option value=""></option>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-sm-2 m-bottom-15">
+                                            <label>Language2</label>
+                                            <select class="form-control" ng-model="editData.client.language2ID" ng-options="item.languageID as item.languageNM for item in editData.languages">
+                                                <option value=""></option>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-sm-2 m-bottom-15">
+                                            <label>Language3</label>
+                                            <select class="form-control" ng-model="editData.client.language3ID" ng-options="item.languageID as item.languageNM for item in editData.languages">
+                                                <option value=""></option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </fieldset>
+
+                                <fieldset>
+                                    <legend>Penalty Term</legend>
+                                    <fieldset style="padding: 0px;">
+                                        <a class="btn btn-primary btn-xs font-11" href="javascript:void(0);" ng-click="event.addPenaltyTerm()" style="margin-bottom: 10px;"><i class="fa fa-plus"></i> Add new </a>
+                                        <div class="tilsoft-table-wrapper">
+                                            <div class="tilsoft-table">
+                                                <div class="tilsoft-table-body" style="width: 100%; overflow-y: hidden; height: auto; min-height: 100px; margin-top: 0px;">
+                                                    <table>
+                                                        <tr>
+                                                            <th style="width: 50px;">&nbsp;</th>
+                                                            <th style="width: 200px;">Name</th>
+                                                            <th style="width: 100px;">Number Date</th>
+                                                            <th style="width: 100px;">Percent</th>
+                                                            <th style="width: 100px;">Value</th>
+                                                            <th>Remark</th>
+                                                        </tr>
+                                                        <tr ng-repeat="item in editData.client.penaltyTerms">
+                                                            <td style="text-align: center; padding-top: 10px">
+                                                                <a href="javascript:void(0);" title="Remove" class="btn btn-danger btn-xs font-11" ng-click="event.removePenaltyTerm(item)">Remove  </a>
+                                                            </td>
+                                                            <td style="width:300px">
+                                                                <input type="text" class="form-control" style="width: 95%;" ng-model="item.penaltyTermNM" />
+                                                            </td>
+                                                            <td style="width: 100px;">
+                                                                <input type="text" class="form-control" style="width: 95%; text-align: center" avs-number ng-data-source="item.numberDate" />
+                                                            </td>
+                                                            <td style="width: 100px;">
+                                                                <input avs-number class="form-control" type="text" style="text-align:right" ng-data-source="item.percent" ng-decimal="2" />
+                                                            </td>
+                                                            <td style="width: 150px;">
+                                                                <input avs-number class="form-control" type="text" style="text-align:right" ng-data-source="item.value" ng-decimal="2" />
+                                                            </td>
+                                                            <td><input type="text" class="form-control" style="width: 95%;" ng-model="item.remark" /></td>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </fieldset>
+                                </fieldset>
+
+                                <fieldset>
+                                    <legend>Tracking</legend>
+                                    <div class="row">
+                                        <div class="col-sm-2 m-bottom-15">
+                                            <label>Created By</label>
+                                            <span class="form-control">
+                                                <a ng-if="editData.client.createdBy" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{editData.client.createdBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                    <i class="fa fa-user"></i> {{editData.client.creatorName}}
+                                                </a>
+                                            </span>
+                                        </div>
+
+                                        <div class="col-sm-2 m-bottom-15">
+                                            <label>Created Date</label>
+                                            <span class="form-control">
+                                                {{editData.client.createdDateFormated}}
+                                            </span>
+                                        </div>
+
+                                        <div class="col-sm-2 m-bottom-15">
+                                            <label>Updated By</label>
+                                            <span class="form-control">
+                                                <a ng-if="editData.client.updatedBy" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{editData.client.updatedBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                    <i class="fa fa-user"></i> {{editData.client.updatorName}}
+                                                </a>
+                                            </span>
+                                        </div>
+                                        <div class="col-sm-2 m-bottom-15">
+                                            <label>Updated Date</label>
+                                            <span class="form-control">
+                                                {{editData.client.updatedDateFormated}}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            </div>
+
+                            <div class="tab-pane" id="hb2">
+                                <div class="row">
+                                    <div class="col-sm-12 m-bottom-15">
+                                        <div class="row">
+                                            <div class="col-sm-3 m-bottom-15">
+                                                <label>Client Code - Client Name</label>
+                                                <span class="form-control">{{editData.client.clientUD}}-{{editData.client.clientNM}}</span>
+                                            </div>
+                                            <div class="col-sm-3 m-bottom-15">
+                                                <label>Website 1:</label>
+                                                <span class="form-control">
+                                                    <i class="fa fa-globe"></i>&nbsp;&nbsp;<a href="http://{{editData.client.website}}" target="_blank">{{editData.client.website}}</a>
+                                                </span>
+                                            </div>
+                                            <div class="col-sm-3 m-bottom-15">
+                                                <label>Website 2:</label>
+                                                <span class="form-control">
+                                                    <i class="fa fa-globe"></i>&nbsp;&nbsp;<a href="http://{{editData.client.website2}}" target="_blank">{{editData.client.website2}}</a>
+                                                </span>
+                                            </div>
+                                            <div class="col-sm-2 m-bottom-15">
+                                                <label>Account Manager</label>
+                                                <span class="form-control">{{editData.client.saleNM}}</span>
+                                            </div>
+                                        </div>
+                                        <div class="row" ng-if="@userInfo.Data.UserId == editData.client.saleID || @canViewAllSaleData == true">
+                                            <label style="color:gray; margin-left: 15px">Below story is how today {{editData.client.saleNM}} evaluates this client. How he looks doing business with them in the past and what’s the potential towards the future.</label>
+                                            <textarea style="color:black;" class="form-control" ng-model="clientGIC.clientGICComment" rows="20"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-12 m-bottom-15">
+                                        <div class="smart-form">
+                                            <div class="widget-body no-padding">
+                                                <div avs-scroll grid-handler="gridHandler" class="tilsoft-table-wrapper">
+                                                    <div class="tilsoft-table" style="height:700px">
+                                                        <div class="tilsoft-table-header" style="width: 1050px;">
+                                                            <div style="width: 80px;"></div>
+                                                            <div style="width: 100px;" data-colname="ContactDate">Date</div>
+                                                            <div data-colname="CommunicationContent">Content</div>
+                                                        </div>
+
+                                                        <div class="tilsoft-table-body" style="width: 1050px;">
+                                                            <table>
+                                                                <tr ng-repeat="item in editData.client.clientContactHistories | orderBy: '-clientContactHistoryID'">
+                                                                    <td style="width:79px;text-align:center">
+                                                                        <a ng-if="checkEditDate(item)" class="btn btn-primary btn-xs font-11" title="Edit" ng-click="editGIC(item)"><i class="fa fa-pencil"></i>Edit</a>
+                                                                    </td>
+                                                                    <td style="text-align: center; width: 100px; vertical-align:middle">{{item.contactDate}}</td>
+                                                                    <td style="text-align: left; vertical-align:middle">
+                                                                        <textarea readonly rows="5" style="padding: 5px;">{{item.communicationContent}}</textarea>                                                                       
+                                                                    </td>
+                                                                </tr>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            @*<div class="tab-pane" id="hb3">
+
+        </div>*@
+
+                            <div class="tab-pane" id="hb4">
+                                <div class="row">
+                                    <div class="col-sm-12 m-bottom-15">
+                                        <div>
+                                            <a href="javascript:void(0);" ng-click="addContact($event)"><b><u>Add new contact person</u></b></a>
+                                        </div>
+                                        <div id="contactPerson" class="tilsoft-table-wrapper">
+                                            <div class="tilsoft-table">
+                                                <div class="tilsoft-table-header" style="width: 2230px; ">
+                                                    <div style="width: 160px;"></div>
+                                                    <div style="width: 30px"></div>
+                                                    <div style="width: 80px;" class="sorting" data-colname="isDefault">Default</div>
+                                                    <div style="width: 200px;" class="sorting" data-colname="fullName">Full Name</div>
+                                                    <div style="width: 200px;" class="sorting" data-colname="callingName">Calling name</div>
+                                                    <div style="width: 300px;" class="sorting" data-colname="jobTitle">Job Title</div>
+                                                    <div style="width: 200px;" class="sorting" data-colname="mobile">mobile</div>
+                                                    <div style="width: 200px;" class="sorting" data-colname="telephone">telephone</div>
+                                                    <div style="width: 200px;" class="sorting" data-colname="email">email</div>
+                                                    <div style="width: 100px;" class="sorting" data-colname="isEurofarAgent">Eurofar Agent</div>
+                                                    <div style="width: 100px;">EUStock Username</div>
+                                                    <div style="width: 100px;">EUStock Password</div>
+                                                    <div class="sorting" data-colname="remark">remark</div>
+                                                </div>
+                                                <div class="tilsoft-table-body" style="width: 2230px; height: auto; max-height: 450px;">
+                                                    <table>
+                                                        <tr ng-repeat="item in editData.client.clientContacts | orderBy: ['displayIndex']">
+                                                            <td style="width: 160px;">
+                                                                <a style="width: 150px; margin-bottom: 5px;" ng-if="item.clientContactID > 0 && !item.eurofarstockUserName" href="javascript:void(0)" class="btn btn-success btn-xs" title="Create Eurofar Stock Account" ng-click="event.createEurofarstockAccount(item)"><i class="fa fa-plus"></i> Add EUStock Account</a>
+                                                                <a style="width: 150px;" href="javascript:void(0)" class="btn btn-danger btn-xs" title="Delete" ng-click="removeContact($event, item.clientContactID)"><i class="fa fa-times"></i> Remove</a>
+                                                            </td>
+                                                            <td style="width: 30px">
+                                                                <a style="width: 20px; margin-bottom: 5px;" href="javascript:void(0)" class="btn btn-primary btn-xs font-11" ng-click="upContact(item.isDefault, item.displayIndex)"><i class="fa fa-level-up"></i></a>
+                                                                <a style="width: 20px;" href="javascript:void(0)" class="btn btn-primary btn-xs font-11" ng-click="downContact(item.isDefault, item.displayIndex)"><i class="fa fa-level-down"></i></a>
+                                                            </td>
+                                                            <td style="width: 80px; text-align: center;"><input @*class="form-control"*@ type="checkbox" ng-model="item.isDefault" ng-change="changeIndexContact(item)"></td>
+                                                            <td style="width: 200px;"><input class="form-control" type="text" name="fullName" ng-model="item.fullName"></td>
+                                                            <td style="width: 200px;"><input class="form-control" type="text" name="callingName" ng-model="item.callingName"></td>
+                                                            <td style="width: 300px;"><input class="form-control" type="text" name="jobTitle" ng-model="item.jobTitle"></td>
+                                                            <td style="width: 200px;"><input class="form-control" type="text" name="mobile" ng-model="item.mobile"></td>
+                                                            <td style="width: 200px;"><input class="form-control" type="text" name="telephone" ng-model="item.telephone"></td>
+                                                            <td style="width: 200px;"><input class="form-control" type="text" name="email" ng-model="item.email"></td>
+                                                            <td style="width: 100px; text-align: center;"><input @*class="form-control"*@ type="checkbox" ng-model="item.isEurofarAgent"></td>
+                                                            <td style="width: 100px;">{{item.eurofarstockUserName}}</td>
+                                                            <td style="width: 100px;">{{item.eurofarstockPassword}}</td>
+                                                            <td><input class="form-control" type="text" name="remark" ng-model="item.remark"></td>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane" id="hb5">
+                                <div class="row">
+                                    <div class="col-sm-12 m-bottom-15">
+                                        <div id="ddc" class="tilsoft-table-wrapper">
+                                            <div class="tilsoft-table">
+                                                <div class="tilsoft-table-header" style="width: 1800px; ">
+                                                    <div style="width: 120px;" class="sorting" data-colname="season">Season</div>
+                                                    <div style="width: 120px;" class="sorting" data-colname="minUSD">min USD</div>
+                                                    <div style="width: 120px;" class="sorting" data-colname="avgUSD">avg USD</div>
+                                                    <div style="width: 120px;" class="sorting" data-colname="maxUSD">max USD</div>
+                                                    <div style="width: 120px;" class="sorting" data-colname="minEUR">min EUR</div>
+                                                    <div style="width: 120px;" class="sorting" data-colname="avgEUR">avg EUR</div>
+                                                    <div style="width: 120px;" class="sorting" data-colname="maxEUR">max EUR</div>
+                                                    <div style="width: 120px;" class="sorting" data-colname="wickerContQty">wicker Cont Qty</div>
+                                                    <div style="width: 120px;" class="sorting" data-colname="wickerPromoContQty">wicker PromoCon tQty</div>
+                                                    <div style="width: 120px;" class="sorting" data-colname="woodAcaciaContQty">wood Acacia Cont Qty</div>
+                                                    <div style="width: 120px;" class="sorting" data-colname="woodTeakContQty">wood Teak Cont Qty</div>
+                                                    <div style="width: 120px;" class="sorting" data-colname="chinaContQty">china Cont Qty</div>
+                                                    <div style="width: 120px;" class="sorting" data-colname="indoContQty">indo Cont Qty</div>
+                                                    <div class="sorting" data-colname="remark">remark</div>
+
+                                                </div>
+                                                <div class="tilsoft-table-body" style="width: 1800px; ">
+                                                    <table>
+                                                        <tr ng-repeat="item in editData.client.ddcDetails">
+                                                            <td style="width: 120px;">{{item.season}}</td>
+                                                            <td style="width: 120px;"><input class="form-control" type="text" name="minUSD" ng-model="item.minUSD" furnindo-currency style="text-align:right"></td>
+                                                            <td style="width: 120px;"><input class="form-control" type="text" name="avgUSD" ng-model="item.avgUSD" furnindo-currency style="text-align:right"></td>
+                                                            <td style="width: 120px;"><input class="form-control" type="text" name="maxUSD" ng-model="item.maxUSD" furnindo-currency style="text-align:right"></td>
+                                                            <td style="width: 120px;"><input class="form-control" type="text" name="minEUR" ng-model="item.minEUR" furnindo-currency style="text-align:right"></td>
+                                                            <td style="width: 120px;"><input class="form-control" type="text" name="avgEUR" ng-model="item.avgEUR" furnindo-currency style="text-align:right"></td>
+                                                            <td style="width: 120px;"><input class="form-control" type="text" name="maxEUR" ng-model="item.maxEUR" furnindo-currency style="text-align:right"></td>
+                                                            <td style="width: 120px;"><input class="form-control" type="text" name="rowIndex" ng-model="item.wickerContQty" style="text-align:right"></td>
+                                                            <td style="width: 120px;"><input class="form-control" type="text" name="rowIndex" ng-model="item.wickerPromoContQty" style="text-align:right"></td>
+                                                            <td style="width: 120px;"><input class="form-control" type="text" name="rowIndex" ng-model="item.woodAcaciaContQty" style="text-align:right"></td>
+                                                            <td style="width: 120px;"><input class="form-control" type="text" name="rowIndex" ng-model="item.woodTeakContQty" style="text-align:right"></td>
+                                                            <td style="width: 120px;"><input class="form-control" type="text" name="rowIndex" ng-model="item.chinaContQty" style="text-align:right"></td>
+                                                            <td style="width: 120px;"><input class="form-control" type="text" name="rowIndex" ng-model="item.indoContQty" style="text-align:right"></td>
+                                                            <td><input class="form-control" type="text" name="remark" ng-model="item.remark"></td>
+
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <div class="tab-pane" id="hb6">
+                                <div class="row">
+                                    <div class="col-sm-12 m-bottom-15">
+                                        <div>
+                                            <a href="javascript:void(0);" ng-click="addDocument($event)"><b><u>Add new documents</u></b></a>
+                                        </div>
+                                        <div id="contract" class="tilsoft-table-wrapper">
+                                            <div class="tilsoft-table">
+                                                <div class="tilsoft-table-header" style="width: 950px; ">
+                                                    <div style="width: 50px;"></div>
+                                                    <div style="width: 150px;">Document Type</div>
+                                                    <div style="width: 150px;">Document Name</div>
+                                                    <div style="width: 300px;">Document File</div>
+                                                    <div>Description</div>
+                                                </div>
+                                                <div class="tilsoft-table-body" style="width: 950px; ">
+                                                    <table>
+                                                        <tr ng-repeat="item in editData.client.clientContracts | filter: {contractTypeID: '!1'}">
+                                                            <td style="width: 49px; text-align: center;">
+                                                                <a href="javascript:void(0)" title="Delete" ng-click="removeContract($event, item.clientContractID)"><i class="fa fa-times-circle grid-button"></i></a>
+                                                            </td>
+
+                                                            <td style="width: 150px; text-align: center;">
+                                                                <select class="form-control" style="width: 100%;" ng-model="item.contractTypeID" ng-options="contractType.clientDocumentTypeID as contractType.clientDocumentTypeNM for contractType in contractTypes">
+                                                                    <option value=""></option>
+                                                                </select>
+                                                            </td>
+
+                                                            <td style="width: 150px; text-align: center;">
+                                                                <input class="form-control" style="width: 100%;" type="text" name="contractNo" ng-model="item.contractNo">
+                                                            </td>
+
+                                                            <td style="width: 300px;">
+                                                                @Html.Partial("~/Views/Shared/_Controls/_FileUploadBox.cshtml", new Frontend.Models.FileUploadViewModel() { ControlID = "item.clientContractID", URLBinding = "item.contractFileURL", FileName = "item.contractFileFriendlyName", JSOnChangeHandler = "changeFile", JSONRemoveHandler = "removeFile" })
+                                                            </td>
+
+                                                            <td>
+                                                                <input class="form-control" style="width: 100%;" type="text" name="contractDescription" ng-model="item.remark">
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane" id="hb61">
+                                <div class="row">
+                                    <div class="col-sm-12 m-bottom-15">
+                                        <div>
+                                            <a href="javascript:void(0);" ng-click="addContract($event)"><b><u>Add new contract</u></b></a>
+                                        </div>
+                                        <div id="contract" class="tilsoft-table-wrapper">
+                                            <div class="tilsoft-table">
+                                                <div class="tilsoft-table-header" style="width: 1250px; ">
+                                                    <div style="width: 50px;"></div>
+                                                    <div style="width: 70px;" data-colname="isSigned">Signed</div>
+                                                    <div style="width: 150px;">Contract No</div>
+                                                    <div style="width: 300px;">File</div>
+                                                    <div style="width: 450px;">Orders</div>
+                                                    <div>Description</div>
+                                                </div>
+                                                <div class="tilsoft-table-body" style="width: 1250px; ">
+                                                    <table>
+                                                        <tr ng-repeat="item in editData.client.clientContracts | filter: {contractTypeID: 1}">
+                                                            <td style="width: 49px; text-align: center;">
+                                                                <a href="javascript:void(0)" title="Delete" ng-click="removeContract($event, item.clientContractID)"><i class="fa fa-times-circle grid-button"></i></a>
+                                                            </td>
+
+                                                            <td style="width: 70px; text-align: center;"><input type="checkbox" ng-model="item.isSigned"></td>
+
+                                                            <td style="width: 150px; text-align: center;">
+                                                                <input class="form-control" style="width: 100%;" type="text" name="contractNo" ng-model="item.contractNo">
+                                                            </td>
+
+                                                            <td style="width: 300px;">
+                                                                @Html.Partial("~/Views/Shared/_Controls/_FileUploadBox.cshtml", new Frontend.Models.FileUploadViewModel() { ControlID = "item.clientContractID", URLBinding = "item.contractFileURL", FileName = "item.contractFileFriendlyName", JSOnChangeHandler = "changeFile", JSONRemoveHandler = "removeFile" })
+                                                            </td>
+
+                                                            <td style="width: 450px;">
+                                                                <table class="table table-bordered" style="margin-bottom: 0px;" ng-show="(item.contractTypeID != null && item.contractTypeID == 1)">
+                                                                    <tbody>
+                                                                        <tr>
+                                                                            <td colspan="2"><a href="javascript:void(0);" ng-click="addContractDetail($event,item.clientContractID)"><b><u>Add order</u></b></a></td>
+                                                                        </tr>
+                                                                        <tr ng-repeat="item_detail in item.clientContractDetails">
+                                                                            <td style="width: 25px; text-align:center"><a href="#" title="Delete" ng-click="removeContractDetail($event, item.clientContractID, item_detail.clientContractDetailID )"><i class="fa fa-times-circle grid-button"></i></a></td>
+                                                                            <td>
+                                                                                <select class="form-control" ng-model="item_detail.saleOrderID" ng-options="order_item.saleOrderID as order_item.proformaInvoiceNo for order_item in editData.client.saleOrders | orderBy : 'proformaInvoiceNo'">
+                                                                                    <option value=""></option>
+                                                                                </select>
+                                                                            </td>
+                                                                        </tr>
+                                                                    </tbody>
+                                                                </table>
+                                                            </td>
+
+                                                            <td>
+                                                                <input class="form-control" style="width: 100%;" type="text" name="contractDescription" ng-model="item.remark">
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane" id="hb7">
+                                <div class="row">
+                                    <div class="col-sm-3 m-bottom-15">
+                                        <label>Select CI Report Template</label>
+                                        <select class="form-control" id="CIReportTemplate" ng-model="editData.client.ciTemplateID" ng-options="reportTemplate.reportTemplateID as reportTemplate.reportTemplateNM for reportTemplate in editData.reportTemplates | filter:{'reportType':'CI'}:true">
+                                            <option value=""></option>
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-3 m-bottom-15">
+                                        <label>Select PI Report Template</label>
+                                        <select class="form-control" id="PIReportTemplate" ng-model="editData.client.piTemplateID" ng-options="reportTemplate.reportTemplateID as reportTemplate.reportTemplateNM for reportTemplate in editData.reportTemplates | filter:{'reportType':'PI'}:true">
+                                            <option value=""></option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane" id="hb9">
+                                <table class="table table-striped table-bordered table-hover" style="width: 100%;">
+                                    <thead>
+                                        <tr>
+                                            <th>SUBJECT</th>
+                                            <th>OWNER</th>
+                                            <th>LOCATION</th>
+                                            <th>FACTORY</th>
+                                            <th>START</th>
+                                            <th>END</th>
+                                            <th>ATTACHMENT</th>
+                                            <th>DESCRIPTION</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="item in editData.client.appointmentDTOs">
+                                            @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Read, HttpContext.Current) != "disabled")
+                                            {
+                                                <td ng-if="item.userID === @userInfo.Data.UserId">
+                                                    <a href="@Url.Action("Index", "AgendaMng")#/event/edit/{{item.appointmentID}}" target="_blank">{{item.subject}}</a>
+                                                </td>
+                                                <td ng-if="item.userID !== @userInfo.Data.UserId">
+                                                    <a href="@Url.Action("Index", "AgendaMng")#/event/view/{{item.appointmentID}}" target="_blank">{{item.subject}}</a>
+                                                </td>
+                                            }
+                                            else
+                                            {
+                                                <td>{{item.subject}}</td>
+                                            }
+
+                                            <td style="text-align: center;">
+                                                <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.userID}}" data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                    {{item.employeeNM}}
+                                                </a>
+                                            </td>
+                                            <td style="text-align: center;">{{item.meetingLocationNM}}</td>
+                                            <td style="text-align: center;">{{item.factoryUD}}</td>
+                                            <td>{{item.startTime}}</td>
+                                            <td>{{item.endTime}}</td>
+                                            <td style="text-align: center;">{{item.totalAttachedFile}}</td>
+                                            <td>{{item.description}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="tab-pane" id="hb10">
+                                <div class="row">
+                                    <div class="col-sm-12 m-bottom-15">
+                                        <div>
+                                            <a href="javascript:void(0);" ng-click="addClientSpecialPackagingMethod($event)"><b><u>Add new special packaging method</u></b></a>
+                                        </div>
+                                        <div id="contactPerson" class="tilsoft-table-wrapper">
+                                            <div class="tilsoft-table">
+                                                <div class="tilsoft-table-header" style="width: 1000px; ">
+                                                    <div style="width: 160px;"></div>
+                                                    <div style="width: 250px;" class="sorting" data-colname="isDefault">Special packaging method name</div>
+                                                    <div class="sorting" data-colname="remark">Description</div>
+                                                </div>
+                                                <div class="tilsoft-table-body" style="width: 1000px; height: auto; max-height: 450px;">
+                                                    <table>
+                                                        <tr ng-repeat="item in editData.client.clientSpecialPackagingMethods">
+                                                            <td style="width: 160px;">
+                                                                <a ng-show="item.usaged == 0 || item.clientSpecialPackagingMethodID < 0" style="width: 150px;" href="javascript:void(0)" class="btn btn-danger btn-xs" title="Delete" ng-click="removeClientSpecialPackagingMethod($event, item.clientSpecialPackagingMethodID)"><i class="fa fa-times"></i> Remove</a>
+                                                            </td>
+                                                            <td style="width: 250px;"><input ng-readonly="item.usaged == 1" class="form-control" type="text" name="special" ng-model="item.clientSpecialPackagingMethodNM"></td>
+                                                            <td><input ng-readonly="item.usaged == 1" class="form-control" type="text" name="description" ng-model="item.description"></td>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane" id="hb11">
+                                <div class="row">
+                                    <div class="col-sm-12 m-bottom-15">
+                                        <style>
+                                            #est-section .tilsoft-table-header div {
+                                                height: 75px;
+                                            }
+                                        </style>
+
+                                        <div id="est-section" class="tilsoft-table-wrapper">
+                                            <div class="tilsoft-table">
+                                                <div class="tilsoft-table-header" style="width: 1300px; ">
+                                                    <div style="width: 85px;"></div>
+                                                    <div style="width: 70px;">Season</div>
+                                                    <div style="width: 110px">% Interest Cost <br /> (1)</div>
+                                                    <div style="width: 90px">% LC Cost <br /> (2)</div>
+                                                    <div style="width: 125px">Transport Per Cont EUR <br /> (3)</div>
+                                                    <div style="width: 100px">% Default Commission <br /> (4)</div>
+                                                    <div style="width: 110px">% Discount / Bonus <br /> (5)</div>
+                                                    <div style="width: 110px">% Damage <br /> (6)</div>
+                                                    <div style="width: 100px">Testing Cost USD <br /> (7)</div>
+                                                    <div style="width: 100px">Sample Cost USD <br /> (8)</div>
+                                                    <div style="width: 110px">Sparepart Cost USD <br /> (9)</div>
+                                                    <div style="width: 140px">Confirmed By</div>
+                                                    <div>&nbsp;</div>
+                                                </div>
+                                                <div class="tilsoft-table-body" style="width: 1300px; height: auto; max-height: 450px; margin-top: 75px;">
+                                                    <table>
+                                                        <tr ng-repeat="item in editData.client.clientEstimatedAdditionalCost| orderBy: '-season'">
+                                                            <td style="width: 85px; text-align:center">
+                                                                <a ng-if="!item.isConfirmed" href="javascript:void(0)" class="btn btn-primary btn-xs" title="Confirm" ng-click="confirmAdditionalCostMethod($event, item)"><i class="fa fa-check"></i> Comfirm</a>
+                                                                <a ng-if="@userInfo.Data.ModuleSpecialPermissionAccesses.Count(o => o.ModuleSpecialPermissionUD == Frontend.Helper.ConstantIdentifier.SPECIAL_PERMISSION_RESET_CLIENT_EST_COST) > 0 && item.isConfirmed" href="javascript:void(0)" class="btn btn-danger btn-xs" title="Reset" ng-click="resetAdditionalCostMethod($event, item)"><i class="fa fa-reply"></i> Reset</a>
+                                                            </td>
+                                                            <td style="width: 70px; text-align: center;">{{item.season}}</td>
+                                                            @* Have reset permission *@
+                                                            <td style="width: 110px;" ng-if="@userInfo.Data.ModuleSpecialPermissionAccesses.Count(o => o.ModuleSpecialPermissionUD == Frontend.Helper.ConstantIdentifier.SPECIAL_PERMISSION_RESET_CLIENT_EST_COST) > 0">
+                                                                <input ng-readonly="item.isConfirmed" class="form-control" style="text-align: right" avs-number-2 type="text" ng-model="item.interestCostPercent" ng-decimal="4">
+                                                            </td>
+                                                            <td style="width: 90px;" ng-if="@userInfo.Data.ModuleSpecialPermissionAccesses.Count(o => o.ModuleSpecialPermissionUD == Frontend.Helper.ConstantIdentifier.SPECIAL_PERMISSION_RESET_CLIENT_EST_COST) > 0">
+                                                                <input ng-readonly="item.isConfirmed" class="form-control" style="text-align: right" avs-number-2 type="text" ng-model="item.lcCostPercent" ng-decimal="4">
+                                                            </td>
+                                                            @* Haven't reset permission *@
+                                                            <td style="width: 110px;" ng-if="@userInfo.Data.ModuleSpecialPermissionAccesses.Count(o => o.ModuleSpecialPermissionUD == Frontend.Helper.ConstantIdentifier.SPECIAL_PERMISSION_RESET_CLIENT_EST_COST) <= 0">
+                                                                <span class="form-control">{{item.interestCostPercent | number:4}}</span>
+                                                            </td>
+                                                            <td style="width: 90px;" ng-if="@userInfo.Data.ModuleSpecialPermissionAccesses.Count(o => o.ModuleSpecialPermissionUD == Frontend.Helper.ConstantIdentifier.SPECIAL_PERMISSION_RESET_CLIENT_EST_COST) <= 0">
+                                                                <span class="form-control">{{item.lcCostPercent | number:4}}</span>
+                                                            </td>
+
+                                                            <td style="width: 125px;">
+                                                                <input ng-readonly="item.isConfirmed" class="form-control" style="text-align: right" avs-currency-2 ng-currency-symbol="€" type="text" ng-model="item.estTransportationPerContainerEUR">
+                                                            </td>
+                                                            <td style="width: 100px;">
+                                                                <input ng-readonly="item.isConfirmed" class="form-control" style="text-align: right" avs-number-2 type="text" ng-model="item.defaultCommissionPercent" ng-decimal="4">
+                                                            </td>
+                                                            <td style="width: 110px;">
+                                                                <input ng-readonly="item.isConfirmed" class="form-control" style="text-align: right" avs-number-2 type="text" ng-model="item.bonusPercent" ng-decimal="2">
+                                                            </td>
+                                                            <td style="width: 110px;">
+                                                                <input ng-readonly="1" class="form-control" style="text-align: right" avs-number-2 type="text" ng-model="item.damagePercent" ng-decimal="2">
+                                                            </td>
+
+                                                            <td style="width: 100px;">
+                                                                <input ng-readonly="item.isConfirmed" class="form-control" style="text-align: right" avs-currency-2 type="text" ng-model="item.inspectionCostUSD">
+                                                            </td>
+                                                            <td style="width: 100px;">
+                                                                <input ng-readonly="item.isConfirmed" class="form-control" style="text-align: right" avs-currency-2 type="text" ng-model="item.sampleCostUSD">
+                                                            </td>
+                                                            <td style="width: 110px;">
+                                                                <input ng-readonly="item.isConfirmed" class="form-control" style="text-align: right" avs-currency-2 type="text" ng-model="item.sparepartCostUSD">
+                                                            </td>
+
+                                                            <td style="width: 140px;">
+                                                                <a ng-if="item.confirmedBy" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.confirmedBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                                    <i class="fa fa-user"></i> {{item.confirmNM}}
+                                                                </a>
+                                                            </td>
+                                                            <td>&nbsp;</td>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane" id="hb12">
+                                <div class="row">
+                                    <div class="col-sm-12 m-bottom-15">
+                                        <div id="contactPerson" class="tilsoft-table-wrapper">
+                                            <div class="tilsoft-table">
+                                                <div class="tilsoft-table-header" style="width: 1640px; ">
+                                                    <div style="width: 40px;"></div>
+                                                    <div style="width: 60px;">Select</div>
+                                                    <div style="width: 100px" class="sorting">Type</div>
+                                                    <div style="width: 200px" class="sorting">Name</div>
+                                                    <div style="width: 300px" class="sorting">Detail</div>
+                                                    <div style="width: 150px" class="sorting">Who to Pay</div>
+                                                    <div style="width: 300px" class="sorting">Remark</div>
+                                                    <div style="width: 250px" class="sorting">File Attach</div>
+                                                    <div>&nbsp;Tracking</div>
+                                                </div>
+                                                <div class="tilsoft-table-body" style="width: 1640px; height: auto; max-height: 450px;">
+                                                    <table>
+                                                        <tr ng-repeat="item in editData.client.clientAdditionalConditionDTO">
+                                                            <td style="width:39px; vertical-align:middle; text-align:center">
+                                                                {{$index+1}}
+                                                            </td>
+                                                            <td style="width: 60px; text-align:center">
+                                                                <input type="checkbox" ng-model="item.isSelected" />
+                                                            </td>
+                                                            <td style="width: 100px; text-align: center;">{{item.additionalConditionTypeNM}}</td>
+                                                            <td style="width: 200px;">
+                                                                <label ng-if="item.activeFactory==true" style="color:green">{{item.additionalConditionNM}}</label>
+                                                                <label ng-if="item.activeFactory==false || item.activeFactory==null">{{item.additionalConditionNM}}</label>
+                                                            </td>
+                                                            <td style="width: 300px;">
+                                                                <label ng-if="item.activeFactory==true" style="color:green">{{item.remark}}</label>
+                                                                <label ng-if="item.activeFactory==false || item.activeFactory==null">{{item.remark}}</label>
+                                                            </td>
+                                                            <td style="width: 150px;">
+                                                                <select ng-if="item.whoToPay==true || item.typeWhoToPayID != null" ng-model="item.typeWhoToPayID " ng-options="type.clientAdditionalConditionTypeID as type.clientAdditionalConditionTypeNM for type in clientAdditionalConditionTypeDTO" name="typeWhoToPayID" class="form-control">
+                                                                    <option value=""></option>
+                                                                </select>
+                                                            </td>
+                                                            <td style="width: 300px;">
+                                                                <input type="text" ng-model="item.remarkClient" />
+                                                            </td>
+                                                            <td style="width: 250px;">
+                                                                @Html.Partial("~/Views/Shared/_Controls/_FileUploadBox.cshtml", new Frontend.Models.FileUploadViewModel() { ControlID = "item.clientAdditionalConditionID", URLBinding = "item.attachFileURL", FileName = "item.attachFileFriendlyName", JSOnChangeHandler = "changeAttachFile", JSONRemoveHandler = "removeAttachFile" })
+                                                            </td>
+                                                            <td>
+                                                                Selected by:<a ng-if="item.isSelected==true">{{item.updateName1}}</a> | <a ng-if="item.isSelected==true">{{item.updatedCheckDate}}</a>
+                                                                <br />
+                                                                UnSelected by:<a ng-if="item.isSelected==false && item.updatedUnCheckDate!=null"> {{item.updateName2}}</a> | <a ng-if="item.isSelected==false && item.updateName2!=null"> {{item.updatedUnCheckDate}}</a>
+                                                                <br />
+                                                                Updated by: <a>{{item.updateName3}}</a> | <a>{{item.updatedDate}}</a>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-col-12 tab-pane" id="hb13">
+                                <div id="card-section" class="well-sm col-sm-12" style="background: #fff;">
+                                    <div>
+                                        <div class="widget-body">
+                                            <a href="javascript:void(0)" class="btn btn-primary" ng-click="event.addCard()"><i class="fa fa-plus"></i> Add New Business Card</a>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="widget-body">
+                                            <div id="searchResult" class="tilsoft-table-wrapper">
+                                                <div class="row image-wrapper" style="width: auto;border:1px solid #ddd;">
+                                                    <section ng-repeat="item in editData.client.clientBusinessCardDTO | orderBy: '-updatedDate'" class="col-sm-6">
+                                                        <div class="row">
+                                                            <p style="margin: 15px 0px 0px 0px;height:100px;padding:10px;color:#000;text-align:left;font-size:12px;overflow:hidden;">
+                                                                <strong>Info: </strong>{{item.description}}
+                                                                <br />
+                                                                <span>
+                                                                    <strong>Remark: </strong>{{item.remark}}
+                                                                </span>
+                                                                <br />
+                                                                <strong>Name: </strong>
+                                                                <a ng-if="item.controllerID > 0" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.controllerID}}" dat data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                                    <i class="fa fa-user"></i>  {{item.controllerName}}
+                                                                </a>
+                                                                <a ng-if="item.otherName != null && item.controllerID == null">
+                                                                    <i class="fa fa-user"></i>  {{item.otherName}}
+                                                                </a>
+                                                            </p>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div style="padding: 10px;" class="col-sm-6">
+                                                                <a data-featherlight="image" href="{{item.frontFileLocation}}" class="input-group" style="display:block;">
+                                                                    <div class="img m-bottom-15" style="background: url('{{item.frontThumbnailLocation}}') center center no-repeat;background-size:100%;"></div>
+                                                                </a>
+                                                            </div>
+                                                            <div style="padding: 10px;" class="col-sm-6">
+                                                                <a data-featherlight="image" href="{{item.behindFileLocation}}" class="input-group" style="display:block;">
+                                                                    <div class="img m-bottom-15" style="background: url('{{item.behindThumbnailLocation}}') center center no-repeat;background-size:100%;"></div>
+                                                                </a>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row" style="padding:10px">
+                                                            <a title="Change" ng-click="event.editCard(item)" class="btn btn-default btn-sm"><i class="fa fa-folder-open-o"></i> Change</a>
+                                                            <a title="Remove" ng-click="event.removeCard(item)" class="btn btn-default btn-sm"><i class="fa fa-times danger"></i> <span class="text-danger">Remove</span></a>
+                                                        </div>
+                                                    </section>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!--Business Card Form-->
+                            <div id="cardForm" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+                                <div class="modal-dialog modal-lg">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                                                &times;
+                                            </button>
+                                            <h4 class="modal-title" id="myModalLabel">Business Card</h4>
+                                        </div>
+                                        <div class="modal-body no-padding">
+                                            <div class="smart-form">
+                                                <fieldset>
+                                                    <section class="col col-6">
+                                                        <label class="label">Preview Image</label>
+                                                        <div class="input" style="text-align: center;">
+                                                            <div style="width: 100%; border: solid 1px #ddd; vertical-align: central">
+                                                                @*<img ng-if="currentCard.frontFileLocation" style="width: 100%; display:block;" class="background-size:100%;" ng-src="{{currentCard.frontFileLocation}}">*@
+                                                                <a data-featherlight="image" href="{{currentCard.frontFileLocation}}" class="input-group" style="display:block;">
+                                                                    <div class="img" style="background: url('{{currentCard.frontThumbnailLocation}}') center center no-repeat;background-size:100%;"></div>
+                                                                </a>
+                                                            </div>
+                                                            <br />
+                                                            <a ng-click="event.addPreviewCardImage(1)" class="btn btn-primary btn-xs font-11" href="javascript:void(0);"><i class="fa fa-pencil"></i> Change</a>
+                                                        </div>
+                                                    </section>
+                                                    <section class="col col-6">
+                                                        <label class="label">&nbsp;</label>
+                                                        <div class="input" style="text-align: center;">
+                                                            <div style="width: 100%; border: solid 1px #ddd;vertical-align:central">
+                                                                @*<img ng-if="currentCard.behindFileLocation" style="width: 100%; display:block;" class="background-size:100%;" ng-src="{{currentCard.behindFileLocation}}">*@
+                                                                <a data-featherlight="image" href="{{currentCard.behindFileLocation}}" class="input-group" style="display:block;">
+                                                                    <div class="img" style="background: url('{{currentCard.behindThumbnailLocation}}') center center no-repeat;background-size:100%;"></div>
+                                                                </a>
+                                                            </div>
+                                                            <br />
+                                                            <a ng-click="event.addPreviewCardImage(2)" class="btn btn-primary btn-xs font-11" href="javascript:void(0);"><i class="fa fa-pencil"></i> Change</a>
+                                                        </div>
+                                                    </section>
+                                                    <section class="col col-6">
+                                                        <label class="label">Info Description</label>
+                                                        <label class="textarea">
+                                                            <i class="icon-append fa fa-comment"></i>
+                                                            <textarea class="form-control" ng-model="currentCard.description" rows="3" style="padding:5px"></textarea>
+                                                        </label>
+                                                    </section>
+                                                    <section class="col col-6">
+                                                        <label class="label">Remark</label>
+                                                        <label class="textarea">
+                                                            <i class="icon-append fa fa-comment"></i>
+                                                            <textarea class="form-control" ng-model="currentCard.remark" rows="3" style="padding:5px"></textarea>
+                                                        </label>
+                                                    </section>
+                                                    <section class="col col-6">
+                                                        <label class="label">Name</label>
+                                                        <lable class="select">
+                                                            <select ng-model="currentCard.controllerID" ng-options="user.userID as (user.employeeNM + ' ('+user.internalCompanyNM+')') for user in users | orderBy : 'employeeNM'" ng-change="event.changeController(currentCard.controllerID)">
+                                                                <option value="">No Account</option>
+                                                            </select>
+                                                        </lable>
+                                                    </section>
+                                                    <section class="col col-6">
+                                                        <label class="label">Other Name</label>
+                                                        <lable class="input" ng-if="currentCard.controllerID > 0 ">
+                                                            <input readonly type="text" />
+                                                        </lable >
+                                                        <lable class="input" ng-if="currentCard.controllerID == 0 || currentCard.controllerID==null">
+                                                            <input  type="text" ng-model="currentCard.otherName" />
+                                                        </lable>
+                                                    </section>
+                                                </fieldset>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-primary" ng-click="event.updateCard()">
+                                                OK
+                                            </button>
+                                            <button type="button" class="btn btn-default" data-dismiss="modal">
+                                                Cancel
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </article>
+    </div>
+</form>
+
+
+<div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="frmAdditionalCost" class="modal fade" style="display: none;" data-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="padding: 5px;">
+                <button style="margin-top: 2px; margin-right: 5px;" aria-hidden="true" data-dismiss="modal" class="close" type="button">
+                    ×
+                </button>
+                <h4 id="myModalLabel" class="modal-title"><i class="fa fa-cog"></i> Add new Estimated additional Cost </h4>
+            </div>
+            <div class="modal-body no-padding">
+                <div class="smart-form">
+                    <fieldset>
+                        <fieldset>
+                            <div class="row">
+                                <section class="col col-6">
+                                    <div ng-show="dupSeason==0">
+                                        <label class="label">Season</label>
+                                    </div>
+                                    <div ng-show="dupSeason==1">
+                                        <label style="color:red">Session had already exists</label>
+                                    </div>
+
+                                    <select ng-change="checkDuplicateSeason(additionalCostTemp.season)" class="form-control search-filter" style="width: 100%" ng-model="additionalCostTemp.season" ng-options="season.seasonValue as season.seasonText for season in editData.seasons">
+                                        <option value=""></option>
+                                    </select>
+                                </section>
+                            </div>
+                            <div class="row">
+                                <section class="col col-3">
+                                    <label class="label">% Interest Cost</label>
+                                    <label class="input">
+                                        <input avs-number-2 style="text-align: right" ng-model="additionalCostTemp.interestCostPercent" ng-decimal="4" type="text" />
+                                    </label>
+                                </section>
+                                <section class="col col-3">
+                                    <label class="label">% LC Cost</label>
+                                    <label class="input">
+                                        <input avs-number-2 style="text-align: right" ng-model="additionalCostTemp.lcCostPercent" ng-decimal="4" type="text" />
+                                    </label>
+                                </section>
+                                <section class="col col-3">
+                                    <label class="label">Testing Cost $</label>
+                                    <label class="input">
+                                        <input avs-currency-2 style="text-align: right" ng-model="additionalCostTemp.inspectionCostUSD" type="text" />
+                                    </label>
+                                </section>
+                                <section class="col col-3">
+                                    <label class="label">Sample Cost $</label>
+                                    <label class="input">
+                                        <input avs-currency-2 style="text-align: right" ng-model="additionalCostTemp.sampleCostUSD" type="text" />
+                                    </label>
+                                </section>
+                                <section class="col col-3">
+                                    <label class="label">Sparepart Cost $</label>
+                                    <label class="input">
+                                        <input avs-currency-2 style="text-align: right" ng-model="additionalCostTemp.sparepartCostUSD" type="text" />
+                                    </label>
+                                </section>
+                            </div>
+                        </fieldset>
+                    </fieldset>
+                </div>
+            </div>
+            <div class="modal-footer" style="padding: 5px;">
+                <a ng-click="addAdditionalCostMethod($event, additionalCostTemp)" href="javascript:void(0);" class="btn btn-default btn-sm"><i class="fa fa-plus"></i> Add </a>
+                <a href="javascript:void(0);" class="btn btn-default btn-sm" data-dismiss="modal"><i class="fa fa-reply"></i> Close</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section pagepopup
+{
+}
+
+@section FormAction {
+<ul id="sparks">
+    <li class="sparks-info">
+        <a href="@Url.Action("Index", "Client")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="#" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="update($event)"><i class="fa fa-save"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0)" class="btn btn-default" title="Print CIS" ng-click="event.printCIS()"><i class="fa fa-print"></i></a>
+    </li>
+    @if (!string.IsNullOrEmpty(userManualUrl))
+    {
+        <li class="sparks-info">
+            <a target="_blank" href="@userManualUrl" class="btn btn-default" title="Help"><i class="fa fa-info"></i></a>
+        </li>
+    }
+</ul>
+}
+
+@section pagejs {
+    <script src="~/Views/Client/service.js"></script>
+    <script type="text/javascript">        
+        if (@ViewBag.ID !== 0) {
+            $(document).ready(function () {
+                $('a[data-toggle="tab"]').on('show.bs.tab', function (e) {
+                    localStorage.setItem('activeTab', $(e.target).attr('href'));
+                });
+                var activeTab = localStorage.getItem('activeTab');
+                if (activeTab) {
+                    $('.nav-tabs a[href="' + activeTab + '"]').tab('show');
+                }
+            });
+        }
+    </script>
+    <script type="text/javascript">
+
+        clientService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/client/';
+        clientService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+        var clientApp = angular.module('tilsoftApp', ['furnindo-directive', 'avs-directives']);
+        clientApp.controller('tilsoftController', ['$scope', function ($scope) {
+            $scope.editData = null;
+            $scope.contractTypes = null;
+            $scope.clientGetDataAdditionalConditionDTO = [];
+            $scope.clientAdditionalConditionDTO = [];
+            $scope.currentCard = [];
+            $scope.clientGIC = {
+                clientGICComment: null,
+                lastClientGICComment: null
+            };
+            $scope.checkEdit = false;
+            //$scope.contractTypes = [
+            //    { 'id': 1, 'name': 'Contract' },
+            //    { 'id': 2, 'name': 'Client Specification' },
+            //    { 'id': 3, 'name': 'Other' },
+            //    // add three option: 'Supplier profile', 'Offer', 'Pre-order' - 21 FEB 2018
+            //    { 'id': 4, 'name': 'Supplier profile' },
+            //    { 'id': 5, 'name': 'Offer' },
+            //    { 'id': 6, 'name': 'Pre-order' }
+            //    // add three option: 'Supplier profile', 'Offer', 'Pre-order' - 21 FEB 2018
+            //];
+            
+            $scope.GICItem = {
+                clientContactHistoryID: null,
+                communicationContent: null
+            };
+            $scope.gridHandler = {
+                loadMore: function () {
+                    if ($scope.pageIndex < $scope.totalPage) {
+                        $scope.pageIndex++;
+                        dataService.searchFilter.pageIndex = $scope.pageIndex;
+                        $scope.event.search(true);
+                    }
+                },
+                sort: function (sortedBy, sortedDirection) {
+                    $scope.data = [];
+                    dataService.searchFilter.sortedDirection = sortedDirection;
+                    $scope.pageIndex = 1;
+                    dataService.searchFilter.pageIndex = scope.pageIndex;
+                    dataService.searchFilter.sortedBy = sortedBy;
+                    $scope.event.search();
+                },
+                isTriggered: false
+            };
+
+            $scope.editGIC = function (item) {                
+                $scope.GICItem = {
+                    clientContactHistoryID: item.clientContactHistoryID,
+                    communicationContent: item.communicationContent
+                };
+                item.isEditItem = true;
+            };
+
+            $scope.checkEditDate = function (item) {
+                var today = new Date;
+                var day = ("0" + today.getDate()).slice(-2);
+                var month = ("0" + (today.getMonth() + 1)).slice(-2);
+                var year = today.getFullYear();
+                var todayFormated = day + '/' + month + '/' + year;
+                if (todayFormated === item.contactDate) {
+                    return true;
+                }
+                else {
+                    return false;
+                }
+            };
+
+            var clientEstimatedAdditionalCostID = -1;
+
+            $scope.additionalCostTemp = {
+                clientEstimatedAdditionalCostID: clientEstimatedAdditionalCostID,
+                ClientID: @ViewBag.ID,
+                season : null,
+                interestCostPercent : null,
+                lcCostPercent: null,
+                inspectionCostUSD : null,
+                sampleCostUSD: null,
+                sparepartCostUSD: null
+            };
+
+            $scope.dupSeason = 0;
+
+            $scope.YesNoOption = ["YES", "NO"];
+
+            $scope.filterAccountManager = function () {
+                return function (item) {
+                    if (item.companyID == '4' || item.isAccountManager == '1') {
+                        return true;
+                    }
+                    return false;
+                };
+            };
+           
+            $scope.getVNSale = function(){
+                var result = [];
+                if ($scope.editData===null || $scope.editData.salers===null) return result;
+                angular.forEach($scope.editData.salers, function (item) {
+                    if (item.companyID !== 4) {
+                        result.push(item);
+                    }
+                });
+                return result;
+            }
+            $scope.load = function()
+            {
+                clientService.load(@ViewBag.ID,
+                    function (data) {
+                        $scope.editData = data.data;
+                        $scope.contractTypes = data.data.clientDocumentTypeDTOs;
+                        $scope.clientGetDataAdditionalConditionDTO = data.data.clientGetDataAdditionalConditionDTO;
+                        $scope.users = data.data.usersDTO;
+                        $scope.clientAdditionalConditionTypeDTO = data.data.clientAdditionalConditionTypeDTO;
+                        if ($scope.editData.client.clientContactHistories && $scope.editData.client.clientContactHistories.length > 0) {
+                            console.log($scope.editData.client.clientContactHistories);
+
+                            $scope.clientGIC.clientGICComment = $scope.editData.client.clientContactHistories[0].communicationContent;
+                            $scope.clientGIC.lastClientGICComment = $scope.editData.client.clientContactHistories[0].communicationContent;
+                        }
+                        
+                        var contractTypeOptionDTO = $scope.contractTypes.find(o=>o.clientDocumentTypeID === 1);
+                        if(contractTypeOptionDTO){
+                            $scope.contractTypes.splice($scope.contractTypes.indexOf(contractTypeOptionDTO), 1);
+                        }
+
+                        if($scope.editData.client.website){
+                            var website = $scope.editData.client.website;
+                            website = website.replace("http://", "");
+                            website = website.replace("https://", "");
+                        }
+                        $scope.editData.client.website = website;
+
+                        $scope.$apply();
+
+                        jQuery('#content').show();
+                        // monitor changes
+                        $scope.$watch('client', function() {
+                            jQuery('#changeNotification').html('<i class="fa fa-save blink_me"></i>');
+                        });
+                    },
+                    function (error) {
+                        jsHelper.showMessage('warning', error);
+
+                        $scope.editData = null;
+                        $scope.$apply();
+                    }
+                );
+            }
+        $scope.clickClientAdditionalCondition = function () {
+            debugger;
+            clientService.getDataClientAdditionalCondition(
+                function (data) {
+                    debugger;
+                    $scope.clientGetDataAdditionalConditionDTO = data.data.clientGetDataAdditionalConditionDTO;
+                    for (var i = 0; i < $scope.clientGetDataAdditionalConditionDTO.length; i++) {
+                        var clientGetDataAdditionalConditionDTO = $scope.clientGetDataAdditionalConditionDTO[i];
+                        var a=0;
+                        for (var j = 0; j < $scope.editData.client.clientAdditionalConditionDTO.length; j++) {
+                            var clientAdditionalConditionDTO = $scope.editData.client.clientAdditionalConditionDTO[j];
+                            if (clientGetDataAdditionalConditionDTO.additionalConditionID == clientAdditionalConditionDTO.additionalConditionID) {
+                                a = 1;
+                            }
+                        }
+                        if (a == 0) {
+                                $scope.editData.client.clientAdditionalConditionDTO.push({
+                                    clientAdditionalConditionID: $scope.method.getNewID(),
+                                    isSelected: false,
+                                    additionalConditionID: clientGetDataAdditionalConditionDTO.additionalConditionID,
+                                    additionalConditionNM: clientGetDataAdditionalConditionDTO.additionalConditionNM,
+                                    additionalConditionTypeNM: clientGetDataAdditionalConditionDTO.additionalConditionTypeNM,
+                                    remark: clientGetDataAdditionalConditionDTO.remark,
+                                    activeFactory: clientGetDataAdditionalConditionDTO.activeFactory,
+                                    whoToPay: clientGetDataAdditionalConditionDTO.whoToPay
+                                });
+                        }
+                    }
+                    $scope.$apply();
+                    },
+                function (error) {
+                    jsHelper.showMessage('warning', error);
+                    $scope.clientGetDataAdditionalConditionDTO = null;
+                }
+            );
+        }
+
+        $scope.addAdditionalCost = function ($event) {
+                $scope.dupSeason = 0;
+                $scope.additionalCostTemp = {
+                    clientEstimatedAdditionalCostID: clientEstimatedAdditionalCostID,
+                    ClientID: @ViewBag.ID,
+                    season : null,
+                    interestCostPercent : null,
+                    lcCostPercent : null,
+                    inspectionCostUSD : null,
+                    sampleCostUSD: null,
+                    sparepartCostUSD: null
+                };
+                jQuery('#frmAdditionalCost').modal();
+            }
+
+            $scope.addAdditionalCostMethod = function ($event, additionalCostTemp) {
+                $event.preventDefault();
+
+                if ($scope.additionalCostTemp.season != null) {
+                    if ($scope.dupSeason == 0) {
+                        var arr = $scope.editData.client.clientEstimatedAdditionalCost.filter(function (o) { return o.clientEstimatedAdditionalCostID < 0 });
+                        max_id = -1;
+                        if (arr.length > 0) {
+                            arr.sort(function (a, b) { return a.clientEstimatedAdditionalCostID - b.clientEstimatedAdditionalCostID });
+                            max_id = arr[0].clientEstimatedAdditionalCostID - 1;
+                        }
+                        $scope.editData.client.clientEstimatedAdditionalCost.push({
+                            clientEstimatedAdditionalCostID: additionalCostTemp.clientEstimatedAdditionalCostID,
+                            ClientID: additionalCostTemp.ClientID,
+                            season: additionalCostTemp.season,
+                            interestCostPercent: additionalCostTemp.interestCostPercent,
+                            lcCostPercent: additionalCostTemp.lcCostPercent,
+                            inspectionCostUSD: additionalCostTemp.inspectionCostUSD,
+                            sampleCostUSD: additionalCostTemp.sampleCostUSD,
+                            sparepartCostUSD: additionalCostTemp.sparepartCostUSD
+                        });
+                        clientEstimatedAdditionalCostID--;
+                        jQuery('#frmAdditionalCost').modal('hide');
+                    }
+                }
+            }
+
+            $scope.removeAdditionalCostMethod = function ($event, clientEstimatedAdditionalCostID) {
+                $event.preventDefault();
+
+                isExist = false;
+                for (j = 0; j < $scope.editData.client.clientEstimatedAdditionalCost.length; j++) {
+                    if ($scope.editData.client.clientEstimatedAdditionalCost[j].clientEstimatedAdditionalCostID == clientEstimatedAdditionalCostID) {
+                        isExist = true;
+                        break;
+                    }
+                }
+                if (isExist) {
+                    $scope.editData.client.clientEstimatedAdditionalCost.splice(j, 1);
+                }
+            }
+
+            $scope.confirmAdditionalCostMethod = function ($event, AdditionalCostMethod) {
+                $event.preventDefault();
+
+                if (confirm('Are you sure ?')) {
+                    AdditionalCostMethod.isConfirmed = true;
+                    AdditionalCostMethod.IsChange = true;
+                }
+            }
+
+            $scope.resetAdditionalCostMethod = function ($event, AdditionalCostMethod) {
+                if (confirm('Are you sure ?')) {
+                    AdditionalCostMethod.isConfirmed = false;
+                }
+            }
+
+
+            $scope.checkDuplicateSeason = function (season) {
+                var keepGoing = true;
+                angular.forEach($scope.editData.client.clientEstimatedAdditionalCost, function (aItem) {
+                    if (keepGoing) {
+                        if (season == aItem.season) {
+                            $scope.dupSeason = 1;
+                            keepGoing = false;
+                        }
+                        else {
+                            $scope.dupSeason = 0;
+                        }
+                    }
+                });
+            }
+
+        $scope.update = function ($event) {
+            //$event.preventDefault();
+
+                $scope.editData.client.clientContacts = $scope.editData.client.clientContacts.sort(function (a, b) { return b.isDefault - a.isDefault; }).sort(function (a, b) { return a.displayIndex - b.displayIndex; });
+                var i = 2;
+                var id = 0;
+                angular.forEach($scope.editData.client.clientContacts, function (sItem) {
+                    if (sItem.isDefault) {
+                        sItem.displayIndex = 1;
+                        id = sItem.clientContactID;
+                    }
+                    if (sItem.clientContactID !== id) {
+                        sItem.displayIndex = i;
+                        i++;
+                    }
+            });
+
+            if ($scope.clientGIC.clientGICComment !== $scope.clientGIC.lastClientGICComment) {
+                $scope.editData.client.clientContactHistories.push({
+                    clientContactHistoryID: $scope.method.getNewID(),
+                    hasChanged: true,
+                    communicationContent: $scope.clientGIC.clientGICComment
+                });
+            }
+
+                if($scope.editForm.$valid)
+                {
+                    if($scope.editData.client.website){
+                        var website = $scope.editData.client.website;
+                        website = website.replace("http://", "");
+                        website = website.replace("https://", "");
+                    }
+                    $scope.editData.client.website = website;
+                    var count = 0;
+                    if ($scope.editData.client.agentID > 0) {
+                        angular.forEach($scope.editData.client.clientEstimatedAdditionalCost, function (item) {
+                            if (item.defaultCommissionPercent == null && item.season == jsHelper.getCurrentSeason()) {
+                                jsHelper.showMessage('warning', 'This client have Agent, please reload page and input % Default Commission');
+                                count = count + 1;
+                            }
+                        });
+                    }
+                    else {
+                        angular.forEach($scope.editData.client.clientEstimatedAdditionalCost, function (item) {
+                            if (item.defaultCommissionPercent != null && item.defaultCommissionPercent != '') {
+                                count = count + 1;
+                            }
+                        });
+                        if (count > 0) {
+                            jsHelper.showMessage('warning', "This client haven't Agent, please reload page and select Agent before input % Default Commission");
+                        }
+                    }                    
+                    if (count == 0) {
+                        clientService.update(@ViewBag.ID, $scope.editData.client,
+                            function (data) {
+                            jsHelper.processMessage(data.message);
+                            if(data.message.type == 0) {
+                                window.location = '@Url.Action("Edit", "Client", new  {id = UrlParameter.Optional})/' + data.data.clientID;
+                            }
+                        },
+                            function (error) {
+                                jsHelper.showMessage('warning', error);
+                            }
+                        );
+                    }
+                }
+                else
+                {
+                    jsHelper.showMessage('warning', '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED');
+                }
+            }
+
+
+            $scope.delete = function ($event) {
+                $event.preventDefault();
+
+                if (confirm('Are you sure ?')) {
+                    clientService.delete(@ViewBag.ID,
+                    function (data) {
+                        jsHelper.processMessage(data.message);
+                        if(data.message.type == 0) {
+                            window.location = '@Url.Action("Index", "Client")';
+                        }
+                    },
+                    function (error) {
+                        jsHelper.showMessage('warning', error);
+                    }
+                );
+                }
+             }            
+            $scope.addContract = function($event){
+                $event.preventDefault();
+
+                var arr = $scope.editData.client.clientContracts.filter(function(o){ return o.clientContractID < 0});
+                max_id = -1;
+
+                if (arr.length > 0)
+                {
+                    arr.sort(function(a,b){return a.clientContractID - b.clientContractID});
+                    max_id = arr[0].clientContractID - 1;
+                }
+                $scope.editData.client.clientContracts.push({
+                    clientContractID : max_id,
+                    contractTypeID: 1,
+                    clientContractDetails : []
+                });
+            }
+
+            $scope.addDocument = function($event){
+                $event.preventDefault();
+
+                var arr = $scope.editData.client.clientContracts.filter(function(o){ return o.clientContractID < 0});
+                max_id = -1;
+
+                if (arr.length > 0)
+                {
+                    arr.sort(function(a,b){return a.clientContractID - b.clientContractID});
+                    max_id = arr[0].clientContractID - 1;
+                }
+                $scope.editData.client.clientContracts.push({
+                    clientContractID : max_id,
+                    clientContractDetails : []
+                });
+            }
+
+            $scope.removeContract = function ($event,clientContractID) {
+                $event.preventDefault();
+
+                isExist = false;
+                for(j = 0; j< $scope.editData.client.clientContracts.length; j++) {
+                    if($scope.editData.client.clientContracts[j].clientContractID == clientContractID) {
+                        isExist = true;
+                        break;
+                    }
+                }
+                if(isExist){
+                    $scope.editData.client.clientContracts.splice(j, 1);
+                }
+            }
+
+            $scope.addContractDetail = function($event,clientContractID){
+                $event.preventDefault();
+
+                var arr_contract = $scope.editData.client.clientContracts.filter(function(o){ return o.clientContractID == clientContractID});
+                var arr_contractDetail = arr_contract[0].clientContractDetails;
+                var arr = arr_contractDetail.filter(function(o){ return o.clientContractDetailID < 0});
+                max_id = -1;
+
+                if (arr.length > 0)
+                {
+                    arr.sort(function(a,b){return a.clientContractDetailID - b.clientContractDetailID});
+                    max_id = arr[0].clientContractDetailID - 1;
+                }
+                arr_contractDetail.push({
+                    clientContractDetailID : max_id
+                });
+            }
+
+            $scope.removeContractDetail = function ($event,contractID,contractDetailID) {
+                $event.preventDefault();
+
+                var arr_contract = $scope.editData.client.clientContracts.filter(function(o){ return o.clientContractID == contractID});
+                var arr_contractDetail = arr_contract[0].clientContractDetails;
+                isExist = false;
+                for(j = 0; j< arr_contractDetail.length; j++) {
+                    if(arr_contractDetail[j].clientContractDetailID == contractDetailID) {
+                        isExist = true;
+                        break;
+                    }
+                }
+                if(isExist){
+                    arr_contractDetail.splice(j, 1);
+                }
+            }
+            $scope.index = 0
+            $scope.addContact = function($event){
+                $event.preventDefault();
+                for (var i = 0; i < $scope.editData.client.clientContacts.length; i++) {
+                    if (i === $scope.editData.client.clientContacts.length - 1) {
+                        if ($scope.editData.client.clientContacts[i].displayIndex !== null && $scope.editData.client.clientContacts[i].displayIndex !== 0) {
+                            $scope.index = $scope.editData.client.clientContacts[i].displayIndex + 1;
+                        }
+                        if ($scope.editData.client.clientContacts[i].displayIndex === null || $scope.editData.client.clientContacts[i].displayIndex === 0) {
+                            $scope.index = 1;
+                        }
+                    }
+                }
+                var arr = $scope.editData.client.clientContacts.filter(function(o){ return o.clientContactID < 0});
+                max_id = -1;
+                if (arr.length > 0)
+                {
+                    arr.sort(function(a,b){return a.clientContactID - b.clientContactID});
+                    max_id = arr[0].clientContactID - 1;
+                }
+                $scope.editData.client.clientContacts.push({
+                    clientContactID : max_id,
+                    displayIndex: $scope.index,
+                    isDefault: false
+                });
+                //$scope.$apply();
+
+                console.log($scope.editData.client.clientContacts);
+            }
+
+            $scope.removeContact = function ($event,clientContactID) {
+                $event.preventDefault();
+
+                isExist = false;
+                for(j = 0; j< $scope.editData.client.clientContacts.length; j++) {
+                    if($scope.editData.client.clientContacts[j].clientContactID == clientContactID) {
+                        isExist = true;
+                        break;
+                    }
+                }
+                if(isExist){
+                    $scope.editData.client.clientContacts.splice(j, 1);
+                }
+            }
+
+            $scope.addClientSpecialPackagingMethod = function ($event) {
+                $event.preventDefault();
+
+                var arr = $scope.editData.client.clientSpecialPackagingMethods.filter(function (o) { return o.clientSpecialPackagingMethodID < 0 });
+                max_id = -1;
+                if (arr.length > 0) {
+                    arr.sort(function (a, b) { return a.clientSpecialPackagingMethodID - b.clientSpecialPackagingMethodID });
+                    max_id = arr[0].clientSpecialPackagingMethodID - 1;
+                }
+                $scope.editData.client.clientSpecialPackagingMethods.push({
+                    clientSpecialPackagingMethodID: max_id
+                });
+            }
+
+            $scope.removeClientSpecialPackagingMethod = function ($event, clientSpecialPackagingMethodID) {
+                $event.preventDefault();
+
+                isExist = false;
+                for (j = 0; j < $scope.editData.client.clientSpecialPackagingMethods.length; j++) {
+                    if ($scope.editData.client.clientSpecialPackagingMethods[j].clientSpecialPackagingMethodID == clientSpecialPackagingMethodID) {
+                        isExist = true;
+                        break;
+                    }
+                }
+                if (isExist) {
+                    $scope.editData.client.clientSpecialPackagingMethods.splice(j, 1);
+                }
+            }
+
+            $scope.changeFile = function ($event, controlID) {
+                $event.preventDefault();
+                userFileMng.isMultiSelectActivated = false;
+                userFileMng.autoResizeImage = false;
+                userFileMng.callback = function () {
+                    scope.$apply(function () {
+                        var d = new Date();
+                        var n = d.getMilliseconds();
+
+                        if(userFileMng.selectedFiles.length > 0){
+                            console.log(userFileMng.selectedFiles[0]);
+                            var arr = scope.editData.client.clientContracts.filter(function(o){ return o.clientContractID == controlID});
+                            $(arr).each(function(){
+                                this.contractFileURL = (userFileMng.selectedFiles[0].filePath.indexOf('?') < 0) ? userFileMng.selectedFiles[0].filePath + '?' + n : userFileMng.selectedFiles[0].filePath + n;
+                                this.contractFileFriendlyName = userFileMng.selectedFiles[0].fileName;
+                                this.contractFileHasChange = true;
+                                this.newContractFile = userFileMng.selectedFiles[0].fileName;
+                            });
+                        }
+                    });
+                };
+                userFileMng.open();
+            },
+
+            $scope.removeFile = function ($event,controlID) {
+                var arr = $scope.editData.client.clientContracts.filter(function(o){ return o.clientContractID == controlID});
+                $(arr).each(function(){
+                    this.contractFileURL = '';
+                    this.contractFileFriendlyName = '';
+                    this.contractFileHasChange = true;
+                    this.newContractFile = '';
+                });
+            }
+
+
+            $scope.changeAttachFile = function ($event, controlID) {
+                $event.preventDefault();
+                userFileMng.isMultiSelectActivated = false;
+                userFileMng.autoResizeImage = false;
+                userFileMng.callback = function () {
+                    scope.$apply(function () {
+                        var d = new Date();
+                        var n = d.getMilliseconds();
+
+                        if (userFileMng.selectedFiles.length > 0) {
+                            console.log(userFileMng.selectedFiles[0]);
+                            var arr = scope.editData.client.clientAdditionalConditionDTO.filter(function (o) { return o.clientAdditionalConditionID == controlID });
+                            $(arr).each(function () {
+                                this.attachFileURL = (userFileMng.selectedFiles[0].filePath.indexOf('?') < 0) ? userFileMng.selectedFiles[0].filePath + '?' + n : userFileMng.selectedFiles[0].filePath + n;
+                                this.attachFileFriendlyName = userFileMng.selectedFiles[0].fileName;
+                                this.attachFileHasChange = true;
+                                this.newAttachFile = userFileMng.selectedFiles[0].fileName;
+                            });
+                        }
+                    });
+                };
+                userFileMng.open();
+            },
+
+                $scope.removeAttachFile = function ($event, controlID) {
+                var arr = $scope.editData.client.clientAdditionalConditionDTO.filter(function (o) { return o.clientAdditionalConditionID == controlID });
+                $(arr).each(function () {
+                    this.attachFileURL = '';
+                    this.attachFileFriendlyName = '';
+                    this.attachFileHasChange = true;
+                    this.newAttachFile = '';
+                });
+            }
+
+            $scope.changeIndexContact = function (item) {
+                //var isChecked = item.isDefault;
+                //angular.forEach($scope.editData.client.clientContacts, function (sItem) {
+                //    if (isChecked) {
+                //        if (sItem.clientContactID !== item.clientContactID) {
+                //            sItem.isDefault = false;
+                //            sItem.displayIndex = sItem.displayIndex + 1;
+                //        }
+                //        else {
+                //            sItem.displayIndex = 0;
+                //        }
+                //    }
+                //});
+
+                $scope.editData.client.clientContacts = $scope.editData.client.clientContacts.sort(function (a, b) { return a.displayIndex - b.displayIndex; });
+
+                var isChecked = item.isDefault;
+                var i = 2;
+                angular.forEach($scope.editData.client.clientContacts, function (sItem) {
+                    if (isChecked) {
+                        if (sItem.clientContactID !== item.clientContactID) {
+                            sItem.isDefault = false;
+
+                            sItem.displayIndex = i;
+                            i++;
+                        }
+                        else {
+                            sItem.displayIndex = 1;
+                        }
+                    }
+                });
+
+                //var i = 2;
+                //angular.forEach($scope.editData.client.clientContacts, function (sItem) {
+                //    if (sItem.clientContactID !== item.clientContactID) {
+                //        sItem.displayIndex = i;
+                //        i++;
+                //    }
+                //    else {
+                //        sItem.displayIndex = 1;
+                //    }
+                //});
+
+            }
+
+            $scope.upContact = function (isDefault, index) {
+            for (var i = 0; i < $scope.editData.client.clientContacts.sort(function (a, b) { return b.isDefault - b.isDefault; }).sort(function (a, b) { return a.displayIndex - b.displayIndex; }).length; i++) {
+                    //var item = $scope.editData.client.clientContacts[i];
+                    if (index === $scope.editData.client.clientContacts[i].displayIndex) {
+                        if (i > 0) {
+                            $scope.editData.client.clientContacts[i].displayIndex = $scope.editData.client.clientContacts[i].displayIndex - 1;
+                            $scope.editData.client.clientContacts[i - 1].displayIndex = $scope.editData.client.clientContacts[i - 1].displayIndex + 1;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            $scope.downContact = function (isDefault, index) {
+            for (var i = 0; i < $scope.editData.client.clientContacts.sort(function (a, b) { return b.isDefault - a.isDefault; }).sort(function (a, b) { return a.displayIndex - b.displayIndex; }).length; i++) {
+                    //var item = $scope.editData.client.clientContacts[i];
+                    if (index === $scope.editData.client.clientContacts[i].displayIndex) {
+                        if (i < $scope.editData.client.clientContacts.length) {
+                            $scope.editData.client.clientContacts[i].displayIndex = $scope.editData.client.clientContacts[i].displayIndex + 1;
+                            $scope.editData.client.clientContacts[i + 1].displayIndex = $scope.editData.client.clientContacts[i + 1].displayIndex - 1;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            $scope.event = {
+                printCIS: function(){
+                    clientService.getCIS(
+                        $scope.editData.client.clientID,
+                        function (data) {
+                            window.open('@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]' + data.data + '.xlsm');
+                        },
+                        function (error) {
+                            jsHelper.showMessage('warning', error);
+                        }
+                    );
+                },
+                changeLogo: function(){
+                    userFileMng.isMultiSelectActivated = false;
+                    userFileMng.autoResizeImage = false;
+                    userFileMng.callback = function () {
+                        scope.$apply(function () {
+                            var d = new Date();
+                            var n = d.getMilliseconds();
+
+                            if(userFileMng.selectedFiles.length > 0){
+                                scope.editData.client.newFile = userFileMng.selectedFiles[0].fileName;
+                                scope.editData.client.hasChanged = true;
+                                scope.editData.client.thumbnailLocation = (userFileMng.selectedFiles[0].filePath.indexOf('?') < 0) ? userFileMng.selectedFiles[0].filePath + '?' + n : userFileMng.selectedFiles[0].filePath + n;
+                                scope.editData.client.fileLocation = (userFileMng.selectedFiles[0].filePath.indexOf('?') < 0) ? userFileMng.selectedFiles[0].filePath + '?' + n : userFileMng.selectedFiles[0].filePath + n;
+                            }
+                        });
+                    };
+                    userFileMng.open();
+                },
+                removeLogo: function(){
+                    $scope.editData.client.newFile = '';
+                    $scope.editData.client.hasChanged = true;
+                    $scope.editData.client.thumbnailLocation = '';
+                    $scope.editData.client.fileLocation = '';
+                },
+
+                createEurofarstockAccount: function(contact){
+                    clientService.createEurofarstockAccount(
+                        contact.clientContactID,
+                        function (data) {
+                            jsHelper.processMessage(data.message);
+                            if(data.message.type == 0) {
+                                contact.eurofarstockUserName = data.data.username;
+                                contact.eurofarstockPassword = data.data.password;
+                                $scope.$apply();
+                            }
+                        },
+                        function (error) {
+                            jsHelper.showMessage('warning', error);
+                        }
+                    );
+                },
+                addPenaltyTerm: function () {
+                    $scope.editData.client.penaltyTerms.push({
+                        penaltyTermID: $scope.method.getNewID(),
+                    });
+                },
+                removePenaltyTerm: function (item) {
+                    $scope.editData.client.penaltyTerms.splice($scope.editData.client.penaltyTerms.indexOf(item), 1);
+                },
+                //
+                // BUSINESS CARD
+                //
+
+                addCard: function () {
+                    var newCard = {
+                        clientBusinessCardID: $scope.method.getNewID(),
+                        clientID: 0,
+                        frontFileUD: null,
+                        behindFileUD: null,
+                        description: null,
+                        remark: null,
+
+                        frontFriendlyName: null,
+                        frontThumbnailLocation: null,
+                        frontFileLocation: null,
+                        frontHasChange: false,
+                        frontNewFile: null,
+
+                        behindFriendlyName: null,
+                        behindThumbnailLocation: null,
+                        behindFileLocation: null,
+                        behindHasChange: false,
+                        behindNewFile: null,
+                        controllerID: null,
+                        controllerName: null,
+                        otherName:null
+
+                    };
+                    $scope.event.editCard(newCard);
+                },
+                editCard: function (item) {
+                    $scope.currentCard = JSON.parse(JSON.stringify(item));
+                    jQuery("#cardForm").modal();
+                },
+                removeCard: function (item) {
+                    if (confirm('Are you sure ?')) {
+                        $scope.editData.client.clientBusinessCardDTO.splice($scope.editData.client.clientBusinessCardDTO.indexOf(item), 1);
+                    }
+                },
+                updateCard: function () {
+                    debugger;
+                    var index = $scope.method.getCardIndex($scope.currentCard.clientBusinessCardID);
+                    if (index >= 0) {
+                        $scope.editData.client.clientBusinessCardDTO[index] = $scope.currentCard;
+                    }
+                    else {
+                        debugger;
+                        $scope.editData.client.clientBusinessCardDTO.push($scope.currentCard);
+                    }
+                    jQuery("#cardForm").modal('hide');
+
+                    $scope.method.renderCard();
+                },
+                addPreviewCardImage: function (pos) {
+                    if (pos === 1) {
+                        masterUploader.multiSelect = true;
+                        masterUploader.imageOnly = false;
+                        masterUploader.callback = function () {
+                            var scope = angular.element(jQuery('body')).scope();
+                            scope.$apply(function () {
+                                angular.forEach(masterUploader.selectedFiles, function (img) {
+                                    // TO DO LIST
+                                    scope.currentCard.frontHasChange = true;
+                                    scope.currentCard.frontThumbnailLocation = img.fileURL;
+                                    scope.currentCard.frontFileLocation = img.fileURL;
+                                    scope.currentCard.frontNewFile = img.filename;
+                                }, null);
+                            });
+                        };
+                        masterUploader.open();
+                    }
+                    if (pos === 2) {
+                        masterUploader.multiSelect = true;
+                        masterUploader.imageOnly = false;
+                        masterUploader.callback = function () {
+                            var scope = angular.element(jQuery('body')).scope();
+                            scope.$apply(function () {
+                                angular.forEach(masterUploader.selectedFiles, function (img) {
+                                    // TO DO LIST
+                                    scope.currentCard.behindHasChange = true;
+                                    scope.currentCard.behindThumbnailLocation = img.fileURL;
+                                    scope.currentCard.behindFileLocation = img.fileURL;
+                                    scope.currentCard.behindNewFile = img.filename;
+                                }, null);
+                            });
+                        };
+                        masterUploader.open();
+                    }
+                },
+
+                changeController: function (controllerID) {
+                    if ($scope.currentCard.controllerID) {
+                        angular.forEach($scope.users, function (item) {
+                            if (item.userID == $scope.currentCard.controllerID) {
+                                $scope.currentCard.controllerName = item.employeeNM + ' (' + item.internalCompanyNM + ')';
+                            }
+                        });
+                    }
+                    else {
+                        $scope.currentCard.controllerName = '';
+                    }
+                },                
+            }
+
+            $scope.newID = -1;
+            $scope.method = {
+                getNewID: function () {
+                    $scope.newID--;
+                    return $scope.newID;
+                },
+                //Card
+                getCardIndex: function (id) {
+                    debugger;
+                    var isExist = false;
+                    var cardIndex = 0;
+                    if ($scope.editData.client.clientBusinessCardDTO !== null) {
+                        for (cardIndex; cardIndex < $scope.editData.client.clientBusinessCardDTO.length; cardIndex++) {
+                            if ($scope.editData.client.clientBusinessCardDTO[cardIndex].clientBusinessCardID === id) {
+                                isExist = true;
+                                break;
+                            }
+                        }
+
+                        if (!isExist) {
+                            return -1;
+                        }
+                        else {
+                            return cardIndex;
+                        }
+                    }
+                    else {
+                        return -1;
+                    }
+                },
+                renderCard: function () {
+                    $scope.cards = [];
+                    angular.forEach($scope.editData.client.clientBusinessCardDTO, function (value, key) {
+                        if ($scope.cards.indexOf(value.draw) < 0) {
+                            $scope.cards.push(value.draw);
+                        }
+                    }, null);
+                }
+            };
+
+
+            //load form
+            $scope.load();
+
+        }]);
+
+    </script>
+}

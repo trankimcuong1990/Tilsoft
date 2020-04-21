@@ -1,0 +1,182 @@
+﻿@{
+    if (ViewBag.ID == 0)
+    {
+        ViewBag.Title = "Create New Client Group";
+    }
+    else
+    {
+        ViewBag.Title = "Edit Client Group";
+    }
+
+    ViewBag.Module = "ClientGroup";
+}
+
+<div class="row">
+    <article class="col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-0" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>ClientGroup Information</h2>
+            </header>
+            <div>
+                <div class="jarviswidget-editbox"></div>
+
+                <div class="widget-body">
+                    <form name="editForm">
+                        <fieldset>
+                            <div class="form-group">
+                                <label>ClientGroup Name</label>
+                                <input class="form-control" type="text" name="clientGroupNM" ng-model="clientGroup.clientGroupNM" required>
+
+                                <span class="help-block" ng-show="editForm.clientGroupNM.$error.required"><i class="fa fa-warning"></i> ClientGroup Name is required!</span>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Remark</label>
+                                <input class="form-control" type="text" name="remark" ng-model="clientGroup.remark" required>
+
+                                <span class="help-block" ng-show="editForm.remark.$error.required"><i class="fa fa-warning"></i> Remark is required!</span>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Creator Name</label>
+                                <input class="form-control" type="text" name="creatorName" ng-model="clientGroup.creatorName" required>
+
+                                <span class="help-block" ng-show="editForm.creatorName.$error.required"><i class="fa fa-warning"></i> Creator Name Code is required!</span>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Created Date</label>
+                                <input class="form-control" type="text" name="createdDate" ng-model="clientGroup.createdDate" required>
+
+                                <span class="help-block" ng-show="editForm.createdDate.$error.required"><i class="fa fa-warning"></i> Created Date is required!</span>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Updator Name</label>
+                                <input class="form-control" type="text" name="updatorName" ng-model="clientGroup.updatorName" required>
+
+                                <span class="help-block" ng-show="editForm.updatorName.$error.required"><i class="fa fa-warning"></i> Updator Name is required!</span>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Updated Date</label>
+                                <input class="form-control" type="text" name="updatedDate" ng-model="clientGroup.updatedDate" required>
+
+                                <span class="help-block" ng-show="editForm.updatedDate.$error.required"><i class="fa fa-warning"></i> Updated Date is required!</span>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Concurrency Flag</label>
+                                <input class="form-control" type="text" name="concurrencyFlag" ng-model="clientGroup.concurrencyFlag" required>
+
+                                <span class="help-block" ng-show="editForm.concurrencyFlag.$error.required"><i class="fa fa-warning"></i> Concurrency Flag is required!</span>
+                            </div>
+
+                        </fieldset>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="#" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="update($event)"><i class="fa fa-save"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "ClientGroup")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default@(ViewBag.ID==0?" disabled":"") @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="Delete" style="color: #ff0000;" ng-click="delete($event)"><i class="fa fa-times"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default disabled" title="Print"><i class="fa fa-print"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default disabled" title="Approve"><i class="fa fa-thumbs-o-up"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default disabled" title="Reset Approval status"><i class="fa fa-thumbs-o-down"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script src="~/Angular/app/clientGroup/service.js"></script>
+    <script type="text/javascript">
+        clientGroupService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/clientgroup/';
+        clientGroupService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+        var clientGroupApp = angular.module('tilsoftApp', []);
+        clientGroupApp.controller('tilsoftController', ['$scope', function ($scope) {
+            $scope.clientGroup = null;
+            clientGroupService.load(
+                @ViewBag.ID,
+                    function (data) {
+                        $scope.clientGroup = data.data;
+                        $scope.$apply();
+                        jQuery('#content').show();
+
+                        // monitor changes
+                        $scope.$watch('clientGroup', function() {
+                            jQuery('#changeNotification').html('<i class="fa fa-save blink_me"></i>');
+                        });
+                    },
+                    function (error) {
+                        jsHelper.showMessage('warning', error);
+
+                        $scope.clientGroup = null;
+                        $scope.$apply();
+                    }
+                );
+
+            // function defined
+            $scope.update = function ($event) {
+                $event.preventDefault();
+
+                if($scope.editForm.$valid)
+                {
+                    clientGroupService.update(@ViewBag.ID, $scope.clientGroup,
+                    function (data) {
+                        jsHelper.processMessage(data.message);
+                        if(data.message.type == 0) {
+                            window.location = '@Url.Action("Index", "ClientGroup")';
+                        }
+                    },
+                        function (error) {
+                            jsHelper.showMessage('warning', error);
+                        }
+                    );
+                }
+                else
+                {
+                    jsHelper.showMessage('warning', '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED');
+                }
+            }
+
+            $scope.delete = function ($event) {
+                $event.preventDefault();
+
+                if (confirm('Are you sure ?')) {
+                    clientGroupService.delete(@ViewBag.ID,
+                    function (data) {
+                        jsHelper.processMessage(data.message);
+                        if(data.message.type == 0) {
+                            window.location = '@Url.Action("Index", "ClientGroup")';
+                        }
+                    },
+                    function (error) {
+                        jsHelper.showMessage('warning', error);
+                    }
+                );
+                }
+            }
+        }]);
+    </script>
+}
+

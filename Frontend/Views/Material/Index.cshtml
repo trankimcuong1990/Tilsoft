@@ -1,0 +1,110 @@
+﻿@{
+    ViewBag.Title = "Search Material";
+    ViewBag.Module = "Material";
+}
+
+<div class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-search-filter" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Search Results</h2>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div avs-scroll grid-handler="gridHandler" class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header">
+                                <div style="width:100px;vertical-align:middle;text-align:center"></div>
+                                <div class="sorting" style="width:80px;vertical-align:middle;text-align:center" data-colname="MaterialUD">Code</div>
+                                <div class="sorting_asc" style="vertical-align:middle;text-align:center" data-colname="MaterialNM">Name</div>
+                            </div>
+                            <div class="tilsoft-table-filter">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>
+                                                <div style="width:100px;text-align:center;vertical-align:middle;border-right:solid 1px #ddd">
+                                                    <a href="javascript:void(0)" class="btn btn-{{isDefaultFilter?'default':'primary'}} btn-xs" title="Apply Filter" ng-click="event.reload()"><i class="fa fa-filter"></i></a>
+                                                    <a href="javascript:void(0)" class="btn btn-default btn-xs" title="Clear Filter" ng-click="event.clearFilter()"><i class="fa fa-ban"></i></a>
+                                                </div>
+                                            </th>
+                                            <th>
+                                                <div style="width:80px;text-align:center;vertical-align:middle;border-right:solid 1px #ddd">
+                                                    <input class="search-filter" style="text-align:center;font-weight:normal" type="text" maxlength="2" ng-model="filters.materialUd" />
+                                                </div>
+                                            </th>
+                                            <th style="width:100%">
+                                                <div style="text-align:center;vertical-align:middle">
+                                                    <input class="search-filter" style="text-align:left;float:left;width:100%;font-weight:normal" type="text" maxlength="255" ng-model="filters.materialNm" />
+                                                </div>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                            <div class="tilsoft-table-body" style="height: 403px">
+                                <table>
+                                    <tbody>
+                                        <tr ng-repeat="model in data">
+                                            <td style="width:99px;text-align:center;vertical-align:middle">
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current) == "disabled")
+                                                {
+                                                    <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "Material")/{{model.materialID}}" title="View (Read Only)"><i class="fa fa-folder-open"></i> View</a>
+                                                }
+                                                else
+                                                {
+                                                    <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "Material")/{{model.materialID}}" ng-if="model.total == 0" title="Edit"><i class="fa fa-pencil"></i> Edit</a>
+                                                    <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "Material")/{{model.materialID}}" ng-if="model.total != 0" title="View (Read Only)"><i class="fa fa-folder-open"></i> View</a>
+                                                }
+
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current) != "disabled")
+                                                {
+                                                    <a class="btn btn-danger btn-xs font-11" href="javascript:void(0)" ng-click="event.delete(model.materialID)" ng-if="model.total == 0" title="Delete"><i class=" fa fa-times"></i> Del</a>
+                                                }
+                                            </td>
+                                            <td style="width:80px;text-align:center;vertical-align:middle">{{model.materialUD}}</td>
+                                            <td style="text-align:left;vertical-align:middle">{{model.materialNM}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <span>Found: <b>{{totalRows}}</b> record(s).</span>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Search" ng-click="event.reload()"><i class="fa fa-search"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Refresh" ng-click="event.reload()"><i class="fa fa-refresh"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="@Url.Action("Edit", "Material")/0" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="New"><i class="fa fa-file-o"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default disabled" title="Print"><i class="fa fa-print"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/material/',
+            token: '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]',
+            pageSize: '@System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"]',
+            cookieId: '@HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString()'
+        }
+    </script>
+    <script src="~/Angular/app/material/index.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/jsonService2.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/material/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}

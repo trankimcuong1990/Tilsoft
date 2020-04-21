@@ -1,0 +1,138 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    var pageSize = System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"];
+    var cookieID = HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString();
+
+    ViewBag.Title = "Showroom Transfer An Viet Thinh";
+    ViewBag.Module = "Showroom Transfer Management";
+    ViewBag.Icon = "fa-search";
+
+    Frontend.APIDTO.APIUserInformation userInfo = (Frontend.APIDTO.APIUserInformation)Session[Frontend.Customize.Common.ProjectDefinition.USER_INFO_SESSION];
+}
+
+<div class="row">
+    <article class="col col-sm-12">
+        <div class="jarviswidget" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>Showroom Transfer</h2>
+            </header>
+            <div class="no-padding">
+                <div class="widget-body">
+                    <div avs-scrollable-table class="tilsoft-table-wrapper" ng-load-next-page="event.loadMore()" ng-sort-data="event.sort">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header">
+                                <div style="width: 100px">Found <b>{{totalRows | number : 0}}</b></div>
+                                <div class="sorting" style="width: 150px" data-colname="ShowroomTransferUD">Transfer Code</div>
+                                <div class="sorting" style="width: 150px" data-colname="ShowroomTransferDate">Transfer Date</div>
+                                <div class="sorting" style="width: 170px" data-colname="FromWarehouseNM">From Warehouse</div>
+                                <div class="sorting" style="width: 170px" data-colname="ToWarehouseNM">To Warehouse</div>
+                                <div style="width: 250px">Remark</div>
+                                <div style="width: 270px">More Information</div>
+                                <div style="border-bottom: none"></div>
+                            </div>
+                            <div class="tilsoft-table-filter" style="margin-top: 50px">
+                                <div style="width: 100px">
+                                    <a href="javascript:void(0)" class="btn btn-default btn-xs font-11" ng-click="event.search()"><i class="fa fa-filter"></i></a>
+                                    <a href="javascript:void(0)" class="btn btn-default btn-xs font-11" ng-click="event.clear()"><i class="fa fa-ban"></i></a>
+                                </div>
+                                <div style="width: 150px; padding-bottom: 5px">
+                                    <input class="form-control search-filter" style="width: 100%; height:30px" ng-model="filters.showroomTransferUD"/>
+                                </div>
+                                <div style="width: 150px; padding: 0px">
+                                    <div class="input-group" style="border:none;">
+                                        <input type="text" class="form-control search-filter" style="width:100%; height:30px" avs-calendar ng-data-source="filters.showroomTransferDate" />
+                                        <span class="input-group-addon">
+                                            <i class="fa fa-calendar"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div style="width: 170px; padding-bottom: 5px">
+                                    <select class="form-control search-filter" style="width: 100%; height:30px" ng-model="filters.fromWarehouseID" ng-options="item.factoryWarehouseID as item.factoryWarehouseNM for item in factoryWarehouses">
+                                        <option value=""></option>
+                                    </select>
+                                </div>
+                                <div style="width: 170px; padding-bottom: 5px">
+                                    <select class="form-control search-filter" style="width: 100%; height:30px" ng-model="filters.toWarehouseID" ng-options="item.factoryWarehouseID as item.factoryWarehouseNM for item in factoryWarehouses">
+                                        <option value=""></option>
+                                    </select>
+                                </div>
+                                <div style="width: 250px"></div>
+                                <div style="width: 270px"></div>
+                                <div style="border-bottom: none"></div>
+                            </div>
+                            <div class="tilsoft-table-body" style="margin-top: 95px">
+                                <table>
+                                    <tr ng-repeat="item in data">
+                                        <td style="width: 100px; text-align: center">
+                                            @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current) != "disabled")
+                                            {
+                                                <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "ShowroomTransfer")/{{item.showroomTransferID}}" title="Edit" target="_blank" style=""><i class="fa fa-pencil"></i>Edit</a>
+                                            }
+                                            @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current) != "disabled")
+                                            {
+                                                <a class="btn btn-danger btn-xs font-11" href="#" title="Delete" ng-click="event.remove(item)"><i class="fa fa-times"></i>Del</a>
+                                            }
+                                        </td>
+                                        <td style="width: 150px; text-align: center">{{item.showroomTransferUD}}</td>
+                                        <td style="width: 150px; text-align: center">{{item.showroomTransferDate}}</td>
+                                        <td style="width: 170px; text-align: center">{{item.fromWarehouseNM}}</td>
+                                        <td style="width: 170px; text-align: center">{{item.toWarehouseNM}}</td>
+                                        <td style="width: 250px">{{item.remark}}</td>
+                                        <td style="width: 270px">
+                                            <span>
+                                                Created by <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.createdBy}}" dat data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                    <i class="fa fa-user"></i> {{item.creatorName}}
+                                                </a> on {{item.updatedDate}}
+                                            </span>
+                                            <br />
+                                            <span>
+                                                Updated by <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.updatedBy}}" dat data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                    <i class="fa fa-user"></i> {{item.updatorName}}
+                                                </a> on {{item.updatedDate}}
+                                            </span>
+                                        </td>
+                                        <td style="border-bottom: none"></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="javascript:void(0);" ng-click="event.search()" class="btn btn-default btn-sm" title="Search showroom transfer with filters"><i class="fa fa-search"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" ng-click="event.refresh()" class="btn btn-default btn-sm" title="Resfresh showroom trasnfer with filters"><i class="fa fa-refresh"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default btn-sm @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="Create new showroom transfer" ng-click="event.edit(0, $event)" ng-disabled="@userInfo.Data.CompanyID != 3"><i class="fa fa-file-o"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs{
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(serviceRoot)/api/showroomTransferMng/',
+            token: '@token',
+            pageSize: '@pageSize',
+            branchID: '@userInfo.Data.BranchID',
+            editUrl: '@Url.Action("Edit", "ShowroomTransfer")/'
+        };
+    </script>
+    <script type="text/javascript" src="~/Views/ShowroomTransfer/index.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Views/ShowroomTransfer/service.js?v=@guid"></script>
+}

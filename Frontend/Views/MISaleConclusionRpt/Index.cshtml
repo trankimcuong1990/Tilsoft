@@ -1,0 +1,95 @@
+﻿@{
+    /**/
+
+    ViewBag.Title = "Management Info: Sales Conclusion";
+    ViewBag.Module = "Management Info: Sales Conclusion";
+    //string Season = Library.OMSHelper.Helper.GetCurrentSeason();
+    //string prevSeason = Library.OMSHelper.Helper.GetPrevSeason(Season);
+    string currentSeason = Library.OMSHelper.Helper.GetCurrentSeason();
+    string nextSeason = Library.OMSHelper.Helper.GetNextSeason(currentSeason);
+    string prevSeason = Library.OMSHelper.Helper.GetPrevSeason(currentSeason);
+
+    string Season = currentSeason;
+    if (DateTime.Now.Month == 8)
+    {
+        Season = nextSeason;
+        //Season = currentSeason;
+    }
+    else
+    {
+        Season = currentSeason;
+    }
+    prevSeason = Library.OMSHelper.Helper.GetPrevSeason(Season);
+    string prePrevSeason = Library.OMSHelper.Helper.GetPrevSeason(prevSeason);
+}
+<style>
+    .tilsoft-table .tilsoft-table-body {
+        height: auto !important;
+        max-height: none !important;
+    }
+</style>
+
+<div class="row" style="margin-top: 15px;">
+    <!-- show report for management level -->
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget well jarviswidget-color-darken" id="wid-id-0" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <div>
+                <div class="widget-body no-padding">
+                    <div class="padding-10">
+                        <p class="alert alert-info no-margin" style="border-bottom: none;">
+                            <span style="padding: 5px; display: inline-block; margin-bottom: 5px; margin-right: 5px; background: rgba(255,255,255,0.7);"><strong>Exchange Rate</strong>: {{data.exchangeRate | currency:'':2}}</span>
+                            <span style="padding: 5px; display: inline-block; margin-bottom: 5px; margin-right: 5px; background: rgba(255,255,255,0.7);"><strong>Est. Container Value</strong>: $ {{data.usdContainerValue | currency:'':0}} or &euro; {{data.eurContainerValue | currency:'':0}}</span>
+                        </p>
+
+                        @*expected by country compare with commercial invoice last season*@
+                        @Html.Partial("~/Views/MISaleConclusionRpt/Widget/ExpectedByCountry.cshtml", new ViewDataDictionary() { { "season", Season } })
+
+                        @*proforma invoice by country compare with commecial invoice last season by country*@
+                        @Html.Partial("~/Views/MISaleConclusionRpt/Widget/PiByCountry.cshtml", new ViewDataDictionary() { { "season", Season } })
+
+                        @*proforma invoice confirmed by country compare with commecial invoice last season by country*@
+                        @Html.Partial("~/Views/MISaleConclusionRpt/Widget/PiConfirmedByCountry.cshtml", new ViewDataDictionary() { { "season", Season } })
+
+                        @*commercial invoice by country*@
+                        @Html.Partial("~/Views/MISaleConclusionRpt/Widget/CiByCountry.cshtml", new ViewDataDictionary() { { "season", Season } })
+
+                        @*GROWTH*@
+                        @Html.Partial("~/Views/MISaleConclusionRpt/Widget/GrowExpected.cshtml", new ViewDataDictionary() { { "season", Season } })
+
+                        @*CLIENT & SALES*@
+                        @*@Html.Partial("~/Views/MISaleConclusionRpt/Widget/RangeExpected.cshtml", new ViewDataDictionary() { { "season", Season } })*@
+
+                        @*distribution for top 20 and 10*@
+                        @Html.Partial("~/Views/MISaleConclusionRpt/Widget/Top20ClientByDelta.cshtml", new ViewDataDictionary() { { "season", Season } })
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section pagejs {
+    <script src="~/Angular/app/jsonService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script type="text/javascript">
+        jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/misaleconclusion/';
+        jsonService.supportServiceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/support/';
+        jsonService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+        var context = {
+            season: '@Season',
+            prevSeason : '@prevSeason',
+        }
+    </script>
+    <script src="~/Angular/app/miSaleConclusionRpt/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/miSaleConclusionRpt/index.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/MISaleConclusionRpt/Widget/PiByCountry.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/MISaleConclusionRpt/Widget/PiConfirmedByCountry.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/MISaleConclusionRpt/Widget/ExpectedByCountry.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/MISaleConclusionRpt/Widget/CiByCountry.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/MISaleConclusionRpt/Widget/Top20ClientByDelta.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>    
+    <script src="~/Views/MISaleConclusionRpt/Widget/GrowExpected.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/MISaleConclusionRpt/Widget/RangeExpected.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    @*<script src="~/Views/MISaleConclusionRpt/Widget/Top10ClientByCountryOnExpected.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>*@
+
+}

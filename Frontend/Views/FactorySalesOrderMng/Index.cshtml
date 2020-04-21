@@ -1,0 +1,188 @@
+﻿@{
+    ViewBag.Title = "Search Sales Order";
+    ViewBag.Module = "Sales Order";
+    ViewBag.Icon = "fa-search";
+
+    string userManualUrl = string.Empty;
+    if (System.IO.File.Exists(Server.MapPath("~/UserManual/" + ViewBag.ModuleCode + ".pdf")))
+    {
+        userManualUrl = "/UserManual/" + ViewBag.ModuleCode + ".pdf";
+    }
+}
+
+<form class="row" id="main-form">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-search-result" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Sales Order search result</h2>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div avs-scroll grid-handler="gridHandler" class="tilsoft-table-wrapper">
+
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header" style="width: 1650px;">
+                                <div style="width: 100px;">Found(s)<br><strong style="color:maroon" class="ng-binding">{{totalRows}}</strong></div>
+                                <div style="width: 120px;" class="sorting" data-colname="factorySaleOrderUD">Sale Order</div>
+                                <div style="width: 120px;" class="sorting" data-colname="factorySaleQuotationUD">Sale Quotation</div>
+                                <div style="width: 250px;" class="sorting" data-colname="factoryRawMaterialOfficialNM">Customer</div>
+                                <div style="width: 100px;" class="sorting" data-colname="factorySaleQuotationStatusID">Status</div>
+                                <div style="width: 120px;" class="sorting" data-colname="documentDate">Document Date</div>
+                                <div style="width: 120px;" class="sorting" data-colname="createdDate">Posting Date</div>
+                                <div style="width: 120px;" class="sorting" data-colname="expectedPaidDate">Manually Input</div>
+                                <div style="width: 200px;" class="sorting" data-colname="shippingAddress">Address</div>
+                                <div style="width: 200px;" class="sorting" data-colname="billingAddress">Billing Address</div>
+                                <div class="sorting">More Infor</div>
+                            </div>
+
+                            <div class="tilsoft-table-filter" style="width: 1650px;">
+                                <div class="divs" style="text-align: center; width: 100px; vertical-align:middle">
+                                    <a href="javascript:void(0)" class="btn btn-{{isDefaultFilter?'default':'primary'}} btn-xs" title="Apply Filter" ng-click="event.reload()"><i class="fa fa-filter"></i></a>
+                                    <a href="javascript:void(0)" class="btn btn-default btn-xs" title="Clear Filter" ng-click="event.clearFilter()"><i class="fa fa-ban"></i></a>
+                                </div>
+                                <div class="divs" style="width: 120px; text-align: center; vertical-align: middle">
+                                    <input type="text" ng-model="filters.factorySaleOrderUD" class="form-control search-filter" style="font-family: Arial;text-align:center" name="saleorder">
+
+                                </div>
+                                <div class="divs" style="width: 120px; text-align: center; vertical-align: middle">
+                                    <input type="text" ng-model="filters.factorySaleQuotationUD" class="form-control search-filter" style="font-family: Arial;" name="quotation">
+                                </div>
+                                <div class="divs" style="width: 250px; text-align: center; vertical-align: middle">
+                                    <select avs-select style="margin-top:-8px; width:100%; text-align: center" class=" search-filter" id="factoryRawMaterialID" ng-model="filters.factoryRawMaterialID" ng-options="item2.factoryRawMaterialID as item2.factoryRawMaterialOfficialNM for item2 in lstListRawMaterial ">
+                                        <option value=""></option>
+                                    </select>
+                                </div>
+                                <div class="divs" style="width: 100px; text-align: center; vertical-align: middle">
+                                    <select style="margin-bottom:20px" class="form-control search-filter" id="factorySaleOrderStatusID" ng-model="filters.factorySaleOrderStatusID" ng-options="item.factorySaleQuotationStatusID as item.factorySaleQuotationStatusNM for item  in lstStatus">
+                                        <option value=""></option>
+                                    </select>
+                                </div>                              
+                                <div style="width: 120px; text-align: center; vertical-align: middle; padding-top: 0px">
+                                    <div class="input-group" style="border:none">
+                                        <input type="text" class="form-control search-filter" style="width:100%" avs-calendar ng-data-source="filters.documentDate" />
+                                        <span class="input-group-addon">
+                                            <i class="fa fa-calendar"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div style="width: 120px; text-align: center; vertical-align: middle; padding-top: 0px">
+                                    <div class="input-group" style="border:none">
+                                        <input type="text" class="form-control search-filter" style="width:100%" avs-calendar ng-data-source="filters.expectedPaidDate" />
+                                        <span class="input-group-addon">
+                                            <i class="fa fa-calendar"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div style="width: 120px; text-align: center; vertical-align: middle; padding-top: 0px">
+                                    <div class="input-group" style="border:none">
+                                        <input type="text" class="form-control search-filter" style="width:100%" avs-calendar ng-data-source="filters.postingDate" />
+                                        <span class="input-group-addon">
+                                            <i class="fa fa-calendar"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div style="width: 200px; text-align: center; vertical-align: middle"></div>
+                                <div style="width: 200px;"></div>
+                                <div></div>
+                            </div>
+                            <div class="tilsoft-table-body" style="width: 1650px;">
+                                <table>
+                                    <tr ng-repeat="item in data">
+                                        <td style="width:99px;text-align:center">
+                                            @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current) == "disabled")
+                                            {
+                                                <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "FactorySalesOrderMng")/{{item.factorySaleOrderID}}" title="view (read only)" target="_blank"><i class="fa fa-folder-open"></i>View</a>
+                                            }
+                                            else
+                                            {
+                                                <a class="btn btn-default btn-xs font-11" href="@Url.Action("Edit", "FactorySalesOrderMng")/{{item.factorySaleOrderID}}" title="View (Read Only)" target="_blank" style="width: 85px" ng-show="item.isConfirmed && item.isDeleted == false"><i class="fa fa-folder-open"></i> View</a>
+                                                <a class="btn btn-default btn-xs font-11" href="@Url.Action("Edit", "FactorySalesOrderMng")/{{item.factorySaleOrderID}}" title="Cancel (Read Only)" target="_blank" style="width: 85px; color: red" ng-show="item.isConfirmed == true && item.isDeleted == true"><i class="fa fa-close"></i> Cancel</a>
+                                                <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "FactorySalesOrderMng")/{{item.factorySaleOrderID}}" title="Edit" target="_blank" ng-show="!item.isConfirmed"><i class="fa fa-pencil"></i>Edit</a>
+                                            }
+
+                                            @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current) != "disabled")
+                                            {
+                                                <a class="btn btn-danger btn-xs font-11" href="#" ng-click="event.delete(item)" title="Delete" ng-show="!item.isConfirmed"><i class="fa fa-times"></i>Del</a>
+                                            }
+                                        </td>
+                                        <td style="text-align: left; width: 120px;">{{item.factorySaleOrderUD}}</td>
+                                        <td style="text-align: left; width: 120px;">{{item.factorySaleQuotationUD}}</td>
+                                        <td style="text-align: left; width: 250px;">{{item.factoryRawMaterialOfficialNM}}</td>
+                                        <td style="text-align: left; width: 100px;">{{item.factorySaleQuotationStatusNM}}</td>
+                                        <td style="text-align: center; width: 120px;">{{item.documentDate}}</td>
+                                        <td style="text-align: center; width: 120px;">{{item.createdDate}}</td>
+                                        <td style="text-align: center; width: 120px;">{{item.expectedPaidDate}}</td>
+                                        <td style="text-align: left; width: 200px;">{{item.shippingAddress}}</td>
+                                        <td style="text-align: left; width: 200px;">{{item.billingAddress}}</td>
+                                        <td style="text-align: left; vertical-align:middle">
+                                            <label>
+                                                Update By:
+                                                <a ng-show="(item.updatedBy != null && item.updaterName != null)" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.updatedBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                    <i class="fa fa-user"></i> {{item.updaterName}}
+                                                </a>
+                                            </label>
+                                            <label>
+                                                Update Date: {{item.updatedDate}}
+                                            </label>
+                                            <label>
+                                                Confirm By:
+                                                <a ng-show="(item.confirmedBy != null && item.confirmer != null)" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.confirmedBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                    <i class="fa fa-user" ng-if="item.isConfirmed"></i> {{item.confirmer}}
+                                                </a>
+                                            </label>
+                                            <label>
+                                                Confirm Date: {{item.confirmedDate}}
+                                            </label>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <span>Found: {{totalRows}} record(s)</span>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+@section FormAction {
+<ul id="sparks">
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default" title="Search" ng-click="event.reload()"><i class=" fa fa-search"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default" title="Refresh" ng-click="event.clearFilter()"><i class="fa fa-refresh"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="@Url.Action("Edit", "FactorySalesOrderMng")/0" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" target="_blank" title="New"><i class="fa fa-file-o"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default" title="Export Excel" style="color: #31B404" ng-click="event.exportExcel($event)"><i class="fa fa-file-excel-o"></i></a>
+    </li>
+    @if (!string.IsNullOrEmpty(userManualUrl))
+    {
+        <li class="sparks-info">
+            <a target="_blank" href="@userManualUrl" class="btn btn-default" title="Help"><i class="fa fa-info"></i></a>
+        </li>
+    }
+</ul>
+}
+
+@section pagejs {
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/FactorySalesOrderMng/',
+            token: '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]',
+            pageSize: @System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"],
+            cookieId: '@HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString()',
+            backendReportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]',
+            title:'Calculate Price'
+        }
+    </script>
+    <script src="~/Views/FactorySalesOrderMng/Index.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+
+    <script src="~/Angular/app/jsonService2.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/FactorySalesOrderMng/Service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+
+}

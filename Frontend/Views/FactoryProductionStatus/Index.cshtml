@@ -1,0 +1,175 @@
+﻿@{
+    ViewBag.Title = "Factory Production Status";
+    ViewBag.Module = "Factory Production Status";
+}
+<style>
+    .select2-arrow {
+        width: 15px !important;
+    }
+
+    .search-text {
+        height: 29px !important;
+        padding: 8px !important;
+        border: 1px solid #ddd !important;
+    }
+</style>
+<form class="row" id="main-form">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-search-result" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Search Result</h2>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div avs-scroll grid-handler="gridHandler" class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header" style="width: 1100px;">
+                                <div style="width: 100px;"></div>
+                                <div style="width: 130px;" class="sorting" data-colname="factoryUD">Factory</div>
+                                <div style="width: 120px;" class="sorting" data-colname="season">Season</div>
+                                <div style="width: 220px;" class="sorting" data-colname="weekNo">Week</div>
+                                <div style="" class="sorting" data-colname="updatedDate">Tracking Info</div>
+                            </div>
+
+                            <div class="tilsoft-table-filter" style="width: 1100px;">
+                                <div style="text-align: center; width: 100px; vertical-align:middle">
+                                    <a href="javascript:void(0)" class="btn btn-{{isDefaultFilter?'default':'primary'}} btn-xs" title="Apply Filter" ng-click="event.reload()"><i class="fa fa-filter"></i></a>
+                                    <a href="javascript:void(0)" class="btn btn-default btn-xs" title="Clear Filter" ng-click="event.clearFilter()"><i class="fa fa-ban"></i></a>
+                                </div>
+                                <div style="width: 130px; text-align: center; vertical-align: middle;padding:0px;">
+                                    <select style="border:none;" id="factoryID" class="search-filter js-example-basic-single" ng-model="filters.factoryID" ng-options="item.factoryID as item.factoryUD for item in factories | orderBy: 'factoryUD'">
+                                        <option value=""></option>
+                                    </select>
+                                </div>
+                                <div style="width: 120px; text-align: center; vertical-align: middle;padding:0px;">
+                                    <select style="border:none;" id="season" class="search-filter js-example-basic-single" ng-model="filters.season" ng-options="item.seasonValue as item.seasonText for item in seasons | orderBy: 'season'">
+                                        <option value=""></option>
+                                    </select>
+                                </div>
+                                <div style="width: 220px; text-align: center; vertical-align: middle;padding:0px;">
+                                    <select id="weekNo" name="weekNo" ng-model="filters.weekNo" ng-options="item.weekNo as item.weekNo + ' (' + item.startDate +' - ' + item.endDate + ')' for item in weekSeasons">
+                                        <option value=""></option>
+                                    </select>
+                                </div>
+                                @*<div style="width: 70px; text-align: center; vertical-align: middle">
+                                    <input type="text" ng-model="filters.weekNo" class="search-filter" />
+                                </div>*@
+                                <div style="text-align: center; vertical-align: middle"></div>
+                            </div>
+
+                            <div class="tilsoft-table-body" style="width: 1100px; margin-top: 95px;">
+                                <table>
+                                    <tr ng-repeat="item in data">
+                                        <td style="width:99px;text-align:center">
+                                            @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current) == "disabled")
+                                            {
+                                                <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "FactoryProductionStatus")/{{item.factoryProductionStatusID}}"  title="view (read only)" target="_blank"><i class="fa fa-folder-open"></i>View</a>
+                                            }
+                                            else
+                                            {
+                                                <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "FactoryProductionStatus")/{{item.factoryProductionStatusID}}" title="Edit" target="_blank"><i class="fa fa-pencil"></i>Edit</a>
+                                            }
+                                            @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current) != "disabled")
+                                            {
+                                                <a class="btn btn-danger btn-xs font-11" href="#" ng-click="event.delete(item.factoryProductionStatusID,$event)" title="Delete"><i class="fa fa-times"></i>Del</a>
+                                            }
+                                        </td>
+                                        <td style="text-align: center; width: 130px; vertical-align:middle">{{item.factoryUD}}</td>
+                                        <td style="text-align: left; width: 120px; vertical-align:middle;text-align:center">{{item.season}}</td>
+                                        <td style="text-align: left; width: 220px; vertical-align:middle;text-align:center">{{getWeekDayRange(item.weekNo)}}</td>
+                                        <td style="text-align: left; vertical-align:middle">
+                                            <span class="box">
+                                                <i class="fa fa-user"></i>
+                                                <strong>Updated By</strong>:
+                                                <a ng-if="item.updatedBy" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.updatedBy}}" dat data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                    {{item.updatorName}}
+                                                </a>
+                                            </span>
+                                            <span class="box"><i class="fa fa-calendar"></i> <strong>Updated Date</strong>: {{item.updatedDate}}</span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <span>Found: {{totalRows}} record(s)</span>
+                </div>
+            </div>
+        </div>
+    </article>
+
+    <div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="frmInit" class="modal fade" style="display: none;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button aria-hidden="true" data-dismiss="modal" class="close" type="button">
+                        ×
+                    </button>
+                    <h4 id="myModalLabel" class="modal-title">Select factory and season to create new</h4>
+                </div>
+                <div class="modal-body smart-form">
+                    <fieldset>
+                        <div class="row">
+                            
+                            <section class="col col-lg-6">
+                                <select id="factoryID_Init" ng-model="initForm.factoryID" ng-options="item.factoryID as item.factoryUD for item in factories | orderBy: 'factoryUD'">
+                                    <option value=""></option>
+                                </select>
+                            </section>
+
+                            <section class="col col-lg-6">
+                                <select id="season_Init" ng-model="initForm.season" ng-options="item.seasonValue as item.seasonText for item in seasons | orderBy: 'season'">
+                                    <option value=""></option>
+                                </select>
+                            </section>
+                        </div>
+                    </fieldset>
+                </div>
+                <div class="modal-footer">
+                    <button data-dismiss="modal" class="btn btn-default" type="button">
+                        Cancel
+                    </button>
+                    <button class="btn btn-primary" type="button" ng-click="event.createNew($event)">
+                        OK
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section FormAction {
+<ul id="sparks">
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default" title="Search" ng-click="event.reload()"><i class="fa fa-search"></i></a>
+    </li> 
+    <li class="sparks-info">
+        <a class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="Create a factory production" ng-click="event.openInitForm($event)"><i class="fa fa-file-o"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="#" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Print, HttpContext.Current))" title="Print production overview" ng-click="event.print($event)"><i class="fa fa-print"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="@Url.Action("ProductionOverview", "FactoryProductionStatus")" class="btn btn-default" title="Production Overview" target="_blank"><i class="fa fa-bar-chart-o"></i></a>
+    </li>
+</ul>
+}
+@section pagepopup2{
+}
+
+@section pagejs {
+<script src="~/Angular/app/jsonService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+<script type="text/javascript">
+    jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/factoryProductionStatus/';
+    jsonService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+    var context = {
+        reportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]',
+        editUrl: '@Url.Action("Edit", "FactoryProductionStatus", new { id = UrlParameter.Optional })/0',
+        currentSeason : '@Library.Helper.GetCurrentSeason()'
+
+    }
+</script>
+<script src="~/Angular/app/factoryProductionStatus/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+<script src="~/Angular/app/factoryProductionStatus/index.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}

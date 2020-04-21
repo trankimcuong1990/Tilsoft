@@ -1,0 +1,1085 @@
+﻿@{
+    if (ViewBag.ID == 0)
+    {
+        ViewBag.Title = "Create New Product";
+    }
+    else
+    {
+        ViewBag.Title = "Edit Product";
+    }
+
+    ViewBag.Module = "Product";
+    ViewBag.CurrentSeason = Frontend.Helper.Common.GetCurrentSeason();
+    int modelID = 0;
+    if (Request.Params["m"] != null)
+    {
+        modelID = Convert.ToInt32(Request.Params["m"]);
+    }
+}
+
+<style>
+    .tilsoft-table .tilsoft-table-body {
+        height: auto !important;
+        max-height: none
+    }
+
+    /*.smart-form .tilsoft-table .checkbox i {
+        position: relative !important;
+        top: 1px !important;
+    }*/
+
+</style>
+
+<form class="row" name="editForm" id="main-form">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-product-information" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <ul class="nav nav-tabs pull-left in">
+                    <li class="active">
+                        <a data-toggle="tab" href="#tabGeneral"> <span> General </span> </a>
+                    </li>
+
+                    <li>
+                        <a data-toggle="tab" href="#tabColli"> <span>Colli</span> </a>
+                    </li>
+
+                    <li ng-show="data.productTypeNM=='SET'">
+                        <a data-toggle="tab" href="#tabPiece"> <span>Piece</span> </a>
+                    </li>
+
+                    <li>
+                        <a data-toggle="tab" href="#tabModel"> <span> Model </span> </a>
+                    </li>
+
+                    <li ng-show="data.productTypeNM!='SET'">
+                        <a data-toggle="tab" href="#tabEcommerceSpec"> <span>ECommerce Spec</span> </a>
+                    </li>
+
+                    <li>
+                        <a data-toggle="tab" href="#tabTracking"> <i class="fa fa-history"></i> <span> Tracking </span> </a>
+                    </li>
+                </ul>
+            </header>
+            <div>
+                <div class="widget-body product-form">
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="tabGeneral">
+                            <div class="smart-form">
+                                <fieldset>
+                                    <div class="row">
+
+                                        <section class="col col-4">
+                                            <label class="label">Art.Code</label>
+                                            <label class="input">
+                                                <span class="form-control">{{data.articleCode}}</span>
+                                            </label>
+                                        </section>
+
+                                        <section class="col col-2">
+                                            <label class="label">Season</label>
+                                            <label class="select">
+                                                <select class="form-control" ng-model="data.season" ng-options="season.seasonValue as season.seasonText for season in seasons">
+                                                    <option value=""></option>
+                                                </select>
+                                                <i></i>
+                                            </label>
+                                        </section>
+                                        <section class="col col-2">
+                                            <label class="label">Type</label>
+                                            <label class="input">
+                                                <span class="form-control">{{data.productTypeNM}}</span>
+                                            </label>
+                                        </section>
+                                        <section class="col col-2">
+                                            <label class="label">Page</label>
+                                            <label class="input">
+                                                <input type="text" ng-model="data.cataloguePageNumber" />
+                                            </label>
+                                        </section>
+                                        <section class="col col-2">
+                                            <label class="label">Status</label>
+                                            <label class="input">
+                                                <span class="form-control">{{data.confirmedStatus}}</span>
+                                            </label>
+                                        </section>
+                                       
+                                    </div>
+                                    <section>
+                                        <label class="label">Description</label>
+                                        <label class="input">
+                                            <span class="form-control">{{data.description}}</span>
+                                        </label>
+                                    </section>
+                                    <div class="row">
+                                        <section class="col col-6">
+                                            <label class="label">Freescan Image</label>
+                                            <div class="input-group" style="width: 100%;">
+                                                @Html.Partial("~/Views/Shared/_Controls/_ImageBox.cshtml", new Frontend.Models.ImageBoxViewModel() { URLBinding = "data.imageFile_DisplayUrl", JSOnChangeHandler = "event.changeImage", JSONRemoveHandler = "event.removeImage", ImageBoxStyle = "height: 335px;" })
+                                            </div>
+                                        </section>
+                                        <section class="col col-6">
+                                            <legend style="margin-bottom: 15px; padding-bottom: 5px;">Product Attributes <a ng-if="!data.isOffer" href="javascript:void(0);" ng-click="event.openProductWizard()" class="btn btn-primary btn-xs" style="font-size: 11px;">Change Attributes</a></legend>
+                                            <section>
+                                                <label class="label">Material</label>
+                                                <label class="input">
+                                                    <span class="form-control">{{data.materialText}}</span>
+                                                </label>
+                                            </section>
+                                            <section>
+                                                <label class="label">Frame</label>
+                                                <label class="input">
+                                                    <span class="form-control">{{data.frameText}}</span>
+                                                </label>
+                                            </section>
+                                            <section>
+                                                <label class="label">Sub Material</label>
+                                                <label class="input">
+                                                    <span class="form-control">{{data.subMaterialText}}</span>
+                                                </label>
+                                            </section>
+                                            <section>
+                                                <label class="label">Cushion</label>
+                                                <label class="input">
+                                                    <span class="form-control">{{data.cushionText}}</span>
+                                                </label>
+                                            </section>
+                                            <section class="col col-6 no-padding">
+                                                <label class="label">FSC</label>
+                                                <label class="input">
+                                                    <span class="form-control">{{data.fscText}}</span>
+                                                </label>
+                                            </section>
+                                            <section class="col col-6 no-padding">
+                                                <label class="label">Manufacturer Country</label>
+                                                <label class="input">
+                                                    <span class="form-control">{{data.manufacturerCountryNM}}</span>
+                                                </label>
+                                            </section>
+                                        </section>
+                                    </div>
+                                    <section>
+                                        <label class="label">Remark</label>
+                                        <label class="textarea textarea-resizable">
+                                            <textarea class="custom-scroll" rows="3" ng-model="data.remark"></textarea>
+                                        </label>
+                                    </section>
+                                </fieldset>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane" id="tabColli">
+                            <div class="smart-form">
+
+                                <fieldset style="padding: 0px; border-top: none;">
+                                    <div class="row" ng-if="isManualEANCode==false">
+                                        <section class="col col-lg-12">
+                                            <a class="btn btn-success btn-xs" href="javascript:void(0);" ng-click="event.createSetEanCode_Auto(data.productID)"><i class="fa fa-database"></i> Create EAN Code Automatic</a>
+                                            <a class="btn btn-primary btn-xs" href="javascript:void(0);" ng-click="event.createEANCodeManual()"><i class="fa fa-database"></i> Create EAN Code</a>
+                                        </section>
+                                    </div>
+
+                                    <div class="row" ng-if="isManualEANCode==true">
+                                        <section class="col col-lg-2">
+                                            <input type="text" class="form-control" ng-model="eanCodeManual" style="text-align:center" ng-pattern="/^[0-9]{13}$/" name="txtEanCodeIndex" />
+                                            <span class="help-block" ng-show="editForm.txtEanCodeIndex.$error.pattern"><i class="fa fa-warning"></i>Always 13 digits</span>
+                                        </section>
+                                        <section class="col col-lg-9">
+                                            <a class="btn btn-primary btn-xs" href="javascript:void(0);" ng-click="event.createSetEanCode_Manual(data.productID,eanCodeManual)"><i class="fa fa-database"></i> Create EAN Code</a>
+                                        </section>
+                                    </div>
+
+
+                                    <div class="row">
+                                        <section class="col col-lg-12">
+                                            <div id="grdSetEanCode" class="tilsoft-table-wrapper">
+                                                <div class="tilsoft-table">
+                                                    <div class="tilsoft-table-body" style="width: 100%; margin-top:0px">
+                                                        <table>
+                                                            <tr>
+                                                                <th style="width: 200px;"></th>
+                                                                <th style="text-align:left">EAN Code</th>
+                                                            </tr>
+                                                            <tbody ng-repeat="item in data.productSetEANCodes">
+                                                                <tr>
+                                                                    <td style="text-align: center;vertical-align:middle">
+                                                                        <a class="btn btn-danger btn-xs font-11" href="#" title="Delete" ng-click="event.deleteSetEanCode(item.productSetEANCodeID,$index)"><i class="fa fa-times"></i>Del</a>
+                                                                        <a class="btn btn-primary btn-xs font-11" href="#" title="Create Colli" ng-click="event.createColli(item)"><i class="fa fa-plus"></i> Create Colli EAN Code</a>
+                                                                    </td>
+                                                                    <td style="text-align:left; vertical-align:middle"><span style="font-weight:bold">{{item.eanCode}}</span></td>
+                                                                </tr>
+                                                                <tr ng-if="item.productCollis.length>0">
+                                                                    <td></td>
+                                                                    <td>
+                                                                        <table>
+                                                                            <tr>
+                                                                                <th style="width: 240px;"></th>
+                                                                                <th style="text-align:left">COLLI EAN Code</th>
+                                                                            </tr>
+                                                                            <tbody ng-repeat="cItem in item.productCollis">
+                                                                                <tr>
+                                                                                    <td style="text-align:center">
+                                                                                        <a class="btn btn-danger btn-xs font-11" href="#" title="Remove" ng-click="event.deleteColli(item,cItem.productColliID,$index)"><i class="fa fa-times"></i>Del</a>
+                                                                                        <a class="btn btn-primary btn-xs font-11" href="#" title="Create Colli" ng-click="event.createColliPiece(cItem)"><i class="fa fa-plus"></i> Add Piece For This Colli</a>
+                                                                                        <a class="btn btn-primary btn-xs font-11" href="#" title="Save" ng-click="event.updateColli(cItem)"><i class="fa fa-save"></i> Save</a>
+                                                                                    </td>
+                                                                                    <td style="vertical-align:middle"><span style="font-weight:bold">{{cItem.eanCode}}</span></td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td style="background-color:#eeefee">Packing:</td>
+                                                                                    <td>
+                                                                                        <table>
+                                                                                            <tr>
+                                                                                                <td width="5%" style="background-color:#eeefee">L :</td>
+                                                                                                <td width="15%">
+                                                                                                    <input type="number" class="form-control" ng-model="cItem.cartonBoxDimL" name="txtLength" ng-pattern="^[0-9](\.[0-9][0-9])?$" min="0" />
+                                                                                                </td>
+                                                                                                <td width="5%" style="background-color:#eeefee">W :</td>
+                                                                                                <td width="15%">
+                                                                                                    <input type="number" class="form-control" ng-model="cItem.cartonBoxDimW" name="txtLength" ng-pattern="^[0-9](\.[0-9][0-9])?$" min="0" />
+                                                                                                </td>
+                                                                                                <td width="5%" style="background-color:#eeefee">H :</td>
+                                                                                                <td width="15%">
+                                                                                                    <input type="number" class="form-control" ng-model="cItem.cartonBoxDimH" name="txtLength" ng-pattern="^[0-9](\.[0-9][0-9])?$" min="0" />
+                                                                                                </td>
+                                                                                                <td width="10%" style="background-color:#eeefee">Net weight :</td>
+                                                                                                <td width="10%">
+                                                                                                    <input type="number" class="form-control" ng-model="cItem.netWeight" name="txtLength" ng-pattern="^[0-9](\.[0-9][0-9])?$" min="0" />
+                                                                                                </td>
+                                                                                                <td width="10%" style="background-color:#eeefee">Gross weight :</td>
+                                                                                                <td width="10%">
+                                                                                                    <input type="number" class="form-control" ng-model="cItem.grossWeight" name="txtLength" ng-pattern="^[0-9](\.[0-9][0-9])?$" min="0" />
+                                                                                                </td>
+                                                                                            </tr>
+                                                                                        </table>
+                                                                                    </td>
+                                                                                </tr>
+
+                                                                                @*piece*@
+                                                                                <tr ng-if="cItem.productColliPieces.length > 0">
+                                                                                    <td></td>
+                                                                                    <td>
+                                                                                        <table>
+                                                                                            <tr>
+                                                                                                <th style="width: 100px;"></th>
+                                                                                                <th style="text-align:left">PIECE Description</th>
+                                                                                                <th style="text-align:left;width:300px">More Description</th>
+                                                                                                <th style="width:70px;text-align:center">Pcs</th>
+                                                                                            </tr>
+                                                                                            <tr ng-repeat="pItem in cItem.productColliPieces">
+                                                                                                <td style="text-align:center;vertical-align:middle">
+                                                                                                    <a class="btn btn-danger btn-xs font-11" href="#" title="Delete" ng-click="event.deleteColliPiece(cItem,pItem.productColliPieceID,$index)"><i class="fa fa-times"></i>Del</a>
+                                                                                                    <a class="btn btn-primary btn-xs font-11" href="#" title="Save" ng-click="event.updateColliPiece(pItem)"><i class="fa fa-save"></i> Save</a>
+                                                                                                </td>
+                                                                                                <td style="vertical-align:middle">
+                                                                                                    <select class="form-control" ng-model="pItem.pieceID" ng-options="x.pieceID as x.pieceDescription for x in data.productPieces" ng-if="data.productTypeNM=='SET'">
+                                                                                                        <option value=""></option>
+                                                                                                    </select>
+                                                                                                    <span ng-if="data.productTypeNM!='SET'">{{pItem.piceDescription}}</span>
+                                                                                                </td>
+                                                                                                <td>
+                                                                                                    <input type="text" ng-model="pItem.colliPieceDescription" />
+                                                                                                </td>
+                                                                                                <td><input type="number" ng-model="pItem.pcs" class="form-control" style="text-align:right" ng-disabled="data.productTypeNM!='SET'" /></td>
+                                                                                            </tr>
+                                                                                        </table>
+                                                                                    </td>
+                                                                                </tr>
+                                                                            </tbody>
+                                                                        </table>
+                                                                    </td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </section>
+
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane" id="tabPiece" ng-show="data.productTypeNM=='SET'">
+                            <div class="smart-form">
+
+                                <fieldset style="padding: 0px; border-top: none;">
+
+                                    <div class="row">
+                                        <section class="col col-lg-12">
+                                            <div id="grdPiece" class="tilsoft-table-wrapper">
+                                                <div class="tilsoft-table">
+                                                    <div class="tilsoft-table-body" style="width: 100%; overflow-y: hidden; height: auto; min-height: 100px;  margin-top:0px">
+                                                        <table>
+                                                            <tr>
+                                                                <th style="width: 50px;"></th>
+                                                                <th style="width: 210px;">Piece Art</th>
+                                                                <th>Piece Description</th>
+                                                                <th style="width: 100px;">Piece Qnt</th>
+                                                            </tr>
+                                                            <tbody ng-repeat="item in data.productPieces">
+                                                                <tr>
+                                                                    <td style="text-align: center;vertical-align:middle">
+                                                                        <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "Product", new { id = UrlParameter.Optional })/{{item.pieceID}}?m=0" title="Edit" target="_blank"><i class="fa fa-pencil"></i> Edit</a>
+                                                                    </td>
+                                                                    <td style="text-align:center;vertical-align:middle"><span style="font-weight:bold">{{item.articleCode}}</span></td>
+                                                                    <td style="text-align:left;vertical-align:middle"><span style="font-weight:bold">{{item.description}}</span></td>
+                                                                    <td>
+                                                                        <input type="text" ng-model="item.quantity" class="form-control" style="text-align:center" />
+                                                                    </td>
+                                                                </tr>
+                                                                <tr ng-if="item.productPieceCodes.length > 0">
+                                                                    <td></td>
+                                                                    <td colspan="3">
+                                                                        <ul>
+                                                                            <li ng-repeat="eItem in item.productPieceCodes" style="display:inline"><a class="btn btn-default btn-xs">{{eItem.pieceCode}}</a></li>
+                                                                        </ul>
+                                                                    </td>
+                                                                </tr>
+
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </section>
+
+
+
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane" id="tabModel">
+                            <div class="smart-form">
+                                <fieldset>
+                                    <div class="row">
+                                        <section class="col col-2">
+                                            <label class="label">Model Code</label>
+                                            <label class="input">
+                                                <span class="form-control">
+                                                    <a href="@Url.Action("Edit","Model")/{{data.modelID}}" target="_blank">
+                                                        {{data.modelUD}}
+                                                    </a>
+                                                </span>
+                                            </label>
+                                        </section>
+                                        <section class="col col-8">
+                                            <label class="label">Model Name</label>
+                                            <label class="input">
+                                                <span class="form-control">{{data.modelNM}}</span>
+                                            </label>
+                                        </section>
+                                        <section class="col col-2">
+                                            <label class="label">HS Code</label>
+                                            <label class="input">
+                                                <input type="text" ng-model="data.hsCode" />
+                                            </label>
+                                        </section>                                        
+                                    </div>
+                                    <div class="row">
+                                        <section class="col col-2">
+                                            <label class="label">Range Name</label>
+                                            <label class="input">
+                                                <span class="form-control">{{data.rangeName}}</span>
+                                            </label>
+                                        </section>
+                                        <section class="col col-2">
+                                            <label class="label">Collection</label>
+                                            <label class="input">
+                                                <span class="form-control">{{data.collection}}</span>
+                                            </label>
+                                        </section>
+                                        <section class="col col-2">
+                                            <label class="label">Product Group</label>
+                                            <label class="input">
+                                                <span class="form-control">{{data.productGroupNM}}</span>
+                                            </label>
+                                        </section>
+                                        <section class="col col-2">
+                                            <label class="label">&nbsp;</label>
+                                            <label class="checkbox state-disabled">
+                                                <input type="checkbox" ng-model="data.hasCushion" disabled>
+                                                <i></i>Cushion Enabled
+                                            </label>
+                                        </section>
+                                        <section class="col col-2">
+                                            <label class="label">&nbsp;</label>
+                                            <label class="checkbox state-disabled">
+                                                <input type="checkbox" ng-model="data.hasFrameMaterial" disabled>
+                                                <i></i>Frame Enabled
+                                            </label>
+                                        </section>
+                                        <section class="col col-2">
+                                            <label class="label">&nbsp;</label>
+                                            <label class="checkbox state-disabled">
+                                                <input type="checkbox" ng-model="data.hasSubMaterial" disabled>
+                                                <i></i>Sub Material Enabled
+                                            </label>
+                                        </section>
+                                    </div>
+                                    <div class="row">
+                                        <section class="col col-6">
+                                            <div id="grdPiece" class="tilsoft-table-wrapper">
+                                                <div class="tilsoft-table" style="border-bottom: none;">
+                                                    <div class="tilsoft-table-body" style="width: 100%; overflow-y: hidden; min-height: 0px; height: auto;margin-top:0px">
+                                                        <table>
+                                                            <tr>
+                                                                <th style="text-align: center; font-weight: bold;" colspan="4">DIMENSION</th>
+                                                            </tr>
+                                                            <tr>
+                                                                <td style="width: 40%;">&nbsp;</td>
+                                                                <td style="text-align: center; font-weight: bold;">L</td>
+                                                                <td style="text-align: center; font-weight: bold;">W</td>
+                                                                <td style="text-align: center; font-weight: bold;">H</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td style="width: 40%;">OVERALL</td>
+                                                                <td style="text-align: center;">{{data.overallDimL}}</td>
+                                                                <td style="text-align: center;">{{data.overallDimW}}</td>
+                                                                <td style="text-align: center;">{{data.overallDimH}}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td style="width: 40%;">SEAT</td>
+                                                                <td style="text-align: center;">{{data.seatDimL}}</td>
+                                                                <td style="text-align: center;">{{data.seatDimW}}</td>
+                                                                <td style="text-align: center;">{{data.seatDimH}}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td style="width: 40%;">ARM</td>
+                                                                <td style="text-align: center;">{{data.armDimL}}</td>
+                                                                <td style="text-align: center;">{{data.armDimW}}</td>
+                                                                <td style="text-align: center;">{{data.armDimH}}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td style="width: 40%;">OTHER</td>
+                                                                <td style="text-align: center;">{{data.otherDimL}}</td>
+                                                                <td style="text-align: center;">{{data.otherDimW}}</td>
+                                                                <td style="text-align: center;">{{data.otherDimH}}</td>
+                                                            </tr>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </section>
+                                        <section class="col col-6">
+                                            <div id="grdPiece" class="tilsoft-table-wrapper">
+                                                <div class="tilsoft-table" style="border-bottom: none;">
+                                                    <div class="tilsoft-table-body" style="width: 100%; overflow-y: hidden; min-height: 0px; height: auto;margin-top:0px">
+                                                        <table>
+                                                            <tr>
+                                                                <th style="text-align: center; font-weight: bold;" colspan="3">LOAD ABILITY</th>
+                                                            </tr>
+                                                            <tr>
+                                                                <td style="text-align: center; font-weight: bold;">20 DC</td>
+                                                                <td style="text-align: center; font-weight: bold;">40 DC</td>
+                                                                <td style="text-align: center; font-weight: bold;">40 HC</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td style="text-align: center;">{{data.qnt20DC}}</td>
+                                                                <td style="text-align: center;">{{data.qnt40DC}}</td>
+                                                                <td style="text-align: center;">{{data.qnt40HC}}</td>
+                                                            </tr>
+                                                        </table>
+
+                                                        @*<table>
+                                <tr>
+                                    <th style="text-align: center; font-weight: bold;" colspan="3">WEIGHT</th>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: center; font-weight: bold;">Gross Weight</td>
+                                    <td style="text-align: center; font-weight: bold;">Net Weight</td>
+                                </tr>
+                                <tr style="height: 17px;">
+                                    <td style="text-align: center;">&nbsp;{{data.grossWeight}}</td>
+                                    <td style="text-align: center;">&nbsp;{{data.netWeight}}</td>
+                                </tr>
+                            </table>*@
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </section>
+                                    </div>
+                                    <div class="tilsoft-table-wrapper">
+                                        <div class="tilsoft-table">
+                                            <div class="tilsoft-table-body" style="width: 100%; overflow-y: auto; height: auto; min-height: 100px; margin-top: 0px;">
+                                                <table>
+                                                    <tr>
+                                                        <th rowspan="2">Method</th>
+                                                        <th rowspan="2">Remark</th>
+                                                        <th colspan="3">Carton Box Dimension</th>
+                                                        <th colspan="3">Load Ability</th>
+                                                        <th rowspan="2">CBM</th>
+                                                        <th rowspan="2">Qnt/Box</th>
+                                                        <th rowspan="2">GW</th>
+                                                        <th rowspan="2">NW</th>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>L</th>
+                                                        <th>W</th>
+                                                        <th>H</th>
+                                                        <th>20DC</th>
+                                                        <th>40DC</th>
+                                                        <th style="border-right: solid 1px #ddd;">40HC</th>
+                                                    </tr>
+                                                    <tr ng-repeat="item in packagingMethodOptions | filter:{isDefault:true}">
+                                                        <td style="width: 300px;">
+                                                            <span type="text" class="form-control" style="width:100%;font-size:10px; text-align: left;">{{item.packagingMethodNM}}</span>
+                                                        </td>
+                                                        <td style="width: 250px;">
+                                                            <span type="text" class="form-control" style="width: 95%; text-align: left;">{{item.packingRemark}}</span>
+                                                        </td>
+                                                        <td style="width: 150px;">
+                                                            <span type="text" class="form-control" style="width: 95%; text-align: left;">{{item.cartonBoxDimL}} </span>
+                                                        </td>
+                                                        <td style="width: 180px;">
+                                                            <span type="text" class="form-control" style="width: 95%; text-align: left;">{{item.cartonBoxDimW}}</span>
+                                                        </td>
+                                                        <td style="width: 150px;">
+                                                            <span type="text" class="form-control" style="width: 95%; text-align: left;">{{item.cartonBoxDimH}}</span>
+                                                        </td>
+                                                        <td style="width: 100px;">
+                                                            <span type="text" class="form-control" style="width: 95%; text-align: left;">{{item.qnt20DC}}</span>
+                                                        </td>
+                                                        <td style="width: 100px;">
+                                                            <span type="text" class="form-control" style="width: 95%; text-align: left;">{{item.qnt40DC}}</span>
+                                                        </td>
+                                                        <td style="width: 100px;">
+                                                            <span type="text" class="form-control" style="width: 95%; text-align: left;">{{item.qnt40HC}}</span>
+                                                        </td>
+                                                        <td style="width: 180px;">
+                                                            <span type="text" class="form-control" style="width: 95%;text-align: left;">{{item.cbm}}</span>
+                                                        </td>
+                                                        <td style="width: 100px;">
+                                                            <span type="text" class="form-control" style="width: 95%;text-align: left;">{{item.qntInBox}}</span>
+                                                        </td>
+                                                        <td style="width: 180px;">
+                                                            <span type="text" class="form-control" style="width: 95%;text-align: left;">{{item.grossWeight}}</span>
+                                                        </td>
+                                                        <td style="width: 180px;">
+                                                            <span type="text" class="form-control" style="width: 95%;text-align: left;">{{item.netWeight}}</span>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            </div>
+
+                        </div>
+
+                        <div class="tab-pane" id="tabEcommerceSpec" ng-show="data.productTypeNM!='SET'">
+                            <div class="smart-form">
+                                <fieldset>
+                                    <div class="row">
+                                        <section class="col col-2">
+                                            <label class="label">ArticleCode</label>
+                                            <label class="input">
+                                                <span class="form-control">{{data.articleCode}}</span>
+                                            </label>
+                                        </section>
+                                        <section class="col col-2">
+                                            <label class="label">Brand</label>
+                                            <label class="input">
+                                                <span class="form-control">{{data.rangeName}}</span>
+                                            </label>
+                                        </section>
+                                        <section class="col col-2">
+                                            <label class="label">EAN Code</label>
+                                            <label class="input">
+                                                <span class="form-control">{{data.productSetEANCodes[0].eanCode}}</span>
+                                            </label>
+                                        </section>
+                                        <section class="col col-2">
+                                            <label class="label">Catalog Page</label>
+                                            <label class="input">
+                                                <span class="form-control">{{data.cataloguePageNumber}}</span>
+                                            </label>
+                                        </section>
+
+                                        <section class="col col-2">
+                                            <label class="label">Warranty (Month)</label>
+                                            <input class="form-control text-right" ng-model="productECommerceSpec.warranty" />
+                                        </section>
+
+                                        <section class="col col-2">
+                                            <label class="label">Number Of Seat</label>
+                                            <input class="form-control text-right" ng-model="productECommerceSpec.numberOfSeat" />
+                                        </section>
+
+                                    </div>
+                                    
+                                    <div class="row" ng-show="data.productTypeNM!='TABLE'">
+                                        <section class="col col-lg-12">
+                                            <div id="grdPiece" class="tilsoft-table-wrapper">
+                                                <div class="tilsoft-table" style="border-bottom: none;">
+                                                    <div class="tilsoft-table-body" style="width: 100%; overflow-y: hidden; min-height: 0px; height: auto;margin-top:0px">
+                                                        <table>
+                                                            <tr>
+                                                                <td style="width:25%; text-align: left;vertical-align:middle" colspan="3">
+                                                                    <label class="checkbox">
+                                                                        <input type="checkbox" ng-model="productECommerceSpec.hasArmRest">
+                                                                        <i></i>ARMREST
+                                                                    </label>
+                                                                </td>
+                                                                <td style="width:25%; text-align: left;vertical-align:middle" colspan="3">
+                                                                    <label class="checkbox">
+                                                                        <input type="checkbox" ng-model="productECommerceSpec.includeCushion">
+                                                                        <i></i>INCLUDING CUSHION
+                                                                    </label>
+                                                                </td>
+                                                                <td style="width:25%; text-align: left;vertical-align:middle" colspan="3">
+                                                                    <label class="checkbox">
+                                                                        <input type="checkbox" ng-model="productECommerceSpec.canAdjustDegree">
+                                                                        <i></i>ADJUSTABLE
+                                                                    </label>
+                                                                </td>
+                                                                <td style="width:10%; text-align: left;vertical-align:middle" colspan="3">
+                                                                    Degree:
+                                                                </td>
+                                                                <td style="width:15%; text-align: left;vertical-align:middle" colspan="3">
+                                                                    <input type="text" class="input-xs text-right" ng-model="productECommerceSpec.degreeAdjust"/>
+                                                                </td>
+                                                            </tr>
+
+                                                            
+
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </section>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <section class="col col-4">
+                                            <div id="grdPiece" class="tilsoft-table-wrapper">
+                                                <div class="tilsoft-table" style="border-bottom: none;">
+                                                    <div class="tilsoft-table-body" style="width: 100%; overflow-y: hidden; min-height: 0px; height: auto;margin-top:0px">
+                                                        <table>
+                                                            <tr>
+                                                                <th style="text-align: center; font-weight: bold;" colspan="4">MEASUREMENT</th>
+                                                            </tr>
+                                                            @*overall*@
+                                                            <tr>
+                                                                <td style="width: 40%;vertical-align:middle">OVERALL</td>
+                                                                <td style="width:30%; text-align: left;vertical-align:middle">Length</td>
+                                                                <td style="width:20%; text-align: center;vertical-align:middle"><input type="text" ng-model="productECommerceSpec.overallDimL" class="input-xs text-right" avs-number-2 ng-decimal="2" /></td>
+                                                                <td style="width:10%; text-align: center;vertical-align:middle">CM</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td style="width: 40%;vertical-align:middle"></td>
+                                                                <td style="width:30%; text-align: left;vertical-align:middle">Width</td>
+                                                                <td style="width:20%; text-align: center;vertical-align:middle"><input type="text" ng-model="productECommerceSpec.overallDimW" class="input-xs text-right" avs-number-2 ng-decimal="2" /></td>
+                                                                <td style="width:10%; text-align: center;vertical-align:middle">CM</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td style="width: 40%;vertical-align:middle"></td>
+                                                                <td style="width:30%; text-align: left;vertical-align:middle">Height</td>
+                                                                <td style="width:20%; text-align: center;vertical-align:middle"><input type="text" ng-model="productECommerceSpec.overallDimH" class="input-xs text-right" avs-number-2 ng-decimal="2" /></td>
+                                                                <td style="width:10%; text-align: center;vertical-align:middle">CM</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td style="width: 40%;vertical-align:middle"></td>
+                                                                <td style="width:30%; text-align: left;vertical-align:middle">Lowest point to ground height</td>
+                                                                <td style="width:20%; text-align: center;vertical-align:middle"><input type="text" ng-model="productECommerceSpec.lowestPointToGroundHeight" class="input-xs text-right" avs-number-2 ng-decimal="2" /></td>
+                                                                <td style="width:10%; text-align: center;vertical-align:middle">CM</td>
+                                                            </tr>
+                                                            @*seater*@
+                                                            <tr>
+                                                                <td style="width: 40%;vertical-align:middle">SEATER</td>
+                                                                <td style="width:30%; text-align: left;vertical-align:middle">Length</td>
+                                                                <td style="width:20%; text-align: center;vertical-align:middle"><input type="text" ng-model="productECommerceSpec.seatDimL" class="input-xs text-right" avs-number-2 ng-decimal="2" /></td>
+                                                                <td style="width:10%; text-align: center;vertical-align:middle">CM</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td style="width: 40%;vertical-align:middle"></td>
+                                                                <td style="width:30%; text-align: left;vertical-align:middle">Width</td>
+                                                                <td style="width:20%; text-align: center;vertical-align:middle"><input type="text" ng-model="productECommerceSpec.seatDimW" class="input-xs text-right" avs-number-2 ng-decimal="2" /></td>
+                                                                <td style="width:10%; text-align: center;vertical-align:middle">CM</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td style="width: 40%;vertical-align:middle"></td>
+                                                                <td style="width:30%; text-align: left;vertical-align:middle">Height</td>
+                                                                <td style="width:20%; text-align: center;vertical-align:middle"><input type="text" ng-model="productECommerceSpec.seatDimH" class="input-xs text-right" avs-number-2 ng-decimal="2" /></td>
+                                                                <td style="width:10%; text-align: center;vertical-align:middle">CM</td>
+                                                            </tr>
+                                                            @*seater extend*@
+                                                            <tr ng-show="data.productTypeNM!='TABLE'">
+                                                                <td style="width: 40%;vertical-align:middle"></td>
+                                                                <td style="width:30%; text-align: left;vertical-align:middle">Back Height</td>
+                                                                <td style="width:20%; text-align: center;vertical-align:middle"><input type="text" ng-model="productECommerceSpec.seatBackDimH" class="input-xs text-right" avs-number-2 ng-decimal="2" /></td>
+                                                                <td style="width:10%; text-align: center;vertical-align:middle">CM</td>
+                                                            </tr>
+                                                            <tr ng-show="data.productTypeNM!='TABLE'">
+                                                                <td style="width: 40%;vertical-align:middle"></td>
+                                                                <td style="width:30%; text-align: left;vertical-align:middle">Legs Height</td>
+                                                                <td style="width:20%; text-align: center;vertical-align:middle"><input type="text" ng-model="productECommerceSpec.seatLegsDimH" class="input-xs text-right" avs-number-2 ng-decimal="2" /></td>
+                                                                <td style="width:10%; text-align: center;vertical-align:middle">CM</td>
+                                                            </tr>
+
+                                                            @*Armrest*@
+                                                            <tr>
+                                                                <td style="width: 40%;vertical-align:middle">ARMREST</td>
+                                                                <td style="width:30%; text-align: left;vertical-align:middle">Length</td>
+                                                                <td style="width:20%; text-align: center;vertical-align:middle"><input type="text" ng-model="productECommerceSpec.armDimL" class="input-xs text-right" avs-number-2 ng-decimal="2" /></td>
+                                                                <td style="width:10%; text-align: center;vertical-align:middle">CM</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td style="width: 40%;vertical-align:middle"></td>
+                                                                <td style="width:30%; text-align: left;vertical-align:middle">Width</td>
+                                                                <td style="width:20%; text-align: center;vertical-align:middle"><input type="text" ng-model="productECommerceSpec.armDimW" class="input-xs text-right" avs-number-2 ng-decimal="2" /></td>
+                                                                <td style="width:10%; text-align: center;vertical-align:middle">CM</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td style="width: 40%;vertical-align:middle"></td>
+                                                                <td style="width:30%; text-align: left;vertical-align:middle">Height</td>
+                                                                <td style="width:20%; text-align: center;vertical-align:middle"><input type="text" ng-model="productECommerceSpec.armDimH" class="input-xs text-right" avs-number-2 ng-decimal="2" /></td>
+                                                                <td style="width:10%; text-align: center;vertical-align:middle">CM</td>
+                                                            </tr>
+
+                                                            @*Distance beetween legs*@
+                                                            <tr ng-show="data.productTypeNM=='TABLE'">
+                                                                <td style="width: 40%;vertical-align:middle">DISTANCE BEETWEEN LEGS</td>
+                                                                <td style="width:30%; text-align: left;vertical-align:middle">Long side</td>
+                                                                <td style="width:20%; text-align: center;vertical-align:middle"><input type="text" ng-model="productECommerceSpec.longSideTableLegs" class="input-xs text-right" avs-number-2 ng-decimal="2" /></td>
+                                                                <td style="width:10%; text-align: center;vertical-align:middle">CM</td>
+                                                            </tr>
+                                                            <tr ng-show="data.productTypeNM=='TABLE'">
+                                                                <td style="width: 40%;vertical-align:middle"></td>
+                                                                <td style="width:30%; text-align: left;vertical-align:middle">Short side</td>
+                                                                <td style="width:20%; text-align: center;vertical-align:middle"><input type="text" ng-model="productECommerceSpec.shortSideTableLegs" class="input-xs text-right" avs-number-2 ng-decimal="2" /></td>
+                                                                <td style="width:10%; text-align: center;vertical-align:middle">CM</td>
+                                                            </tr>
+
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </section>
+
+                                        <section class="col col-4">
+                                            <div id="grdPiece" class="tilsoft-table-wrapper">
+                                                <div class="tilsoft-table" style="border-bottom: none;">
+                                                    <div class="tilsoft-table-body" style="width: 100%; overflow-y: hidden; min-height: 0px; height: auto;margin-top:0px">
+                                                        <table>
+                                                            @*WEIGHT*@
+                                                            <tr>
+                                                                <th style="text-align: center; font-weight: bold;" colspan="4">WEIGHT</th>
+                                                            </tr>
+                                                            <tr>
+                                                                <td style="width: 40%;vertical-align:middle">WEIGHT</td>
+                                                                <td style="width:30%; text-align: left;vertical-align:middle">Net Weight</td>
+                                                                <td style="width:20%; text-align: center;vertical-align:middle"><input type="text" ng-model="productECommerceSpec.netWeight" class="input-xs text-right" avs-number-2 ng-decimal="2" /></td>
+                                                                <td style="width:10%; text-align: center;vertical-align:middle">KG</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td style="width: 40%;vertical-align:middle"></td>
+                                                                <td style="width:30%; text-align: left;vertical-align:middle">Gross Weight</td>
+                                                                <td style="width:20%; text-align: center;vertical-align:middle"><input type="text" ng-model="productECommerceSpec.grossWeight" class="input-xs text-right" avs-number-2 ng-decimal="2" /></td>
+                                                                <td style="width:10%; text-align: center;vertical-align:middle">KG</td>
+                                                            </tr>
+                                                            @*MATERIAL*@
+                                                            <tr>
+                                                                <th style="text-align: center; font-weight: bold;" colspan="4">MATERIAL</th>
+                                                            </tr>
+                                                            <tr>
+                                                                <td style="width: 40%;vertical-align:middle">MATERIAL</td>
+                                                                <td style="width:70%; text-align: left;vertical-align:middle" colspan="3">
+                                                                    <select class="input-xs" ng-model="productECommerceSpec.materialID" ng-options="item.materialID as item.materialNM for item in materials">
+                                                                        <option value=""></option>
+                                                                    </select>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td style="width: 40%;vertical-align:middle">FRAME MATERIAL</td>
+                                                                <td style="width:70%; text-align: left;vertical-align:middle" colspan="3">
+                                                                    <select class="input-xs" ng-model="productECommerceSpec.frameMaterialID" ng-options="item.frameMaterialID as item.frameMaterialNM for item in frameMaterials">
+                                                                        <option value=""></option>
+                                                                    </select>
+                                                                </td>
+                                                            </tr>
+
+                                                            <tr>
+                                                                <td style="width: 40%;vertical-align:middle">MATERIAL TYPE</td>
+                                                                <td style="width:70%; text-align: left;vertical-align:middle" colspan="3">
+                                                                    <select class="input-xs" ng-model="productECommerceSpec.materialTypeID" ng-options="item.materialTypeID as item.materialTypeNM for item in materialTypes">
+                                                                        <option value=""></option>
+                                                                    </select>
+                                                                </td>
+                                                            </tr>
+
+                                                            <tr>
+                                                                <td style="width: 40%;vertical-align:middle">LEGS MATERIAL</td>
+                                                                <td style="width:70%; text-align: left;vertical-align:middle" colspan="3">
+                                                                    <select class="input-xs" ng-model="productECommerceSpec.legMaterialID" ng-options="item.materialID as item.materialNM for item in materials">
+                                                                        <option value=""></option>
+                                                                    </select>
+                                                                </td>
+                                                            </tr>
+
+                                                            <tr>
+                                                                <td style="width: 40%;vertical-align:middle">FSC</td>
+                                                                <td style="width:70%; text-align: left;vertical-align:middle" colspan="3">
+                                                                    <select class="input-xs" ng-model="productECommerceSpec.fscTypeID" ng-options="item.fscTypeID as item.fscTypeNM for item in fscTypes">
+                                                                        <option value=""></option>
+                                                                    </select>
+                                                                </td>
+                                                            </tr>
+
+
+
+                                                            @*COLOR*@
+                                                            <tr>
+                                                                <th style="text-align: center; font-weight: bold;" colspan="4">COLOR</th>
+                                                            </tr>
+                                                            <tr>
+                                                                <td style="width: 40%;vertical-align:middle">MATERIAL COLOR</td>
+                                                                <td style="width:70%; text-align: left;vertical-align:middle" colspan="3">
+                                                                    <select class="input-xs" ng-model="productECommerceSpec.materialColorID" ng-options="item.materialColorID as item.materialColorNM for item in materialColors">
+                                                                        <option value=""></option>
+                                                                    </select>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td style="width: 40%;vertical-align:middle">FRAME MATERIAL COLOR</td>
+                                                                <td style="width:70%; text-align: left;vertical-align:middle" colspan="3">
+                                                                    <select class="input-xs" ng-model="productECommerceSpec.frameMaterialColorID" ng-options="item.frameMaterialColorID as item.frameMaterialColorNM for item in frameMaterialColors">
+                                                                        <option value=""></option>
+                                                                    </select>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td style="width: 40%;vertical-align:middle">LEGS MATERIAL COLOR</td>
+                                                                <td style="width:70%; text-align: left;vertical-align:middle" colspan="3">
+                                                                    <select class="input-xs" ng-model="productECommerceSpec.legMaterialColorID" ng-options="item.materialColorID as item.materialColorNM for item in materialColors">
+                                                                        <option value=""></option>
+                                                                    </select>
+                                                                </td>
+                                                            </tr>
+                                                            <tr ng-show="data.productTypeNM=='TABLE'">
+                                                                <td style="width: 40%;vertical-align:middle">TABLE LEGS COLOR</td>
+                                                                <td style="width:70%; text-align: left;vertical-align:middle" colspan="3">
+                                                                    <select class="input-xs" ng-model="productECommerceSpec.tableLegsMaterialColorID" ng-options="item.materialColorID as item.materialColorNM for item in materialColors">
+                                                                        <option value=""></option>
+                                                                    </select>
+                                                                </td>
+                                                            </tr>
+
+
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </section>
+
+                                        <section class="col col-4">
+                                            <div id="grdPiece" class="tilsoft-table-wrapper">
+                                                <div class="tilsoft-table" style="border-bottom: none;">
+                                                    <div class="tilsoft-table-body" style="width: 100%; overflow-y: hidden; min-height: 0px; height: auto;margin-top:0px">
+                                                        <table>
+                                                            <tr>
+                                                                <th style="text-align: center; font-weight: bold;" colspan="4">CUSHIONS</th>
+                                                            </tr>
+                                                            @*<tr>
+                                                                <td style="width: 40%;vertical-align:middle">ALL SEASON CUSHION</td>
+                                                                <td style="width:30%; text-align: left;vertical-align:middle">
+                                                                    <label class="checkbox">
+                                                                        <input type="checkbox" name="checkbox-inline">
+                                                                        <i></i>&nbsp;
+                                                                    </label>
+                                                                </td>
+                                                                <td style="width:20%; text-align: center;vertical-align:middle"></td>
+                                                                <td style="width:10%; text-align: center;vertical-align:middle"></td>
+                                                            </tr>*@
+                                                            <tr>
+                                                                <td style="width:70%; text-align: left;vertical-align:middle" colspan="3">
+                                                                    <label class="checkbox">
+                                                                        <input type="checkbox" ng-model="productECommerceSpec.allSeasonCushion">
+                                                                        <i></i>ALL SEASON CUSHION
+                                                                    </label>
+                                                                </td>
+                                                            </tr>
+
+                                                            <tr>
+                                                                <td style="width: 40%;vertical-align:middle">COVER MATERIAL</td>
+                                                                <td style="width:30%; text-align: left;vertical-align:middle" colspan="3">
+                                                                    <select class="input-xs" ng-model="productECommerceSpec.cushionTypeID" ng-options="item.cushionTypeID as item.cushionTypeNM for item in cushionTypes">
+                                                                        <option value=""></option>
+                                                                    </select>
+                                                                </td>
+                                                            </tr>
+
+                                                            <tr>
+                                                                <td style="width: 40%;vertical-align:middle">FILLING</td>
+                                                                <td style="width:30%; text-align: left;vertical-align:middle" colspan="3">
+                                                                    <input type="text" class="input-xs" ng-model="productECommerceSpec.fillingCushion" />
+                                                                </td>
+                                                            </tr>
+
+                                                            <tr>
+                                                                <td style="width: 40%;vertical-align:middle">CUSHION COLOR</td>
+                                                                <td style="width:30%; text-align: left;vertical-align:middle" colspan="3">
+                                                                    <select class="input-xs" ng-model="productECommerceSpec.cushionColorID" ng-options="item.cushionColorID as item.cushionColorNM for item in cushionColors">
+                                                                        <option value=""></option>
+                                                                    </select>
+                                                                </td>
+                                                            </tr>
+
+                                                            <tr>
+                                                                <td style="width: 40%;vertical-align:middle">NUMBER OF CUSHION</td>
+                                                                <td style="width:30%; text-align: left;vertical-align:middle">
+                                                                    <input type="text" class="input-xs text-right" ng-model="productECommerceSpec.numberOfCushion" avs-number-2 />
+                                                                </td>
+                                                                <td style="width:20%; text-align: center;vertical-align:middle"></td>
+                                                                <td style="width:10%; text-align: center;vertical-align:middle"></td>
+                                                            </tr>
+
+                                                            <tr>
+                                                                <td style="width: 40%;vertical-align:middle">THICKNESS OF CUSHION</td>
+                                                                <td style="width:30%; text-align: left;vertical-align:middle">Back</td>
+                                                                <td style="width:20%; text-align: center;vertical-align:middle">
+                                                                    <input type="text" class="input-xs text-right" ng-model="productECommerceSpec.backCushionThinkNess" avs-number-2 ng-decimal="2" />
+                                                                </td>
+                                                                <td style="width:10%; text-align: center;vertical-align:middle">CM</td>
+                                                            </tr>
+
+                                                            <tr>
+                                                                <td style="width: 40%;vertical-align:middle"></td>
+                                                                <td style="width:30%; text-align: left;vertical-align:middle">Seat</td>
+                                                                <td style="width:20%; text-align: center;vertical-align:middle">
+                                                                    <input type="text" class="input-xs text-right" ng-model="productECommerceSpec.seatCushionThinkNess" avs-number-2 ng-decimal="2" />
+                                                                </td>
+                                                                <td style="width:10%; text-align: center;vertical-align:middle">CM</td>
+                                                            </tr>
+
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </section>
+
+
+                                    </div>
+
+                                </fieldset>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane" id="tabTracking">
+                            <div class="smart-form">
+                                <fieldset>
+                                    <div class="row">
+                                        <section class="col col-3">
+                                            <label class="label">Created By</label>
+                                            <label class="input">
+                                                <span class="form-control">
+                                                    <a ng-show="(data.createdBy!=null && data.creatorName!=null)" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{data.createdBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                        <i class="fa fa-user"></i> {{data.creatorName}}
+                                                    </a>
+                                                    <span ng-show="(data.createdBy!=null && data.creatorName==null && data.creatorName!=null)">{{data.creatorName}}</span>
+                                                </span>
+                                            </label>
+                                        </section>
+                                        <section class="col col-3">
+                                            <label class="label">Created Date</label>
+                                            <label class="input">
+                                                <span class="form-control">{{data.createdDate}}</span>
+                                            </label>
+                                        </section>
+                                    </div>
+                                    <div class="row">
+                                        <section class="col col-3">
+                                            <label class="label">Updated By</label>
+                                            <label class="input">
+                                                <span class="form-control">
+                                                    <a ng-show="(data.updatedBy!=null && data.updatorName2!=null)" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{data.updatedBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                        <i class="fa fa-user"></i> {{data.updatorName2}}
+                                                    </a>
+                                                    <span ng-show="(data.updatedBy!=null && data.updatorName2==null && data.updatorName!=null)">{{data.updatorName}}</span>
+                                                </span>
+                                            </label>
+                                        </section>
+                                        <section class="col col-3">
+                                            <label class="label">Updated Date</label>
+                                            <label class="input">
+                                                <span class="form-control">{{data.updatedDate}}</span>
+                                            </label>
+                                        </section>
+                                    </div>
+                                    <div class="row">
+                                        <section class="col col-3">
+                                            <label class="label">Confirmed By</label>
+                                            <label class="input">
+                                                <span class="form-control">
+                                                    <a ng-show="(data.confirmedBy!=null && data.confirmerName2!=null)" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{data.confirmedBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                        <i class="fa fa-user"></i> {{data.confirmerName2}}
+                                                    </a>
+                                                    <span ng-show="(data.confirmedBy!=null && data.confirmerName2==null && data.confirmerName!=null)">{{data.confirmerName}}</span>
+                                                </span>
+                                            </label>
+                                        </section>
+                                        <section class="col col-3">
+                                            <label class="label">Confirmed Date</label>
+                                            <label class="input">
+                                                <span class="form-control">{{data.confirmedDate}}</span>
+                                            </label>
+                                        </section>
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "Product")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="event.update($event)" ng-disabled="data.isConfirmed"><i class="fa fa-save"></i></a>
+        </li>        
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default@(ViewBag.ID==0?" disabled":"") @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="Delete" style="color: #ff0000;" ng-click="event.delete($event)" ng-disabled="data.isConfirmed"><i class="fa fa-times"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default" title="Print"><i class="fa fa-print"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Approve, HttpContext.Current))" title="Approve" ng-click="event.approve($event)" ng-disabled="data.isConfirmed"><i class="fa fa-thumbs-o-up"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Reset, HttpContext.Current))" title="Reset Approval status" ng-click="event.reset($event)" ng-disabled="!data.isConfirmed"><i class="fa fa-thumbs-o-down"></i></a>
+        </li>
+    </ul>
+}
+@section pagepopup2 {
+    @Html.Partial("~/Views/Shared/_Controls/_ProductAttributeWizard.cshtml")
+}
+@section pagejs {
+    <script src="~/Angular/app/jsonService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script type="text/javascript">
+        jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/product/';
+        jsonService.supportServiceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/support/';
+        jsonService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+        var context = {
+            id: @ViewBag.ID,
+            modelid: @modelID,
+            backUrl: '@Url.Action("Index", "Product")',
+            refreshUrl: '@Url.Action("Edit", "Product", new { id = UrlParameter.Optional })/',
+            currentSeason: '@ViewBag.CurrentSeason',
+            errMsg: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED'
+        }
+    </script>
+    <script src="~/Angular/app/product/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/product/edit.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}
+

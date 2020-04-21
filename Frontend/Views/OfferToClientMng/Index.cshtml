@@ -1,0 +1,245 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var serviceReport = System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"];
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+
+    ViewBag.Title = "Search Offer";
+    ViewBag.Module = "OfferToClient";
+    string userManualUrl = string.Empty;
+    if (System.IO.File.Exists(Server.MapPath("~/UserManual/" + ViewBag.ModuleCode + ".pdf")))
+    {
+        userManualUrl = "/UserManual/" + ViewBag.ModuleCode + ".pdf";
+    }
+}
+
+<div class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-search-filter" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Search Filters</h2>
+            </header>
+
+            <div>
+                <div class="jarviswidget-editbox"></div>
+
+                <div class="widget-body">
+                    <div class="row">
+                        <div class="col-sm-2">
+                            <label>Offer</label>
+                            <input class="form-control search-filter" type="text" ng-model="filters.OfferUD">
+                        </div>
+
+                        <div class="col-sm-2">
+                            <label>Season</label>
+                            <select class="form-control search-filter" ng-model="filters.Season" ng-options="season.seasonValue as season.seasonText for season in supportModel.seasons">
+                                <option value=""></option>
+                            </select>
+                        </div>
+
+
+
+                        <div class="col-sm-2">
+                            <label>Client Code</label>
+                            <input class="form-control search-filter" type="text" ng-model="filters.ClientUD">
+                        </div>
+
+                        <div class="col-sm-2">
+                            <label>Client Name</label>
+                            <input class="form-control search-filter" type="text" ng-model="filters.ClientNM">
+                        </div>
+
+                        <div class="col-sm-2">
+                            <label>Payment Term</label>
+                            <input class="form-control search-filter" type="text" ng-model="filters.PaymentTermNM">
+                        </div>
+
+                        <div class="col-sm-2">
+                            <label>Account Manager</label>
+                            <select class="form-control" ng-model="filters.SaleID" ng-options="item.saleID as item.saleNM for item in saler | filter : {isAccountManager: true}">
+                                <option value=""></option>
+                            </select>
+                        </div>
+
+
+
+                        <div class="col-sm-2">
+                            <label>Delivery Term</label>
+                            <input class="form-control search-filter" type="text" ng-model="filters.DeliveryTermNM">
+                        </div>
+
+                        <div class="col-sm-1">
+                            <label>Currency</label>
+                            <input class="form-control search-filter" type="text" ng-model="filters.Currency">
+                        </div>
+
+                        <div class="col-sm-1">
+                            <label>POD</label>
+                            <input class="form-control search-filter" type="text" ng-model="filters.PODNM">
+                        </div>
+
+                        <div class="col-sm-2">
+                            <label>Forwarder</label>
+                            <input class="form-control search-filter" type="text" ng-model="filters.ForwarderNM">
+                        </div>
+
+
+
+                        <div class="col-sm-2">
+                            <label>ArticleCode</label>
+                            <input class="form-control search-filter" type="text" ng-model="filters.ArticleCode">
+                        </div>
+
+                        <div class="col-sm-2">
+                            <label>Description</label>
+                            <input class="form-control search-filter" type="text" ng-model="filters.Description">
+                        </div>
+
+                        <div class="col-sm-1">
+                            <label>Status</label>
+                            <select class="form-control search-filter" ng-model="filters.OfferStatus" ng-options="offerStatus.trackingStatusID as offerStatus.trackingStatusNM for offerStatus in supportModel.offerStatusDTOs">
+                                <option value=""></option>
+                            </select>
+                        </div>
+
+                        <div class="col-sm-1">
+                            <label>Potential</label>
+                            <select class="form-control search-filter" ng-model="filters.IsPotential" ng-options="item.value as item.label for item in yesNoValues">
+                                <option value=""></option>
+                            </select>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-search-result" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Search Result</h2>
+            </header>
+
+            <div>
+                <div class="jarviswidget-editbox"></div>
+
+                <div class="widget-body">
+                    <div id="searchResult" class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header" style="width: 2070px;">
+                                <div style="width: 100px;">Found <strong>{{totalRows}}</strong></div>
+                                <div style="width: 60px;" class="sorting" data-colname="IsPotential">Poten tial</div>                          
+                                <div style="width: 270px;" class="sorting" data-colname="OfferUD">Offer</div>
+                                <div style="width: 80px;" class="sorting_desc" data-colname="OfferDate">Offer Date</div>
+                                <div style="width: 100px;" data-colname="TotalAmount">Offer Amount</div>
+                                <div style="width: 40px;" data-colname="OfferVersion">Ver</div>
+                                <div style="width: 70px;" data-colname="Season">Season</div>
+                                <div style="width: 80px;" class="sorting" data-colname="ValidUntil">Valid Until</div>
+                                <div style="width: 100px;" class="sorting" data-colname="TrackingStatusNM">Offer status</div>
+                                <div style="width: 70px;" class="sorting" data-colname="ClientUD">Client Code</div>
+                                <div style="width: 250px;" class="sorting" data-colname="ClientNM">Client Name</div>
+                                <div style="width: 150px;" class="sorting" data-colname="PaymentTermNM">Payment Term</div>
+                                <div style="width: 150px;" class="sorting" data-colname="DeliveryTermNM">Delivery Term</div>
+                                <div style="width: 50px;" class="sorting" data-colname="Currency">Cur</div>
+                                <div style="width: 80px;" class="sorting" data-colname="LDS">LDS</div>
+                                <div style="width: 150px;" class="sorting" data-colname="ForwarderNM">Forwarder</div>
+                                <div style="width: 100px;" class="sorting" data-colname="PODNM">POD</div>
+                                <div style="width: 80px;" class="sorting" data-colname="UpdatorName">Updated By</div>
+                                <div class="sorting" data-colname="UpdatedDate">Updated Date</div>
+                            </div>
+                            <div class="tilsoft-table-body" style="width: 2070px; ">
+                                <table>
+                                    <tr ng-repeat="model in models" style="height: 45px;">
+                                        <td style="text-align: center; width: 100px; ">
+                                            @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current) == "disabled")
+                                            {
+                                                <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "OfferToClientMng")/{{model.offerID}}?clientID={{model.clientID}}&season={{model.season}}&currency={{model.currency}}" title="View (Read Only)" target="_blank"><i class="fa fa-folder-open"></i> View</a>
+                                            }
+                                            else
+                                            {
+                                                <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "OfferToClientMng")/{{model.offerID}}?clientID={{model.clientID}}&season={{model.season}}&currency={{model.currency}}" title="Edit" target="_blank"><i class="fa fa-pencil"></i> Edit</a>
+                                            }
+
+                                            @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current) != "disabled")
+                                            {
+                                                <a class="btn btn-danger btn-xs font-11" href="javascript:void(0);" ng-click="delete(model.offerID,$event)" title="Delete"><i class="fa fa-times"></i> Del</a>
+                                            }
+                                            @*<a style="margin-top:3px; width:87px" class="btn btn-default btn-xs font-11" href="@Url.Action("OverView", "Offer")/{{model.offerID}}/1" title="Edit" target="_blank"><i class="fa fa-eye"></i> OverView</a>*@
+
+                                        </td>
+                                        <td style="width: 60px; text-align: center;"><i class="fa fa-check-square-o" ng-if="model.isPotential"></i></td>
+                                        @*<td style="width: 60px; text-align: center;"><i class="fa fa-check-square-o" ng-if="model.isApproved"></i></td>*@
+                                        <td style="width: 270px;" title="{{model.offerUD}}">{{model.offerUD}}</td>
+                                        <td style="width: 80px; text-align: center;">{{model.offerDate}}</td>
+                                        <td style="width: 100px; text-align: right;"><span ng-if="model.currency === 'EUR' && model.totalAmount != null">€ </span><span ng-if="model.currency === 'USD' && model.totalAmount != null">$ </span>{{model.totalAmount | number : 2}}</td>
+                                        <td style="width: 40px; text-align: center;">{{model.offerVersion}}</td>
+                                        <td style="width: 70px; text-align: center;">{{model.season}}</td>
+                                        <td style="width: 80px; text-align: center;">{{model.validUntil}}</td>
+                                        <td style="width: 100px;">{{model.trackingStatusNM}}</td>
+                                        <td style="width: 70px; text-align: center;">{{model.clientUD}}</td>
+                                        <td style="width: 250px;" title="{{model.clientNM}}">{{model.clientNM}}</td>
+                                        <td style="width: 150px;" title="{{model.paymentTermNM}}">{{model.paymentTermNM}}</td>
+                                        <td style="width: 150px;" title="{{model.deliveryTermNM}}">{{model.deliveryTermNM}}</td>
+                                        <td style="width: 50px; text-align: center;">{{model.currency}}</td>
+                                        <td style="width: 80px; text-align: center;">{{model.lds}}</td>
+                                        <td style="width: 150px;" title="{{model.forwarderNM}}">{{model.forwarderNM}}</td>
+                                        <td style="width: 100px; text-align: center;" title="{{model.podNM}}">{{model.podNM}}</td>
+                                        <td style="width: 80px; text-align: center;">
+                                            <a ng-if="model.updatedBy" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{model.updatedBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                <i class="fa fa-user"></i> {{model.updatorName}}
+                                            </a>
+                                        </td>
+                                        <td>{{model.updatedDate}}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction {
+<ul id="sparks">
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default" title="Search" ng-click="event.search()"><i class="fa fa-search"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default" title="Refresh" ng-click="event.search()"><i class="fa fa-refresh"></i></a>
+    </li>
+
+    @*<li class="sparks-info">
+            <a href="@Url.Action("Init", "OfferToClientMng")" class="btn btn-default " title="New"><i class="fa fa-file-o"></i></a>
+        </li>*@
+
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default disabled" title="Print"><i class="fa fa-print"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default" title="Export Excel" style="color: #31B404" ng-click="event.exportExcelOffer($event)"><i class="fa fa-file-excel-o"></i></a>
+    </li>
+    @if (!string.IsNullOrEmpty(userManualUrl))
+    {
+        <li class="sparks-info">
+            <a target="_blank" href="@userManualUrl" class="btn btn-default" title="Help"><i class="fa fa-info"></i></a>
+        </li>
+    }
+</ul>
+}
+
+@section pagejs {
+    <script type="text/javascript" src="~/Views/OfferToClientMng/index.js?v=@guid"></script>
+    <script type="text/javascript">
+
+        var context = {          
+            serviceReport: '@serviceReport',
+            serviceUrl: '@(serviceRoot)/api/offerToClientMng/',
+            token: '@token'
+        }
+    </script>
+    <script type="text/javascript" src="~/Views/OfferToClientMng/service.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+}

@@ -1,0 +1,238 @@
+﻿@{
+    ViewBag.Title = "Warehouse";
+    ViewBag.Module = "Warehouse";
+}
+
+<div class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-search-result" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Search Result</h2>
+            </header>
+
+            <div>
+                <div class="jarviswidget-editbox"></div>
+
+                <div class="widget-body">
+                    <div class="table-responsive" id="wareHouseTable">
+                        <table class="table table-bordered table-hover custom-table dataTable">
+                            <thead>
+                                <tr>
+                                    <th style="width: 60px;"></th>
+                                    <th style="width: 60px" class="sorting" data-colname="WareHouseUD">Code</th>
+                                    <th class="sorting_asc" data-colname="WareHouseNM">Name</th>
+                                    <th class="sorting" data-colname="CountryNM">Country</th>
+                                    <th style="width: 90px;" class="sorting" data-colname="Tel">Tel</th>
+                                    <th class="sorting" data-colname="Fax">Fax</th>
+                                    <th class="sorting" data-colname="UpdatorName">Updated By</th>
+                                    <th class="sorting" data-colname="UpdatedDate">Updated Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="model in models">
+                                    <td style="text-align: center;">
+                                        @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current) == "disabled")
+                                        {
+                                            <a href="@Url.Action("Edit", "WareHouse")/{{model.wareHouseID}}" title="View (Read Only)"><i class="fa fa-folder-open grid-button"></i></a>
+                                        }
+                                        else
+                                        {
+                                            <a href="@Url.Action("Edit", "WareHouse")/{{model.wareHouseID}}" title="Edit"><i class="fa fa-pencil-square grid-button"></i></a>
+                                        }
+
+                                        @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current) != "disabled")
+                                        {
+                                            <a href="#" ng-click="delete(model.wareHouseID)" title="Delete"><i class="fa fa-times-circle grid-button"></i></a>
+                                        }
+                                    </td>
+                                    <td>{{model.wareHouseUD}}</td>
+                                    <td>{{model.wareHouseNM}}</td>
+                                    <td>{{model.countryNM}}</td>
+                                    <td>{{model.tel}}</td>
+                                    <td>{{model.fax}}</td>
+                                    <td>{{model.updatorName}}</td>
+                                    <td>{{model.updatedDate}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default disabled" title="Search"><i class="fa fa-search"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Refresh" ng-click="event.search()"><i class="fa fa-refresh"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="@Url.Action("Edit", "WareHouse")/0" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="New"><i class="fa fa-file-o"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default disabled" title="Print"><i class="fa fa-print"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script src="~/Angular/app/warehouse/service.js"></script>
+    <script type="text/javascript">
+        //// config data table
+        jQuery('#wareHouseTable').furnindoTable();
+        //// end config data table
+
+        wareHouseService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/warehouse/';
+        wareHouseService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+        wareHouseService.searchFilter.pageSize = @System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"];
+
+        var wareHouseApp = angular.module('tilsoftApp', []);
+        wareHouseApp.controller('tilsoftController', ['$scope', function ($scope) {
+            $scope.models = null;
+            $scope.pageIndex = 1;
+            $scope.totalPage = 0;
+
+            //
+            // event defined
+            //
+            $scope.event = {
+                search: function(){
+                    $scope.search();
+                }
+            }
+
+            //
+            // private function defined
+            //
+            $scope.search = function () {
+                wareHouseService.search(
+                    function (data) {
+                        $scope.models = data.data;
+                        $scope.totalPage = Math.ceil(data.totalRows / wareHouseService.searchFilter.pageSize);
+                        $scope.$apply();
+
+                        if(data.totalRows < wareHouseService.searchFilter.pageSize) {
+                            jQuery('#wareHouseTable').find('ul').hide();
+                        }
+                        else {
+                            jQuery('#wareHouseTable').find('ul').show();
+                        }
+
+                        jQuery('#content').show();
+                    },
+                    function (error) {
+                        $scope.models = null;
+                        $scope.pageIndex = 1;
+                        $scope.totalPage = 0;
+                        $scope.$apply();
+                    }
+                );
+            }
+
+            // function define
+            $scope.delete = function (id) {
+                if (confirm('Are you sure ?')) {
+                    wareHouseService.delete(id,
+                        function (data) {
+                            jsHelper.processMessage(data.message);
+
+                            if(data.message.type == 0) {
+                                var j = -1;
+                                for (var i = 0; i < $scope.models.length; i++) {
+                                    if ($scope.models[i].wareHouseID == data.data) {
+                                        j = i;
+                                        break;
+                                    }
+                                }
+
+                                if (j >= 0) {
+                                    $scope.models.splice(j, 1);
+                                }
+
+                                $scope.$apply();
+                            }
+                        },
+                        function (error) {
+                            jsHelper.showMessage('warning', error);
+                        }
+                    );
+                }
+            }
+
+            //
+            // SORTING & PAGING
+            //
+            $scope.goToFirst = function ($event) {
+                $event.preventDefault($event);
+                $scope.pageIndex = 1;
+                wareHouseService.searchFilter.pageIndex = $scope.pageIndex;
+                $scope.search();
+            }
+
+            $scope.goToPrev = function ($event) {
+                $event.preventDefault();
+                if ($scope.pageIndex > 1) {
+                    $scope.pageIndex--;
+                    wareHouseService.searchFilter.pageIndex = $scope.pageIndex;
+                    $scope.search();
+                }
+            }
+
+            $scope.goToNext = function ($event) {
+                $event.preventDefault();
+                if ($scope.pageIndex < $scope.totalPage) {
+                    $scope.pageIndex++;
+                    wareHouseService.searchFilter.pageIndex = $scope.pageIndex;
+                    $scope.search();
+                }
+            }
+
+            $scope.goToLast = function ($event) {
+                $event.preventDefault();
+                $scope.pageIndex = $scope.totalPage;
+                wareHouseService.searchFilter.pageIndex = $scope.pageIndex;
+                $scope.search();
+            }
+
+            $scope.goToPage = function ($event) {
+                $event.preventDefault();
+                if (jQuery('#wareHouseTable_pageIndex').val() > 0 && jQuery('#wareHouseTable_pageIndex').val() <= $scope.totalPage) {
+                    $scope.pageIndex = jQuery('#wareHouseTable_pageIndex').val();
+                    wareHouseService.searchFilter.pageIndex = $scope.pageIndex;
+                    $scope.search();
+                }
+                else {
+                    alert('Invalid page index!');
+                    jQuery('#wareHouseTable_pageIndex').val($scope.pageIndex);
+                }
+            }
+
+            $scope.sort = function ($event) {
+                $event.preventDefault();
+
+                $scope.pageIndex = 1;
+                wareHouseService.searchFilter.pageIndex = $scope.pageIndex;
+                wareHouseService.searchFilter.sortedBy = jQuery($event.target).data('colname');
+
+                if (jQuery($event.target).hasClass('sorting_asc')) {
+                    wareHouseService.searchFilter.sortedDirection = 'asc';
+                }
+                else if (jQuery($event.target).hasClass('sorting_desc') || jQuery($event.target).hasClass('sorting')) {
+                    wareHouseService.searchFilter.sortedDirection = 'desc';
+                }
+
+                $scope.search();
+            }
+
+            //
+            // INIT
+            //
+            $scope.search();
+        }]);
+    </script>
+}

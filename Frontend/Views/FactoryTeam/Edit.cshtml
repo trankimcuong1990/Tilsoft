@@ -1,0 +1,138 @@
+﻿@{
+    if (ViewBag.ID == 0)
+    {
+        ViewBag.Title = "Create team";
+    }
+    else
+    {
+        ViewBag.Title = "Edit team";
+    }
+
+    ViewBag.Module = "Team";
+}
+
+<form class="row" name="editForm">
+
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+
+        <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>General</h2>
+            </header>
+            <div>
+                <div class="widget-body">
+                    <div class="smart-form">
+                        <div class="row">
+                            <div class="col col-lg-2 m-bottom-15">
+                                <label>Code</label>
+                                <input type="text" class="form-control" ng-model="data.factoryTeamUD" />
+                            </div>
+                            <div class="col col-lg-10 m-bottom-15">
+                                <label>Name</label>
+                                <input type="text" class="form-control" ng-model="data.factoryTeamNM" />
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col col-lg-6">
+                                <label>Step responsible / <a class="btn btn-primary btn-xs" style="font-size:10px; margin-bottom:4px" ng-click="event.addTeamStep($event)">Add step</a></label>
+                                <div id="grdStep" class="tilsoft-table-wrapper">
+                                    <div class="tilsoft-table">
+                                        <div class="tilsoft-table-body" style="width: auto;margin-top:0px">
+                                            <table>
+                                                <tr>
+                                                    <th style="width:100px"></th>
+                                                    <th>Step</th>
+                                                    <th style="width:100px">Index</th>
+                                                </tr>
+                                                <tr ng-repeat="item in data.factoryTeamStepDTOs">
+                                                    <td style="text-align:center;vertical-align:middle">
+                                                        <a class="btn btn-danger btn-xs font-11" ng-click="event.deleteTeamStep($event,item.factoryTeamStepID)"><i class="fa fa-times"></i> Del</a>
+                                                        <a class="btn btn-primary btn-xs font-11" ng-click="event.createTeamStep($event,data.factoryTeamID,item)"><i class="fa fa-save"></i> Save</a>
+                                                    </td>
+                                                    <td>
+                                                        <select class="form-control" ng-model="item.factoryStepID" ng-options="x.factoryStepID as x.factoryStepNM for x in factorySteps">
+                                                            <option value=""></option>
+                                                        </select>
+                                                    </td>
+                                                    <td><input type="text" ng-model="item.stepIndex" class="form-control" style="text-align:center"></td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col col-lg-6">
+                                <label>Material group responsible / <a class="btn btn-primary btn-xs" style="font-size:10px; margin-bottom:4px" ng-click="event.addMaterialGroupTeam($event)">Add material group</a></label>
+                                <div id="grdStep" class="tilsoft-table-wrapper">
+                                    <div class="tilsoft-table">
+                                        <div class="tilsoft-table-body" style="width: auto;margin-top:0px">
+                                            <table>
+                                                <tr>
+                                                    <th style="width:100px"></th>
+                                                    <th>Material group</th>
+                                                </tr>
+                                                <tr ng-repeat="item in data.factoryMaterialGroupTeamDTOs">
+                                                    <td style="text-align:center;vertical-align:middle">
+                                                        <a class="btn btn-danger btn-xs font-11" ng-click="event.deleteMaterialGroupTeam($event,item.factoryMaterialGroupTeamID)"><i class="fa fa-times"></i> Del</a>
+                                                        <a class="btn btn-primary btn-xs font-11" ng-click="event.createMaterialGroupTeam($event,data.factoryTeamID,item)"><i class="fa fa-save"></i> Save</a>
+                                                    </td>
+                                                    <td>
+                                                        <select class="form-control" ng-model="item.factoryMaterialGroupID" ng-options="x.factoryMaterialGroupID as x.factoryMaterialGroupNM for x in factoryMaterialGroups">
+                                                            <option value=""></option>
+                                                        </select>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+
+</form>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "FactoryTeam")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="#" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="event.update($event)"><i class="fa fa-save"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="#" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="Delete" style="color: #ff0000;" ng-click="event.delete($event)"><i class="fa fa-times"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script src="~/Angular/app/jsonService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/support/service.js?c=@System.Guid.NewGuid().ToString().Replace("-","")"></script>
+    <script type="text/javascript">
+        jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/factoryTeam/';
+        jsonService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+        supportService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/support/';
+        supportService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+        var context = {
+            id: '@ViewBag.ID',
+            backUrl: '@Url.Action("Index", "FactoryTeam")',
+            refreshUrl: '@Url.Action("Edit", "FactoryTeam", new { id = UrlParameter.Optional })/',
+            errMsg: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED',
+        }
+    </script>
+    <script src="~/Angular/app/factoryTeam/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/factoryTeam/edit.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}
+

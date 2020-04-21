@@ -1,0 +1,66 @@
+﻿
+@{
+    ViewBag.Title = "Search RAP List";
+    ViewBag.Module = "RAP List";
+}
+
+
+<div class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-search-filter" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>RAP List</h2>
+            </header>
+
+            <div>
+                <div class="jarviswidget-editbox"></div>
+
+                <div class="widget-body">
+                    <button ng-click="event.ok($event)">OK</button>
+ 
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction {
+}
+
+@section pagejs {
+    <script src="~/Angular/app/raplist/service.js"></script>
+    <script type="text/javascript">
+        rapService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/raplist/';
+        rapService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+        var rapServiceApp = angular.module('tilsoftApp', []);
+        rapServiceApp.controller('tilsoftController', ['$scope', function ($scope) {
+            //
+            // event defined
+            //
+
+            $scope.event = {
+                ok: function ($event) {
+                    
+                    $event.preventDefault();
+                    rapService.getReport(
+                        function(data) {
+                            window.location = '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]' + data.data + '.xlsm';
+                            alert('ok');
+
+                        },
+                        function(error) {
+                            jsHelper.showMessage('warning', error);
+                            alert('errro');
+                        }
+                    );
+                }
+            };
+
+        }]);
+
+
+
+    </script>
+}

@@ -1,0 +1,179 @@
+﻿@{
+    ViewBag.Title = "Purchasing Price for Factory";
+    ViewBag.Module = "Search Purchasing price for Factory";
+    ViewBag.Icon = "fa-search";
+
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    var pageSize = System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"];
+    var backendReportUrl = System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"];
+}
+
+<div class="row">
+    <article class="col-xs-12 col-sm-12 col-lg-12 col-md-12">
+        <div class="jarviswidget" id="wid-id-1" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-table"></i>
+                </span>
+                <h2>Search Result</h2>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div class="smart-form">
+                        <fieldset>
+                            <section class="col col-sm-2">
+                                <label class="label">Valid Date<em class="note note-error" ng-show="(filters.validDate == null || filters.validDate == '')">(Required)</em></label>
+                                <label class="input-group">
+                                    <input type="text" class="form-control" style="height: 30px;" required avs-calendar ng-data-source="filters.validDate" />
+                                    <span class="input-group-addon">
+                                        <i class="fa fa-calendar"></i>
+                                    </span>
+                                </label>
+                            </section>
+
+                            <section class="col col-sm-2">
+                                <label class="label">Supplier</label>
+                                <label class="input">
+                                    <select avs-select ng-data-source="filters.supplierID">
+                                        <option value=""></option>
+                                        <option value="{{supplier.supplierID}}" ng-repeat="supplier in suppliers">{{supplier.supplierNM}}</option>
+                                    </select>
+                                </label>
+                            </section>
+
+                            <section class="col col-sm-2">
+                                <label class="label">Material Group</label>
+                                <label class="input">
+                                    <select avs-select ng-data-source="filters.materialGroupID">
+                                        <option value=""></option>
+                                        <option value="{{materialGroup.materialGroupID}}" ng-repeat="materialGroup in materialGroups">{{materialGroup.materialGroupNM}}</option>
+                                    </select>
+                                </label>
+                            </section>
+
+                            <section class="col col-sm-4">
+                                <label class="label">Material</label>
+                                <label class="input">
+                                    @*<input type="text" class="form-control" style="font-family: Arial;" avs-remote-auto-complete ng-request-param="material.api" ng-init-param="material.param" ng-model="material.param" ng-item-value="material.data" ng-item-selected="event.getMaterialID();" data-method="POST" data-format-function="formatMaterial" />*@
+                                    <input type="text" class="form-control search-filter" style="font-family: Arial;" ng-model="filters.materialNM" />
+                                </label>
+                            </section>
+
+                            <section class="col col-sm-2">
+                                <label class="label">Status</label>
+                                <label class="input">
+                                    <select class="form-control" style="height: 30px;" ng-model="filters.statusID" ng-options="status.statusID as status.statusNM for status in statuses">
+                                        <option value=""></option>
+                                    </select>
+                                </label>
+                            </section>
+                        </fieldset>
+                    </div>
+                    <div class="tilsoft-table-wrapper" avs-scrollable-table ng-load-next-page="event.loadNextPage()" ng-sort-data="event.sortData">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header" style="width:1600px">
+                                <div style="width: 60px; background-color: #eee;">Found<br /><b>{{totalRows | number:0}}</b></div>
+                                <div class="sorting_asc" style="width: 100px; background-color: #eee;" data-colname="">Type</div>
+                                <div class="sorting_asc" style="width: 125px; background-color: #eee;" data-colname="ProductionItemUD">Code</div>
+                                <div class="sorting" style="width: 230px; background-color: #eee;" data-colname="ProductionItemNM">Name</div>
+                                <div class="sorting" style="width: 130px; background-color: #eee;" data-colname="ProductionItemGroupNM">Group</div>
+                                <div style="width: 50px; background-color: #eee;">Unit</div>
+                                <div class="sorting" style="width: 85px; background-color: #eee;" data-colname="UnitPrice">Price</div>
+                                <div class="sorting" style="width: 100px; background-color: #eee;" data-colname="FactoryRawMaterialUD">Supplier</div>
+                                <div class="sorting" style="width: 80px; background-color: #eee;" data-colname="IsDefault">Status</div>
+                                <div style="width: 120px; background-color: #eee;">Approved By</div>
+                                <div class="sorting" style="width: 100px; background-color: #eee;" data-colname="ValidFrom">Valid From</div>
+                                <div class="sorting" style="width: 100px; background-color: #eee;" data-colname="ValidTo">Valid To</div>
+                                <div class="sorting" style="width: 100px; background-color: #eee;" data-colname="PurchaseQuotationUD">PQ No</div>
+                                <div  background-color: #eee;">Attachments</div>
+                                
+                            </div>
+                            <div class="tilsoft-table-body" style="margin-top: 50px; width:1600px">
+                                <table>
+                                    <tbody>
+                                        <tr ng-repeat="item in data">
+                                            <td style="width: 59px; text-align: center;">{{$index + 1}}</td>
+                                            <td style="width: 100px;">
+                                                <label ng-if="item.purchaseQuotationID > 0">Quotation</label>
+                                                <label ng-if="item.purchaseQuotationID == 0 || item.purchaseQuotationID == null">Agreement</label>
+                                            </td>
+                                            <td style="width: 125px;">{{item.productionItemUD}}</td>
+                                            <td style="width: 230px;">{{item.productionItemNM}}</td>
+                                            <td style="width: 130px; text-align: center;">{{item.productionItemGroupNM}}</td>
+                                            <td style="width: 50px; text-align: center;">{{item.unitNM}}</td>
+                                            <td style="width: 85px; text-align: right;">{{item.unitPrice | number:0}}</td>
+                                            <td style="width: 100px; text-align: center;">{{item.factoryRawMaterialUD}}</td>
+                                            <td style="width: 80px; text-align: center;">
+
+                                                <input type="checkbox" class="disabled" ng-model="item.isDefault" />
+                                            </td>
+                                            <td style="width: 120px;">
+                                                <a href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.approvedBy}}" data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600" ng-if="item.approvedBy != null">
+                                                    <i class="fa fa-user"></i> {{item.employeeNM}}
+                                                </a>
+                                            </td>
+                                            <td style="width: 100px; text-align: center;">{{item.validFrom}}</td>
+                                            <td style="width: 100px; text-align: center;">{{item.validTo}}</td>
+                                            <td style="width: 100px; text-align: center;">
+                                                <label ng-if="item.purchaseQuotationID > 0">
+                                                    <a href="javascript:void(0);" ng-click="event.moveQuotation(item.purchaseQuotationID)">
+                                                        {{item.purchaseQuotationUD}}
+                                                    </a>
+                                                </label>
+                                                <label ng-if="item.purchaseQuotationID == 0 || item.purchaseQuotationID == null">
+                                                    <a href="@Url.Action("Edit", "FactoryRawMaterialMng", new { id = UrlParameter.Optional })/{{item.factoryRawMaterialID}}">
+                                                        {{item.factoryRawMaterialUD}}
+                                                    </a>
+                                                </label>
+
+                                            </td>
+                                            <td>
+                                                <a href="{{item.fileLocation}}" target="_blank">
+                                                    {{item.friendlyName}}
+                                                </a>
+                                            </td>
+                                            
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction{
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Search" ng-click="event.refresh();"><i class="fa fa-search"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Refresh Page" ng-click="event.refresh();"><i class="fa fa-refresh"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Export excel" ng-click="event.exportExcel();"><i class="fa fa-file-excel-o"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs{
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(serviceRoot)/api/PurchaseQuotationMng/',
+            token: '@token',
+            pageSize: '@pageSize',
+            backendReportUrl: '@backendReportUrl',
+            errMsg: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED',
+            moveQuotation: '@Url.Action("Edit", "PurchaseQuotationMng")/'
+        };
+    </script>
+    <script type="text/javascript" src="~/Views/PurchasingPriceFactoryRpt/index.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Views/PurchasingPriceFactoryRpt/service.js?v=@guid"></script>
+}
+

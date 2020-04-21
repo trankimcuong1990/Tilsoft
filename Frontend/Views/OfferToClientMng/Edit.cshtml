@@ -1,0 +1,116 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var serviceReport = System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"];
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+
+    ViewBag.Title = (ViewBag.ID == 0) ? "Create Offer To Client" : "Edit Offer To Client";
+    ViewBag.SubTitle = (ViewBag.ID == 0) ? "Create" : "Edit";
+    ViewBag.Module = "Offer To Client";
+
+
+}
+
+<form class="row" name="editForm">
+    <div ng-view></div>
+    <div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="frmPrintOption" class="modal fade" style="display:none" data-backdrop="none">
+        <div class="modal-dialog">
+            <div class="modal-content" style="margin-top:90px !important">
+                <div class="modal-header">
+                    <h4 id="myModalLabel" class="modal-title">Print Offer</h4>
+                </div>
+                <div class="modal-body smart-form">
+                    <div>
+                        <div class="widget-body no-padding">
+                            <div class="row">
+                                <div class="col col-lg-12">
+                                    <ul style="padding: 0px;">
+                                        <li style="display:block" ng-repeat="item in printOptions">
+                                            <input type="radio" name="radio-print" id="print-option-{{item.printOptionValue}}" ng-value="item.printOptionValue" ng-model="$parent.printOptionValue" /><i> {{item.printOptionText}}</i>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="smart-form" ng-repeat="item in printOptionsImage">
+                        <div class="col col-lg-4">
+                            <input type="radio" name="radio-print-image" id="print-option-image-{{item.printOptionImageValue}}" ng-value="item.printOptionImageValue" ng-model="$parent.printOptionImageValue" /><i> {{item.printOptionImageText}}</i>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" type="button" ng-click="printSelectedOffer()">
+                        Print
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+
+@section FormAction {
+
+    @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current) != "disabled")
+    {
+<ul id="sparks">
+    <li class="sparks-info">
+        <a href="javascript:void(0)" ng-click="refresh()" class="btn btn-default" title="Refresh"><i class="fa fa-refresh"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="#" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="update($event)"><i class="fa fa-save"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="@Url.Action("Index", "OfferToClientMng")" class="btn btn-default" title="Back to offer"><i class="fa fa-arrow-left"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default@(ViewBag.ID==0?" disabled":"") @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Approve, HttpContext.Current))" title="Copy" style="color: #0066ff; " ng-click="copy($event)"><i class="fa fa-files-o"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default@(ViewBag.ID==0?" disabled":"") @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current))" title="Delete" style="color: #ff0000;" ng-click="delete($event)"><i class="fa fa-times"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default@(ViewBag.ID==0?" disabled":"") @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Print, HttpContext.Current))" title="Print offer" ng-click="showPrintOptionForm()"><i class="fa fa-print"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0)" class="btn btn-default" title="Export Excel(New Version)" style="color: #0c68f1" ng-click="exportExcelNewVersion()"><i class="fa fa-file-excel-o"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Print, HttpContext.Current))" title="Export Excel for POB Item Only" style="color: #31B404" ng-click="printExcelFOBItemOnly(offerDataContainer.offerDTO.offerID)"><i class="fa fa-file-excel-o"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="#" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Update Client Infomation" style="color: #31B404" ng-click="updateClientInfo($event)"><i class="fa fa-refresh"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="@Url.Action("PI", "SaleOrder")/@ViewBag.ID" class="btn btn-default @(ViewBag.ID==0?" disabled":"")" title="Go to PI" style="color: #0066ff;" target="_blank"><i class="fa fa-arrow-right"></i></a>
+    </li>
+</ul>
+    }    
+}
+
+@section pagejs{
+
+    <script type="text/javascript" src="~/Views/OfferToClientMng/edit.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Views/OfferToClientMng/_Edit/_GeneralController.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Views/OfferToClientMng/_Edit/_OfferSeasonDetailController.js?v=@guid"></script>
+
+    <script type="text/javascript">
+    var context = {
+        id: @ViewBag.ID,
+        backUrl: '@Url.Action("Index", "OfferToClientMng")',
+        refreshUrl: '@Url.Action("Edit", "OfferToClientMng", new { id = UrlParameter.Optional })/',
+        serviceUrl: '@(serviceRoot)/api/offerToClientMng/',
+        token: '@token',
+        clientID: @ViewBag.ClientID,
+        season: '@ViewBag.Season',
+        serviceReport: '@serviceReport',
+        currency: '@ViewBag.Currency'
+    };
+    </script>
+
+
+    <script type="text/javascript" src="~/Views/OfferToClientMng/service.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+
+}

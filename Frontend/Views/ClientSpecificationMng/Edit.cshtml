@@ -1,0 +1,251 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+
+    ViewBag.Title = (ViewBag.ID == 0) ? "Create Client Specification" : "Client Specification"/* + ViewBag.Code*/;
+    ViewBag.SubTitle = (ViewBag.ID == 0) ? "Create" : "Edit";
+    ViewBag.Module = "Client Specification"/* + ViewBag.Code*/;
+
+    Frontend.APIDTO.APIUserInformation userInfo = (Frontend.APIDTO.APIUserInformation)Session[Frontend.Customize.Common.ProjectDefinition.USER_INFO_SESSION];
+
+    string userManualUrl = string.Empty;
+    if (System.IO.File.Exists(Server.MapPath("~/UserManual/" + ViewBag.ModuleCode + ".pdf")))
+    {
+        userManualUrl = "/UserManual/" + ViewBag.ModuleCode + ".pdf";
+    }
+}
+
+<form name="editForm" class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>Client Specification</h2>
+            </header>
+            <div>
+                <div class="jarviswidget-editbox"></div>
+                <div class="widget-body">
+                    <div class="smart-form">
+                        <div class="row">
+                            <section class="col col-lg-3">
+                                <label class="label">
+                                    Art. Code
+                                </label>
+                                <label class="input">
+                                    <input type="text" class="form-control" readonly ng-model="data.articleCode" />
+                                </label>
+                            </section>
+                            <section class="col col-lg-9">
+                                <label class="label">
+                                    Description
+                                </label>
+                                <label class="input">
+                                    <input type="text" class="form-control" readonly ng-model="data.description" />
+                                </label>
+                            </section>
+                        </div>
+                        <div class="row">
+                            <section class="col col-lg-3">
+                                <label class="label">
+                                    Type
+                                    <em class="note note-error" ng-show="editForm.clientSpecificationType.$error.required"> (Required)</em>
+                                </label>
+                                <label class="input" ng-class="{ 'state-error': editForm.clientSpecificationType.$error.required }">
+                                    <select class="form-control" ng-model="data.clientSpecificationTypeID" ng-options="item.clientSpecificationTypeID as item.clientSpecificationTypeNM for item in clientSpecificationTypes" required name="clientSpecificationType" ng-change="event.changeType(data.clientSpecificationTypeID, data.clientID)">
+                                        <option value=""></option>
+                                    </select>
+                                </label>
+                            </section>
+                            <section class="col col-lg-9">
+                                <label class="label">
+                                    Specification File
+                                    <em class="note note-error" ng-show="data.clientSpecificationTypeID == 3 && (data.friendlyName == null || data.friendlyName == '')"> (Required)</em>
+                                </label>
+                                <label class="input" ng-class="{ 'state-error': (data.clientSpecificationTypeID == 3 && (data.friendlyName == null || data.friendlyName == '')) }">
+                                    <span class="form-control">
+                                        <div style="position: absolute; right: 5px; top: 5px;">
+                                            <a ng-disabled="(data.friendlyName == null || data.friendlyName == '')" href="javascript:void(0)" target="_blank" class="btn btn-primary btn-xs" style="font-size: 11px;" ng-click="event.download()">Download</a>
+                                            <a ng-disabled="(data.clientSpecificationTypeID == 1 || data.clientSpecificationTypeID == 2)" href="javascript:void(0)" class="btn btn-primary btn-xs" style="font-size: 11px;" ng-click="event.change()">Change</a>
+                                            <a ng-disabled="(data.friendlyName == null || data.friendlyName == '' || data.clientSpecificationTypeID == 1 || data.clientSpecificationTypeID == 2)" href="javascript:void(0);" class="btn btn-danger btn-xs" style="font-size: 11px;" ng-click="event.remove()">Remove</a>
+                                        </div>
+                                        {{data.friendlyName}}
+                                    </span>
+                                </label>
+                            </section>
+                        </div>
+                        <div class="row">
+                            <section class="col col-lg-12">
+                                <label class="label">
+                                    Remark
+                                </label>
+                                <label class="textarea">
+                                    <textarea class="form-control" rows="5" ng-model="data.clientSpecificationRemark"></textarea>
+                                </label>
+                            </section>
+                        </div>
+                        <div class="row">
+                            <section class="col col-lg-12">
+                                <label class="label">
+                                    Factory Specification
+                                </label>
+                                <table class="table table-bordered table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 80px;text-align: center;"></th>
+                                            <th style="width: 110px;text-align: center;">Factory</th>
+                                            <th style="width: 150px;text-align: center;">Type</th>
+                                            <th style="width: 250px;text-align: center;">File Name</th>
+                                            <th style="width: 80px;text-align: center;">
+                                                <i class="fa fa-comments-o"></i>
+                                            </th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody ng-repeat="factorySpec in data.factorySpecifications">
+                                        <tr>
+                                            <td style="text-align: center;">
+                                                <a href="javascript:void(0)" class="btn btn-default btn-success btn-xs font-11" id="icon-view-detail-{{factorySpec.factorySpecificationID}}" style="width: 60px;" ng-click="event.openComment(factorySpec.factorySpecificationID)">
+                                                    <i class="fa fa-list"></i> Details
+                                                </a>
+                                            </td>
+                                            <td style="text-align: center;">{{factorySpec.factoryUD}}</td>
+                                            <td style="text-align: center;">{{factorySpec.factorySpecificationTypeNM}}</td>
+                                            <td>
+                                                <a href="{{factorySpec.fileLocation}}" target="_blank">{{factorySpec.friendlyName}}</a>
+                                            </td>
+                                            <td style="text-align: right;">{{factorySpec.commentNo}}</td>
+                                            <td>
+                                                Updated by
+                                                <a ng-show="factorySpec.hasUrlLink" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{factorySpec.factorySpecificationUpdatedBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                    {{factorySpec.updatorName}}
+                                                </a>
+                                                <span ng-show="!factorySpec.hasUrlLink">{{factorySpec.updatorName}}</span>
+                                                on
+                                                {{factorySpec.factorySpecificationUpdatedDate}}
+                                            </td>
+                                        </tr>
+                                        <tr style="display: none;" id="{{factorySpec.factorySpecificationID}}">
+                                            <td colspan="6">
+                                                <section>
+                                                    <label class="label">Remark</label>
+                                                    <label class="textarea">
+                                                        <textarea rows="6" readonly ng-model="factorySpec.factorySpecificationRemark"></textarea>
+                                                    </label>
+                                                </section>
+                                                <section>
+                                                    <label class="label">Comment(s)</label>
+                                                    <div class="well">
+                                                        <table class="table table-striped table-forum">
+                                                            <tbody>
+                                                                <tr>
+                                                                    <td class="text-center" style="width: 150px;">Yourself</td>
+                                                                    <td>Just now</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td class="text-center">
+                                                                        <img src="@userInfo.Data.PersonalPhoto_DisplayUrl" style="width: 50px; height: 50px;" class="online" />
+                                                                    </td>
+                                                                    <td>
+                                                                        <label class="textarea">
+                                                                            <textarea id="comment-{{factorySpec.factorySpecificationID}}" rows="6" maxlength="255"></textarea>
+                                                                        </label>
+                                                                        <br />
+                                                                        <a href="javascript:void(0)" class="btn btn-default btn-primary btn-xs" ng-click="event.postComment(factorySpec.factorySpecificationID, factorySpec)">Post Comment</a>
+                                                                    </td>
+                                                                </tr>
+                                                            </tbody>
+                                                            <tbody ng-repeat="factorySpecComment in factorySpec.factorySpecificationComments">
+                                                                <tr>
+                                                                    <td class="text-center" style="width: 150px;">
+                                                                        <a ng-show="factorySpecComment.hasUrlLink" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{factorySpecComment.updatedBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                                            {{factorySpecComment.updatorName}}
+                                                                        </a>
+                                                                        <span ng-show="!factorySpecComment.hasUrlLink">{{factorySpecComment.updatorName}}</span>
+                                                                    </td>
+                                                                    <td>on {{factorySpecComment.updatedDate}}</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td class="text-center">
+                                                                        <img src="{{factorySpecComment.thumbnailLocation}}" style="width: 50px; height: 50px;" class="online" />
+                                                                    </td>
+                                                                    <td>
+                                                                        <label class="input">
+                                                                            <span>{{factorySpecComment.comment}}</span>
+                                                                        </label>
+                                                                        <br />
+                                                                        <a href="javascript:void(0)" class="btn btn-default btn-danger btn-xs" ng-click="event.delComment(factorySpecComment, factorySpec)" ng-show="factorySpecComment.canDelete">Delete Comment</a>
+                                                                    </td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </section>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </section>
+                        </div>
+                        <div class="row">
+                            <section class="col col-lg-12">
+                                Updated by
+                                <a ng-show="data.hasUrlLink" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{data.clientSpecificationUpdatedBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                    {{data.updatorName}}
+                                </a>
+                                <span ng-show="!data.hasUrlLink">{{data.updatorName}}</span>
+                                on
+                                {{data.clientSpecificationUpdatedDate}}
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+@section FormAction{
+<ul id="sparks">
+    <li class="sparks-info">
+        <a href="javascript:void(0)" class="btn btn-default" title="Back" ng-click="event.back()">
+            <i class="fa fa-arrow-left"></i>
+        </a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0)" class="btn btn-default" title="Save" ng-click="event.update()">
+            <i class="fa fa-floppy-o"></i>
+        </a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0)" class="btn btn-default" style="color: red; display: none;" title="Delete">
+            <i class="fa fa-times"></i>
+        </a>
+    </li>
+    @if (!string.IsNullOrEmpty(userManualUrl))
+    {
+        <li class="sparks-info">
+            <a target="_blank" href="@userManualUrl" class="btn btn-default" title="Help"><i class="fa fa-info"></i></a>
+        </li>
+    }
+</ul>
+}
+
+@section pagejs{
+    <script type="text/javascript">
+        var context = {
+            id: @ViewBag.ID,
+            backUrl: '@Url.Action("Index", "ClientSpecificationMng")',
+            refreshUrl: '@Url.Action("Edit", "ClientSpecificationMng", new { id = UrlParameter.Optional })/',
+            clientContract: '@Url.Action("Edit", "Client", new { id = UrlParameter.Optional })/',
+            serviceUrl: '@(serviceRoot)/api/clientSpecification/',
+            token: '@token',
+            errorMsg: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED'
+        };
+    </script>
+    <script type="text/javascript" src="~/Angular/app/clientSpecification/edit.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/clientSpecification/service.js?v=@guid"></script>
+}

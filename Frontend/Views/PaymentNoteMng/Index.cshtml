@@ -1,0 +1,172 @@
+﻿@{
+    ViewBag.Title = "Payment Note";
+    ViewBag.Module = "Payment Note";
+
+    string userManualUrl = string.Empty;
+    if (System.IO.File.Exists(Server.MapPath("~/UserManual/" + ViewBag.ModuleCode + ".pdf")))
+    {
+        userManualUrl = "/UserManual/" + ViewBag.ModuleCode + ".pdf";
+    }
+}
+
+<form class="row" id="main-form">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-search-result" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Search Result</h2>
+            </header>
+            <div class="smart-form">
+                <div class="widget-body no-padding">
+                    <div avs-scroll grid-handler="gridHandler" class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header" style="width: 1800px;">
+                                <div style="width: 70px;"></div>
+                                <div style="width: 80px;" class="sorting" data-colname="StatusNM">Status</div>
+                                <div style="width: 150px;" class="sorting" data-colname="PaymentNoteNo">Payment Note No</div>
+                                <div style="width: 120px;" class="sorting" data-colname="PaymentNoteDate">Payment Note Date</div>
+                                <div style="width: 120px;" class="sorting" data-colname="PostingDate">Posting Date</div>
+                                <div style="width: 120px;" class="sorting" data-colname="PaymentNoteTypeID">Payment Note Type</div>
+                                <div style="width: 80px;" class="sorting" data-colname="Currency">Currency</div>
+                                <div style="width: 180px;" class="sorting" data-colname="BankAcc">Bank Acc</div>
+                                <div style="width: 150px;" class="sorting" data-colname="ReceiverName">Receiver Name</div>
+                                <div style="width: 200px;" class="sorting" data-colname="Remark">Remark</div>
+                                <div style="width: 200px;" class="sorting" data-colname="Creator">Created Infor</div>
+                                <div style="width: 200px;" class="sorting" data-colname="Updater">Updated Infor</div>
+                                <div></div>
+                            </div>
+
+                            <div class="tilsoft-table-filter" style="width: 1800px;">
+                                <div style="text-align: center; width: 70px; vertical-align:middle">
+                                    <a href="javascript:void(0)" class="btn btn-{{isDefaultFilter?'default':'primary'}} btn-xs" title="Apply Filter" ng-click="event.reload()"><i class="fa fa-filter"></i></a>
+                                    <a href="javascript:void(0)" class="btn btn-default btn-xs" title="Clear Filter" ng-click="event.clearFilter()"><i class="fa fa-ban"></i></a>
+                                </div>
+                                <div style="width: 80px; text-align: center; vertical-align: middle">
+                                    <select class="search-filter" ng-model="filters.statusID" ng-options="xxx.statusID as xxx.statusNM for xxx in supportdata.status">
+                                        <option value=""></option>
+                                    </select>
+                                </div>
+                                <div style="width: 150px;">
+                                    <input type="text" ng-model="filters.paymentNoteNo" class="search-filter" />
+                                </div>
+                                <div style="width: 120px">
+                                    <input type="text" avs-calendar ng-data-source="filters.paymentNoteDate" class="search-filter" />
+                                </div>
+                                <div style="width: 120px">
+                                    <input type="text" avs-calendar ng-data-source="filters.postingDate" class="search-filter" />
+                                </div>
+                                <div style="width:120px">
+                                    <select class="search-filter" ng-model="filters.paymentNoteTypeID" ng-options="type.paymentNoteTypeID as type.paymentNoteTypeNM for type in supportdata.types">
+                                        <option value=""></option>
+                                    </select>
+                                </div>
+                                <div style="width: 80px"></div>
+                                <div style="width: 180px"></div>
+                                <div style="width: 150px">
+                                    <input type="text" ng-model="filters.receiverName" class="search-filter" />
+                                </div>
+                                <div style="width: 200px"></div>
+                                <div style="width: 200px"></div>
+                                <div style="width: 200px"></div>
+                                <div></div>
+                            </div>
+
+                            <div class="tilsoft-table-body" style="width: 1800px; margin-top: 95px;">
+                                <table>
+                                    <tbody ng-repeat="item in data">
+                                        <tr>
+                                            <td style="width:69px;text-align:center">
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current) == "disabled")
+                                                {
+                                                    <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "PaymentNoteMng")/{{item.paymentNoteID}}#/" title="view (read only)" target="_blank" style="width:60px"><i class="fa fa-folder-open"></i>View</a>
+                                                }
+                                                else
+                                                {
+                                                    <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "PaymentNoteMng")/{{item.paymentNoteID}}#/" title="Edit" target="_blank" style="width:60px"><i class="fa fa-pencil"></i>Edit</a>
+                                                }
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current) != "disabled")
+                                                {
+                                                    @*<a class="btn btn-danger btn-xs font-11" href="#" ng-click="event.delete(item)" title="Delete" style="width:60px; margin-top:2px"><i class="fa fa-times"></i>Del</a>*@
+                                                }
+                                            </td>
+                                            <td style="text-align: center; width: 80px">{{item.statusNM}}</td>
+                                            <td style="text-align: center; width: 150px">{{item.paymentNoteNo}}</td>
+                                            <td style="text-align: left; width: 120px">{{item.paymentNoteDate}}</td>
+                                            <td style="text-align: left; width: 120px">{{item.postingDate}}</td>
+                                            <td style="text-align: left; width: 120px">{{item.paymentNoteTypeNM}}</td>
+                                            <td style="text-align: center; width: 80px">{{item.currency}}</td>
+                                            <td style="text-align: left; width: 180px">{{item.bankAcc}}</td>
+                                            <td style="text-align: left; width: 150px">{{item.receiverName}}</td>
+                                            <td style="text-align: left; width: 200px">{{item.remark}}</td>
+                                            <td style="text-align: left; width: 200px">
+                                                <span class="box">
+                                                    <i class="fa fa-user"></i>
+                                                    <strong>Created By</strong>:
+                                                    <a ng-if="item.createBy" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.createBy}}" dat data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                        {{item.creator}}
+                                                    </a>
+                                                </span>
+                                                <span class="box"><i class="fa fa-calendar"></i> <strong>Created Date</strong>: {{item.createDate}}</span>
+                                            </td>
+                                            <td style="text-align: left; width: 200px">
+                                                <span class="box">
+                                                    <i class="fa fa-user"></i>
+                                                    <strong>Updated By</strong>:
+                                                    <a ng-if="item.updateBy" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.updateBy}}" dat data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                        {{item.updater}}
+                                                    </a>
+                                                </span>
+                                                <span class="box"><i class="fa fa-calendar"></i> <strong>Updated Date</strong>: {{item.updateDate}}</span>
+                                            </td>
+                                            <td></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <span>Found: {{totalRows}} record(s)</span>
+                </div>
+            </div>
+        </div>
+    </article>
+
+</form>
+
+@section FormAction {
+<ul id="sparks">
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default" title="Search" ng-click="event.reload()"><i class="fa fa-search"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default" title="Refresh" ng-click="event.reload()"><i class="fa fa-refresh"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="@Url.Action("Edit", "PaymentNoteMng")/0#/" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="New" target="_blank"><i class="fa fa-file-o"></i></a>
+    </li>
+    @if (!string.IsNullOrEmpty(userManualUrl))
+    {
+        <li class="sparks-info">
+            <a target="_blank" href="@userManualUrl" class="btn btn-default" title="Help"><i class="fa fa-info"></i></a>
+        </li>
+    }
+
+</ul>
+}
+@section pagepopup2{
+}
+
+@section pagejs {
+    <script src="~/Views/PaymentNoteMng/index.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/payment-note/',
+            token: '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]',
+            pageSize: @System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"],
+            cookieId: '@HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString()',
+            backendReportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]',
+        }
+    </script>
+    <script src="~/Angular/app/jsonService2.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/PaymentNoteMng/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}

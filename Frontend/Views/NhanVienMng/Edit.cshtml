@@ -1,0 +1,136 @@
+﻿@using Frontend.Helper;
+<style>
+</style>
+<div class="row">
+    <article class="col-sm-12">
+        <div class="jarviswidget">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-pencil-square-o txt-color-darken"></i> </span>
+                <h2>Edit</h2>
+            </header>
+            <div class="no-padding">
+                <div class="widget-body">
+                    <form name="frmEdit" class="smart-form">
+                        <fieldset>
+                            <div class="row">
+                                <section class="col col-4">
+                                    <label class="label">Code</label>
+                                    <label class="input">
+                                        <input type="text" ng-model="data.nhanVienUD" readonly />
+                                    </label>
+                                </section>
+                                <section class="col col-6">
+                                    <div style="padding: 10px;">
+                                        <a href="{{data.fileLocation}}" data-featherlight="image">
+                                            <img style="width: 95%;" ng-src="{{data.thumbnailLocation}}" />
+                                        </a>
+                                        <a href="javascript:void(0)" class="btn btn-default btn-sm" style="width: 100%;" ng-click="event.uploadImage()"><i class="fa fa-camera"></i> Change</a>
+                                    </div>
+                                </section>
+                            </div>                            
+                            <div class="row">
+                                <section class="col col-6">
+                                    <label class="label" ng-class="{'state-error': frmEdit.nhanVienNM.$error.required}">
+                                        Name <em ng-show="frmEdit.nhanVienNM.$error.required" class="note note-error">(Required)</em>
+                                    </label>
+                                    <label class="input">
+                                        <input type="text" name="nhanVienNM" ng-model="data.nhanVienNM" required />
+                                    </label>
+                                </section>
+                                <section class="col col-6">
+                                    <label class="label" ng-class="{'state-error': frmEdit.phongBanID.$error.required}">
+                                        Phong Ban <em ng-show="frmEdit.phongBanID.$error.required" class="note note-error">(Required)</em>
+                                    </label>
+                                    <label class="select">
+                                        <select ng-model="data.phongBanID" ng-options="item.phongBanID as item.phongBanNm for item in phongBans" required>
+                                            <option value=""></option>
+                                        </select>
+                                        <i></i>
+                                    </label>
+                                </section>
+                            </div>
+                            <section>
+                                <label class="label">Ngay sinh</label>
+                                <label class="input">
+                                    <input type="text" class="datepicker" ng-model="data.ngaySinh" data-dateformat="dd/mm/yy" />
+                                    <i class="icon-append fa fa-calendar"></i>
+                                </label>
+                            </section>
+                            <section>
+                                <label class="label">Nguoi Phu Thuoc</label>
+                                <a href="javascript:void(0)" ng-click="event.addNPT()">add</a>
+                                <table border="1" width="100%">
+                                    <tr>
+                                        <td></td>
+                                        <td>Quan he</td>
+                                        <td>Ten</td>
+                                        <td>Ngay sinh</td>
+                                    </tr>
+                                    <tr ng-repeat="item in data.nguoiPhuThuocDTOs">
+                                        <td><a href="javascript:void(0)" ng-click="event.delNPT(item)">del</a></td>
+                                        <td>
+                                            <input ng-model="item.quanHe" />
+                                        </td>
+                                        <td>
+                                            <input ng-model="item.nguoiPhuThuocNM" />
+                                        </td>
+                                        <td>
+                                            <input type="text" class="datepicker" ng-model="item.ngaySinh" data-dateformat="dd/mm/yy" />
+                                        </td>
+                                    </tr>
+                                </table>
+                            </section>
+                            <section>
+                                <div class="note" ng-if="data.updatorName">
+                                    <strong>Updated by</strong> {{data.updatorName}} ({{data.updatedDate}})
+                                </div>
+                            </section>
+                        </fieldset>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction {
+    <ul id="sparks">
+        <li>
+            <a href="javascript:void(0)" class="btn btn-success" title="Save" ng-click="event.update()"><i class="fa fa-save"></i></a>
+        </li>
+        <li>
+            <a href="javascript:void(0)" class="btn btn-default disabled" title="Print"><i class="fa fa-print"></i></a>
+        </li>
+        <li>
+            <a href="javascript:void(0)" class="btn btn-default disabled" title="Approve"><i class="fa fa-thumbs-o-up"></i></a>
+        </li>
+        <li>
+            <a href="javascript:void(0)" class="btn btn-default disabled" title="Reset"><i class="fa fa-thumbs-o-down"></i></a>
+        </li>
+        <li>
+            <a href="javascript:void(0)" class="btn btn-danger {{data.uomid > 0 ? '' : 'disabled'}}" title="Delete" ng-click="event.delete()"><i class="fa fa-times"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagepopup {
+
+}
+
+@section pagejs {
+    <script type="text/javascript">
+        var context = {
+            id: @ViewBag.ID,
+            errMsg: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED',
+            backUrl: '@Url.Action("Index", "NhanVienMng")',
+            refreshUrl: '@Url.Action("Edit", "NhanVienMng", new { id = UrlParameter.Optional })/',
+
+            backendReportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]',
+            serviceUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/nhan-vien-mng/',
+            token: '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]'
+        };
+    </script>
+    <script src="~/Views/NhanVienMng/edit.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/jsonService2.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/NhanVienMng/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}

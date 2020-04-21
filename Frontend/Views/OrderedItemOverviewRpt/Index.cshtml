@@ -1,0 +1,95 @@
+﻿@{
+    ViewBag.Icon = "fa-bar-chart-o";
+    ViewBag.Title = "Ordered Item Overview";
+    ViewBag.Module = "Ordered Item Overview";
+}
+
+<div class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-search-filter" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Filters</h2>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <form name="reportForm" class="smart-form">
+                        <fieldset>
+                            <section class="col col-4">
+                                <label class="label">Season <span class="note-error" ng-show="reportForm.season.$error.required"> - Required</span></label>
+                                <label class="select">
+                                    <select name="season" class="form-control search-filter" ng-model="selection.season" ng-options="season.seasonValue as season.seasonText for season in seasons" required>
+                                        <option value=""></option>
+                                    </select>
+                                    <i></i>
+                                </label>
+                            </section>
+                        </fieldset>
+                        <footer>
+                            <a href="javascript:void(0)" class="btn btn-primary" ng-click="event.generateExcel()" style="float: none;"><i class="fa fa-file-excel-o"></i> Excel Version</a>
+                            <a href="javascript:void(0)" class="btn btn-primary" style="float: none;" ng-click="event.search()"><i class="fa fa-code"></i> HTML Version</a>
+                        </footer>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </article>
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="margin-top: 5px;">
+        <div class="jarviswidget jarviswidget-color-darken" id="." data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Results HTML</h2>
+            </header>
+            <div>
+                <div class="jarviswidget-editbox"></div>
+                <div class="widget-body no-padding">
+                    <div class="tilsoft-table-wrapper" avs-scroll grid-handler="gridHandler">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-body" style="width: 100%; overflow-y: hidden; margin-top: 0px; max-height:none">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th style="width:120px; background-color: #adc7e7; border: 1px solid black"><strong>SEASON</strong></th>
+                                            <th style="width:120px; background-color: #adc7e7; border: 1px solid black"><strong>ART. CODE</strong></th>
+                                            <th style="width:150px; background-color: #adc7e7; border: 1px solid black"><strong>ART. DESCRIPTION</strong></th>
+                                            <th style="width:80px; background-color: #adc7e7; border: 1px solid black"><strong>QNT/40FT</strong></th>
+                                            <th style="width:120px; background-color: #adc7e7; border: 1px solid black"><strong>TOTAL ORDERED QNT</strong></th>
+                                            <th style="width:120px; background-color: #adc7e7; border: 1px solid black"><strong>ORDER IN CONT.</strong></th>
+                                            <th style="width:auto; background-color: #adc7e7; border: 1px solid black"><strong>CLIENT CODE(S)</strong></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody  ng-repeat="item in data.data">
+                                        <tr>
+                                            <td style="width: 120px">{{item.season}}</td>
+                                            <td style="width: 120px">{{item.modelUD}}</td>
+                                            <td style="width: 150px">{{item.modelNM}}</td>
+                                            <td style="width: 80px">{{item.totalOrderCont}}</td>
+                                            <td style="width: 120px">{{item.totalOrderQnt}}</td>
+                                            <td style="width: 120px"> <span ng-if="item.totalOrderQnt>0">{{item.totalOrderQnt/item.totalOrderCont |currency:'2'}}</span></td>
+                                            <td style="width: auto">{{item.clientUDs}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section pagejs {
+    <script src="~/Angular/app/jsonService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script type="text/javascript">
+        jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/ordereditemoverview/';
+        jsonService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+        var context = {
+            backendReportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]'
+        }
+    </script>
+    <script src="~/Angular/app/orderedItemOverviewRpt/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/orderedItemOverviewRpt/index.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+
+}

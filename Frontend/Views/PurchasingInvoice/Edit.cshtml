@@ -1,0 +1,1745 @@
+﻿@{
+    if (ViewBag.ID == 0)
+    {
+        ViewBag.Title = "Create purchasing invoice";
+    }
+    else
+    {
+        ViewBag.Title = "Purchasing Invoice";
+    }
+
+    ViewBag.Module = "Purchasing Invoice";
+
+    string tID = "-1";
+    string bID = "-1";
+    string sID = "-1";
+    string pID = "-1";
+    if (Request.Params["invoiceType"] != null)
+    {
+        tID = Request.Params["invoiceType"];
+    }
+    if (Request.Params["bookingID"] != null)
+    {
+        bID = Request.Params["bookingID"];
+    }
+    if (Request.Params["supplierID"] != null)
+    {
+        sID = Request.Params["supplierID"];
+    }
+    if (Request.Params["parentID"] != null)
+    {
+        pID = Request.Params["parentID"];
+    }
+
+    string userManualUrl = string.Empty;
+    if (System.IO.File.Exists(Server.MapPath("~/UserManual/" + ViewBag.ModuleCode + ".pdf")))
+    {
+        userManualUrl = "/UserManual/" + ViewBag.ModuleCode + ".pdf";
+    }
+
+}
+<form name="editForm">
+    <div class="row">
+        <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+            <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+                <header>
+                    <ul class="nav nav-tabs pull-left in">
+                        <li class="active" ng-if="editData.invoiceType==1">
+                            <a data-toggle="tab" href="#general_1"> <i class="fa fa-database"></i> <span class="hidden-mobile hidden-tablet">General</span> </a>
+                        </li>
+
+                        <li class="active" ng-if="editData.invoiceType==2">
+                            <a data-toggle="tab" href="#general_2"> <i class="fa fa-database"></i> <span class="hidden-mobile hidden-tablet">General</span> </a>
+                        </li>
+
+                        <li>
+                            <a data-toggle="tab" href="#tracking"> <i class="fa fa-database"></i> <span class="hidden-mobile hidden-tablet">Tracking</span> </a>
+                        </li>
+
+                    </ul>
+                </header>
+                <div>
+                    <div class="jarviswidget-editbox"></div>
+
+                    <div class="widget-body">
+                        <div class="tab-content">
+
+                            <div class="tab-pane active" id="general_1" ng-if="editData.invoiceType==1">
+                                <div class="row">
+                                    <div class="col-sm-2 m-bottom-15">
+                                        <label>Invoice No</label>
+                                        <span class="form-control" ng-if="editData.invoiceType==1">{{editData.invoiceNo}}</span>
+                                    </div>
+
+                                    <div class="col-sm-2 m-bottom-15">
+                                        <label>Invoice Type</label>
+                                        <span class="form-control">FOB</span>
+                                    </div>
+
+                                    <div class="col-sm-2 m-bottom-15">
+                                        <label>Invoice Date</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control datepicker" data-dateformat="dd/mm/yy" ng-model="editData.invoiceDate" ng-disabled="editData.isConfirmedPrice">
+                                            <div class="input-group-addon"><i class="fa fa-calendar"></i></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-sm-2 m-bottom-15">
+                                        <label>Season</label>
+                                        <select name="season" class="form-control" ng-model="editData.season" ng-options="season.seasonValue as season.seasonText for season in supportData.seasons" ng-change="selectedSeason(editData.season)">
+                                            <option value=""></option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-sm-2 m-bottom-15">
+                                        <label>Factory Invoice No</label>
+                                        <input type="text" class="form-control" ng-model="editData.factoryInvoiceNo" ng-readonly="editData.isConfirmedPrice"/>
+                                    </div>
+                                   
+                                    <div class="col-sm-2 m-bottom-15">
+                                        <label>Status</label>
+                                        <span class="form-control">{{getStatusText()}}</span>
+                                    </div>
+
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-sm-2 m-bottom-15" ng-if="editData.invoiceType!=2">
+                                        <label>BL No</label>
+                                        <span class="form-control">
+                                            <a href="@Url.Action("Edit","Booking2Mng")/{{editData.bookingID}}" target="_blank">{{editData.blNo}}</a>
+                                        </span>
+                                        
+                                    </div>
+
+                                    <div class="col-sm-2 m-bottom-15" ng-if="editData.invoiceType!=2">
+                                        <label>Shipped Date</label>
+                                        <span class="form-control">{{editData.shipedDate}}</span>
+                                    </div>
+
+                                    <div class="col-sm-2 m-bottom-15" ng-if="editData.invoiceType!=2">
+                                        <label>POL</label>
+                                        <span class="form-control">{{editData.polName}}</span>
+                                    </div>
+
+                                    <div class="col-sm-2 m-bottom-15" ng-if="editData.invoiceType!=2">
+                                        <label>POD</label>
+                                        <span class="form-control">{{editData.podName}}</span>
+                                    </div>
+
+                                    <div class="col-sm-4 m-bottom-15" ng-if="editData.invoiceType!=2">
+                                        <label>Forwarder</label>
+                                        <input type="text" class="form-control" readonly ng-model="editData.forwarderNM" />
+                                    </div>
+                                </div>
+
+
+                                <div class="row">
+                                    <div class="col-sm-6 m-bottom-15">
+                                        <label>Supplier</label>
+                                        <span class="form-control">                                            
+                                            <a href="@Url.Action("Edit","Supplier")/{{editData.supplierID}}" target="_blank">{{editData.supplierNM}}</a>
+                                        </span>                                        
+                                    </div>
+
+                                    <div class="col-sm-2 m-bottom-15">
+                                        <label>Company</label>
+                                        <span class="form-control">{{editData.companyNM}}</span>
+                                    </div>
+
+                                    <div class="col-sm-4 m-bottom-15">
+                                        <label>Remark</label>
+                                        <input type="text" class="form-control" ng-model="editData.remark" />
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            <div class="tab-pane active" id="general_2" ng-if="editData.invoiceType==2">
+                                <div class="row">
+                                    <div class="col-sm-2 m-bottom-15">
+                                        <label>Invoice No</label>
+                                        <input class="form-control" ng-model="editData.invoiceNo" />
+                                    </div>
+
+                                    <div class="col-sm-2 m-bottom-15">
+                                        <label>Invoice Type</label>
+                                        <span class="form-control">EXTRA</span>
+                                    </div>
+
+                                    <div class="col-sm-2 m-bottom-15">
+                                        <label>Invoice Date</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control datepicker" data-dateformat="dd/mm/yy" ng-model="editData.invoiceDate">
+                                            <div class="input-group-addon"><i class="fa fa-calendar"></i></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-sm-2 m-bottom-15">
+                                        <label>Season</label>
+                                        <select name="season" class="form-control" ng-model="editData.season" ng-options="season.seasonValue as season.seasonText for season in supportData.seasons" ng-change="selectedSeason(editData.season)">
+                                            <option value=""></option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-sm-2 m-bottom-15">
+                                        <label>Factory Invoice No</label>
+                                        <input type="text" class="form-control" ng-model="editData.factoryInvoiceNo" />
+                                    </div>
+
+                                    <div class="col-sm-2 m-bottom-15">
+                                        <label>Remark</label>
+                                        <input type="text" class="form-control" ng-model="editData.remark" />
+                                    </div>
+
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-sm-6 m-bottom-15">
+                                        <label>Supplier</label>
+                                        <span class="form-control">{{editData.supplierNM}}</span>
+                                    </div>
+
+                                    <div class="col-sm-2 m-bottom-15">
+                                        <label>Company</label>
+                                        <select name="company" class="form-control" ng-model="editData.companyID" ng-options="company.companyID as company.companyNM for company in supportData.companyDTOs">
+                                        </select>
+                                    </div>
+
+                                    <div class="col-sm-2 m-bottom-15">
+                                        <label>Status</label>
+                                        <span class="form-control">{{getStatusText()}}</span>
+                                    </div>
+
+                                    <div class="col-sm-2 m-bottom-15">
+                                        <label>Cost Type</label>
+                                        <select name="factoryCostTypeID" class="form-control" ng-model="editData.factoryCostTypeID" ng-options="item.factoryCostTypeID as item.factoryCostTypeNM for item in supportData.factoryCostTypes">
+                                            <option value=""></option>
+                                        </select>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            <div class="tab-pane" id="tracking">
+                                <div class="row">
+                                    <div class="col-sm-2 m-bottom-15">
+                                        <label>Created By</label>
+                                        <span class="form-control">
+                                            <a ng-show="(editData.createdBy!=null && editData.creatorName2!=null)" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{editData.createdBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                <i class="fa fa-user"></i> {{editData.creatorName2}}
+                                            </a>
+                                            <span ng-show="(editData.createdBy!=null && editData.creatorName2==null && editData.creatorName!=null)">{{editData.creatorName}}</span>
+                                        </span>
+                                    </div>
+
+                                    <div class="col-sm-2 m-bottom-15">
+                                        <label>Created Date</label>
+                                        <span class="form-control">{{editData.createdDate}}</span>
+                                    </div>
+
+                                    <div class="col-sm-2 m-bottom-15">
+                                        <label>Updated By</label>
+                                        <span class="form-control">
+                                            <a ng-show="(editData.updatedBy!=null && editData.updatorName2!=null)" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{editData.updatedBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                <i class="fa fa-user"></i> {{editData.updatorName2}}
+                                            </a>
+                                            <span ng-show="(editData.updatedBy!=null && editData.updatorName2==null && editData.updatorName!=null)">{{editData.updatorName}}</span>
+                                        </span>
+                                    </div>
+                                    <div class="col-sm-2 m-bottom-15">
+                                        <label>Updated Date</label>
+                                        <span class="form-control">{{editData.updatedDate}}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+        </article>
+
+        <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12" ng-if="editData.invoiceType==1">
+            <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+                <header>
+                    <ul class="nav nav-tabs pull-left in">
+                        <li class="active">
+                            <a data-toggle="tab" href="#hb3"> <i class="fa fa-database"></i> <span class="hidden-mobile hidden-tablet">Product</span> </a>
+                        </li>
+                        <li>
+                            <a data-toggle="tab" href="#hb4"> <i class="fa fa-database"></i> <span class="hidden-mobile hidden-tablet">Sparepart</span> </a>
+                        </li>
+                        <li>
+                            <a data-toggle="tab" href="#hb5"> <i class="fa fa-database"></i> <span class="hidden-mobile hidden-tablet">Sample</span> </a>
+                        </li>
+                    </ul>
+                </header>
+                <div>
+                    <div class="jarviswidget-editbox"></div>
+
+                    <div class="widget-body">
+                        <div class="tab-content">
+
+                            <div class="tab-pane active" id="hb3">
+                                <div class="row">
+                                    <div class="col-sm-12 m-bottom-15">
+                                        <div class="tilsoft-table">
+                                            <div class="tilsoft-table-body" style="width: 1600px;margin-top:0px">
+                                                <table>
+                                                    <tr>
+                                                        <th style="width: 80px" data-colname="ClientUD">Client / <br />Order No</th>
+                                                        <th style="width: 140px" data-colname="LoadingPlanUD">Loading Plan Info</th>
+                                                        <th data-colname="Description">Description</th>
+                                                        <th style="width: 80px" data-colname="Quantity">Quan tity</th>
+                                                        <th style="width: 110px" data-colname="UnitPrice" ng-if="editData.userOfficeID!=4">Unit Price</th>
+                                                        <th style="width: 140px" data-colname="Amount" ng-if="editData.userOfficeID!=4">Amount</th>
+                                                        <th style="width: 110px" data-colname="UnitPrice">Factory Price</th>
+                                                        <th style="width: 140px" data-colname="Amount">Factory Amount</th>
+                                                        <th style="width: 110px" data-colname="QuotationPurchasingPrice" ng-if="editData.userOfficeID!=4">Quotation Purchasing Price</th>
+                                                        <th style="width: 110px" data-colname="QuotationSalePrice" ng-if="editData.userOfficeID!=4">Quotation Sale Price</th>
+                                                        <th style="width: 120px" data-colname="priceStatus">Price Status</th>
+                                                        <th style="width: 140px" data-colname="FactoryProformaPrice">Factory Proforma Price</th>
+                                                    </tr>
+                                                    <tr ng-repeat="item in editData.purchasingInvoiceDetails | orderBy : 'loadingPlanDetailID'" style="background:  {{item.isDiffPrice ? '#ff4646' : 'none'}}">
+                                                        <td>
+                                                            <a title="Client" href="@Url.Action("Edit","Client")/{{item.clientID}}" target="_blank">{{item.clientUD}}</a>
+                                                            <br />
+                                                            <a title="Order No" href="@Url.Action("Edit","SaleOrder")/{{item.saleOrderID}}/{{item.offerID}}" target="_blank">{{item.proformaInvoiceNo}}</a>
+                                                        </td>
+                                                        <td>
+                                                            <a title="Loading Ref" href="@Url.Action("Edit","LoadingPlan")/{{item.loadingPlanID}}" target="_blank">{{item.loadingPlanUD}}</a>
+                                                            <br />
+                                                            <a title="Container No" href="@Url.Action("Edit","LoadingPlan")/{{item.loadingPlanID}}" target="_blank">{{item.containerNo}}</a>
+                                                            <br />
+                                                            {{item.sealNo}}
+                                                            <br />
+                                                            {{item.containerTypeNM}}                                                                                                                        
+                                                        </td>
+                                                        <td>
+                                                            <u>{{item.articleCode}}</u>
+                                                            <br />
+                                                            {{item.description}}
+                                                        </td>
+                                                        <td style="text-align: right">
+                                                            @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Reset, HttpContext.Current) != "disabled")
+                                                            {
+                                                                <input type="text" ng-model="item.quantity" class="form-control" style="text-align:right" />
+                                                            }
+                                                            else
+                                                            {
+                                                                <input type="text" ng-model="item.quantity" class="form-control" style="text-align:right" ng-if="item.purchasingInvoiceDetailID < 1" />
+                                                                <span class="form-control" ng-if="item.purchasingInvoiceDetailID > 1">{{item.quantity}}</span>
+                                                            }
+
+                                                        </td>
+                                                        <td style="text-align:right" ng-if="editData.userOfficeID!=4">
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon">$</span>
+                                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Reset, HttpContext.Current) != "disabled")
+                                                                {
+                                                                    <input type="text" class="form-control furnindo-currency" ng-model="item.unitPrice" style="text-align:right" ng-currency fraction="2" currency-symbol="" />
+                                                                }
+                                                                else
+                                                                {
+                                                                    <input type="text" class="form-control furnindo-currency" ng-model="item.unitPrice" style="text-align:right" ng-currency fraction="2" currency-symbol="" ng-if="item.purchasingInvoiceDetailID < 1" />
+                                                                    <span class="form-control" ng-if="item.purchasingInvoiceDetailID > 1">{{item.unitPrice | number : 2}}</span>
+                                                                }
+                                                            </div>
+                                                        </td>
+                                                        <td style="text-align: right" ng-if="editData.userOfficeID!=4">
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon">$</span>
+                                                                <span class="form-control" style="text-align:right">
+                                                                    {{item.unitPrice * item.quantity | number : 2}}
+                                                                </span>
+                                                            </div>
+                                                        </td>
+
+                                                        <td style="text-align:right">
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon">$</span>
+                                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Reset, HttpContext.Current) != "disabled")
+                                                                {
+                                                                    <input type="text" class="form-control furnindo-currency" ng-model="item.factoryPrice" style="text-align:right" ng-currency fraction="2" currency-symbol="" />
+                                                                }
+                                                                else
+                                                                {
+                                                                    <input type="text" class="form-control furnindo-currency" ng-model="item.factoryPrice" style="text-align:right" ng-currency fraction="2" currency-symbol="" ng-if="item.purchasingInvoiceDetailID < 1" />
+                                                                    <span class="form-control" ng-if="item.purchasingInvoiceDetailID > 1">{{item.factoryPrice | number : 2}}</span>
+                                                                }
+                                                            </div>
+                                                        </td>
+                                                        <td style="text-align: right">
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon">$</span>
+                                                                <span class="form-control" style="text-align:right">
+                                                                    {{item.factoryPrice * item.quantity | number : 2}}
+                                                                </span>
+                                                            </div>
+                                                        </td>
+
+                                                        <td style="text-align: right" ng-if="editData.userOfficeID!=4">
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon">$</span>
+                                                                <span class="form-control" style="text-align:right">
+                                                                    {{item.quotationPurchasingPrice | number : 2}}
+                                                                </span>
+                                                            </div>
+                                                        </td>
+
+                                                        <td style="text-align: right" ng-if="editData.userOfficeID!=4">
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon">$</span>
+                                                                <span class="form-control" style="text-align:right">
+                                                                    {{item.quotationSalePrice | number : 2}}
+                                                                </span>
+                                                            </div>
+                                                        </td>
+
+                                                        <td>
+                                                            <span class="form-control">{{item.priceStatus}}</span>
+                                                        </td>
+
+                                                        <td style="text-align: right">
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon">$</span>
+                                                                <span class="form-control" style="text-align:right">
+                                                                    {{item.factoryProformaPrice | number : 2}}
+                                                                </span>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+
+                                                    @*sub total row*@
+                                                    <tr>
+                                                        <td colspan="3" style="text-align:right; vertical-align:middle"><strong>Sub Total</strong></td>
+                                                        <td style="text-align: right"><span class="form-control">{{calTotalQuantity() | number : 0}}</span></td>
+                                                        <td ng-if="editData.userOfficeID!=4"></td>
+                                                        <td style="text-align: right" ng-if="editData.userOfficeID!=4">
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon">$</span>
+                                                                <span class="form-control" style="text-align:right">
+                                                                    {{calTotalAmount() | number : 2}}
+                                                                </span>
+                                                            </div>
+                                                        </td>
+                                                        <td></td>
+                                                        <td style="text-align: right">
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon">$</span>
+                                                                <span class="form-control" style="text-align:right">
+                                                                    {{calTotalFactoryAmount() | number : 2}}
+                                                                </span>
+                                                            </div>
+                                                        </td>
+                                                        <td colspan="4"></td>
+                                                    </tr>
+
+                                                    @*deposit row*@
+                                                    <tr>
+                                                        <td colspan="3" style="text-align:right; vertical-align:middle"><strong>Deposit</strong></td>
+                                                        <td style="text-align: right">
+                                                            <div class="input-group">
+                                                                @*<span class="input-group-addon">%</span>
+                                                                <input type="text" class="form-control furnindo-currency" ng-model="editData.depositPercent" style="text-align:right" ng-currency fraction="1" currency-symbol="" />*@
+                                                            </div>
+                                                        </td>
+                                                        <td ng-if="editData.userOfficeID!=4"></td>
+                                                        <td style="text-align: right" ng-if="editData.userOfficeID!=4">
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon">$</span>
+                                                                <input type="text" ng-readonly="editData.isConfirmedPrice" class="form-control furnindo-currency" ng-model="editData.depositAmount" style="text-align:right" ng-currency fraction="2" currency-symbol="" />
+                                                            </div>
+                                                        </td>
+                                                        <td></td>
+                                                        <td style="text-align: right">
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon">$</span>
+                                                                <input type="text" ng-readonly="editData.isConfirmedPrice" class="form-control furnindo-currency" ng-model="editData.depositFactoryAmount" style="text-align:right" ng-currency fraction="2" currency-symbol="" />
+                                                            </div>
+                                                        </td>
+                                                        <td colspan="4"></td>
+                                                    </tr>
+
+                                                    @*grand total row*@
+                                                    <tr>
+                                                        <td colspan="3" style="text-align:right; vertical-align:middle"><strong>Grand Total</strong></td>
+                                                        <td style="text-align: right">
+                                                        </td>
+                                                        <td ng-if="editData.userOfficeID!=4"></td>
+                                                        <td style="text-align: right" ng-if="editData.userOfficeID!=4">
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon">$</span>
+                                                                <span class="form-control" style="text-align:right" ng-if="!isNumber(editData.depositAmount)">
+                                                                    {{calTotalAmount() | number : 2}}
+                                                                </span>
+                                                                <span class="form-control" style="text-align:right" ng-if="isNumber(editData.depositAmount)">
+                                                                    {{calTotalAmount() - editData.depositAmount | number : 2}}
+                                                                </span>
+                                                            </div>
+                                                        </td>
+                                                        <td></td>
+                                                        <td style="text-align: right">
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon">$</span>
+                                                                <span class="form-control" style="text-align:right" ng-if="!isNumber(editData.depositFactoryAmount)">
+                                                                    {{calTotalFactoryAmount() | number : 2}}
+                                                                </span>
+                                                                <span class="form-control" style="text-align:right"ng-if="isNumber(editData.depositFactoryAmount)">
+                                                                    {{calTotalFactoryAmount() - editData.depositFactoryAmount | number : 2}}
+                                                                </span>
+                                                            </div>
+                                                        </td>
+                                                        <td colspan="4"></td>
+                                                    </tr>
+
+
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <div class="tab-pane" id="hb4">
+                                <div class="row">
+                                    <div class="col-sm-12 m-bottom-15">
+                                        <div class="tilsoft-table">
+                                            <div class="tilsoft-table-body" style="width: 1500px;margin-top:0px">
+                                                <table>
+                                                    <tr>
+                                                        <th style="width: 80px" data-colname="ClientUD">Client / <br />Order No</th>
+                                                        <th style="width: 140px" data-colname="LoadingPlanUD">Loading Plan Info</th>
+                                                        <th data-colname="Description">Description</th>
+
+                                                        <th style="width: 80px" data-colname="Quantity">Quan tity</th>
+                                                        <th style="width: 110px" data-colname="UnitPrice" ng-if="editData.userOfficeID!=4">Unit Price</th>
+                                                        <th style="width: 140px" data-colname="Amount" ng-if="editData.userOfficeID!=4">Amount</th>
+                                                        <th style="width: 110px" data-colname="UnitPrice">Factory Price</th>
+                                                        <th style="width: 140px" data-colname="Amount">Factory Amount</th>
+                                                        <th style="width: 110px" data-colname="QuotationPurchasingPrice" ng-if="editData.userOfficeID!=4">Quotation Purchasing Price</th>
+                                                        <th style="width: 110px" data-colname="QuotationSalePrice" ng-if="editData.userOfficeID!=4">Quotation Sale Price</th>
+                                                        <th style="width: 120px" data-colname="priceStatus">Price Status</th>
+                                                        <th style="width: 140px" data-colname="FactoryProformaPrice">Factory Proforma Price</th>
+                                                    </tr>
+                                                    <tr ng-repeat="item in editData.purchasingInvoiceSparepartDetails | orderBy : 'loadingPlanSparepartDetailID'">
+                                                        <td>
+                                                            <a title="Client" href="@Url.Action("Edit","Client")/{{item.clientID}}" target="_blank">{{item.clientUD}}</a>
+                                                            <br />
+                                                            <a title="Order No" href="@Url.Action("Edit","SaleOrder")/{{item.saleOrderID}}/{{item.offerID}}" target="_blank">{{item.proformaInvoiceNo}}</a>
+                                                        </td>
+                                                        <td>
+                                                            <a title="Loading Ref" href="@Url.Action("Edit","LoadingPlan")/{{item.loadingPlanID}}" target="_blank">{{item.loadingPlanUD}}</a>
+                                                            <br />
+                                                            <a title="Container No" href="@Url.Action("Edit","LoadingPlan")/{{item.loadingPlanID}}" target="_blank">{{item.containerNo}}</a>
+                                                            <br />
+                                                            {{item.sealNo}}
+                                                            <br />
+                                                            {{item.containerTypeNM}}
+                                                        </td>
+                                                        <td>
+                                                            <u>{{item.articleCode}}</u>
+                                                            <br />
+                                                            {{item.description}}
+                                                        </td>
+
+                                                        <td style="text-align: right">
+                                                            @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Reset, HttpContext.Current) != "disabled")
+                                                            {
+                                                                <input type="text" ng-model="item.quantity" class="form-control" style="text-align:right" />
+                                                            }
+                                                            else
+                                                            {
+                                                                <input type="text" ng-model="item.quantity" class="form-control" style="text-align:right" ng-if="item.purchasingInvoiceSparepartDetailID < 1" />
+                                                                <span class="form-control" ng-if="item.purchasingInvoiceSparepartDetailID > 1">{{item.quantity}}</span>
+                                                            }
+                                                        </td>
+                                                        <td style="text-align:right" ng-if="editData.userOfficeID!=4">
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon">$</span>
+                                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Reset, HttpContext.Current) != "disabled")
+                                                                {
+                                                                    <input type="text" class="form-control furnindo-currency" ng-model="item.unitPrice" style="text-align:right" ng-currency fraction="2" currency-symbol="" />
+                                                                }
+                                                                else
+                                                                {
+                                                                    <input type="text" class="form-control furnindo-currency" ng-model="item.unitPrice" style="text-align:right" ng-currency fraction="2" currency-symbol="" ng-if="item.purchasingInvoiceSparepartDetailID < 1" />
+                                                                    <span class="form-control" ng-if="item.purchasingInvoiceSparepartDetailID > 1">{{item.unitPrice | number : 2}}</span>
+                                                                }
+                                                            </div>
+                                                        </td>
+                                                        <td style="text-align: right" ng-if="editData.userOfficeID!=4">
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon">$</span>
+                                                                <span class="form-control" style="text-align:right">
+                                                                    {{item.unitPrice * item.quantity | number : 2}}
+                                                                </span>
+                                                            </div>
+                                                        </td>
+
+                                                        <td style="text-align:right">
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon">$</span>
+                                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Reset, HttpContext.Current) != "disabled")
+                                                                {
+                                                                    <input type="text" class="form-control furnindo-currency" ng-model="item.factoryPrice" style="text-align:right" ng-currency fraction="2" currency-symbol="" />
+                                                                }
+                                                                else
+                                                                {
+                                                                    <input type="text" class="form-control furnindo-currency" ng-model="item.factoryPrice" style="text-align:right" ng-currency fraction="2" currency-symbol="" ng-if="item.purchasingInvoiceSparepartDetailID < 1" />
+                                                                    <span class="form-control" ng-if="item.purchasingInvoiceSparepartDetailID > 1">{{item.factoryPrice | number : 2}}</span>
+                                                                }
+                                                            </div>
+                                                        </td>
+                                                        <td style="text-align: right">
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon">$</span>
+                                                                <span class="form-control" style="text-align:right">
+                                                                    {{item.factoryPrice * item.quantity | number : 2}}
+                                                                </span>
+                                                            </div>
+                                                        </td>
+
+
+                                                        <td style="text-align: right" ng-if="editData.userOfficeID!=4">
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon">$</span>
+                                                                <span class="form-control" style="text-align:right">
+                                                                    {{item.quotationPurchasingPrice | number : 2}}
+                                                                </span>
+                                                            </div>
+                                                        </td>
+
+                                                        <td style="text-align: right" ng-if="editData.userOfficeID!=4">
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon">$</span>
+                                                                <span class="form-control" style="text-align:right">
+                                                                    {{item.quotationSalePrice | number : 2}}
+                                                                </span>
+                                                            </div>
+                                                        </td>
+
+                                                        <td>
+                                                            <span class="form-control">{{item.priceStatus}}</span>
+                                                        </td>
+
+                                                        <td style="text-align: right">
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon">$</span>
+                                                                <span class="form-control" style="text-align:right">
+                                                                    {{item.factoryProformaPrice | number : 2}}
+                                                                </span>
+                                                            </div>
+                                                        </td>
+
+                                                    </tr>
+
+                                                    @*total row*@
+                                                    <tr>
+                                                        <td colspan="3" style="text-align:right; vertical-align:middle"><strong>Total</strong></td>
+                                                        <td style="text-align: right"><span class="form-control">{{calTotalQuantitySparepart() | number : 0}}</span></td>
+                                                        <td ng-if="editData.userOfficeID!=4"></td>
+                                                        <td style="text-align: right" ng-if="editData.userOfficeID!=4">
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon">$</span>
+                                                                <span class="form-control" style="text-align:right">
+                                                                    {{calTotalAmountSparepart() | number : 2}}
+                                                                </span>
+                                                            </div>
+                                                        </td>
+                                                        <td></td>
+
+                                                        <td style="text-align: right">
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon">$</span>
+                                                                <span class="form-control" style="text-align:right">
+                                                                    {{calTotalFactoryAmountSparepart() | number : 2}}
+                                                                </span>
+                                                            </div>
+                                                        </td>
+
+                                                        <td colspan="4"></td>
+                                                    </tr>
+
+                                                    @*deposit*@
+                                                    <tr>
+                                                        <td colspan="3" style="text-align:right; vertical-align:middle"><strong>Deposit</strong></td>
+                                                        <td style="text-align: right">
+                                                            <div class="input-group">
+                                                                @*<span class="input-group-addon">%</span>
+                                                                <input type="text" class="form-control furnindo-currency" ng-model="editData.depositPercent" style="text-align:right" ng-currency fraction="1" currency-symbol="" />*@
+                                                            </div>
+                                                        </td>
+                                                        <td ng-if="editData.userOfficeID!=4"></td>
+                                                        <td style="text-align: right" ng-if="editData.userOfficeID!=4">
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon">$</span>
+                                                                <input type="text" ng-readonly="editData.isConfirmedPrice" class="form-control furnindo-currency" ng-model="editData.depositAmountSparepart" style="text-align:right" ng-currency fraction="2" currency-symbol="" />
+                                                            </div>
+                                                        </td>
+                                                        <td></td>
+
+                                                        <td style="text-align: right">
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon">$</span>
+                                                                <input type="text" ng-readonly="editData.isConfirmedPrice" class="form-control furnindo-currency" ng-model="editData.depositFactoryAmountSparepart" style="text-align:right" ng-currency fraction="2" currency-symbol="" />
+                                                            </div>
+                                                        </td>
+
+                                                        <td colspan="4"></td>
+                                                    </tr>
+
+                                                    @*grand total row*@
+                                                    <tr>
+                                                        <td colspan="3" style="text-align:right; vertical-align:middle"><strong>Grand Total</strong></td>
+                                                        <td style="text-align: right"></td>
+                                                        <td ng-if="editData.userOfficeID!=4"></td>
+                                                        <td style="text-align: right" ng-if="editData.userOfficeID!=4">
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon">$</span>
+                                                                <span class="form-control" style="text-align:right" ng-if="!isNumber(editData.depositAmountSparepart)">
+                                                                    {{calTotalAmountSparepart() | number : 2}}
+                                                                </span>
+                                                                <span class="form-control" style="text-align:right" ng-if="isNumber(editData.depositAmountSparepart)">
+                                                                    {{calTotalAmountSparepart() - editData.depositAmountSparepart | number : 2}}
+                                                                </span>
+                                                            </div>
+                                                        </td>
+                                                        <td></td>
+
+                                                        <td style="text-align: right">
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon">$</span>
+                                                                <span class="form-control" style="text-align:right" ng-if="!isNumber(editData.depositFactoryAmountSparepart)">
+                                                                    {{calTotalFactoryAmountSparepart() | number : 2}}
+                                                                </span>
+                                                                <span class="form-control" style="text-align:right" ng-if="isNumber(editData.depositFactoryAmountSparepart)">
+                                                                    {{calTotalFactoryAmountSparepart() - editData.depositFactoryAmountSparepart | number : 2}}
+                                                                </span>
+                                                            </div>
+                                                        </td>
+
+                                                        <td colspan="4"></td>
+                                                    </tr>
+
+
+
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            
+                            @*SamPle Tab*@
+                            <div class="tab-pane" id="hb5">
+                                <div class="row">
+                                    <div class="col-sm-12 m-bottom-15">
+                                        <div class="tilsoft-table">
+                                            <div class="tilsoft-table-body" style="width: 1600px;margin-top:0px">
+                                                <table>
+                                                    <tr>
+                                                        <th style="width: 80px" data-colname="ClientUD">Client / <br />Order No</th>
+                                                        <th style="width: 140px" data-colname="LoadingPlanUD">Loading Plan Info</th>
+                                                        <th data-colname="Description">Description</th>
+                                                        <th style="width: 80px" data-colname="Quantity">Quan tity</th>
+                                                        <th style="width: 110px" data-colname="UnitPrice" ng-if="editData.userOfficeID!=4">Unit Price</th>
+                                                        <th style="width: 140px" data-colname="Amount" ng-if="editData.userOfficeID!=4">Amount</th>
+                                                        <th style="width: 110px" data-colname="UnitPrice">Factory Price</th>
+                                                        <th style="width: 140px" data-colname="Amount">Factory Amount</th>
+                                                        <th style="width: 110px" data-colname="QuotationPurchasingPrice" ng-if="editData.userOfficeID!=4">Quotation Purchasing Price</th>
+                                                        <th style="width: 110px" data-colname="QuotationSalePrice" ng-if="editData.userOfficeID!=4">Quotation Sale Price</th>
+                                                        <th style="width: 120px" data-colname="priceStatus">Price Status</th>
+                                                        <th style="width: 140px" data-colname="FactoryProformaPrice">Factory Proforma Price</th>
+                                                    </tr>
+                                                    <tr ng-repeat="item in editData.purchasingInvoiceSampleDetails | orderBy : 'loadingPlanSampleDetailID'" style="background:  {{item.isDiffPrice ? '#ff4646' : 'none'}}">
+                                                        <td>
+                                                            <a title="Client" href="@Url.Action("Edit","Client")/{{item.clientID}}" target="_blank">{{item.clientUD}}</a>
+                                                            <br />
+                                                            <a title="Order No" href="@Url.Action("Edit","SaleOrder")/{{item.saleOrderID}}/{{item.offerID}}" target="_blank">{{item.proformaInvoiceNo}}</a>
+                                                        </td>
+                                                        <td>
+                                                            <a title="Loading Ref" href="@Url.Action("Edit","LoadingPlan")/{{item.loadingPlanID}}" target="_blank">{{item.loadingPlanUD}}</a>
+                                                            <br />
+                                                            <a title="Container No" href="@Url.Action("Edit","LoadingPlan")/{{item.loadingPlanID}}" target="_blank">{{item.containerNo}}</a>
+                                                            <br />
+                                                            {{item.sealNo}}
+                                                            <br />
+                                                            {{item.containerTypeNM}}                                                                                                                        
+                                                        </td>
+                                                        <td>
+                                                            <u>{{item.articleCode}}</u>
+                                                            <br />
+                                                            {{item.description}}
+                                                        </td>
+                                                        <td style="text-align: right">
+                                                            @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Reset, HttpContext.Current) != "disabled")
+                                                            {
+                                                                <input type="text" ng-model="item.quantity" class="form-control" style="text-align:right" />
+                                                            }
+                                                            else
+                                                            {
+                                                                <input type="text" ng-model="item.quantity" class="form-control" style="text-align:right" ng-if="item.purchasingInvoiceDetailID < 1" />
+                                                                <span class="form-control" ng-if="item.purchasingInvoiceDetailID > 1">{{item.quantity}}</span>
+                                                            }
+                                                        </td>
+                                                        <td style="text-align:right" ng-if="editData.userOfficeID!=4">
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon">$</span>
+                                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Reset, HttpContext.Current) != "disabled")
+                                                                {
+                                                                    <input type="text" class="form-control furnindo-currency" ng-model="item.unitPrice" style="text-align:right" ng-currency fraction="2" currency-symbol="" />
+                                                                }
+                                                                else
+                                                                {
+                                                                    <input type="text" class="form-control furnindo-currency" ng-model="item.unitPrice" style="text-align:right" ng-currency fraction="2" currency-symbol="" ng-if="item.purchasingInvoiceDetailID < 1" />
+                                                                    <span class="form-control" ng-if="item.purchasingInvoiceDetailID > 1">{{item.unitPrice | number : 2}}</span>
+                                                                }
+                                                            </div>
+                                                        </td>
+                                                        <td style="text-align: right" ng-if="editData.userOfficeID!=4">
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon">$</span>
+                                                                <span class="form-control" style="text-align:right">
+                                                                    {{item.unitPrice * item.quantity | number : 2}}
+                                                                </span>
+                                                            </div>
+                                                        </td>
+
+                                                        <td style="text-align:right">
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon">$</span>
+                                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Reset, HttpContext.Current) != "disabled")
+                                                                {
+                                                                    <input type="text" class="form-control furnindo-currency" ng-model="item.factoryPrice" style="text-align:right" ng-currency fraction="2" currency-symbol="" />
+                                                                }
+                                                                else
+                                                                {
+                                                                    <input type="text" class="form-control furnindo-currency" ng-model="item.factoryPrice" style="text-align:right" ng-currency fraction="2" currency-symbol="" ng-if="item.purchasingInvoiceDetailID < 1" />
+                                                                    <span class="form-control" ng-if="item.purchasingInvoiceDetailID > 1">{{item.factoryPrice | number : 2}}</span>
+                                                                }
+                                                            </div>
+                                                        </td>
+                                                        <td style="text-align: right">
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon">$</span>
+                                                                <span class="form-control" style="text-align:right">
+                                                                    {{item.factoryPrice * item.quantity | number : 2}}
+                                                                </span>
+                                                            </div>
+                                                        </td>
+
+                                                        <td style="text-align: right" ng-if="editData.userOfficeID!=4">
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon">$</span>
+                                                                <span class="form-control" style="text-align:right">
+                                                                    {{item.quotationPurchasingPrice | number : 2}}
+                                                                </span>
+                                                            </div>
+                                                        </td>
+
+                                                        <td style="text-align: right" ng-if="editData.userOfficeID!=4">
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon">$</span>
+                                                                <span class="form-control" style="text-align:right">
+                                                                    {{item.quotationSalePrice | number : 2}}
+                                                                </span>
+                                                            </div>
+                                                        </td>
+
+                                                        <td>
+                                                            <span class="form-control">{{item.priceStatus}}</span>
+                                                        </td>
+
+                                                        <td style="text-align: right">
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon">$</span>
+                                                                <span class="form-control" style="text-align:right">
+                                                                    {{item.factoryProformaPrice | number : 2}}
+                                                                </span>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+
+                                                    @*sub total row*@
+                                                    <tr>
+                                                        <td colspan="3" style="text-align:right; vertical-align:middle"><strong>Sub Total</strong></td>
+                                                        <td style="text-align: right"><span class="form-control">{{calTotalSampleQuantity() | number : 0}}</span></td>
+                                                        <td ng-if="editData.userOfficeID!=4"></td>
+                                                        <td style="text-align: right" ng-if="editData.userOfficeID!=4">
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon">$</span>
+                                                                <span class="form-control" style="text-align:right">
+                                                                    {{calTotalSampleAmount() | number : 2}}
+                                                                </span>
+                                                            </div>
+                                                        </td>
+                                                        <td></td>
+                                                        <td style="text-align: right">
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon">$</span>
+                                                                <span class="form-control" style="text-align:right">
+                                                                    {{calTotalFactorySampleAmount() | number : 2}}
+                                                                </span>
+                                                            </div>
+                                                        </td>
+                                                        <td colspan="4"></td>
+                                                    </tr>
+
+                                                    @*deposit row*@
+                                                    <tr>
+                                                        <td colspan="3" style="text-align:right; vertical-align:middle"><strong>Deposit</strong></td>
+                                                        <td style="text-align: right">
+                                                            <div class="input-group">
+                                                                @*<span class="input-group-addon">%</span>
+                                                                <input type="text" class="form-control furnindo-currency" ng-model="editData.depositPercent" style="text-align:right" ng-currency fraction="1" currency-symbol="" />*@
+                                                            </div>
+                                                        </td>
+                                                        <td ng-if="editData.userOfficeID!=4"></td>
+                                                        <td style="text-align: right" ng-if="editData.userOfficeID!=4">
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon">$</span>
+                                                                <input type="text" ng-readonly="editData.isConfirmedPrice" class="form-control furnindo-currency" ng-model="editData.depositAmount" style="text-align:right" ng-currency fraction="2" currency-symbol="" />
+                                                            </div>
+                                                        </td>
+                                                        <td></td>
+                                                        <td style="text-align: right">
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon">$</span>
+                                                                <input type="text" ng-readonly="editData.isConfirmedPrice" class="form-control furnindo-currency" ng-model="editData.depositFactoryAmount" style="text-align:right" ng-currency fraction="2" currency-symbol="" />
+                                                            </div>
+                                                        </td>
+                                                        <td colspan="4"></td>
+                                                    </tr>
+
+                                                    @*grand total row*@
+                                                    <tr>
+                                                        <td colspan="3" style="text-align:right; vertical-align:middle"><strong>Grand Total</strong></td>
+                                                        <td style="text-align: right">
+                                                        </td>
+                                                        <td ng-if="editData.userOfficeID!=4"></td>
+                                                        <td style="text-align: right" ng-if="editData.userOfficeID!=4">
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon">$</span>
+                                                                <span class="form-control" style="text-align:right" ng-if="!isNumber(editData.depositAmount)">
+                                                                    {{calTotalSampleAmount() | number : 2}}
+                                                                </span>
+                                                                <span class="form-control" style="text-align:right" ng-if="isNumber(editData.depositAmount)">
+                                                                    {{calTotalSampleAmount() - editData.depositAmount | number : 2}}
+                                                                </span>
+                                                            </div>
+                                                        </td>
+                                                        <td></td>
+                                                        <td style="text-align: right">
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon">$</span>
+                                                                <span class="form-control" style="text-align:right" ng-if="!isNumber(editData.depositFactoryAmount)">
+                                                                    {{calTotalFactorySampleAmount() | number : 2}}
+                                                                </span>
+                                                                <span class="form-control" style="text-align:right" ng-if="isNumber(editData.depositFactoryAmount)">
+                                                                    {{calTotalFactorySampleAmount() - editData.depositFactoryAmount | number : 2}}
+                                                                </span>
+                                                            </div>
+                                                        </td>
+                                                        <td colspan="4"></td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </article>
+
+        <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12" ng-if="editData.invoiceType==2">
+            <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+                <header>
+                    <ul class="nav nav-tabs pull-left in">
+
+                        <li class="active">
+                            <a data-toggle="tab" href="#tabExtraFree"> <i class="fa fa-database"></i> <span class="hidden-mobile hidden-tablet">Other</span> </a>
+                        </li>
+                    </ul>
+                </header>
+                <div>
+                    <div class="jarviswidget-editbox"></div>
+
+                    <div class="widget-body">
+                        <div class="tab-content">
+
+                            <div class="tab-pane active" id="tabExtraFree">
+                                <div class="row">
+                                    <div class="col-sm-12 m-bottom-15">
+                                        <a class="btn btn-primary btn-xs font-11" href="javascript:void(0);" ng-click="addFreeExtraItemDetail($event)" style="margin-bottom: 10px;"><i class="fa fa-plus"></i>Add extra amount</a>
+                                        <div class="tilsoft-table">
+                                            <div class="tilsoft-table-body" style="width: 1000px;margin-top:0px">
+                                                <table>
+                                                    <tbody>
+                                                        <tr>
+                                                            <th style="width: 60px"></th>
+                                                            <th data-colname="Description">Remark</th>
+                                                            <th style="width: 150px" data-colname="Amount">Amount</th>
+                                                        </tr>
+                                                        <tr ng-repeat="item in editData.purchasingInvoiceExtraDetails">
+                                                            <td style="width: 60px; text-align: center;">
+                                                                <a href="#" class="btn btn-danger btn-xs font-11" title="remove extra item" ng-click="removeFreeExtraItemDetail($event, $index)"><i class="fa fa-times"></i>Del</a>
+                                                            </td>
+                                                            <td><input ng-model="item.remark" class="form-control" /></td>
+                                                            <td style="width: 150px;">
+                                                                <div class="input-group">
+                                                                    <span class="input-group-addon">$</span>
+                                                                    <input type="text" class="form-control furnindo-currency" ng-model="item.amount" style="text-align:right" ng-currency fraction="2" currency-symbol="" />
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </article>
+
+        <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12" ng-if="editData.invoiceType==3">
+            <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+                <header>
+                    <ul class="nav nav-tabs pull-left in">
+
+                        <li class="active">
+                            <a data-toggle="tab" href="#tabExtraProduct"> <i class="fa fa-database"></i> <span class="hidden-mobile hidden-tablet">Product</span> </a>
+                        </li>
+                        <li>
+                            <a data-toggle="tab" href="#tabExtraSparepart"> <i class="fa fa-database"></i> <span class="hidden-mobile hidden-tablet">Sparepart</span> </a>
+                        </li>
+                    </ul>
+                </header>
+                <div>
+                    <div class="jarviswidget-editbox"></div>
+
+                    <div class="widget-body">
+                        <div class="tab-content">
+
+                            <div class="tab-pane active" id="tabExtraProduct">
+                                <div class="row">
+                                    <div class="col-sm-12 m-bottom-15">
+                                        <div class="tilsoft-table">
+                                            <div class="tilsoft-table-body" style="width: 1500px;margin-top:0px">
+                                                <table>
+                                                    <tr>
+                                                        <th style="width: 60px" data-colname="ClientUD">Client</th>
+                                                        <th style="width: 70px" data-colname="ProformaInvoiceNo">Order No</th>
+                                                        <th style="width: 140px" data-colname="LoadingPlanUD">Loading Ref</th>
+                                                        <th style="width: 120px" data-colname="ContainerNo">Container No</th>
+                                                        <th style="width: 110px" data-colname="SealNo">Seal No</th>
+                                                        <th style="width: 60px" data-colname="ContainerTypeNM">Cont Type</th>
+                                                        <th style="width: 110px" data-colname="ArticleCode">ArticleCode</th>
+                                                        <th data-colname="Description">Description</th>
+                                                        <th style="width: 60px" data-colname="Quantity">Quan tity</th>
+                                                        <th style="width: 110px" data-colname="UnitPrice">Factory Price</th>
+                                                        <th style="width: 140px" data-colname="Amount">Amount</th>
+                                                    </tr>
+                                                    <tr ng-repeat="item in editData.purchasingInvoiceExtraDetails | filter : { goodsType : 'PRODUCT'}">
+                                                        <td>{{item.clientUD}}</td>
+                                                        <td>{{item.proformaInvoiceNo}}</td>
+                                                        <td>{{item.loadingPlanUD}}</td>
+                                                        <td>{{item.containerNo}}</td>
+                                                        <td>{{item.sealNo}}</td>
+                                                        <td>{{item.containerTypeNM}}</td>
+                                                        <td>{{item.articleCode}}</td>
+                                                        <td>{{item.description}}</td>
+                                                        <td style="text-align: right"><input type="text" ng-model="item.quantity" class="form-control" style="text-align:right" /></td>
+                                                        <td style="text-align:right">
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon">$</span>
+                                                                <input type="text" class="form-control furnindo-currency" ng-model="item.factoryPrice" style="text-align:right" ng-currency fraction="2" currency-symbol="" />
+                                                            </div>
+                                                        </td>
+                                                        <td style="text-align: right">
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon">$</span>
+                                                                <span class="form-control" style="text-align:right">
+                                                                    {{item.factoryPrice * item.quantity | number : 2}}
+                                                                </span>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td colspan="8">Total():</td>
+                                                        <td style="text-align: right"><span class="form-control">{{calTotalQuantityExtra() | number : 0}}</span></td>
+                                                        <td></td>
+                                                        <td style="text-align: right">
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon">$</span>
+                                                                <span class="form-control" style="text-align:right">
+                                                                    {{calTotalAmountExtra() | number : 2}}
+                                                                </span>
+                                                            </div>
+                                                        </td>
+
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane" id="tabExtraSparepart">
+                                <div class="row">
+                                    <div class="col-sm-12 m-bottom-15">
+                                        <div class="tilsoft-table">
+                                            <div class="tilsoft-table-body" style="width: 1500px;margin-top:0px">
+                                                <table>
+                                                    <tr>
+                                                        <th style="width: 60px" data-colname="ClientUD">Client</th>
+                                                        <th style="width: 70px" data-colname="ProformaInvoiceNo">Order No</th>
+                                                        <th style="width: 140px" data-colname="LoadingPlanUD">Loading Ref</th>
+                                                        <th style="width: 120px" data-colname="ContainerNo">Container No</th>
+                                                        <th style="width: 110px" data-colname="SealNo">Seal No</th>
+                                                        <th style="width: 60px" data-colname="ContainerTypeNM">Cont Type</th>
+                                                        <th style="width: 110px" data-colname="ArticleCode">ArticleCode</th>
+                                                        <th data-colname="Description">Description</th>
+                                                        <th style="width: 60px" data-colname="Quantity">Quan tity</th>
+                                                        <th style="width: 110px" data-colname="UnitPrice">Factory Price</th>
+                                                        <th style="width: 140px" data-colname="Amount">Amount</th>
+                                                    </tr>
+                                                    <tr ng-repeat="item in editData.purchasingInvoiceExtraDetails | filter : { goodsType : 'SPAREPART'}">
+                                                        <td>{{item.clientUD}}</td>
+                                                        <td>{{item.proformaInvoiceNo}}</td>
+                                                        <td>{{item.loadingPlanUD}}</td>
+                                                        <td>{{item.containerNo}}</td>
+                                                        <td>{{item.sealNo}}</td>
+                                                        <td>{{item.containerTypeNM}}</td>
+                                                        <td>{{item.articleCode}}</td>
+                                                        <td>{{item.description}}</td>
+                                                        <td style="text-align: right"><input type="text" ng-model="item.quantity" class="form-control" style="text-align:right" /></td>
+                                                        <td style="text-align:right">
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon">$</span>
+                                                                <input type="text" class="form-control furnindo-currency" ng-model="item.factoryPrice" style="text-align:right" ng-currency fraction="2" currency-symbol="" />
+                                                            </div>
+                                                        </td>
+                                                        <td style="text-align: right">
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon">$</span>
+                                                                <span class="form-control" style="text-align:right">
+                                                                    {{item.factoryPrice * item.quantity | number : 2}}
+                                                                </span>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td colspan="8">Total():</td>
+                                                        <td style="text-align: right"><span class="form-control">{{calTotalQuantityExtra() | number : 0}}</span></td>
+                                                        <td></td>
+                                                        <td style="text-align: right">
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon">$</span>
+                                                                <span class="form-control" style="text-align:right">
+                                                                    {{calTotalAmountExtra() | number : 2}}
+                                                                </span>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </article>
+
+    </div>
+</form>
+
+<div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="frmPrintOption" class="modal fade" style="display: none; z-index:1400;">
+    <div class="modal-dialog" style="margin-top:50px">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button aria-hidden="true" data-dismiss="modal" class="close" type="button">
+                    ×
+                </button>
+                <h4 id="myModalLabel" class="modal-title">Print Option</h4>
+            </div>
+            <div class="modal-body smart-form">
+                <fieldset>
+                    <div class="row">
+                        <section class="col col-12">
+                            <div class="">
+                                <label class="radio">
+                                    <input type="radio" name="print" ng-model="print_type" value="1" /><i></i>COMMERCIAL INVOICE
+                                </label>
+                            </div>
+
+                            <div class="">
+                                <label class="radio">
+                                    <input type="radio" name="print" ng-model="print_type" value="2" /><i></i>PACKING LIST
+                                </label>
+                            </div>
+
+                        </section>
+                    </div>
+                </fieldset>
+            </div>
+            <div class="modal-footer">
+                <button data-dismiss="modal" class="btn btn-default" type="button">
+                    CANCEL
+                </button>
+                <button class="btn btn-primary" type="button" ng-click="printOption(editData.purchasingInvoiceID, print_type)">
+                    PRINT
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section pagepopup
+{
+}
+
+@section FormAction {
+<ul id="sparks">
+
+    <li class="sparks-info">
+        <a href="@Url.Action("Index", "PurchasingInvoice")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+    </li>
+
+    <li class="sparks-info">
+        <a href="#" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Print, HttpContext.Current))" title="Print Option" ng-click="showPrintOption()"><i class="fa fa-print"></i></a>
+    </li>
+
+    <li class="sparks-info">
+        <a href="#" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="update($event)"><i class="fa fa-save"></i></a>
+    </li>
+
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default@(ViewBag.ID==0?" disabled":"") @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Approve, HttpContext.Current)) {{editData.isConfirmedPrice==true?'disabled' : ''}}" title="Confirm by factory" style="color: #0066ff; " ng-click="setConfirmPrice(true)"><i class="fa fa-check-square"></i></a>
+    </li>
+
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default@(ViewBag.ID==0?" disabled":"") @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Approve, HttpContext.Current)) {{editData.isConfirmedPrice==false?'disabled' : ''}}" title="Un-Confirm by factory" style="color: #ff0000;" ng-click="setConfirmPrice(false)"><i class="fa fa-reply-all"></i></a>
+    </li>
+
+    @*<li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default@(ViewBag.ID==0?" disabled":"") @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Print, HttpContext.Current))" title="Print Invoice" ng-click="print(@ViewBag.ID)"><i class="fa fa-print"></i></a>
+        </li>*@
+
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default@(ViewBag.ID==0?" disabled":"") @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Approve, HttpContext.Current)) {{editData.isConfirmed==true?'disabled' : ''}}" title="Confirm by AVT" style="color: #0066ff; " ng-click="setStatus($event,@ViewBag.ID,true, editData.invoiceType)"><i class="fa fa-check"></i></a>
+    </li>
+
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default@(ViewBag.ID==0?" disabled":"") @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Approve, HttpContext.Current)) {{editData.isConfirmed==false?'disabled' : ''}}" title="Un-Confirm by AVT" style="color: #ff0000;" ng-click="setStatus($event,@ViewBag.ID,false, editData.invoiceType)"><i class="fa fa-reply"></i></a>
+    </li>
+
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default {{editData.isConfirmedPrice==false?'disabled' : ''}}" title="Create credit note" ng-click="createPurchasingCreditNote($event)" style="color:#0026ff"><i class="fa fa-undo"></i></a>
+    </li>
+
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default {{editData.isConfirmedPrice==false?'disabled' : ''}}" title="Create extra invoice" ng-click="createExtraInvoice($event)" style="color:#0026ff" ng-if="editData.invoiceType==1"><i class="fa fa-database"></i></a>
+    </li>
+
+    @if (!string.IsNullOrEmpty(userManualUrl))
+    {
+        <li class="sparks-info">
+            <a target="_blank" href="@userManualUrl" class="btn btn-default" title="Help"><i class="fa fa-info"></i></a>
+        </li>
+    }
+    @*<li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default@(ViewBag.ID==0?" disabled":"") @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Print, HttpContext.Current))" title="Print Packing List" ng-click="printPackingList()"><i class="fa fa-print"></i></a>
+        </li>*@
+
+</ul>
+}
+
+@section pagejs {
+    <script src="~/Angular/app/purchasingInvoice/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/packinglist/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script type="text/javascript">
+
+    purchasingInvoiceService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/purchasingInvoice/';
+    purchasingInvoiceService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+    packingListService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/packinglist/';
+    packingListService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+    var tilsoftApp = angular.module('tilsoftApp', ['ng-currency']);
+    tilsoftApp.controller('tilsoftController', ['$scope', function ($scope) {
+        $scope.editData = null;
+        $scope.supportData = null;
+        $scope.newID = -1;
+
+        $scope.isNumber = function (n) {
+            return !isNaN(parseFloat(n)) && isFinite(n);
+        }
+
+        $scope.printPackingList = function () {
+            var packingListID = $scope.editData.packingListID;
+            var companyID = $scope.editData.companyID;
+            var reportOption = -1;
+            //validate
+            if (packingListID === null) {
+                bootbox.alert("Packing list did not make yet");
+                return;
+            }
+            //find option to print
+            if (companyID === 13) {
+                reportOption = 1;
+            }
+            else if (companyID === 4) {
+                reportOption = 2;
+            }
+            //print
+            packingListService.getReport(packingListID, reportOption,
+                function (data) {
+                    window.location = '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]' + data.data;
+                },
+                function (error) {
+                    jsHelper.showMessage('warning', error);
+                }
+            );
+        };
+
+
+        $scope.method = {
+            getNewID: function () {
+                $scope.newID--;
+                return $scope.newID;
+            }
+        };
+
+        $scope.calTotalAmount = function(){
+            if ($scope.editData == null) return;
+            var total = 0;
+            angular.forEach($scope.editData.purchasingInvoiceDetails, function(item){
+                total = total + item.unitPrice * item.quantity;
+            })
+            return total;
+        }
+
+        $scope.calTotalQuantity = function(){
+            if ($scope.editData == null) return;
+            var total = 0;
+            angular.forEach($scope.editData.purchasingInvoiceDetails, function(item){
+                total = total + item.quantity;
+            })
+            return total;
+        }
+
+        $scope.calTotalAmountSparepart = function(){
+            if ($scope.editData == null) return;
+            var total = 0;
+            angular.forEach($scope.editData.purchasingInvoiceSparepartDetails, function(item){
+                total = total + item.unitPrice * item.quantity;
+            })
+            return total;
+        }
+
+        $scope.calTotalQuantitySparepart = function(){
+            if ($scope.editData == null) return;
+            var total = 0;
+            angular.forEach($scope.editData.purchasingInvoiceSparepartDetails, function(item){
+                total = total + item.quantity;
+            })
+            return total;
+        }
+
+        $scope.calTotalFactoryAmount = function(){
+            if ($scope.editData == null) return;
+            var total = 0;
+            angular.forEach($scope.editData.purchasingInvoiceDetails, function(item){
+                total = total + item.factoryPrice * item.quantity;
+            })
+            return total;
+        }
+
+        $scope.calTotalFactoryAmountSparepart = function(){
+            if ($scope.editData == null) return;
+            var total = 0;
+            angular.forEach($scope.editData.purchasingInvoiceSparepartDetails, function(item){
+                total = total + item.factoryPrice * item.quantity;
+            })
+            return total;
+        }
+
+        $scope.calTotalAmountExtra = function(){
+            if ($scope.editData == null) return;
+            var total = 0;
+            angular.forEach($scope.editData.purchasingInvoiceExtraDetails, function(item){
+                total = total + item.amount;
+            })
+            return total;
+        }
+
+        $scope.calTotalQuantityExtra = function(){
+            if ($scope.editData == null) return;
+            var total = 0;
+            angular.forEach($scope.editData.purchasingInvoiceExtraDetails, function(item){
+                total = total + item.quantity;
+            })
+            return total;
+        }
+
+        $scope.calTotalSampleAmount = function () {
+            if ($scope.editData == null) return;
+            var total = 0;
+            angular.forEach($scope.editData.purchasingInvoiceSampleDetails, function (item) {
+                total = total + item.unitPrice * item.quantity;
+            })
+            return total;
+        }
+
+        $scope.calTotalSampleQuantity = function () {
+            if ($scope.editData == null) return;
+            var total = 0;
+            angular.forEach($scope.editData.purchasingInvoiceSampleDetails, function (item) {
+                total = total + item.quantity;
+            })
+            return total;
+        }
+
+        $scope.calTotalFactorySampleAmount = function () {
+            if ($scope.editData == null) return;
+            var total = 0;
+            angular.forEach($scope.editData.purchasingInvoiceSampleDetails, function (item) {
+                total = total + item.factoryPrice * item.quantity;
+            })
+            return total;
+        }
+
+
+        $scope.load = function()
+        {
+            purchasingInvoiceService.load(@ViewBag.ID,@tID,@bID,@sID,@pID,
+                function (data) {
+                    $scope.editData = data.data;
+                    $scope.$apply();
+
+                    jQuery('#content').show();
+                    // monitor changes
+                    $scope.$watch('purchasingInvoice', function() {
+                        jQuery('#changeNotification').html('<i class="fa fa-save blink_me"></i>');
+                    });
+                    if (data.message.type == 2)
+                    {
+                        jsHelper.processMessage(data.message);
+                    }
+
+                    if (data.data.purchasingInvoiceID !== 0 && @ViewBag.ID === 0) {
+                        window.location = '@Url.Action("Edit", "PurchasingInvoice", new { id = UrlParameter.Optional })/' + data.data.purchasingInvoiceID;
+                    }
+                    setTimeout(function () { runAllForms() }, 10);
+                },
+                function (error) {
+                    jsHelper.showMessage('warning', error);
+
+                    $scope.editData = null;
+                    $scope.$apply();
+                }
+            );
+        }
+
+
+        $scope.update = function ($event) {
+            $event.preventDefault();
+
+            if($scope.editForm.$valid)
+            {
+                purchasingInvoiceService.update(@ViewBag.ID, $scope.editData,
+                function (data) {
+                    jsHelper.processMessage(data.message);
+                    if(data.message.type == 0) {
+                        window.location = '@Url.Action("Edit", "PurchasingInvoice", new { id = UrlParameter.Optional, id2 = UrlParameter.Optional })/'+ data.data.purchasingInvoiceID;
+                    }
+                },
+                    function (error) {
+                        jsHelper.showMessage('warning', error);
+                    }
+                );
+            }
+            else
+            {
+                jsHelper.showMessage('warning', '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED');
+            }
+        }
+
+        $scope.delete = function ($event) {
+            $event.preventDefault();
+
+            if (confirm('Are you sure ?')) {
+                purchasingInvoiceService.delete(@ViewBag.ID,
+                function (data) {
+                    jsHelper.processMessage(data.message);
+                    if(data.message.type == 0) {
+                        window.location = '@Url.Action("Index", "PurchasingInvoice")';
+                    }
+                },
+                function (error) {
+                    jsHelper.showMessage('warning', error);
+                }
+            );
+            }
+        }
+
+        $scope.setStatus = function ($event, id, status, invoiceType) {
+            $event.preventDefault();
+            askmessage = (status==true ? 'Are you sure you want to confirmed. When you confirm then the quantity will be locked and onther user can make commercial invoice and loadingplan can not change quantity anymore?' : 'Are you sure you want to un-confirmed?')
+            if (confirm(askmessage)) {
+                // Only check different unit price and factory price when confirm.
+                if (status === true){
+                    // Check unit price diff quotation sale price.
+                    var hasDiff = false;
+                    angular.forEach($scope.editData.purchasingInvoiceDetails, function(item) {
+                        if (item.unitPrice != item.quotationSalePrice) {
+                            hasDiff = true;
+                            item.isDiffPrice = true;
+                        } else {
+                            item.isDiffPrice = false;
+                        }
+                    });
+
+                    if (hasDiff) {
+                        return;
+                    }
+                }
+
+                purchasingInvoiceService.setStatus(id, status, invoiceType,
+                function (data) {
+                    jsHelper.processMessage(data.message);
+                    if(data.message.type == 0) {
+                        window.location = '@Url.Action("Edit", "PurchasingInvoice", new { id = UrlParameter.Optional, id2 = UrlParameter.Optional })/'+ id +'/0';
+                        //$scope.editData.isConfirmed = status;
+                        //$scope.$apply();
+                    }
+                },
+                function (error) {
+                    jsHelper.showMessage('warning', error);
+                }
+            );
+            }
+        }
+
+        $scope.print = function (purchasingInvoiceID) {
+            purchasingInvoiceService.getReport(purchasingInvoiceID,
+                function (data) {
+                    jsHelper.processMessage(data.message);
+                    if(data.message.type == 0) {
+                        window.location = '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]' + data.data + '.xlsm';
+                    }
+                },
+                function (error) {
+                    jsHelper.showMessage('warning', error);
+                }
+            );
+        }
+
+        $scope.selectedSeason = function(season){
+
+            var arr_pricedifference = $scope.supportData.priceDifferenceInvoiceSettings.filter(function(o){return o.supplierID == $scope.editData.supplierID && o.season == season});
+
+            for(i = 0; i < $scope.editData.purchasingInvoiceDetails.length; i++)
+            {
+                if (arr_pricedifference.length > 0)
+                {
+                    $scope.editData.purchasingInvoiceDetails[i].unitPrice = $scope.editData.purchasingInvoiceDetails[i].quotationPurchasingPrice * (1 + arr_pricedifference[0].rate);
+                }
+                else {
+                    $scope.editData.purchasingInvoiceDetails[i].unitPrice = $scope.editData.purchasingInvoiceDetails[i].quotationPurchasingPrice;
+                }
+            }
+
+            for(i = 0; i < $scope.editData.purchasingInvoiceSparepartDetails.length; i++)
+            {
+                if (arr_pricedifference.length > 0)
+                {
+                    $scope.editData.purchasingInvoiceSparepartDetails[i].unitPrice = $scope.editData.purchasingInvoiceSparepartDetails[i].quotationPurchasingPrice * (1 + arr_pricedifference[0].rate);
+                }
+                else {
+                    $scope.editData.purchasingInvoiceSparepartDetails[i].unitPrice = $scope.editData.purchasingInvoiceSparepartDetails[i].quotationPurchasingPrice;
+                }
+            }
+        }
+
+        $scope.createPurchasingCreditNote = function ($event) {
+            $event.preventDefault();
+            window.open('@Url.Action("Edit", "PurchasingCreditNote", new { id = UrlParameter.Optional })/0' + '?creditNoteType=1' + '&purchasingInvoiceID=' + $scope.editData.purchasingInvoiceID ,'');
+        }
+
+        $scope.addFreeExtraItemDetail = function($event){
+            $event.preventDefault();
+            $scope.editData.purchasingInvoiceExtraDetails.push({
+                purchasingInvoiceExtraDetailID : $scope.method.getNewID(),
+            });
+            $scope.$apply();
+        }
+
+        $scope.removeFreeExtraItemDetail = function($event,index){
+            $event.preventDefault();
+            $scope.editData.purchasingInvoiceExtraDetails.splice(index,1);
+        }
+
+        $scope.createExtraInvoice = function ($event) {
+            $event.preventDefault();
+            window.open('@Url.Action("Edit", "PurchasingInvoice", new { id = UrlParameter.Optional })/0' + '?invoiceType=3' + '&parentID=' + $scope.editData.purchasingInvoiceID ,'');
+        }
+
+
+        //$scope.addPaymentDetail = function($event){
+        //    $event.preventDefault();
+        //    var arr = $scope.editData.clientPaymentDetails.filter(function(o){ return o.clientPaymentDetailID < 0});
+        //    max_id = -1;
+
+        //    if (arr.length > 0)
+        //    {
+        //        arr.sort(function(a,b){return a.clientPaymentDetailID - b.clientPaymentDetailID});
+        //        max_id = arr[0].clientPaymentDetailID - 1;
+        //    }
+        //    $scope.editData.clientPaymentDetails.push({
+        //        clientPaymentDetailID : max_id,
+        //    });
+        //}
+
+        //$scope.removepaymentDetail = function ($event,clientPaymentDetailID) {
+        //    $event.preventDefault();
+
+        //    isExist = false;
+        //    for(j = 0; j< $scope.editData.clientPaymentDetails.length; j++) {
+        //        if($scope.editData.clientPaymentDetails[j].clientPaymentDetailID == clientPaymentDetailID) {
+        //            isExist = true;
+        //            break;
+        //        }
+        //    }
+        //    if(isExist){
+        //        $scope.editData.clientPaymentDetails.splice(j, 1);
+        //    }
+        //}
+
+        $scope.getEditSupport = function () {
+            purchasingInvoiceService.getEditSupport(
+                function (data) {
+                    $scope.supportData = data.data;
+                    $scope.$apply();
+
+                    $scope.load();
+                },
+                function (error) {
+                    $scope.supportData = null;
+                    $scope.$apply();
+                }
+            );
+        }
+
+        $scope.setConfirmPrice = function (isConfirmedPrice) {
+            askMessage = (isConfirmedPrice ? 'Are you sure you want to confirmed all. When you confirm all then all data will be locked and can not change anymore ?' : 'Are you sure you want to un-confirmed all?')
+            if (confirm(askMessage)) {
+                debugger;
+                // Check unit price diff quotation sale price.
+                if (isConfirmedPrice){
+                    var hasDiff = false;
+                    angular.forEach($scope.editData.purchasingInvoiceDetails, function(item) {
+                        if (item.unitPrice != item.quotationSalePrice) {
+                            hasDiff = true;
+                            item.isDiffPrice = true;
+                        } else {
+                            item.isDiffPrice = false;
+                        }
+                    });
+                    if (hasDiff) {
+                        return;
+                    }
+                }
+
+                purchasingInvoiceService.setConfirmPrice(@ViewBag.ID, $scope.editData, isConfirmedPrice,
+                function (data) {
+                    jsHelper.processMessage(data.message);
+                    if (data.message.type == 0) {
+                        window.location = '@Url.Action("Edit", "PurchasingInvoice", new { id = UrlParameter.Optional, id2 = UrlParameter.Optional })/' + $scope.editData.purchasingInvoiceID + '/0';
+                        //$scope.editData.isConfirmedPrice = isConfirmedPrice;
+                        //$scope.$apply();
+                    }
+                },
+                function (error) {
+                    jsHelper.showMessage('warning', error);
+                }
+            );
+            }
+        }
+
+        $scope.getStatusText = function () {
+            if ($scope.editData != null) {
+                if ($scope.editData.isConfirmedPrice) {
+                    return 'CONFIRMED ALL';
+                }
+                else if ($scope.editData.isConfirmed) {
+                    return 'CONFIRMED';
+                }
+                else {
+                    return 'TO BE CONFIRMED';
+                }
+            }
+        }
+
+        $scope.showPrintOption = function () {
+            $('#frmPrintOption').modal('show');
+        }
+
+        $scope.printOption = function (purchasingInvoiceID, optionID) {
+            if (optionID === undefined) {
+                jsHelper.showMessage('warning', 'Please select to option.');
+                return false;
+            }
+            if (optionID == 1) {
+                $scope.print(purchasingInvoiceID);
+            }
+            if (optionID == 2) {
+                $scope.printPackingList();
+            }
+
+            @*purchasingInvoiceService.getShippmentPurchasing(
+                purchasingInvoiceID,
+                optionID,
+                function (data) {
+                    jsHelper.processMessage(data.message);
+                    if(data.message.type == 0) {
+                        window.location = '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]' + data.data;
+                    }
+                },
+                function (error) {
+                    jsHelper.showMessage('warning', error);
+                }
+            );*@
+        }
+
+        $scope.getEditSupport();
+    }]);
+
+    </script>
+}
+
+
+

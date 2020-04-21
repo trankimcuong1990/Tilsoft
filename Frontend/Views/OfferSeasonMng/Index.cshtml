@@ -1,0 +1,154 @@
+﻿@{
+    ViewBag.Title = "Offer All Season";
+    ViewBag.Module = "OfferSeason";
+    string userManualUrl = string.Empty;
+    if (System.IO.File.Exists(Server.MapPath("~/UserManual/" + ViewBag.ModuleCode + ".pdf")))
+    {
+        userManualUrl = "/UserManual/" + ViewBag.ModuleCode + ".pdf";
+    }
+}
+
+<form class="row" id="main-form">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-search-result" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Search Result</h2>
+            </header>
+            <div class="smart-form">
+                <div class="widget-body no-padding">
+                    <div avs-scroll grid-handler="gridHandler" class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header" style="width: 1050px;">
+                                <div style="width: 100px;"></div>
+                                <div style="width: 70px;" class="sorting" data-colname="Season">Season</div>
+                                <div style="width: 200px;" class="sorting" data-colname="OfferSeasonUD">Offer Season Code</div>
+                                <div style="width: 80px;" class="sorting" data-colname="TotalSaleAmount">Sale Amount</div>
+                                <div style="width: 70px;" class="sorting" data-colname="TotalSaleAmount">Approve Rate</div>
+                                <div style="width: 60px;" class="sorting" data-colname="ClientUD">Client Code</div>
+                                <div style="width: 250px;" class="sorting" data-colname="ClientNM">Client Name</div>
+                                <div style="width: 120px;" class="sorting" data-colname="ClientNM">Acc Mng</div>
+                                <div style="width: 100px;" class="sorting" data-colname="OfferSeasonTypeNM">Offer Type</div>
+                                <div class="sorting" data-colname="CreatorName">Tracking</div>
+                            </div>
+
+                            <div class="tilsoft-table-filter" style="width: 1050px;">
+                                <div style="text-align: center; width: 100px">
+                                    <a href="javascript:void(0)" class="btn btn-{{isDefaultFilter?'default':'primary'}} btn-xs" title="Apply Filter" ng-click="event.reload()"><i class="fa fa-filter"></i></a>
+                                    <a href="javascript:void(0)" class="btn btn-default btn-xs" title="Clear Filter" ng-click="event.clearFilter()"><i class="fa fa-ban"></i></a>
+                                </div>
+
+                                <div style="width: 70px; text-align: center">
+                                    <select class="search-filter" ng-model="filters.season" ng-options="season.seasonValue as season.seasonText for season in seasons">
+                                        <option></option>
+                                    </select>
+                                </div>
+
+                                <div style="width: 200px; text-align: center">
+                                    <input type="text" ng-model="filters.offerSeasonUD" class="search-filter" />
+                                </div>
+
+                                <div style="width: 80px; text-align: center">
+                                </div>
+
+                                <div style="width: 70px; text-align: center">
+                                </div>
+
+                                <div style="width: 60px; text-align: center">
+                                    <input type="text" ng-model="filters.clientUD" class="search-filter" />
+                                </div>
+
+                                <div style="width: 250px; text-align: center">
+                                    <input type="text" ng-model="filters.clientNM" class="search-filter" />
+                                </div>
+
+                                <div style="width: 120px; text-align: center">
+                                    <select ng-model="filters.saleID"
+                                            ng-options="item.userID as item.employeeNM for item in accManagerDTOs | orderBy : 'saleNM'">
+                                        <option value=""></option>
+                                    </select>
+                                </div>
+
+                                <div style="width: 100px; text-align: center">
+                                    <select ng-model="filters.offerSeasonTypeID"
+                                            ng-options="item.offerSeasonTypeID as item.offerSeasonTypeNM for item in offerSeasonTypeDTOs">
+                                        <option value=""></option>
+                                    </select>
+                                </div>
+                                <div style="width: 200px"></div>
+                            </div>
+
+                            <div class="tilsoft-table-body" style="width: 1050px; margin-top: 95px;">
+                                <table>
+                                    <tbody ng-repeat="item in data">
+                                        <tr>
+                                            <td style="width:99px;text-align:center">
+                                                <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "OfferSeasonMng")/{{item.offerSeasonID}}#/{{method.getRouter(item.offerSeasonTypeID)}}" title="Edit" target="_blank"><i class="fa fa-pencil"></i>Edit</a>
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current) != "disabled")
+                                                {
+                                                    <a class="btn btn-danger btn-xs font-11" href="#" ng-click="event.delete(item)" title="Delete"><i class="fa fa-times"></i>Del</a>
+                                                }
+                                            </td>
+                                            <td style="text-align: center; width: 70px; vertical-align:middle">{{item.season}}</td>
+                                            <td style="text-align: left; width: 200px; vertical-align:middle">{{item.offerSeasonUD}}</td>
+                                            <td style="text-align: right; width: 80px; vertical-align:middle">{{item.totalSaleAmount | currency : (item.currency === 'USD' ? '$' : '&euro;') : 0}}</td>
+                                            <td style="text-align: center; width: 70px; vertical-align:middle">{{item.totalItemApproved}} / {{item.totalItem}}</td>
+                                            <td style="text-align: center; width: 60px; vertical-align:middle">{{item.clientUD}}</td>
+                                            <td style="text-align: left; width: 250px; vertical-align:middle">{{item.clientNM}}</td>
+                                            <td style="text-align: left; width: 120px; vertical-align:middle">{{item.saleNM}}</td>
+                                            <td style="text-align: left; width: 100px; vertical-align:middle">{{item.offerSeasonTypeNM}}</td>
+                                            <td style="text-align: left; vertical-align:middle">
+                                                <a ng-if="item.createdBy" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.createdBy}}" data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                    Created by {{item.creatorName}} at {{item.createdDate}}
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <span>Total Row: {{totalRows}} rows</span>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+@section FormAction {
+<ul id="sparks">
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default" title="Tìm kiếm" ng-click="event.reload()"><i class="fa fa-search"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default" title="Làm mới" ng-click="event.clearFilter()"><i class="fa fa-refresh"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="@Url.Action("Edit", "OfferSeasonMng")/0#/init-form" target="_blank" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="Tạo mới"><i class="fa fa-file-o"></i></a>
+    </li>
+    @if (!string.IsNullOrEmpty(userManualUrl))
+    {
+        <li class="sparks-info">
+            <a target="_blank" href="@userManualUrl" class="btn btn-default" title="Help"><i class="fa fa-info"></i></a>
+        </li>
+    }
+</ul>
+}
+@section pagepopup2{
+}
+
+@section pagejs {
+    <script src="~/Views/OfferSeasonMng/Index.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/offer-season/',
+            token: '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]',
+            pageSize: @System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"],
+            cookieId: '@HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString()',
+            backendReportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]',
+            title:'Offer all season'
+        }
+    </script>
+    <script src="~/Angular/app/jsonService2.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/OfferSeasonMng/Service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}

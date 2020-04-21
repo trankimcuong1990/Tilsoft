@@ -1,0 +1,65 @@
+﻿@{
+    ViewBag.Title = "Factory Sale Invoice";
+    ViewBag.Module = "FactorySaleInvoice";
+
+    string userManualUrl = string.Empty;
+    if (System.IO.File.Exists(Server.MapPath("~/UserManual/" + ViewBag.ModuleCode + ".pdf")))
+    {
+        userManualUrl = "/UserManual/" + ViewBag.ModuleCode + ".pdf";
+    }
+
+}
+
+<form class="row" name="editForm">
+    <div ng-view></div>
+</form>
+
+@section FormAction {
+<ul id="sparks">
+    <li class="sparks-info">
+        <a href="@Url.Action("Index", "FactorySaleInvoice")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+    </li>
+    <li class="sparks-info" ng-show="data.factorySaleInvoiceStatusID == 1">
+        <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current))" ng-disabled="data.factorySaleInvoiceID == null || data.factorySaleInvoiceID == 0" title="Delete" ng-click="del(data.factorySaleInvoiceID)">
+            <i class="fa fa-times"></i>
+        </a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="update()" ng-show="data.factorySaleInvoiceStatusID == 1"><i class="fa fa-save"></i></a>
+    </li>
+
+    @if (!string.IsNullOrEmpty(userManualUrl))
+    {
+        <li class="sparks-info">
+            <a target="_blank" href="@userManualUrl" class="btn btn-default" title="Help"><i class="fa fa-info"></i></a>
+        </li>
+    }
+</ul>
+}
+
+@section pagejs {
+    <script src="~/Views/FactorySaleInvoice/edit.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/FactorySaleInvoice/_Edit/_GeneralController.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/FactorySaleInvoice/_Edit/_SaleOrderController.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/factorysale-invoice/',
+            token: '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]',
+            backUrl: '@Url.Action("Index", "FactorySaleInvoice")',
+            backendReportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]',
+            refreshUrl: '@Url.Action("Edit", "FactorySaleInvoice", new { id = UrlParameter.Optional })/',
+            indexUrl: '@Url.Action("Index", "FactorySaleInvoice")',
+            reportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]',
+
+            id: @ViewBag.ID,
+            errMsg: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED',
+            
+            //saleOrderAPI: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/FactorySaleInvoice/get?id=',
+            //updateSaleOrderAPI: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/FactorySaleInvoice/update?id=',
+            getProductionItemUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/factorysale-invoice/getProductionItem',
+        };
+    </script>
+    <script src="~/Angular/app/jsonService2.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/FactorySaleInvoice/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+
+}

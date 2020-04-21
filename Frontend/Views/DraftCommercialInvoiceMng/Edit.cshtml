@@ -1,0 +1,830 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    var pageSize = System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"];
+    var cookieID = HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString();
+    var supportServiceRoot = (System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"]);
+
+
+    ViewBag.Title = "Edit Draft Commercial Invoice";
+    ViewBag.Module = "Draft Commercial Invoice";
+}
+<style>
+    .modal-dialog {
+        margin-top: 10% !important;
+    }
+</style>
+<div ng-show="viewName != 'edit'" ng-if="data.draftCommercialInvoiceID == null || data.draftCommercialInvoiceID == 0">
+    <form class="row" name="editForm">
+        <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+            <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+                <header>
+                    <h2>Select options Client and Season</h2>
+                </header>
+                <div>
+                    <div class="widget-body no-padding">
+                        <div class="smart-form">
+                            <fieldset>
+                                <div class="row">
+                                    <section class="col col-3">
+                                        <label class="label">Client</label>
+                                        <label class="input">
+                                            <input type="text" class="form-control" style="font-family:Arial" placeholder="Please input one Client..." avs-remote-auto-complete ng-request-param="ngRequestClient" ng-init-param="data.clientUD" ng-model="data.clientUD" ng-item-value="ngItemClient" ng-item-selected="event.getClient(ngItemClient)" data-method="POST" data-format-function="formatData" />
+                                        </label>
+                                    </section>
+                                    <section class="col col-3">
+                                        <label class="label">Season</label>
+                                        <label class="label">
+                                            <select avs-select ng-model="data.season" ng-options="item.seasonValue as item.seasonText for item in seasons">
+                                                <option value=""></option>
+                                            </select>
+                                            <i></i>
+                                        </label>
+                                    </section>
+                                </div>
+                            </fieldset>
+                            <footer>
+                                <button class="btn btn-primary" type="button" ng-click="event.goNext(data.season)">
+                                    Next
+                                </button>
+                                <button class="btn btn-default" type="button" ng-click="event.goBack()">
+                                    Cancel
+                                </button>
+                            </footer>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </article>
+    </form>
+</div>
+<form class="row" name="editForm" id="main-form" ng-show="viewName == 'edit'">
+
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <ul class="nav nav-tabs pull-left in">
+                    <li class="active">
+                        <a data-toggle="tab" href="#generalTab"> <i class="fa fa-database"></i> <span class="hidden-mobile hidden-tablet"> General Information </span> </a>
+                    </li>
+                    <li>
+                        <a data-toggle="tab" href="#clientTab"> <i class="fa fa-database"></i> <span class="hidden-mobile hidden-tablet">Client</span> </a>
+                    </li>
+                    <li>
+                        <a data-toggle="tab" href="#descriptionTab"> <i class="fa fa-database"></i> <span class="hidden-mobile hidden-tablet">Description</span> </a>
+                    </li>
+                </ul>
+            </header>
+            <div>
+                <div class="widget-body">
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="generalTab">
+                            <div class="smart-form">
+                                <fieldset>
+                                    <div class="row">
+                                        <section class="col col-2">
+                                            <label>Invoice No Tilsoft</label>
+                                            <span class="form-control">{{data.invoiceNo}}</span>
+                                        </section>
+
+                                        <section class="col col-2">
+                                            <label>Status</label>
+                                            <span class="form-control">{{data.isConfirmedText}}</span>
+                                        </section>
+
+                                        <section class="col col-2">
+                                            <label>Inv.No at client system</label>
+                                            <input class="form-control" type="text" name="clientInvoiceNo" ng-model="data.clientInvoiceNo">
+                                        </section>
+
+                                        <section class="col col-1">
+                                            <label>REF No</label>
+                                            <input class="form-control" type="text" name="refNo" ng-model="data.refNo">
+                                        </section>
+
+                                        <section class="col col-1">
+                                            <label>LC REF No</label>
+                                            <input class="form-control" type="text" name="lcRefNo" ng-model="data.lcRefNo">
+                                        </section>
+
+                                        <section class="col col-4">
+                                            <label>Remark</label>
+                                            <input class="form-control" type="text" name="remark" ng-model="data.remark">
+                                        </section>
+                                    </div>
+                                    <div class="row">
+
+                                        <section class="col col-2">
+                                            <label>Invoice Date</label>
+                                            <div class="input-group">
+                                                <input type="text" class="form-control datepicker" data-dateformat="dd/mm/yy" ng-model="data.invoiceDate">
+                                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                            </div>
+                                        </section>
+
+                                        <section class="col col-2">
+                                            <label>Account No</label>
+                                            <select class="form-control" name="accountNo" ng-model="data.accountNo" ng-options="item.accountNo as item.accountNM for item in turnOverLedgerAccounts">
+                                                <option value=""></option>
+                                            </select>
+                                        </section>
+
+                                        <section class="col col-2">
+                                            <label>Delivery Term</label>
+                                            <select class="form-control" name="deliveryTermID" ng-model="data.deliveryTermID" ng-options="item.deliveryTermID as item.deliveryTermNM for item in deliveryTerms" ng-change="event.selectDeliveryTerm(data.deliveryTermID)">
+                                                <option value=""></option>
+                                            </select>
+                                        </section>
+
+                                        <section class="col col-2">
+                                            <label>Delivery Term Text</label>
+                                            <input class="form-control" type="text" id="deliveryTerm" ng-model="data.deliveryTerm">
+                                        </section>
+
+                                        <section class="col col-2">
+                                            <label>Payment Term</label>
+                                            <select class="form-control" name="paymentTermID" ng-model="data.paymentTermID" ng-options="item.paymentTermID as item.paymentTermNM for item in paymentTerms"  ng-change="event.selectPaymentTerm(data.paymentTermID)">
+                                                <option value=" "></option>
+                                            </select>
+                                        </section>
+
+                                        <section class="col col-2">
+                                            <label>Payment Term Text</label>
+                                            <input class="form-control" type="text" id="paymentTerm" ng-model="data.paymentTerm">
+                                        </section>
+                                    </div>
+                                    <div class="row">
+                                        <section class="col col-1">
+                                            <label>Season</label>
+                                            <span class="form-control">{{data.season}}</span>
+                                        </section>
+
+                                        <section class="col col-3">
+                                            <label>Conditions</label>
+                                            <input class="form-control" type="text" name="conditions" ng-model="data.conditions">
+                                        </section>
+
+                                        <section class="col col-1">
+                                            <label>Currency</label>
+                                            <select class="form-control" name="currency" ng-model="data.currency" ng-options="item.currencyValue as item.currencyText for item in currency" required>
+                                                <option value=""></option>
+                                            </select>
+                                            <span class="help-block" ng-show="editForm.currency.$error.required"><i class="fa fa-warning"></i>Currency is required.</span>
+                                        </section>
+
+                                        <section class="col col-1">
+                                            <label>VAT Rate</label>
+                                            <select class="form-control" name="vatRate" ng-model="data.vatRate" ng-options="item.vatPercentValue as item.vatPercentText for item in vatPercents" required>
+                                                <option value=""></option>
+                                            </select>
+                                            <span class="help-block" ng-show="editForm.vatRate.$error.required"><i class="fa fa-warning"></i>VAT is required.</span>
+                                        </section>
+
+                                        <section class="col col-2">
+                                            <label>Net Amount</label>
+                                            <div class="input-group">
+                                                <span class="input-group-addon">
+                                                    {{data.currency == 'USD' ? '$' : ''}} {{data.currency == 'EUR' ? '€' : ''}}
+                                                </span>
+                                                @*<span class="form-control" style="text-align:right">{{ecommercialinvoice.eCommercialInvoiceData.netAmount | number : 2}}</span>*@
+                                                <span class="form-control" style="text-align:right">{{method.netRecal() | number : 2}}</span>
+
+                                            </div>
+                                        </section>
+
+                                        <section class="col col-2">
+                                            <label>VAT Amount</label>
+                                            <div class="input-group">
+                                                <span class="input-group-addon">{{data.currency == 'USD' ? '$' : ''}} {{data.currency == 'EUR' ? '€' : ''}}</span>
+                                                @*<span class="form-control" style="text-align:right">{{ecommercialinvoice.eCommercialInvoiceData.vatAmount | number : 2}}</span>*@
+                                                <span class="form-control" style="text-align:right">{{method.vatRecal() | number : 2}}</span>
+                                            </div>
+                                        </section>
+
+                                        <section class="col col-2">
+                                            <label>Total Amount</label>
+                                            <div class="input-group">
+                                                <span class="input-group-addon">{{data.currency == 'USD' ? '$' : ''}} {{data.currency == 'EUR' ? '€' : ''}}</span>
+                                                @*<span class="form-control" style="text-align:right">{{ecommercialinvoice.eCommercialInvoiceData.totalAmount | number : 2}}</span>*@
+                                                <span class="form-control" style="text-align:right">{{method.totalRecal() | number : 2}}</span>
+                                            </div>
+                                        </section>
+
+                                    </div>
+                                </fieldset>
+                            </div>
+
+
+
+                        </div>
+
+                        <div class="tab-pane" id="clientTab">
+                            <div class="row">
+
+                                <div class="col-sm-2">
+                                    <label>Client Code</label>
+                                    <span class="form-control">{{data.clientUD}}</span>
+                                </div>
+
+                                <div class="col-sm-2">
+                                    <label>Client Name</label>
+                                    <span class="form-control">{{data.clientNM}}</span>
+                                </div>
+
+
+                                <div class="col-sm-2">
+                                    <label>VAT Code</label>
+                                    <span class="form-control">{{data.vatNo}}</span>
+                                </div>
+
+                                <div class="col-sm-2">
+                                    <label>Telephone</label>
+                                    <span class="form-control">{{data.telephone}}</span>
+                                </div>
+
+                                <div class="col-sm-2">
+                                    <label>Fax</label>
+                                    <span class="form-control">{{data.fax}}</span>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <label>Client Address</label>
+                                    <textarea id="clientAddress" ng-model="data.clientAddress" class="form-control" rows="4"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane" id="descriptionTab">
+                            <div class="row">
+                                <div class="col-sm-6 m-bottom-15">
+                                    <div>
+                                        <a class="btn btn-primary btn-xs font-11" href="javascript:void(0);" ng-click="event.addDescription($event,'TOP')" style="margin-bottom: 10px;"><i class="fa fa-plus"></i>Add top description</a>
+                                    </div>
+                                    <div id="topDescriptionTable" class="table-responsive">
+                                        <table class="table table-bordered table-hover custom-table dataTable">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 90px;"></th>
+                                                    <th class="sorting" data-colname="rowIndex" style="width: 40px;">INDEX</th>
+                                                    <th class="sorting_asc" data-colname="description">TOP DESCRIPTION</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="top_item in data.draftCommercialInvoiceDescriptions | filter : { position: 'TOP' } | orderBy : 'rowIndex'">
+                                                    <td style="text-align: center; ">
+                                                        <a href="#" class="btn btn-primary btn-xs font-11" title="Insert" ng-click="method.insertDescription('TOP',top_item.rowIndex)"><i class="fa fa-level-down"></i> Insert</a>
+                                                        <a href="#" class="btn btn-danger btn-xs font-11" title="Delete" ng-click="method.removeDescription(top_item.draftCommercialInvoiceDescriptionID)"><i class="fa fa-times"></i>Del</a>
+                                                    </td>
+
+                                                    <td>
+                                                        <input class="form-control" type="text" name="rowIndex" ng-model="top_item.rowIndex">
+                                                    </td>
+                                                    <td>
+                                                        <input class="form-control" type="text" name="description" ng-model="top_item.description">
+                                                    </td>
+
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-6 m-bottom-15">
+                                    <div>
+                                        <a class="btn btn-primary btn-xs font-11" href="javascript:void(0);" ng-click="event.addDescription($event,'BOTTOM')" style="margin-bottom: 10px;"><i class="fa fa-plus"></i>Add bottom description</a>
+                                    </div>
+                                    <div id="bottomDescriptionTable" class="table-responsive">
+                                        <table class="table table-bordered table-hover custom-table dataTable">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 90px;"></th>
+                                                    <th class="sorting" data-colname="rowIndex" style="width: 40px;">INDEX</th>
+                                                    <th class="sorting" data-colname="description">BOTTOM DESCRIPTION</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="top_item in data.draftCommercialInvoiceDescriptions | filter : { position: 'BOTTOM' } | orderBy : 'rowIndex'">
+
+                                                    <td style="text-align: center; ">
+                                                        <a href="#" class="btn btn-primary btn-xs font-11" title="Insert" ng-click="method.insertDescription('BOTTOM',top_item.rowIndex)"><i class="fa fa-level-down"></i> Insert</a>
+                                                        <a href="#" class="btn btn-danger btn-xs font-11" title="Delete" ng-click="method.removeDescription(top_item.draftCommercialInvoiceDescriptionID)"><i class="fa fa-times"></i>Del</a>
+                                                    </td>
+                                                    <td><input class="form-control" type="text" name="rowIndex" ng-model="top_item.rowIndex"></td>
+                                                    <td><input class="form-control" type="text" name="description" ng-model="top_item.description"> </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+
+
+    <div>
+        <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+            <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+                <header>
+                    <ul class="nav nav-tabs pull-left in">
+                        <li class="active">
+                            <a data-toggle="tab" href="#hb6"> <i class="fa fa-database"></i> <span class="hidden-mobile hidden-tablet">Product</span> </a>
+                        </li>
+                        <li>
+                            <a data-toggle="tab" href="#hb7"> <i class="fa fa-database"></i> <span class="hidden-mobile hidden-tablet">Sparepart</span> </a>
+                        </li>
+                    </ul>
+                </header>
+                <div>
+                    <div class="jarviswidget-editbox"></div>
+
+                    <div class="widget-body">
+                        <div class="tab-content">
+
+                            <div class="tab-pane active" id="hb6">
+                                <div class="row">
+                                    <div class="col-sm-12 m-bottom-15">
+                                        <div>
+                                            <a class="btn btn-primary btn-xs font-11" href="javascript:void(0);" ng-click="event.addFobProduct()" style="margin-bottom: 10px;"><i class="fa fa-plus"></i>Add product</a>
+                                        </div>
+                                        <div id="detailTable" class="table-responsive">
+                                            <table class="table table-bordered table-hover custom-table dataTable">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 120px;"></th>
+                                                        <th class="sorting" data-colname="proformaInvoiceNo" style="width: 60px;">PROF.NO</th>
+                                                        <th class="sorting" data-colname="articleCode" style="width: 150px;">ARTICLECODE</th>
+                                                        <th class="sorting" data-colname="description" style="width: 300px;">DESCRIPTION</th>
+                                                        <th class="sorting" data-colname="quantity" style="width: 60px;">QUANTITY</th>
+                                                        <th class="sorting" data-colname="unitPrice" style="width: 100px;">PRICE</th>
+                                                        <th class="sorting" data-colname="unitPrice" style="width: 120px;">AMOUNT</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody ng-repeat="detail in data.draftCommercialInvoiceDetails | filter: {saleOrderDetailID: ''}">
+                                                    <tr>
+                                                        <td style="text-align: center;">
+                                                            <a href="#" class="btn btn-primary btn-xs font-11" title="View product line description" ng-click="event.viewDetailDescription(detail.draftCommercialInvoiceDetailID)"><i id="icon-detail-description-{{detail.draftCommercialInvoiceDetailID}}" class="fa fa-plus-square-o"></i> Description</a>
+                                                            <a href="#" class="btn btn-danger btn-xs font-11" title="Remove" ng-click="method.removeFobProduct(detail.draftCommercialInvoiceDetailID)"><i class="fa fa-times"></i>Del</a>
+                                                        </td>
+                                                        <td>{{detail.proformaInvoiceNo}}</td>
+                                                        <td>{{detail.articleCode}}</td>
+                                                        <td>{{detail.description}}</td>
+                                                        <td style="text-align: right">
+                                                            <input type="text" ng-model="detail.quantity" style="text-align:right" class="form-control" />                                                         
+                                                        </td>
+
+                                                        <td>
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon">{{data.currency == 'USD' ? '$' : ''}} {{data.currency == 'EUR' ? '€' : ''}}</span>
+                                                                <input type="text" class="form-control furnindo-currency" ng-model="detail.unitPrice" style="text-align:right" ng-currency fraction="2" currency-symbol="" />
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon">{{data.currency == 'USD' ? '$' : ''}} {{data.currency == 'EUR' ? '€' : ''}}</span>
+                                                                <span class="form-control" style="text-align:right">
+                                                                    {{detail.unitPrice * detail.quantity | number : 2}}
+                                                                </span>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr style="display:none" id="{{detail.draftCommercialInvoiceDetailID}}">
+                                                        <td></td>
+                                                        <td colspan="9">
+                                                            <a class="btn btn-primary btn-xs font-11" href="javascript:void(0);" ng-click="method.addLine(detail.draftCommercialInvoiceDetailID)" style="margin-bottom: 10px;"><i class="fa fa-plus"></i> Add line</a>
+                                                            <a class="btn btn-primary btn-xs font-11" href="javascript:void(0);" ng-click="method.addClientInfo(detail.draftCommercialInvoiceDetailID, detail.saleOrderDetailID, null)" style="margin-bottom: 10px;"><i class="fa fa-plus"></i> Add client info lines</a>
+
+                                                            <table class="table table-bordered table-hover custom-table dataTable">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th style="width: 90px;"></th>
+                                                                        <th class="sorting" data-colname="rowIndex" style="width:40px;">Index</th>
+                                                                        <th class="sorting" data-colname="description">Description</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    <tr ng-repeat="item in detail.draftCommercialInvoiceDetailDescriptions | orderBy : 'rowIndex'">
+                                                                        <td style="text-align: center;">
+                                                                            <a href="#" class="btn btn-primary btn-xs font-11" title="Insert" ng-click="method.insertLine(detail.draftCommercialInvoiceDetailID,item.rowIndex)"><i class="fa fa-level-down"></i> Insert</a>
+                                                                            <a href="#" class="btn btn-danger btn-xs font-11" title="Delete" ng-click="method.removeLine(detail.draftCommercialInvoiceDetailID,item.draftCommercialInvoiceDetailDescriptionID)"><i class="fa fa-times"></i>Del</a>
+                                                                        </td>
+                                                                        <td>
+                                                                            <input class="form-control" type="text" name="rowIndex" ng-model="item.rowIndex">
+                                                                        </td>
+                                                                        <td>
+                                                                            <input class="form-control" type="text" name="description" ng-model="item.description">
+                                                                        </td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+
+                                                @*total row*@
+                                                <tr>
+                                                    <td style="text-align: center;">
+                                                        Total() :
+                                                    </td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td style="text-align: right">
+                                                        {{method.calTotalQuantity() | number : 0}}
+                                                    </td>
+                                                    <td></td>
+                                                    <td>
+                                                        <div class="input-group">
+                                                            <span class="input-group-addon">{{data.currency == 'USD' ? '$' : ''}} {{data.currency == 'EUR' ? '€' : ''}}</span>
+                                                            <span class="form-control" style="text-align:right">
+                                                                {{method.calTotalAmount() | number : 2}}
+                                                            </span>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane" id="hb7">
+                                <div class="row">
+                                    <div class="col-sm-12 m-bottom-15">
+                                        <div>
+                                            <a class="btn btn-primary btn-xs font-11" href="javascript:void(0);" ng-click="event.addFobSparepart()" style="margin-bottom: 10px;"><i class="fa fa-plus"></i>Add sparepart</a>
+                                        </div>
+                                        <div id="sparepartTable" class="table-responsive">
+                                            <table class="table table-bordered table-hover custom-table dataTable">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 120px;"></th>
+                                                        <th class="sorting" data-colname="proformaInvoiceNo" style="width: 60px;">PROF.NO</th>
+                                                        <th class="sorting" data-colname="articleCode" style="width: 150px;">ARTICLECODE</th>
+                                                        <th class="sorting" data-colname="description" style="width: 300px;">DESCRIPTION</th>
+                                                        <th class="sorting" data-colname="quantity" style="width: 60px;">QUANTITY</th>
+                                                        <th class="sorting" data-colname="unitPrice" style="width: 100px;">PRICE</th>
+                                                        <th class="sorting" data-colname="unitPrice" style="width: 120px;">AMOUNT</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody ng-repeat="detail in data.draftCommercialInvoiceDetails | filter: {saleOrderDetailSparepartID: ''}">
+                                                    <tr>
+                                                        <td style="text-align: center;">
+                                                            <a href="#" class="btn btn-primary btn-xs font-11" title="View product line description" ng-click="event.viewDetailDescription(detail.draftCommercialInvoiceDetailID)"><i id="icon-detail-description-{{detail.draftCommercialInvoiceDetailID}}" class="fa fa-plus-square-o"></i> Description</a>
+                                                            <a href="#" class="btn btn-danger btn-xs font-11" title="Remove" ng-click="method.removeFobSparepart(detail.draftCommercialInvoiceDetailID)"><i class="fa fa-times"></i>Del</a>
+                                                        </td>
+                                                        <td>{{detail.proformaInvoiceNoSparepart}}</td>
+                                                        <td>{{detail.articleCodeSparepart}}</td>
+                                                        <td>{{detail.descriptionSparepart}}</td>
+                                                        <td style="text-align: right">{{detail.quantity}}</td>
+                                                        <td>
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon">{{data.currency == 'USD' ? '$' : ''}} {{data.currency == 'EUR' ? '€' : ''}}</span>
+                                                                <input type="text" class="form-control furnindo-currency" ng-model="detail.unitPrice" style="text-align:right" ng-currency fraction="2" currency-symbol="" />
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon">{{data.currency == 'USD' ? '$' : ''}} {{data.currency == 'EUR' ? '€' : ''}}</span>
+                                                                <span class="form-control" style="text-align:right">
+                                                                    {{detail.unitPrice * detail.quantity | number : 2}}
+                                                                </span>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr style="display:none" id="{{detail.draftCommercialInvoiceDetailID}}">
+                                                        <td></td>
+                                                        <td colspan="9">
+                                                            <a class="btn btn-primary btn-xs font-11" href="javascript:void(0);" ng-click="method.addLine(detail.draftCommercialInvoiceDetailID)" style="margin-bottom: 10px;"><i class="fa fa-plus"></i> Add line</a>
+                                                            <a class="btn btn-primary btn-xs font-11" href="javascript:void(0);" ng-click="method.addClientInfo(detail.draftCommercialInvoiceDetailID, null, detail.saleOrderDetailSparepartID)" style="margin-bottom: 10px;"><i class="fa fa-plus"></i> Add client info lines</a>
+
+                                                            <table class="table table-bordered table-hover custom-table dataTable">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th style="width: 90px;"></th>
+                                                                        <th class="sorting" data-colname="rowIndex" style="width:40px;">Index</th>
+                                                                        <th class="sorting" data-colname="description">Description</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    <tr ng-repeat="item in detail.draftCommercialInvoiceDetailDescriptions | orderBy : 'rowIndex'">
+                                                                        <td style="text-align: center;">
+                                                                            <a href="#" class="btn btn-primary btn-xs font-11" title="Insert" ng-click="method.insertLine(detail.draftCommercialInvoiceDetailID,item.rowIndex)"><i class="fa fa-level-down"></i> Insert</a>
+                                                                            <a href="#" class="btn btn-danger btn-xs font-11" title="Delete" ng-click="method.removeLine(detail.draftCommercialInvoiceDetailID,item.draftCommercialInvoiceDetailDescriptionID)"><i class="fa fa-times"></i>Del</a>
+                                                                        </td>
+                                                                        <td>
+                                                                            <input class="form-control" type="text" name="rowIndex" ng-model="item.rowIndex">
+                                                                        </td>
+                                                                        <td>
+                                                                            <input class="form-control" type="text" name="description" ng-model="item.description">
+                                                                        </td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                                <tr>
+                                                    <td style="text-align: center;">
+                                                        Total():
+                                                    </td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td style="text-align: right">
+                                                        {{method.calTotalQuantitySparepart() | number : 0}}
+                                                    </td>
+                                                    <td></td>
+                                                    <td>
+                                                        <div class="input-group">
+                                                            <span class="input-group-addon">{{data.currency == 'USD' ? '$' : ''}} {{data.currency == 'EUR' ? '€' : ''}}</span>
+                                                            <span class="form-control" style="text-align:right">
+                                                                {{method.calTotalAmountSparepart() | number : 2}}
+                                                            </span>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </article>
+    </div>
+
+    @*popup select sale order detail*@
+    <div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="frmSaleOrderDetail" class="modal fade" style="display: none;z-index:50" data-backdrop="static">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button aria-hidden="true" data-dismiss="modal" class="close" type="button">
+                        ×
+                    </button>
+                    <h4 id="myModalLabel" class="modal-title">Sale Order</h4>
+                </div>
+                <br />
+                <div class="row" style="margin-left: 20px">
+                    <section class="col col-lg-3" style="width:175px">
+                        <label>ProF. No</label><br />
+                        <label class="input">
+                            <input type="text" class="form-control" ng-model="filter.proformaInvoiceNo" />
+                        </label>
+                    </section>
+                    <section class="col col-lg-4" style="width:200px">
+                        <label>Article Code</label><br />
+                        <label class="input">
+                            <input type="text" class="form-control" ng-model="filter.articleCode" />
+                        </label>
+                    </section>
+                    <section class="col col-lg-1">
+                        <label></label><br />
+                        <button class="btn btn-primary" type="button" style="margin-top: 5px" ng-click="event.loadSaleOrder(0)">
+                            <i class="fa fa-filter"></i> Search
+                        </button>
+                    </section>
+
+                </div>
+                <div class="row" style="margin-top: 5px">
+                    <div class="col col-lg-12">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-body" style="margin-top:0px;width:100%;height:auto">
+                                <table>
+                                    <tr>
+                                        <th style="width:30px"><input type="checkbox" ng-model="checkSalerOrder" ng-click="event.checkAllSaleOrder(saleOrderDetails, 0)"/></th>
+                                        <th style="width:120px">ProF. No</th>
+                                        <th style="width:90px">Quantity</th>
+                                        <th style="width:90px">Unit Price</th>
+                                        <th style="width:150px">Article Code</th>
+                                        <th style="width:350px">Description</th>
+                                    </tr>
+                                    <tbody>
+                                        <tr ng-repeat="item in saleOrderDetails">
+                                            <td style="text-align:left">
+                                                <input type="checkbox" ng-model="item.check" />
+                                            </td>
+                                            <td>{{item.proformaInvoiceNo}}</td>
+                                            <td style="text-align:right">{{item.quantity}}</td>
+                                            <td style="text-align:right">{{item.unitPrice}}</td>
+                                            <td>{{item.articleCode}}</td>
+                                            <td>{{item.description}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" type="button" ng-click="event.addSaleOrderDetail()">
+                        OK
+                    </button>
+                    <button data-dismiss="modal" class="btn btn-default" type="button" ng-click="event.cancel()">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @*popup select sale order detail Spare part*@
+    <div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="frmSaleOrderDetailSparepart" class="modal fade" style="display: none;z-index:50" data-backdrop="static">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button aria-hidden="true" data-dismiss="modal" class="close" type="button">
+                        ×
+                    </button>
+                    <h4 id="myModalLabel" class="modal-title">Sale Order</h4>
+                </div>
+                <br />
+                <div class="row" style="margin-left: 20px">
+                    <section class="col col-lg-3" style="width:175px">
+                        <label>ProF. No</label><br />
+                        <label class="input">
+                            <input type="text" class="form-control" ng-model="filter.proformaInvoiceNo" />
+                        </label>
+                    </section>
+                    <section class="col col-lg-4" style="width:200px">
+                        <label>Article Code</label><br />
+                        <label class="input">
+                            <input type="text" class="form-control" ng-model="filter.articleCode" />
+                        </label>
+                    </section>
+                    <section class="col col-lg-1">
+                        <label></label><br />
+                        <button class="btn btn-primary" type="button" style="margin-top: 5px" ng-click="event.loadSaleOrder(1)">
+                            <i class="fa fa-filter"></i> Search
+                        </button>
+                    </section>
+
+                </div>
+                <div class="row">
+                    <div class="col col-lg-12">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-body" style="margin-top:0px;width:100%;height:auto">
+                                <table>
+                                    <tr>
+                                        <th style="width:30px"><input type="checkbox" ng-model="checkSalerOrder" ng-click="event.checkAllSaleOrder(saleOrderDetailSpareparts, 1)" /></th>
+                                        <th style="width:120px">ProF. No</th>
+                                        <th style="width:90px">Quantity</th>
+                                        <th style="width:90px">Unit Price</th>
+                                        <th style="width:150px">Article Code</th>
+                                        <th style="width:350px">Description</th>
+                                    </tr>
+                                    <tbody>
+                                        <tr ng-repeat="item in saleOrderDetailSpareparts">
+                                            <td style="text-align:left">
+                                                <input type="checkbox" ng-model="item.check" />
+                                            </td>
+                                            <td>{{item.proformaInvoiceNo}}</td>
+                                            <td style="text-align:right">{{item.quantity}}</td>
+                                            <td style="text-align:right">{{item.unitPrice}}</td>
+                                            <td>{{item.articleCode}}</td>
+                                            <td>{{item.description}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" type="button" ng-click="event.addSaleOrderDetailSparepart()">
+                        OK
+                    </button>
+                    <button data-dismiss="modal" class="btn btn-default" type="button" ng-click="event.cancel()">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @*<div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="frmPrintOption" class="modal fade" style="display: none; z-index:1400;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button aria-hidden="true" data-dismiss="modal" class="close" type="button">
+                        ×
+                    </button>
+                    <h4 id="myModalLabel" class="modal-title">Print Option</h4>
+                </div>
+                <div class="modal-body smart-form">
+                    <fieldset>
+                        <div class="row">
+                            <section class="col col-12">
+
+                                <ul style="list-style-type:none">
+                                    <li><input type="radio" name="print" ng-model="print_type" value="1" />&nbsp;&nbsp;&nbsp;INVOICE AS PDF</li>
+                                    <li><input type="radio" name="print" ng-model="print_type" value="2" />&nbsp;&nbsp;&nbsp;INVOICE AS EXCEL</li>
+                                    <li><input type="radio" name="print" ng-model="print_type" value="3" />&nbsp;&nbsp;&nbsp;PACKING LIST</li>
+                                </ul>
+
+                            </section>
+                        </div>
+                    </fieldset>
+                </div>
+                <div class="modal-footer">
+                    <button data-dismiss="modal" class="btn btn-default" type="button">
+                        CANCEL
+                    </button>
+                    <button class="btn btn-primary" type="button" ng-click="print($event)">
+                        PRINT
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="reportTemplate" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static" style="z-index: 1600;">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title" id="myModalLabel">Select template to print</h4>
+                </div>
+                <div class="modal-body no-padding">
+                    <div class="smart-form">
+                        <fieldset>
+                            <div class="col-xs-9 col-lg-6">
+                                <select class="form-control" id="reportName" ng-model="ecommercialinvoice.eCommercialInvoiceData.defaultCiReport" ng-options="reportTemplate.reportTemplateNM as reportTemplate.reportTemplateNM for reportTemplate in ecommercialinvoice.reportTemplates | filter:{'reportType':'CI'}:true">
+                                    <option value=""></option>
+                                </select>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">
+                        Cancel
+                    </button>
+                    <button type="button" class="btn btn-primary" ng-click="printSelectedTemplate($event,ecommercialinvoice.eCommercialInvoiceData.defaultCiReport)">
+                        PRINT
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>*@
+</form>
+
+
+
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="#" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current)) {{data.isConfirmed==true?'disabled' : ''}}" title="Save" ng-click="event.update()"><i class="fa fa-save"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "DraftCommercialInvoiceMng")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+        </li>
+
+        <li class="sparks-info">
+            <a href="#" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Print, HttpContext.Current))" title="Print Draft Invoice" ng-click="event.getDraftInvoicePrintOut(data.draftCommercialInvoiceID)"><i class="fa fa-print"></i></a>
+        </li>
+
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default@(ViewBag.ID==0?" disabled":"") @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Approve, HttpContext.Current)) {{data.isConfirmed==true?'disabled' : ''}}" title="Confirm Invoice" style="color: #0066ff; " ng-click="event.confirmInvoice()"><i class="fa fa-check-square-o"></i></a>
+        </li>
+
+    </ul>
+}
+
+@section pagejs {
+    <script type="text/javascript">
+        var context = {
+            saleOrderDetailID: '@ViewBag.SaleOrderDetailID',
+            factoryID: '@ViewBag.FactoryID',
+            id: '@ViewBag.ID',
+            backUrl: '@Url.Action("Index", "DraftCommercialInvoiceMng")',
+            serviceUrl: '@(serviceRoot)/api/draftcommercialinvoicemng/',
+            refreshUrl: '@Url.Action("Edit", "DraftCommercialInvoiceMng", new { id = UrlParameter.Optional })/',
+            token: '@token',
+            supportServiceUrl: '@(supportServiceRoot)/api/support/',
+            msgValid: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED',
+            backendReportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]'
+        }
+    </script>
+    <script type="text/javascript" src="~/Views/DraftCommercialInvoiceMng/edit.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Views/DraftCommercialInvoiceMng/service.js?v=@guid"></script>
+
+}
+

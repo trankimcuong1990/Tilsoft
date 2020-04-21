@@ -1,0 +1,153 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    var pageSize = System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"];
+    var cookieID = HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString();
+    var errorNoItems = "No Items have updated, please input data";
+
+    ViewBag.Title = "Search Receipt Production Report";
+    ViewBag.Module = "Receipt From Production";
+}
+
+<form name="frmReceiptfromProduction">
+    <div class="row">
+        <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+            <div class="jarviswidget jarviswidget-color-darken" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+                <header>
+                    <span class="widget-icon">
+                        <i class="fa fa-search"></i>
+                    </span>
+                    <h2> Search Filter </h2>
+                </header>
+                <div class="widget-body">
+                    <div class="smart-form">
+                        <div class="row">
+                            <section class="col col-sm-2">
+                                <label class="label">Work Order <em class="note note-error" ng-show="frmReceiptfromProduction.workOrder.$error.required">(Required)</em></label>
+                                <label class="input" ng-class="{'state-error': frmReceiptfromProduction.workOrder.$error.required}">
+                                    <input type="text" class="form-control search-filter" placeholder="Input work order that you want to find..." style="font-family: Arial;" ng-model="filters.workOrderUD" ng-change="event.changeWorkOrder()" id="workOrder" name="workOrder" required>
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label class="label">Work Center</label>
+                                <label class="input">
+                                    <select class="form-control search-filter" ng-model="filters.workCenterID" ng-options="workCenter.workCenterID as workCenter.workCenterUD for workCenter in workCenters">
+                                        <option value=""></option>
+                                    </select>
+                                </label>
+                            </section>
+                            <section class="col col-sm-2">
+                                <label class="label">Production Team <em class="note note-error" ng-show="frmReceiptfromProduction.productionTeam.$error.required">(Required)</em></label>
+                                <label class="input" ng-class="{'state-error': frmReceiptfromProduction.productionTeam.$error.required}">
+                                    <select class="form-control search-filter" style="width: 250px;" ng-model="filters.productionTeamID" ng-options="productionTeam.productionTeamID as productionTeam.productionTeamNM for productionTeam in productionTeams" name="productionTeam" ng-required="isNullProductionTeam">
+                                        <option value=""></option>
+                                    </select>
+                                </label>
+                            </section>
+                        </div>
+                        <div>
+                            <div class="jarviswidget-editbox"></div>
+                            <div class="widget-body">
+                                <div class="tilsoft-table-wrapper" avs-scroll grid-handler="gridHandler">
+                                    <div class="tilsoft-table">
+                                        <div class="tilsoft-table-body" style="width: 100%; overflow-x: hidden; height: auto; min-height: 100px; margin-top: 0px;">
+                                            <table>
+                                                <thead>
+                                                    <tr>
+                                                        <th rowspan="2" style="width: 30px;"> No </th>
+                                                        <th rowspan="2" style="width: 100px;"> Type </th>
+                                                        <th rowspan="2" style="width: 150px;"> Code </th>
+                                                        <th rowspan="2"> Name </th>
+                                                        <th rowspan="2" style="width: 50px;"> Unit </th>
+                                                        <th rowspan="2" style="width: 80px;"> Norm Qnt </th>
+                                                        <th colspan="2" style="width: 180px;"> Total <br> Receipt Qnt</th>
+                                                        <th rowspan="2" style="width: 80px;"> Remain Qnt </th>
+                                                        <th rowspan="2" style="width: 90px;"> Receipt Qnt </th>
+                                                        <th rowspan="2" style="width: 130px;"> To <br> Factory Warhouse </th>
+                                                    </tr>
+                                                    <tr>
+                                                        <th style="width: 100px;"> From Team </th>
+                                                        <th style="width: 80px;"> Qnt </th>
+                                                    </tr>
+                                                </thead>
+                                                
+                                                <tbody ng-repeat="receiptProductionRpt in receiptProductionRpts">
+                                                    <tr>
+                                                        <td rowspan="{{receiptProductionRpt.receiptProductionDetails.length + 1}}" style="width: 30px; text-align: center; border-right: solid 1px #ddd;"> {{receiptProductionRpt.primaryID}} </td>
+                                                        <td colspan="10" style="text-align: center;"> {{receiptProductionRpt.productionItemUD}}: {{receiptProductionRpt.productionItemNM}} </td>
+                                                    </tr>
+                                                    <tr ng-repeat="receiptProductionDetailRpt in receiptProductionRpt.receiptProductionDetails">
+                                                        <td style="width: 100px; text-align: center;"> {{receiptProductionDetailRpt.productionItemTypeNM}} </td>
+                                                        <td style="width: 150px;"> {{receiptProductionDetailRpt.productionItemUD}} </td>
+                                                        <td> {{receiptProductionDetailRpt.productionItemNM}} </td>
+                                                        <td style="width: 50px; text-align: center;"> {{receiptProductionDetailRpt.unit}} </td>
+                                                        <td style="width: 80px; text-align: right;"> {{receiptProductionDetailRpt.normQnt | number:2}} </td>
+                                                        <td colspan="2" style="width: 180px; text-align: right;">
+                                                            <table style="padding-top: inherit;" ng-show="(receiptProductionDetailRpt.historyReceiptProductionTeams.length > 0)">
+                                                                <tbody>
+                                                                    <tr>
+                                                                        <td colspan="2" style="padding-top: inherit; text-align: right;"> {{(receiptProductionDetailRpt.totalIssuedQnt != null) ? (receiptProductionDetailRpt.totalIssuedQnt | number:2) : (0 | number:2)}} </td>
+                                                                    </tr>
+                                                                    <tr ng-repeat="receiptProductionQuantity in receiptProductionDetailRpt.historyReceiptProductionTeams">
+                                                                        <td style="width: 150px; text-align: center;">{{receiptProductionQuantity.productionTeamNM}}</td>
+                                                                        <td style="width: 100px; text-align: right;">{{receiptProductionQuantity.totalQnt | number:2}}</td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </td>
+                                                        <td style="width: 80px; text-align: right;"> {{(receiptProductionDetailRpt.totalIssuedQnt == undefined || receiptProductionDetailRpt.totalIssuedQnt == null || receiptProductionDetailRpt.totalIssuedQnt == '') ? null : (receiptProductionDetailRpt.normQnt - receiptProductionDetailRpt.totalIssuedQnt | number:2)}} </td>
+                                                        <td style="width: 90px;">
+                                                            <input avs-number type="text" class="form-control" style="text-align: right;" ng-data-source="receiptProductionDetailRpt.receiptProductionQnt" ng-decimal="2">
+                                                        </td>
+                                                        <td style="width: 130px;">
+                                                            <label class="input" ng-class="{'state-error': receiptProductionDetailRpt.receiptProductionQnt != null  && receiptProductionDetailRpt.receiptProductionQnt != '' && receiptProductionDetailRpt.toFactoryWarehouseID == null}">
+                                                                <select class="form-control" ng-model="receiptProductionDetailRpt.toFactoryWarehouseID" ng-options="factoryWarehouse.factoryWarehouseID as factoryWarehouse.factoryWarehouseUD for factoryWarehouse in factoryWarehouses" ng-required="receiptProductionDetailRpt.receiptProductionQnt != null && receiptProductionDetailRpt.receiptProductionQnt != ''">
+                                                                    <option value=""></option>
+                                                                </select>
+                                                            </label>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </article>
+    </div>
+</form>
+
+@section FormAction{
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default" ng-click="event.updateReceivingNote()">
+                <i class="fa fa-save"></i> Save Receipt from Production
+            </a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default" ng-click="event.refreshDataWithFilter()">
+                <i class="fa fa-search"></i> Search Receipt from Production
+            </a>
+        </li>
+    </ul>
+}
+
+@section pagejs{
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(serviceRoot)/api/receiptProductionRpt/',
+            token: '@token',
+            pageSize: '@pageSize',
+            cookieID: '@cookieID',
+            messageNoItems: '@errorNoItems'
+        };
+    </script>
+    <script type="text/javascript" src="~/Angular/app/receiptProductionRpt/index.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/receiptProductionRpt/service.js?v=@guid"></script>
+}

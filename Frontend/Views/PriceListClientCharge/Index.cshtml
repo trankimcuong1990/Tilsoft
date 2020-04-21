@@ -1,0 +1,125 @@
+﻿@{
+    ViewBag.Title = "Search Price Client Charge";
+    ViewBag.Module = "Price Client Charge";
+
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    var pageSize = System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"];
+    var cookieId = HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString();
+}
+
+<div class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-search-filter" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i></span>
+                <h2>Search Results</h2>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div avs-scroll grid-handler="gridHandler" class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header">
+                                <div style="width: 60px;"></div>
+                                <div class="sorting" style="width: 100px;">Start Date</div>
+                                <div class="sorting" style="width: 100px;">End Date</div>
+                                <div class="sorting" style="width: 400px;">Price Client Charge</div>
+                                <div>More Information</div>
+                            </div>
+                            <div class="tilsoft-table-filter">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 79px;"></th>
+                                            <th style="width: 150px;"></th>
+                                            <th style="width: 150px;"></th>
+                                            <th style="width: 400px;"></th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                            <div class="tilsoft-table-body">
+                                <table>
+                                    <tbody>
+                                        <tr ng-repeat="item in data">
+                                            <td style="width: 59px; text-align: center;">
+                                                @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current) == "disabled")
+                                                {
+                                                    <a class="btn btn-default btn-xs font-11" href="@Url.Action("Edit", "PriceListClientCharge")/{{item.priceListClientChargeI}}" title="View (Read Only)" target="_blank"><i class="fa fa-folder-open"></i> View</a>
+                                                }
+                                                else
+                                                {
+                                                    <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "PriceListClientCharge")/{{item.priceListClientChargeID}}/1" title="Edit" target="_blank"><i class="fa fa-pencil"></i> Edit</a>
+                                                }
+                                            </td>
+                                            <td style="width: 100px; text-align: center;">{{item.startDate}}</td>
+                                            <td style="width: 100px; text-align: center;">{{item.endDate}}</td>
+                                            <td style="width: 400px;">
+                                                <span class="box">
+                                                    <u><strong>Client:</strong></u> {{item.clientUD}} - {{item.clientNM}}
+                                                    <br>
+                                                    <u><strong>Charge Type:</strong></u> {{item.chargeTypeNM}}
+                                                    <br>
+                                                    <u><strong>Currency Type:</strong></u> {{item.currencyTypeNM}}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="box">
+                                                    <u><strong>Created By:</strong></u>
+                                                    <a ng-show="(item.createdBy != null && item.createEmployeeNM != null)" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.createdBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                        {{item.createEmployeeNM}}
+                                                    </a>
+                                                    <span ng-show="(item.createdBy != null && item.createEmployeeNM == null && item.createFullName != null)">{{item.createFullName}}</span>
+                                                    <br>
+                                                    <u><strong>Created Date:</strong></u> {{item.createdDate}}
+                                                    <br>
+                                                    <u><strong>Updated By:</strong></u>
+                                                    <a ng-show="(item.updatedBy != null && item.updateEmployeeNM != null)" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.updatedBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                        {{item.updateEmployeeNM}}
+                                                    </a>
+                                                    <span ng-show="(item.updatedBy != null && item.updateEmployeeNM == null && item.updateFullName != null)">{{item.updateFullName}}</span>
+                                                    <br>
+                                                    <u><strong>Created Date:</strong></u> {{item.updatedDate}}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction{
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Search" ng-click="event.reload()"><i class="fa fa-search"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Refresh" ng-click="event.reload()"><i class="fa fa-refresh"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="@Url.Action("Edit", "PriceListClientCharge")/0" class="btn btn-default" title="New"><i class="fa fa-file-o"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs{
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(serviceRoot)/api/pricelistclientcharge/',
+            token: '@token',
+            pageSize: '@pageSize',
+            cookieId: '@cookieId'
+        };
+    </script>
+    <script src="~/Angular/app/pricelistclientcharge/index.js?v=@guid" type="text/javascript"></script>
+    <script src="~/Angular/app/jsonService2.js?v=@guid" type="text/javascript"></script>
+    <script src="~/Angular/app/pricelistclientcharge/service.js?v=@guid" type="text/javascript"></script>
+}

@@ -1,0 +1,125 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var supportServiceRoot = (System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"]);
+    var cookieID = HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString();
+    Frontend.APIDTO.APIUserInformation userInfo = (Frontend.APIDTO.APIUserInformation)Session[Frontend.Customize.Common.ProjectDefinition.USER_INFO_SESSION];
+    ViewBag.Icon = "fa-bar-chart-o";
+    ViewBag.Title = "Stock Status Quantity Report";
+    ViewBag.Module = "Stock Status Quantity Report";
+}
+
+<article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+    <div class="jarviswidget jarviswidget-color-darken" id="wid-id-search-filter" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+        <header>
+            <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+            <h2>Filters</h2>
+        </header>
+        <div>
+            <div class="jarviswidget-editbox"></div>
+            <div class="widget-body widget-body no-padding">
+                <div class="smart-form">
+                    <fieldset>
+                        <section class="col col-sm-3">
+                            <label class="label">Alert Level</label>
+                            <select class="form-control search-filter" id="alert" ng-model="filters.AlertLevel" ng-options="alertLevel.value as alertLevel.name for alertLevel in alertLevels">
+                            </select>
+                        </section>
+                        <section class="col col-sm-3">
+                            <label class="label">Warehouse</label>
+                            <select class="form-control search-filter" id="warehouse" ng-model="filters.FactoryWarehouseID" ng-options="factoryWarehouseDto.factoryWarehouseID as factoryWarehouseDto.factoryWarehouseNM for factoryWarehouseDto in factoryWarehouseDtos">
+                                <option value=""></option>
+                            </select>
+                        </section>
+                        <section class="col col-sm-3">
+                            <label class="label">Material group</label>
+                            <select class="form-control search-filter" id="materialGroup" ng-model="filters.MaterialGroupID" ng-options="productionItemGroup.productionItemGroupID as productionItemGroup.productionItemGroupNM for productionItemGroup in productionItemGroups">
+                                <option value=""></option>
+                            </select>
+                        </section>
+                    </fieldset>
+                    <footer>
+                        <a href="javascript:void(0)" class="btn btn-primary" style="float: none;" ng-click="event.search()"><i class="fa fa-code"></i> HTML Version</a>
+                    </footer>
+                </div>
+            </div>
+        </div>
+    </div>
+</article>
+<article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+    <div class="jarviswidget" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+        <header>
+            <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+            <h2>Results</h2>
+        </header>
+        <div>
+            <div class="jarviswidget-editbox"></div>
+            <div class="widget-body no-padding">
+                <div class="tab-content">
+                    <div class="tab-pane active">
+                        <div avs-scroll grid-handler="gridHandler" class="tilsoft-table-wrapper">
+                            <div class="tilsoft-table">
+                                <div style="width:1700px; background-color: #9999FF" class="tilsoft-table-header">
+                                    <table>
+                                        <tr>
+                                            <th style="background-color: #9999FF; width: 50px; font-weight:bold;"><div style="width: 50px; height: 59px; border-right:solid 1px #ccc">No</div></th>
+                                            <th style="background-color: #9999FF; width: 190px; font-weight:bold;"><div style="width: 190px; height: 59px; border-right:solid 1px #ccc">Code</div></th>
+                                            <th style="background-color: #9999FF; width: 300px; font-weight:bold;"><div style="width: 300px; height: 59px; border-right:solid 1px #ccc">Name</div></th>
+                                            <th style="background-color: #9999FF; width: 120px; font-weight:bold;"><div style="width: 120px; height: 59px; border-right:solid 1px #ccc">Unit</div></th>
+                                            <th style="background-color: #9999FF; width: 120px; font-weight:bold;"><div style="width: 120px; height: 59px; border-right:solid 1px #ccc">Stock QNT</div></th>
+                                            <th style="background-color: #9999FF; width: 120px; font-weight:bold;"><div style="width: 120px; height: 59px; border-right:solid 1px #ccc">Min QNT</div></th>
+                                            <th style="background-color: #9999FF; width: 120px; font-weight:bold;"><div style="width: 120px; height: 59px; border-right:solid 1px #ccc">Average QNT</div></th>
+                                            <th style="background-color: #9999FF; width: 120px; font-weight:bold;"><div style="width: 120px; height: 59px; border-right:solid 1px #ccc">Max QNT</div></th>
+                                            <th style="background-color: #9999FF; width: 120px; font-weight:bold;"><div style="width: 120px; height: 59px; border-right:solid 1px #ccc">Material Group</div></th>
+                                            <th style="background-color: #9999FF; width: 120px; font-weight:bold;"><div style="width: 120px; height: 59px; border-right:solid 1px #ccc">Alert Level</div></th>
+                                            <th style="background-color: #9999FF; width: 170px; font-weight:bold;"><div style="width: 170px; height: 59px; border-right:solid 1px #ccc">Warehouse</div></th>
+                                            <th></th>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div style="width:1700px; margin-top: 60px" class="tilsoft-table-body">
+                                    <table>
+                                        <tr ng-repeat="item in StockStatusData">
+                                            <td style="width:50px; text-align:center">{{$index+1}}</td>
+                                            <td style="width:190px">{{item.productionItemUD}}</td>
+                                            <td style="width:300px">{{item.productionItemNM}}</td>
+                                            <td style="width:120px">{{item.unit}}</td>
+                                            <td style="width:120px; text-align:right">{{item.stockQnt}}</td>
+                                            <td style="width:120px; text-align:right">{{item.minimum}}</td>
+                                            <td style="width:120px; text-align:right">{{item.average}}</td>
+                                            <td style="width:120px; text-align:right">{{item.maximum}}</td>
+                                            <td style="width:120px">{{item.productionItemGroupNM}}</td>
+                                            <td ng-if="item.stockQnt <= item.minimum && item.minimum > 0" style="width:120px">Minimum</td>
+                                            <td ng-if="item.stockQnt <= item.average && item.stockQnt > item.minimum && item.average > 0" style="width:120px">Average</td>
+                                            <td ng-if="item.stockQnt > item.average" style="width:120px"></td>
+                                            <td style="width:170px">{{item.factoryWarehouseNM}}</td>
+                                            <td></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</article>
+
+@section pagejs {
+    <script type="text/javascript">
+        var context = {
+            token: '@token',
+            serviceUrl: '@(serviceRoot)/api/stockstatusqnt-report/',
+            supportServiceUrl: '@(supportServiceRoot)/api/support/',
+            reportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]',
+            backendReportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]',
+            cookieID: '@cookieID',
+            branchID: '@userInfo.Data.BranchID',
+        }
+    </script>
+    <script type="text/javascript" src="~/Views/StockStatusQntRpt/index.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Views/StockStatusQntRpt/service.js?v=@guid"></script>
+}

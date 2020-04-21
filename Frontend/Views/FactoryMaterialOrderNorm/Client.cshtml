@@ -1,0 +1,135 @@
+﻿@{
+    ViewBag.Title = "Search client to create BOM";
+    ViewBag.Module = "BOM Order";
+}
+<div class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-search-filter" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Filters to search order</h2>
+            </header>
+
+            <div>
+                <div class="widget-body">
+                    <div class="row">
+                        <div class="col-sm-2 m-bottom-15">
+                            <label>Client</label>
+                            <input class="form-control search-filter" type="text" ng-model="filters.clientUD">
+                        </div>
+                        <div class="col-sm-2 m-bottom-15">
+                            <label>ArticleCode</label>
+                            <input class="form-control search-filter" type="text" ng-model="filters.articleCode">
+                        </div>
+                        <div class="col-sm-2 m-bottom-15">
+                            <label>Description</label>
+                            <input class="form-control search-filter" type="text" ng-model="filters.description">
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-search-result" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Client search result</h2>
+            </header>
+
+            <div>
+                <div class="jarviswidget-editbox"></div>
+                <div class="widget-body">
+                    <div class="table-responsive" id="wareHouseImportTable">
+                        <div id="grdSearchResult" class="tilsoft-table-wrapper">
+                            <div class="tilsoft-table">
+                                <div class="tilsoft-table-header" style="width: 1000px;">
+                                    <div style="width: 90px;" class="sorting" data-colname="ClientUD">Client</div>
+                                    <div></div>
+                                </div>
+                                <div class="tilsoft-table-body" style="width: 1000px;">
+                                    <table>
+                                        <tbody ng-repeat="item in data">
+                                            <tr>
+                                                <td style="width: 90px; text-align:center">{{item.clientUD}}</td>
+                                                @*<td style="width: 110px; text-align:center">
+                                                    <select class="form-control" ng-model="item.season" ng-options="season.seasonValue as season.seasonText for season in seasons" ng-init="2016/2017">
+                                                        <option value=""></option>
+                                                    </select>
+                                                </td>*@
+                                                <td>
+                                                    <div class="tilsoft-table" ng-if="item.clientProducts.length > 0">
+                                                        <table>
+                                                            <tbody ng-repeat="product_item in item.clientProducts">
+                                                                <tr>
+                                                                    <td style="width:50px">
+                                                                        <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "FactoryMaterialOrderNorm")/0?clientID={{item.clientID}}&productID={{product_item.productID}}" title="Create norm" target="_blank">Norm</a>
+                                                                    </td>
+                                                                    <td colspan="1"><span style="font-weight:bold">{{product_item.articleCode}}</span> <br />{{product_item.description}}</td>
+                                                                </tr>
+                                                                <tr ng-if="product_item.defaultNorms.length > 0">
+                                                                    <td></td>
+                                                                    <td>
+                                                                        <div class="tilsoft-table">
+                                                                            <table>
+                                                                                <tr ng-repeat="materialNormItem in product_item.defaultNorms">
+                                                                                    <td style="width:200px">{{materialNormItem.factoryMaterialUD}}</td>
+                                                                                    <td>{{materialNormItem.factoryMaterialNM}}</td>
+                                                                                    <td style="width:70px;">
+                                                                                        {{materialNormItem.normValue}}
+                                                                                    </td>
+                                                                                    <td style="width:60px">{{materialNormItem.unitNM}}</td>
+                                                                                </tr>
+                                                                            </table>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            </tbody>
+                                                            
+                                                        </table>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                        
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Search" ng-click="event.reload()"><i class="fa fa-search"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Refresh" ng-click="event.reload()"><i class="fa fa-refresh"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script src="~/Angular/app/jsonService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/support/service.js?c=@System.Guid.NewGuid().ToString().Replace("-","")"></script>
+    <script type="text/javascript">
+        jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/factoryMaterialOrderNorm/';
+        jsonService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+        supportService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/support/';
+        supportService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+        jsonService.searchFilter.pageSize = 10;
+        var context = {
+            editUrl: '@Url.Action("Edit", "FactoryMaterialOrderNorm")',
+            reportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]',
+        }
+    </script>
+    <script src="~/Angular/app/factoryMaterialOrderNorm/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/factoryMaterialOrderNorm/client.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}

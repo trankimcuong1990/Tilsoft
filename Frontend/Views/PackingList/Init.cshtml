@@ -1,0 +1,139 @@
+﻿@{
+    ViewBag.Title = "Select invoice to create packing list";
+    ViewBag.Module = "Packing list";
+}
+
+<div class="row">
+
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-0" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-search"></i> </span>
+                <h2>Search Filters</h2>
+            </header>
+
+            <div>
+                <div class="jarviswidget-editbox"></div>
+                <div class="widget-body">
+                    <div class="row">
+                        <div class="col-sm-2">
+                            <label>BL No</label>
+                            <input class="form-control search-filter" type="text" id="BLNo" ng-model="filters.BLNo">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-search-result" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Invoices search result</h2>
+            </header>
+            <div>
+                <div class="jarviswidget-editbox"></div>
+                <div class="widget-body">
+                    <div id="searchTableContent" class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header" style="width: 1500px;">
+                                <div style="width: 60px;"></div>
+                                <div class="sorting" data-colname="invoiceNo" style="width: 100px;">Invoice No</div>
+                                <div class="sorting" data-colname="invoiceDateFormated" style="width: 80px;">Invoice Date</div>
+                                <div class="sorting" data-colname="blNo" style="width: 160px;">BL No</div>
+                                <div class="sorting" data-colname="shipedDateFormated" style="width: 80px;">Shipped Date</div>
+                                <div class="sorting" data-colname="podName" style="width: 120px;">POD</div>
+                                <div class="sorting" data-colname="polName" style="width: 120px;">POL</div>
+                                <div class="sorting" data-colname="forwarderNM">Forwarder</div>
+                            </div>
+                            <div class="tilsoft-table-body" style="width: 1500px; ">
+                                <table>
+                                    <tr ng-repeat="init_item in data">
+                                        <td style="text-align: center; width: 60px;">
+                                            <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "PackingList")/0?pID={{init_item.purchasingInvoiceID}}">Select</a>
+                                        </td>
+                                        <td style="width: 100px; ">{{init_item.invoiceNo}}</td>
+                                        <td style="width: 80px;">{{init_item.invoiceDateFormated}}</td>
+                                        <td style="width: 160px; ">{{init_item.blNo}}</td>
+                                        <td style="width: 80px;">{{init_item.shipedDateFormated}}</td>
+                                        <td style="width: 120px;">{{init_item.podName}}</td>
+                                        <td style="width: 120px;">{{init_item.polName}}</td>
+                                        <td>{{init_item.forwarderNM}}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+    </article>
+</div>
+
+
+@section pagepopup
+{
+}
+
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Search" ng-click="event.search()"><i class=" fa fa-search"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Refresh" ng-click="event.search()"><i class="fa fa-refresh"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script src="~/Angular/app/packinglist/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script type="text/javascript">
+
+        jQuery('.search-filter').keypress(function(e){
+            if (e.keyCode == 13) {
+                var scope = angular.element(jQuery('body')).scope();
+                scope.event.search();
+            }
+        });
+
+        packingListService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/packinglist/';
+        packingListService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+        packingListService.searchFilter.pageSize = @System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"];
+
+        var modelApp = angular.module('tilsoftApp', []);
+        modelApp.controller('tilsoftController', ['$scope', function ($scope) {
+            $scope.data = null;
+            $scope.filters = {
+               BLNo : ''
+            };
+
+            $scope.event = {
+                search: function(){
+                    packingListService.searchFilter.filters = $scope.filters;
+                    $scope.search();
+                }
+            }
+            $scope.search = function () {
+                packingListService.search_initInfo(
+                    function (data) {
+                        $scope.data = data.data;
+                        $scope.$apply();
+                        jQuery('#content').show();
+                        
+                    },
+                    function (error) {
+                        $scope.data = null;
+                        $scope.$apply();
+                    }
+                );
+            }
+
+            $scope.event.search();
+        }]);
+    </script>
+}

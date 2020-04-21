@@ -1,0 +1,224 @@
+﻿@{
+    ViewBag.Title = "Search Delivery Term";
+    ViewBag.Module = "DeliveryTerm";
+}
+
+<div class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-0" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Search Result</h2>
+            </header>
+
+            <div>
+                <div class="jarviswidget-editbox"></div>
+
+                <div class="widget-body">
+                    <div class="table-responsive" id="deliveryTermTable">
+                        <table class="table table-bordered table-hover custom-table dataTable">
+                            <thead>
+                                <tr>
+                                    <th style="width: 90px;"></th>
+                                    <th style="width: 180px;" class="sorting" data-colname="DeliveryType">Delivery Type</th>
+                                    <th class="sorting_asc" data-colname="DeliveryTermNM">Delivery Term Name</th>
+                                    <th class="sorting_asc" data-colname="Code">Code</th>
+                                    <th class="sorting_asc" data-colname="IsActive">Active</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="deliveryTerm in deliveryTerms">
+                                    <td style="text-align: center;">
+                                        @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current) == "disabled")
+                                        {
+                                            <a href="@Url.Action("Edit", "DeliveryTerm")/{{deliveryTerm.deliveryTermID}}" title="View (Read Only)"><i class="fa fa-folder-open grid-button"></i></a>
+                                        }
+                                        else
+                                        {
+                                            <a href="@Url.Action("Edit", "DeliveryTerm")/{{deliveryTerm.deliveryTermID}}" title="Edit"><i class="fa fa-pencil-square grid-button"></i></a>
+                                        }
+
+                                        @if (Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Delete, HttpContext.Current) != "disabled")
+                                        {
+                                            <a href="#" ng-click="delete(deliveryTerm.deliveryTermID)" title="Delete"><i class="fa fa-times-circle grid-button"></i></a>
+                                        }                                        
+                                    </td>
+                                    <td>{{deliveryTerm.deliveryTypeNM}}</td>
+                                    <td>{{deliveryTerm.deliveryTermNM}}</td>
+                                    <td>{{deliveryTerm.deliveryTermUD}}</td>
+                                    <td style="width: 80px; text-align:center"><input type="checkbox" disabled="disabled" ng-model="{{deliveryTerm.IsActive}}" /></td>
+                                  
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default disabled" title="Search"><i class="fa fa-search"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Refresh"><i class="fa fa-refresh"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="@Url.Action("Edit", "DeliveryTerm")/0" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="New"><i class="fa fa-file-o"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default disabled" title="Print"><i class="fa fa-print"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script src="~/Angular/app/deliveryTerm/service.js"></script>
+    <script type="text/javascript">
+        //// config data table
+        jQuery('#deliveryTermTable').furnindoTable();
+        //// end config data table
+
+        deliveryTermService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/deliveryTerm/';
+        deliveryTermService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+        deliveryTermService.searchFilter.pageSize = @System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"];
+
+        var deliveryTermApp = angular.module('tilsoftApp', []);
+        deliveryTermApp.controller('tilsoftController', ['$scope', function ($scope) {
+            $scope.deliveryTerms = null;
+            $scope.pageIndex = 1;
+            $scope.totalPage = 0;
+
+            //
+            // private function defined
+            //
+            var search = function () {
+                deliveryTermService.search(
+                    function (data) {
+                        $scope.deliveryTerms = data.data;
+                        $scope.totalPage = Math.ceil(data.totalRows / deliveryTermService.searchFilter.pageSize);
+                        $scope.$apply();
+
+                        if(data.totalRows < deliveryTermService.searchFilter.pageSize) {
+                            jQuery('#deliveryTermTable').find('ul').hide();
+                        }
+                        else {
+                            jQuery('#deliveryTermTable').find('ul').show();
+                        }
+
+                        jQuery('#content').show();
+                    },
+                    function (error) {
+                        $scope.deliveryTerms = null;
+                        $scope.pageIndex = 1;
+                        $scope.totalPage = 0;
+                        $scope.$apply();
+                    }
+                );
+            }
+
+            // function define
+            $scope.delete = function (id) {
+                if (confirm('Are you sure ?')) {
+                    deliveryTermService.delete(id,
+                        function (data) {
+                            jsHelper.processMessage(data.message);
+
+                            if(data.message.type == 0) {
+                                var j = -1;
+                                for (var i = 0; i < $scope.deliveryTerms.length; i++) {
+                                    if ($scope.deliveryTerms[i].deliveryTermID == data.data) {
+                                        j = i;
+                                        break;
+                                    }
+                                }
+
+                                if (j >= 0) {
+                                    $scope.deliveryTerms.splice(j, 1);
+                                }
+
+                                $scope.$apply();
+                            }
+                        },
+                        function (error) {
+                            jsHelper.showMessage('warning', error);
+                        }
+                    );
+                }
+            }
+
+            //
+            // SORTING & PAGING
+            //
+            $scope.goToFirst = function ($event) {
+                $event.preventDefault($event);
+                $scope.pageIndex = 1;
+                deliveryTermService.searchFilter.pageIndex = $scope.pageIndex;
+                search();
+            }
+
+            $scope.goToPrev = function ($event) {
+                $event.preventDefault();
+                if ($scope.pageIndex > 1) {
+                    $scope.pageIndex--;
+                    deliveryTermService.searchFilter.pageIndex = $scope.pageIndex;
+                    search();
+                }
+            }
+
+            $scope.goToNext = function ($event) {
+                $event.preventDefault();
+                if ($scope.pageIndex < $scope.totalPage) {
+                    $scope.pageIndex++;
+                    deliveryTermService.searchFilter.pageIndex = $scope.pageIndex;
+                    search();
+                }
+            }
+
+            $scope.goToLast = function ($event) {
+                $event.preventDefault();
+                $scope.pageIndex = $scope.totalPage;
+                deliveryTermService.searchFilter.pageIndex = $scope.pageIndex;
+                search();
+            }
+
+            $scope.goToPage = function ($event) {
+                $event.preventDefault();
+                if (jQuery('#deliveryTermTable_pageIndex').val() > 0 && jQuery('#deliveryTermTable_pageIndex').val() <= $scope.totalPage) {
+                    $scope.pageIndex = jQuery('#deliveryTermTable_pageIndex').val();
+                    deliveryTermService.searchFilter.pageIndex = $scope.pageIndex;
+                    search();
+                }
+                else {
+                    alert('Invalid page index!');
+                    jQuery('#deliveryTermTable_pageIndex').val($scope.pageIndex);
+                }
+            }
+
+            $scope.sort = function ($event) {
+                $event.preventDefault();
+
+                $scope.pageIndex = 1;
+                deliveryTermService.searchFilter.pageIndex = $scope.pageIndex;
+                deliveryTermService.searchFilter.sortedBy = jQuery($event.target).data('colname');
+
+                if (jQuery($event.target).hasClass('sorting_asc')) {
+                    deliveryTermService.searchFilter.sortedDirection = 'asc';
+                }
+                else if (jQuery($event.target).hasClass('sorting_desc') || jQuery($event.target).hasClass('sorting')) {
+                    deliveryTermService.searchFilter.sortedDirection = 'desc';
+                }
+
+                search();
+            }
+
+            //
+            // INIT
+            //
+            search();
+        }]);
+    </script>
+}

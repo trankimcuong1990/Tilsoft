@@ -1,0 +1,123 @@
+﻿@{
+    ViewBag.Title = "Master Production Schedule";
+    ViewBag.Module = "Master Production Schedule";
+}
+<form class="row" id="main-form">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-search-result" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Production Schedule</h2>
+            </header>
+            <div class="row">
+                <div class="col-lg-2 m-bottom-15">
+                    <label>Work Order</label>
+                    <input type="text" class="form-control search-filter" ng-model="filters.workOrderUD"/>
+                </div>
+                <div class="col-lg-2">
+                    <label>Work Center</label>
+                    <select name="factoryWarehouse" ng-model="filters.workCenterID" ng-options="item.workCenterID as item.workCenterNM for item in data.workCenters" class="form-control">
+                        <option value=""></option>
+                    </select>
+                </div>
+                @*<div class="col-lg-2">
+                    <label>Production Team</label>
+                    <select name="factoryWarehouse" ng-model="filters.productionTeamID" ng-options="item.productionTeamID as item.productionTeamNM for item in data.productionTeams" class="form-control">
+                        <option value=""></option>
+                    </select>
+                </div>*@
+            </div>
+            <div class="row">
+                <div>
+                    <div class="widget-body no-padding">
+                        <div avs-scroll grid-handler="gridHandler" class="tilsoft-table-wrapper">
+                            <div class="tilsoft-table">
+                                <div class="tilsoft-table-header" style="width: 1100px;">
+                                    <div style="width: 120px;" class="" data-colname="WorkOrderUD">Work Order</div>
+                                    <div style="width: 70px;" class="" data-colname="">Order No</div>
+                                    <div style="width: 70px;" class="" data-colname="">Client</div>
+                                    <div style="width: 100px;" class="" data-colname="">Start Date</div>
+                                    <div style="width: 100px;" class="" data-colname="">Finish Date</div>
+                                    <div style="width: 100px;" class="" data-colname="">WorkOrder Qnt</div>
+                                    <div style="width: 210px;" class="" data-colname="">ArticleCode</div>
+                                    <div style="" class="" data-colname="Remark"></div>
+                                </div>
+                                <div class="tilsoft-table-body" style="width: 1100px;">
+                                    <table>
+                                        <tbody ng-repeat="woItem in workOrders" >
+                                            <tr>
+                                                <td style="text-align: left; width: 119px; vertical-align:middle">{{woItem.workOrderUD}}</td>
+                                                <td style="text-align: center; width: 70px; vertical-align:middle">{{woItem.proformaInvoiceNo}}</td>
+                                                <td style="text-align: center; width: 70px; vertical-align:middle">{{woItem.clientUD}}</td>
+                                                <td style="text-align: center; width: 100px; vertical-align:middle">{{woItem.startDate}}</td>
+                                                <td style="text-align: center; width: 100px; vertical-align:middle">{{woItem.finishDate}}</td>
+                                                <td style="text-align: center; width: 100px; vertical-align:middle">{{woItem.workOrderQnt}}</td>
+                                                <td style="text-align: left; width: 210px; vertical-align:middle">{{woItem.articleCode}}</td>
+                                                <td></td>
+                                            </tr>
+                                            <tr ng-repeat="wcItem in woItem.workCenters">
+                                                <td colspan="2"><b>Work Center :</b> {{wcItem.workCenterNM}}</td>
+                                                <td colspan="6">
+                                                    <table>
+                                                        <tbody ng-repeat="piItem in wcItem.productionItems">
+                                                            <tr>
+                                                                <td colspan="5">
+                                                                    <b>Component&nbsp;: </b>{{piItem.productionItemUD}} ({{piItem.productionItemNM}})
+                                                                    <br />
+                                                                    <b>Norm Qnt&nbsp;&nbsp;&nbsp;&nbsp;: </b> {{woItem.workOrderQnt * piItem.normQnt}}
+                                                                </td>
+                                                            </tr>
+                                                            <tr ng-repeat="ptItem in piItem.productionTeams | orderBy: 'productionTeamNM'">
+                                                                <td style="width:25px"></td>
+                                                                <td><b>Team:</b> {{ptItem.productionTeamNM}}</td>
+                                                                <td style="text-align:left; width:150px">
+                                                                    <b>Production Qnt :</b> {{ptItem.productionQnt}} <br />
+                                                                </td>
+                                                                <td style="text-align:left; width:150px">
+                                                                    <b>Produced Qnt :</b> {{ptItem.producedQnt}} <br />
+                                                                </td>
+                                                                <td style="text-align:left; width:150px">
+                                                                    <b>Remain Qnt :</b> {{ptItem.remainQnt}}
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <span>Found: {{workOrders.length}} record(s)</span>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+
+    </article>
+</form>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Search" ng-click="event.reload()"><i class="fa fa-search"></i> Search</a>
+        </li>
+    </ul>
+}
+@section pagepopup2{
+}
+
+@section pagejs {
+    <script src="~/Angular/app/jsonService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script type="text/javascript">
+        jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/MasterProductionScheduleRpt/';
+        jsonService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+        var context = {
+            reportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]',
+        }
+    </script>
+    <script src="~/Angular/app/masterProductionScheduleRpt/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/masterProductionScheduleRpt/index.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}

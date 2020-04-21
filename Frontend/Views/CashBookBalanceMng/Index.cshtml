@@ -1,0 +1,138 @@
+﻿@{
+    ViewBag.Title = "Search Cash Book Balance";
+    ViewBag.Module = "CashBookBalanceMng";
+    ViewBag.Icon = "fa-search";
+
+    int currentDay = DateTime.Now.Day;
+    int Month = DateTime.Now.Month;
+    int Year = DateTime.Now.Year;
+
+}
+
+<div class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget jarviswidget-color-darken" id="wid-id-0" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Search Result</h2>
+            </header>
+
+            <div>
+                <div class="widget-body no-padding">
+                    <div avs-scroll grid-handler="gridHandler" class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header" style="width: 100%;">
+                                <div style="width: 70px;"><b>Found </b><b style="color:#a90329;">{{totalRows}} </b></div>
+                                <div style="width: 60px;">Month</div>
+                                <div style="width: 60px;">Year</div>
+                                <div><i class="fa fa-list"></i> Tracking</div>
+                            </div>
+                            <div class="tilsoft-table-filter" style="width: 100%;">
+                                <div style="width: 70px;">
+                                    <a href="javascript:void(0)" class="btn btn-{{isDefaultFilter?'default':'primary'}} btn-xs" title="Apply Filter" ng-click="event.reload()"><i class="fa fa-filter"></i></a>
+                                    <a href="javascript:void(0)" class="btn btn-default btn-xs" title="Clear Filter" ng-click="event.clearFilter()"><i class="fa fa-ban"></i></a>
+                                </div>
+                                <div style="width: 60px;">
+                                    <input class="search-filter" type="text" ng-model="filters.BalanceMonth" />
+                                </div>
+                                <div style="width: 60px;">
+                                    <input class="search-filter" type="text" ng-model="filters.BalanceYear" />
+                                </div>
+                                <div></div>
+                            </div>
+                            <div class="tilsoft-table-body" style="width: 100%; margin-top: 95px;">
+                                <table>
+                                    <tr ng-repeat="item in data">
+                                        <td style="text-align: center; width: 69px;"><a href="javascript:void(0);" target="_blank" class="btn btn-primary btn-xs" ng-click="event.getBalanceDetail(item.cashBookBalanceID)">Detail</a></td>
+                                        <td style="text-align: center; width: 60px;">{{item.balanceMonth}}</td>
+                                        <td style="text-align: center; width: 60px;">{{item.balanceYear}}</td>
+                                        <td>
+                                            Updated by:
+                                            <a ng-if="item.updatedBy" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{item.updatedBy}}" dat data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                <i class="fa fa-user"></i>  {{item.updatorName}}
+                                            </a><br/>
+                                            On {{item.updatedDate}}
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+<!--Balance Details-->
+<div id="balanceContainer" name="balanceContainer" class="modal fade" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h2 class="modal-title" id="myModalLabel" style="font-weight:700;">Balance Detail on: {{MonthName}}</h2>
+            </div>
+            <div class="modal-body no-padding">
+                <div class="smart-form">
+                    <div class="tilsoft-table">
+                        <div class="tilsoft-table-body" style="width: 300px; height: auto; margin-top:0px">
+                            <table>
+                                <tr>
+                                    <th style="width: 200px;" data-colname="PaidByNM">Name</th>
+                                    <th data-colname="VNDAmount">Amount</th>
+                                </tr>
+                                <tbody ng-repeat="detail in cashBookBalanceDetails | orderBy: '-paidByNM' ">
+                                    <tr>
+                                        <td style="text-align:center"><span>{{detail.paidByNM}}</span></td>
+                                        <td><span >VNĐ {{detail.vndAmount | number:2}}</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Close
+                </button>
+                <!--
+                <label class="input" style="padding: 25px 10px 10px 5px;">
+                    <a href="javascript:void(0)" class="btn btn-primary btn-xs font-11" ng-click="event.generateExcel(selectedEvent.workingDate)" style="float: none;font-size: 15px; padding: 4px 25px 4px 25px;"><i class="fa fa-file-excel-o"></i> Excel Generate </a>
+                </label>
+                -->
+            </div>
+        </div>
+    </div>
+</div>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Search" ng-click="event.reload()"><i class="fa fa-search"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default" title="Refresh" ng-click="event.reload()"><i class="fa fa-refresh"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Close Entry Balance" ng-click="event.closeEntryBalance(@Month, @Year)"><i class="fa fa-thumbs-o-up"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script type="text/javascript">
+        var context = {
+            serviceUrl : '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/cashbookbalancemng/',
+            token : '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]',
+            pageSize : @System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"],
+            cookieId: '@HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString()',
+            refreshUrl: '@Url.Action("Index", "CashBookBalanceMng")'
+        }
+    </script>
+    <script src="~/Angular/app/cashBookBalanceMng/index.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/jsonService2.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/cashBookBalanceMng/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}

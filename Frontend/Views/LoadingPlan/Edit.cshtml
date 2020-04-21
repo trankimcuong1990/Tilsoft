@@ -1,0 +1,2321 @@
+﻿@{
+    if (ViewBag.ID == 0)
+    {
+        ViewBag.Title = "Create New Loading Plan";
+    }
+    else
+    {
+        ViewBag.Title = "Edit Loading Plan";
+    }
+
+    ViewBag.Module = "Loading Plan";
+    string fID = "0";
+    string bID = "0";
+    string pID = "0";
+    if (Request.Params["fID"] != null)
+    {
+        fID = Request.Params["fID"];
+    }
+    if (Request.Params["bID"] != null)
+    {
+        bID = Request.Params["bID"];
+    }
+    if (Request.Params["pID"] != null)
+    {
+        pID = Request.Params["pID"];
+    }
+    string userManualUrl = string.Empty;
+    if (System.IO.File.Exists(Server.MapPath("~/UserManual/" + ViewBag.ModuleCode + ".pdf")))
+    {
+        userManualUrl = "/UserManual/" + ViewBag.ModuleCode + ".pdf";
+    }
+    // Session login
+    Frontend.APIDTO.APIUserInformation userInfo = (Frontend.APIDTO.APIUserInformation)Session[Frontend.Customize.Common.ProjectDefinition.USER_INFO_SESSION];
+}
+
+<form class="row" name="editForm" id="main-form">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <ul class="nav nav-tabs pull-left in">
+                    <li class="active">
+                        <a data-toggle="tab" href="#tabGeneral"> <span> General Information </span> </a>
+                    </li>
+                    <li>
+                        <a data-toggle="tab" href="#tabShipping"> <span> Shipping Information </span> </a>
+                    </li>
+                    <li>
+                        <a data-toggle="tab" href="#tabImages"> <span> Container checklist </span> </a>
+                    </li>
+                    <li>
+                        <a data-toggle="tab" href="#tabChildLoadingPlan"> <span> Sub loading plan </span> </a>
+                    </li>
+                    <li>
+                        <a data-toggle="tab" href="#tabTracking"> <i class="fa fa-history"></i> <span> Tracking </span> </a>
+                    </li>
+                </ul>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="tabGeneral">
+                            <div class="smart-form">
+                                <fieldset>
+                                    <div class="row">
+                                        <section class="col col-2">
+                                            <label class="label">Loading Ref#</label>
+                                            <label class="input">
+                                                <span class="form-control">{{data.loadingPlanUD}}</span>
+                                            </label>
+                                        </section>
+
+                                        <section class="col col-2">
+                                            <label class="label">Container Ref#</label>
+                                            <label class="input">
+                                                <span class="form-control">{{data.containerRefNo}}</span>
+                                            </label>
+                                        </section>
+
+                                        <section class="col col-2">
+                                            <label class="label">
+                                                Container Loading Date
+                                                <em ng-show="editForm.loadingDate.$error.required" class="note note-error">(Required)</em>
+                                            </label>
+                                            <label class="input" ng-class="{'state-error': editForm.loadingDate.$error.required}">
+                                                <input type="text" name="loadingDate" class="datepicker" ng-model="data.loadingDate" data-dateformat="dd/mm/yy" required />
+                                                <i class="icon-append fa fa-calendar"></i>
+                                            </label>
+                                        </section>
+
+                                        <section class="col col-2">
+                                            <label class="label">ETD</label>
+                                            <label class="input">
+                                                <input type="text" class="datepicker" ng-model="data.shipmentDate" data-dateformat="dd/mm/yy" />
+                                                <i class="icon-append fa fa-calendar"></i>
+                                            </label>
+                                        </section>
+
+                                        <section class="col col-2">
+                                            <label class="label">Factory</label>
+                                            <label class="input">
+                                                <span class="form-control">{{data.factoryUD}}</span>
+                                            </label>
+                                        </section>
+
+                                        <section class="col col-2">
+                                            <label class="label">Status</label>
+                                            <label class="input">
+                                                <span class="form-control">{{data.loadingStatus}}</span>
+                                            </label>
+                                        </section>
+                                    </div>
+                                    <div class="row">
+                                        <section class="col col-2">
+                                            <label class="label">Controller</label>
+                                            <label class="select">
+                                                <select id="controllerID" ng-model="data.controllerID" ng-options="user.userID as (user.employeeNM + ' ('+user.internalCompanyNM+')') for user in users | orderBy : 'employeeNM'" ng-change="event.changeController()">
+                                                    <option value="">No Account</option>
+                                                </select>
+                                                <i></i>
+                                            </label>
+                                        </section>
+
+                                        <section class="col col-2">
+                                            <label class="label">Other Controller</label>
+                                            <label class="input">
+                                                <input ng-readonly="data.controllerID" type="text" ng-model="data.controllerName" />
+                                            </label>
+                                        </section>
+
+                                        <section class="col col-6">
+                                            <label class="label">Attach with other loading plan</label>
+
+                                            <div class="input">
+                                                <input ng-model="data.parentLoadingPlanUD" type="text" placeholder="search loading plan" ng-model="quicksearchLoadingPlan.loadingPlanUD" autocomplete="off" ng-keyup="quicksearchLoadingPlan.event.searchBoxKeyUp($event)" id="txtLoadingPlanUD" />
+                                                <a ng-click="quicksearchLoadingPlan.event.clickSearch()" href="javascript:void(0);"> <i class="icon-append fa fa-search"></i></a>
+                                                <div id="loadingPlan-popup" class="popup-container-2">
+                                                    <div style="float: right; margin-bottom: 8px;">
+                                                        <a ng-click="quicksearchLoadingPlan.event.close($event, true)" class="btn btn-primary btn-xs" href="javascript:void(0);"><i class="fa fa-remove"></i> Close</a>
+                                                    </div>
+                                                    <div class="clear"></div>
+                                                    <div id="quicksearchLoadingPlanGrid" class="tilsoft-table-wrapper">
+                                                        <div class="tilsoft-table">
+                                                            <div class="tilsoft-table-header" style="width: 1000px;">
+                                                                <div style="width: 80px;"></div>
+                                                                <div style="width: 150px;">Loading Ref</div>
+                                                                <div style="width: 110px;">Factory</div>
+                                                                <div style="width: 150px;">Container No</div>
+                                                                <div style="width: 50px;">Type</div>
+                                                                <div style="width: 100px;">Seal No</div>
+                                                                <div style="width: 70px;">Client</div>
+                                                                <div>BL No</div>
+                                                            </div>
+                                                            <div class="tilsoft-table-body" style="width: 1000px;">
+                                                                <table>
+                                                                    <tr ng-repeat="item in quicksearchLoadingPlan.data">
+                                                                        <td style="width: 80px; text-align: center;"><a ng-click="quicksearchLoadingPlan.event.ok($event, item)" class="btn btn-primary btn-xs" href="javascript:void(0);"><i class="fa fa-check"></i> Select</a></td>
+                                                                        <td style="width: 150px;">{{item.loadingPlanUD}}</td>
+                                                                        <td style="width: 110px;">{{item.factoryUD}}</td>
+                                                                        <td style="width: 150px;">{{item.containerNo}}</td>
+                                                                        <td style="width: 50px;">{{item.containerTypeNM}}</td>
+                                                                        <td style="width: 100px;">{{item.sealNo}}</td>
+                                                                        <td style="width: 70px;">{{item.clientUD}}</td>
+                                                                        <td>{{item.blNo}}</td>
+                                                                    </tr>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </section>
+
+                                        <section class="col col-2">
+                                            <label class="label">Remark</label>
+                                            <label class="textarea textarea-resizable">
+                                                <input type="text" ng-model="data.remark" class="form-control" />
+                                            </label>
+                                        </section>
+
+                                    </div>
+
+                                </fieldset>
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="tabShipping">
+                            <div class="smart-form">
+                                <fieldset>
+                                    <div class="row" ng-if="!data.parentID > 0">
+                                        <section class="col col-2">
+                                            <label class="label">Container No</label>
+                                            <label class="input">
+                                                <input type="text" ng-model="data.containerNo" name="txtContainerNo" ng-pattern="/^[A-Z]{4}[0-9]{7}$/" />
+                                            </label>
+                                            <span class="help-block" ng-show="editForm.txtContainerNo.$error.pattern"><i class="fa fa-warning"></i>Invalid container no. Always 4 capital letters and 7 numbers</span>
+                                        </section>
+                                        <section class="col col-2">
+                                            <label class="label">Container Type</label>
+                                            <label class="select">
+                                                <select ng-model="data.containerTypeID" ng-options="containerType.containerTypeID as containerType.containerTypeNM for containerType in containerTypes">
+                                                    <option value=""></option>
+                                                </select>
+                                                <i></i>
+                                            </label>
+                                        </section>
+                                        <section class="col col-2">
+                                            <label class="label">Seal No</label>
+                                            <label class="input">
+                                                <input type="text" ng-model="data.sealNo" />
+                                            </label>
+                                        </section>
+
+                                        <section class="col col-2">
+                                            <label class="label">Booking Ref#</label>
+                                            <label class="input">
+                                                <a href="@Url.Action("Edit","Booking2Mng")/{{data.bookingID}}" target="_blank">
+                                                    <input class="form-control" type="text" readonly ng-model="data.bookingUD" style="cursor:pointer;color:blue" />
+                                                </a>
+                                            </label>
+                                        </section>
+                                        <section class="col col-2">
+                                            <label class="label">B/L</label>
+                                            <label class="input">                                                
+                                                <a href="@Url.Action("Edit","Booking2Mng")/{{data.bookingID}}" target="_blank">
+                                                    <input class="form-control" type="text" readonly ng-model="data.blNo" style="cursor:pointer;color:blue" />
+                                                </a>
+                                            </label>                                            
+                                        </section>
+
+                                        <section class="col col-2">
+                                            <label class="label">ETD</label>                                            
+                                            <label class="input">
+                                                <input class="form-control" type="text" readonly ng-model="data.etd" />
+                                            </label>
+                                        </section>
+
+                                    </div>
+
+                                    <div class="row" ng-if="data.parentID > 0">
+                                        <section class="col col-2">
+                                            <label class="label">Container No</label>
+                                            <label class="input">
+                                                <span class="form-control">{{data.parentContainerNo}}</span>
+                                            </label>
+                                        </section>
+                                        <section class="col col-2">
+                                            <label class="label">Container Type</label>
+                                            <label class="input">
+                                                <span class="form-control">{{data.parentContainerTypeNM}}</span>
+                                            </label>
+                                        </section>
+                                        <section class="col col-2">
+                                            <label class="label">Seal No</label>
+                                            <label class="input">
+                                                <span class="form-control">{{data.parentSealNo}}</span>
+                                            </label>
+                                        </section>
+
+
+                                        <section class="col col-2">
+                                            <label class="label">Booking Ref#</label>
+                                            <label class="input">
+                                                <a href="@Url.Action("Edit","Booking2Mng")/{{data.bookingID}}" target="_blank">
+                                                    <input class="form-control" type="text" readonly ng-model="data.bookingUD" style="cursor:pointer;color:blue" />
+                                                </a>
+                                            </label>
+                                        </section>
+                                        <section class="col col-2">
+                                            <label class="label">B/L</label>
+                                            <label class="input">
+                                                <a href="@Url.Action("Edit","Booking2Mng")/{{data.bookingID}}" target="_blank">
+                                                    <input class="form-control" type="text" readonly ng-model="data.blNo" style="cursor:pointer;color:blue" />
+                                                </a>
+                                            </label>
+                                        </section>
+
+                                        <section class="col col-2">
+                                            <label class="label">ETD</label>
+                                            <label class="input">
+                                                <input class="form-control" type="text" readonly ng-model="data.etd" />
+                                            </label>
+                                        </section>
+
+                                    </div>
+
+                                    <div class="row">
+
+                                        <section class="col col-2">
+                                            <label class="label">ETA</label>
+                                            <label class="input">
+                                                <input class="form-control" type="text" readonly ng-model="data.eta" />
+                                            </label>
+                                        </section>
+
+                                        <section class="col col-2">
+                                            <label class="label">Cut Off Date</label>
+                                            <label class="input">
+                                                <input class="form-control" type="text" readonly ng-model="data.cutOffDate" />
+                                            </label>
+                                        </section>
+
+                                        <section class="col col-4">
+                                            <label class="label">Forwarder</label>
+                                            <label class="input">
+                                                <input class="form-control" type="text" readonly ng-model="data.forwarderNM" />
+                                            </label>
+                                        </section>
+
+                                        <section class="col col-2">
+                                            <label class="label">Feeder</label>
+                                            <label class="input">
+                                                <input class="form-control" type="text" readonly ng-model="data.feeder" />
+                                            </label>
+                                        </section>
+
+                                        <section class="col col-2">
+                                            <label class="label">Vessel</label>
+                                            <label class="input">
+                                                <input class="form-control" type="text" readonly ng-model="data.vessel" />
+                                            </label>
+                                        </section>
+
+                                    </div>
+
+                                </fieldset>
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="tabImages">
+                            <div class="smart-form">
+                                <fieldset>
+                                    <div class="col col-3">
+                                        <section>
+                                            <label class="label">
+                                                <span ng-show="!editForm.productPicture1_DisplayUrl.$error.required">Product Image 1</span>
+                                                <span ng-show="editForm.productPicture1_DisplayUrl.$error.required" class="help-block"><i class="fa fa-warning"></i>Product image 1 is required.</span>
+                                            </label>
+                                            <div class="input-group" style="width: 100%;">
+                                                @Html.Partial("~/Views/Shared/_Controls/_ImageBox.cshtml", new Frontend.Models.ImageBoxViewModel() { URLBinding = "data.productPicture1_DisplayUrl", OrginalImageURLBinding = "data.productPicture1_OriginalUrl", JSOnChangeHandler = "event.changeProduct1Image", JSONRemoveHandler = "event.removeProduct1Image" })
+                                                <input ng-model="data.productPicture1_DisplayUrl" name="productPicture1_DisplayUrl" type="hidden" />
+                                            </div>
+                                        </section>
+                                    </div>
+                                    <div class="col col-3">
+                                        <section>
+                                            <label class="label">
+                                                <span ng-show="!editForm.productPicture2_DisplayUrl.$error.required">Product Image 2</span>
+                                                <span ng-show="editForm.productPicture2_DisplayUrl.$error.required" class="help-block"><i class="fa fa-warning"></i>Product image 2 is required.</span>
+                                            </label>
+                                            <div class="input-group" style="width: 100%;">
+                                                @Html.Partial("~/Views/Shared/_Controls/_ImageBox.cshtml", new Frontend.Models.ImageBoxViewModel() { URLBinding = "data.productPicture2_DisplayUrl", OrginalImageURLBinding = "data.productPicture2_OriginalUrl", JSOnChangeHandler = "event.changeProduct2Image", JSONRemoveHandler = "event.removeProduct2Image" })
+                                                <input ng-model="data.productPicture2_DisplayUrl" name="productPicture2_DisplayUrl" type="hidden" />
+                                            </div>
+                                        </section>
+                                    </div>
+                                    <div class="col col-3">
+                                        <section>
+                                            <label class="label">
+                                                <span ng-show="!editForm.containerPicture1_DisplayUrl.$error.required">Moisture content of wood floor</span>
+                                                <span ng-show="editForm.containerPicture1_DisplayUrl.$error.required" class="help-block"><i class="fa fa-warning"></i>Moisture content wood floor is required.</span>
+                                            </label>
+                                            <div class="input-group" style="width: 100%;">
+                                                @Html.Partial("~/Views/Shared/_Controls/_ImageBox.cshtml", new Frontend.Models.ImageBoxViewModel() { URLBinding = "data.containerPicture1_DisplayUrl", OrginalImageURLBinding = "data.containerPicture1_OriginalUrl", JSOnChangeHandler = "event.changeContainer1Image", JSONRemoveHandler = "event.removeContainer1Image" })
+                                                <input ng-model="data.containerPicture1_DisplayUrl" name="containerPicture1_DisplayUrl" type="hidden" />
+                                            </div>
+                                        </section>
+                                    </div>
+                                    <div class="col col-3">
+                                        <section>
+                                            <label class="label">
+                                                <span ng-show="!editForm.containerPicture2_DisplayUrl.$error.required">Checking for Leakage-Left side</span>
+                                                <span ng-show="editForm.containerPicture2_DisplayUrl.$error.required" class="help-block"><i class="fa fa-warning"></i>Check Leakage-Left side is required.</span>
+                                            </label>
+                                            <div class="input-group" style="width: 100%;">
+                                                @Html.Partial("~/Views/Shared/_Controls/_ImageBox.cshtml", new Frontend.Models.ImageBoxViewModel() { URLBinding = "data.containerPicture2_DisplayUrl", OrginalImageURLBinding = "data.containerPicture2_OriginalUrl", JSOnChangeHandler = "event.changeContainer2Image", JSONRemoveHandler = "event.removeContainer2Image" })
+                                                <input ng-model="data.containerPicture2_DisplayUrl" name="containerPicture2_DisplayUrl" type="hidden" />
+                                            </div>
+                                        </section>
+                                    </div>
+                                    <div class="col col-3">
+                                        <section>
+                                            <label class="label">
+                                                <span ng-show="!editForm.containerPicture3_DisplayUrl.$error.required">Checking for Leakage-Right side</span>
+                                                <span ng-show="editForm.containerPicture3_DisplayUrl.$error.required" class="help-block"><i class="fa fa-warning"></i>Check Leakage-Right side is required.</span>
+                                            </label>
+                                            <div class="input-group" style="width: 100%;">
+                                                @Html.Partial("~/Views/Shared/_Controls/_ImageBox.cshtml", new Frontend.Models.ImageBoxViewModel() { URLBinding = "data.containerPicture3_DisplayUrl", OrginalImageURLBinding = "data.containerPicture3_OriginalUrl", JSOnChangeHandler = "event.changeContainer3Image", JSONRemoveHandler = "event.removeContainer3Image" })
+                                                <input ng-model="data.containerPicture3_DisplayUrl" name="containerPicture3_DisplayUrl" type="hidden" />
+                                            </div>
+                                        </section>
+                                    </div>
+
+                                    <div class="col col-3">
+                                        <section>
+                                            <label class="label">
+                                                <span ng-show="!editForm.containerPicture4_DisplayUrl.$error.required">Checking for Leakage-Ceiling</span>
+                                                <span ng-show="editForm.containerPicture4_DisplayUrl.$error.required" class="help-block"><i class="fa fa-warning"></i>Check Leakage-Ceiling is required.</span>
+                                            </label>
+                                            <div class="input-group" style="width: 100%;">
+                                                @Html.Partial("~/Views/Shared/_Controls/_ImageBox.cshtml", new Frontend.Models.ImageBoxViewModel() { URLBinding = "data.containerPicture4_DisplayUrl", OrginalImageURLBinding = "data.containerPicture4_OriginalUrl", JSOnChangeHandler = "event.changeContainer4Image", JSONRemoveHandler = "event.removeContainer4Image" })
+                                                <input ng-model="data.containerPicture4_DisplayUrl" name="containerPicture4_DisplayUrl" type="hidden" />
+                                            </div>
+                                        </section>
+                                    </div>
+
+                                    <div class="col col-3">
+                                        <section>
+                                            <label class="label">
+                                                <span ng-show="!editForm.containerPicture5_DisplayUrl.$error.required">Checking for Leakage-Inside door</span>
+                                                <span ng-show="editForm.containerPicture5_DisplayUrl.$error.required" class="help-block"><i class="fa fa-warning"></i>Check Leakage-Inside door is required</span>
+                                            </label>
+                                            <div class="input-group" style="width: 100%;">
+                                                @Html.Partial("~/Views/Shared/_Controls/_ImageBox.cshtml", new Frontend.Models.ImageBoxViewModel() { URLBinding = "data.containerPicture5_DisplayUrl", OrginalImageURLBinding = "data.containerPicture5_OriginalUrl", JSOnChangeHandler = "event.changeContainer5Image", JSONRemoveHandler = "event.removeContainer5Image" })
+                                                <input ng-model="data.containerPicture5_DisplayUrl" name="containerPicture5_DisplayUrl" type="hidden" />
+                                            </div>
+                                        </section>
+                                    </div>
+
+                                    <div class="col col-3">
+                                        <section>
+                                            <label class="label">
+                                                <span ng-show="!editForm.containerPicture6_DisplayUrl.$error.required">Checking for Leakage-Corner</span>
+                                                <span ng-show="editForm.containerPicture6_DisplayUrl.$error.required" class="help-block"><i class="fa fa-warning"></i>Check for Leakage-Corner is required</span>
+                                            </label>
+                                            <div class="input-group" style="width: 100%;">
+                                                @Html.Partial("~/Views/Shared/_Controls/_ImageBox.cshtml", new Frontend.Models.ImageBoxViewModel() { URLBinding = "data.containerPicture6_DisplayUrl", OrginalImageURLBinding = "data.containerPicture6_OriginalUrl", JSOnChangeHandler = "event.changeContainer6Image", JSONRemoveHandler = "event.removeContainer6Image" })
+                                                <input ng-model="data.containerPicture6_DisplayUrl" name="containerPicture6_DisplayUrl" type="hidden" />
+                                            </div>
+                                        </section>
+                                    </div>
+
+                                    <div class="col col-3">
+                                        <section>
+                                            <label class="label">
+                                                <span ng-show="!editForm.merchandisesInside1Per3ContImage_DisplayUrl.$error.required">Merchandises inside 1/3 container</span>
+                                                <span ng-show="editForm.merchandisesInside1Per3ContImage_DisplayUrl.$error.required" class="help-block"><i class="fa fa-warning"></i>Merchandises inside 1/3 container</span>
+                                            </label>
+                                            <div class="input-group" style="width: 100%;">
+                                                @Html.Partial("~/Views/Shared/_Controls/_ImageBox.cshtml", new Frontend.Models.ImageBoxViewModel() { URLBinding = "data.merchandisesInside1Per3ContImage_DisplayUrl", OrginalImageURLBinding = "data.merchandisesInside1Per3ContImage_OriginalUrl", JSOnChangeHandler = "event.changeMerchandisesInside1Per3ContImage", JSONRemoveHandler = "event.removeMerchandisesInside1Per3ContImage" })
+                                                <input ng-model="data.merchandisesInside1Per3ContImage_DisplayUrl" name="merchandisesInside1Per3ContImage_DisplayUrl" type="hidden" />
+                                            </div>
+                                        </section>
+                                    </div>
+
+                                    <div class="col col-3">
+                                        <section>
+                                            <label class="label">
+                                                <span ng-show="!editForm.merchandisesInside1Per2ContImage_DisplayUrl.$error.required">Merchandises inside 1/2 container</span>
+                                                <span ng-show="editForm.merchandisesInside1Per2ContImage_DisplayUrl.$error.required" class="help-block"><i class="fa fa-warning"></i>Merchandises inside 1/2 container</span>
+                                            </label>
+                                            <div class="input-group" style="width: 100%;">
+                                                @Html.Partial("~/Views/Shared/_Controls/_ImageBox.cshtml", new Frontend.Models.ImageBoxViewModel() { URLBinding = "data.merchandisesInside1Per2ContImage_DisplayUrl", OrginalImageURLBinding = "data.merchandisesInside1Per2ContImage_OriginalUrl", JSOnChangeHandler = "event.changeMerchandisesInside1Per2ContImage", JSONRemoveHandler = "event.removeMerchandisesInside1Per2ContImage" })
+                                                <input ng-model="data.merchandisesInside1Per2ContImage_DisplayUrl" name="merchandisesInside1Per2ContImage_DisplayUrl" type="hidden" />
+                                            </div>
+                                        </section>
+                                    </div>
+
+                                    <div class="col col-3">
+                                        <section>
+                                            <label class="label">
+                                                <span ng-show="!editForm.merchandisesInsideFullContImage_DisplayUrl.$error.required">Merchandises inside full container</span>
+                                                <span ng-show="editForm.merchandisesInsideFullContImage_DisplayUrl.$error.required" class="help-block"><i class="fa fa-warning"></i>Merchandises inside full container</span>
+                                            </label>
+                                            <div class="input-group" style="width: 100%;">
+                                                @Html.Partial("~/Views/Shared/_Controls/_ImageBox.cshtml", new Frontend.Models.ImageBoxViewModel() { URLBinding = "data.merchandisesInsideFullContImage_DisplayUrl", OrginalImageURLBinding = "data.merchandisesInsideFullContImage_OriginalUrl", JSOnChangeHandler = "event.changeMerchandisesInsideFullContImage", JSONRemoveHandler = "event.removeMerchandisesInsideFullContImage" })
+                                                <input ng-model="data.merchandisesInsideFullContImage_DisplayUrl" name="merchandisesInsideFullContImage_DisplayUrl" type="hidden" />
+                                            </div>
+                                        </section>
+                                    </div>
+
+                                    <div class="col col-3">
+                                        <section>
+                                            <label class="label">
+                                                <span ng-show="!editForm.containerDoorAndLockImage_DisplayUrl.$error.required">Container door and lock</span>
+                                                <span ng-show="editForm.containerDoorAndLockImage_DisplayUrl.$error.required" class="help-block"><i class="fa fa-warning"></i>Container door and lock</span>
+                                            </label>
+                                            <div class="input-group" style="width: 100%;">
+                                                @Html.Partial("~/Views/Shared/_Controls/_ImageBox.cshtml", new Frontend.Models.ImageBoxViewModel() { URLBinding = "data.containerDoorAndLockImage_DisplayUrl", OrginalImageURLBinding = "data.containerDoorAndLockImage_OriginalUrl", JSOnChangeHandler = "event.changeContainerDoorAndLockImage", JSONRemoveHandler = "event.removeContainerDoorAndLockImage" })
+                                                <input ng-model="data.containerDoorAndLockImage_DisplayUrl" name="containerDoorAndLockImage_DisplayUrl" type="hidden" />
+                                            </div>
+                                        </section>
+                                    </div>
+
+                                    <div class="col col-3">
+                                        <section>
+                                            <label class="label">
+                                                <span ng-show="!editForm.containerSealImage_DisplayUrl.$error.required">Container seal</span>
+                                                <span ng-show="editForm.containerSealImage_DisplayUrl.$error.required" class="help-block"><i class="fa fa-warning"></i>Container seal</span>
+                                            </label>
+                                            <div class="input-group" style="width: 100%;">
+                                                @Html.Partial("~/Views/Shared/_Controls/_ImageBox.cshtml", new Frontend.Models.ImageBoxViewModel() { URLBinding = "data.containerSealImage_DisplayUrl", OrginalImageURLBinding = "data.containerSealImage_OriginalUrl", JSOnChangeHandler = "event.changeContainerSealImage", JSONRemoveHandler = "event.removeContainerSealImage" })
+                                                <input ng-model="data.containerSealImage_DisplayUrl" name="containerSealImage_DisplayUrl" type="hidden" />
+                                            </div>
+                                        </section>
+                                    </div>
+
+                                    <div class="col col-3">
+                                        <section>
+                                            <label class="label">Dry pack</label>
+                                            <div class="input-group" style="width: 100%;">
+                                                @Html.Partial("~/Views/Shared/_Controls/_ImageBox.cshtml", new Frontend.Models.ImageBoxViewModel() { URLBinding = "data.dryPackImage_DisplayUrl", OrginalImageURLBinding = "data.dryPackImage_OriginalUrl", JSOnChangeHandler = "event.changeDryPackImage", JSONRemoveHandler = "event.removeDryPackImage" })
+                                            </div>
+                                        </section>
+                                    </div>
+
+                                    <div class="col col-6">
+                                        <section>
+                                            <label class="label">Approved cont picture</label>
+                                            <div class="input-group" style="width: 100%;">
+                                                @Html.Partial("~/Views/Shared/_Controls/_ImageBox.cshtml", new Frontend.Models.ImageBoxViewModel() { URLBinding = "data.approvedImage_DisplayUrl", OrginalImageURLBinding = "data.approvedImage_OriginalUrl", JSOnChangeHandler = "event.changeApprovedImage", JSONRemoveHandler = "event.removeApprovedImage" })
+                                            </div>
+                                        </section>
+                                    </div>
+
+                                </fieldset>
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="tabChildLoadingPlan">
+                            <div class="smart-form">
+                                <fieldset>
+                                    <div id="searchResult" class="tilsoft-table-wrapper">
+                                        <div class="tilsoft-table">
+                                            <div class="tilsoft-table-header" style="width: 2470px;">
+                                                <div style="width: 80px; "></div>
+                                                <div style="width: 60px;" class="sorting" data-colname="IsSent">Sent</div>
+                                                <div style="width: 60px;" class="sorting" data-colname="IsLoaded">Load ed</div>
+                                                <div style="width: 60px;" class="sorting" data-colname="IsShipped">Ship ped</div>
+                                                <div style="width: 60px;" class="sorting" data-colname="IsConfirmed">Confir med</div>
+                                                <div style="width: 150px;" class="sorting" data-colname="LoadingPlanUD">Loading Ref#</div>
+                                                <div style="width: 150px;" class="sorting" data-colname="ContainerRefNo">Container Ref#</div>
+                                                <div style="width: 70px;" class="sorting" data-colname="ClientUD">Client</div>
+                                                <div style="width: 100px;" class="sorting" data-colname="FactoryUD">Factory</div>
+                                                <div style="width: 150px;" class="sorting" data-colname="ControllerName">Controller</div>
+                                                <div style="width: 150px;" class="sorting" data-colname="dataUD">Booking Ref#</div>
+                                                <div style="width: 150px;" class="sorting" data-colname="BLNo">B/L</div>
+                                                <div style="width: 150px;" class="sorting" data-colname="ContainerNo">Container</div>
+                                                <div style="width: 60px;" class="sorting" data-colname="ContainerTypeNM">Type</div>
+                                                <div style="width: 80px;" class="sorting" data-colname="LoadingDate">Loading Date</div>
+                                                <div style="width: 80px; " class="sorting" data-colname="ShippedDate">Shipped Date</div>
+                                                <div style="width: 80px; " class="sorting" data-colname="ShipmentDate">Shipment Date</div>
+                                                <div style="width: 150px;" class="sorting" data-colname="SenderName">Sender</div>
+                                                <div style="width: 80px; " class="sorting" data-colname="SentDate">Send date</div>
+                                                <div style="width: 150px;" class="sorting" data-colname="ConfirmerName">Confirmed By</div>
+                                                <div style="width: 80px;" class="sorting" data-colname="ConfirmedDate">Confirmed Date</div>
+                                                <div style="width: 150px;" class="sorting" data-colname="UpdatorName">Updated By</div>
+                                                <div class="sorting_desc" data-colname="UpdatedDate">Updated Date</div>
+                                            </div>
+                                            <div class="tilsoft-table-body" style="width: 2470px;  height:auto">
+                                                <table>
+                                                    <tr ng-repeat="model in data.childLoadingPlans">
+                                                        <td style="text-align: center; width: 80px;">
+                                                            <a href="@Url.Action("Edit", "LoadingPlan", new {id = UrlParameter.Optional })/{{model.loadingPlanID}}" title="Edit" class="btn btn-primary btn-xs font-11" target="_blank"><i class="fa fa-folder-open"></i> View</a>
+                                                            <a ng-click="event.removeSubLoadingPlan(model.loadingPlanID)" style="margin-top:1px" class="btn btn-danger btn-xs font-11" href="javascript:void(0);"><i class="fa fa-times"></i> Remove</a>
+                                                        </td>
+                                                        <td style="width: 60px; text-align: center"><input type="checkbox" ng-model="model.isSent" disabled /></td>
+                                                        <td style="width: 60px; text-align: center"><input type="checkbox" ng-model="model.isLoaded" disabled /></td>
+                                                        <td style="width: 60px; text-align: center"><input type="checkbox" ng-model="model.isShipped" disabled /></td>
+                                                        <td style="width: 60px; text-align: center"><input type="checkbox" ng-model="model.isConfirmed" disabled /></td>
+                                                        <td style="width: 150px;">{{model.loadingPlanUD}}</td>
+                                                        <td style="width: 150px;">{{model.containerRefNo}}</td>
+                                                        <td style="width: 70px;">{{model.clientUD}}</td>
+                                                        <td style="width: 100px;">{{model.factoryUD}}</td>
+                                                        <td style="width: 150px;">{{model.controllerName}}</td>
+                                                        <td style="width: 150px;">{{model.dataUD}}</td>
+                                                        <td style="width: 150px;">{{model.blNo}}</td>
+                                                        <td style="width: 150px;">{{model.containerNo}}</td>
+                                                        <td style="width: 60px;">{{model.containerTypeNM}}</td>
+                                                        <td style="width: 80px; ">{{model.loadingDate}}</td>
+                                                        <td style="width: 80px; ">{{model.shippedDate}}</td>
+                                                        <td style="width: 80px; ">{{model.shipmentDate}}</td>
+                                                        <td style="width: 150px;">{{model.senderName}}</td>
+                                                        <td style="width: 80px; ">{{model.sentDate}}</td>
+                                                        <td style="width: 150px;">{{model.confirmerName}}</td>
+                                                        <td style="width: 80px;">{{model.confirmedDate}}</td>
+                                                        <td style="width: 150px;">{{model.updatorName}}</td>
+                                                        <td>{{model.updatedDate}}</td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="tabTracking">
+                            <div class="smart-form">
+                                <fieldset>
+                                    <div class="row">
+                                        <section class="col col-3">
+                                            <label class="label">Loaded Date</label>
+                                            <label class="input">
+                                                <span class="form-control">{{data.loadingDate}}</span>
+                                            </label>
+                                        </section>
+                                        <section class="col col-3">
+                                            <label class="label">Shipped Date</label>
+                                            <label class="input">
+                                                <span class="form-control">{{data.shippedDate}}</span>
+                                            </label>
+                                        </section>
+                                    </div>
+                                    <div class="row">
+                                        <section class="col col-3">
+                                            <label class="label">Updated By</label>
+                                            <label class="input">
+                                                <span class="form-control">
+                                                    <a ng-show="(data.updatedBy!=null && data.updatorName2!=null)" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{data.updatedBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                        <i class="fa fa-user"></i> {{data.updatorName2}}
+                                                    </a>
+                                                    <span ng-show="(data.updatedBy!=null && data.updatorName2==null && data.updatorName!=null)">{{data.updatorName}}</span>
+                                                </span>
+                                            </label>
+                                        </section>
+                                        <section class="col col-3">
+                                            <label class="label">Updated Date</label>
+                                            <label class="input">
+                                                <span class="form-control">{{data.updatedDate}}</span>
+                                            </label>
+                                        </section>
+                                    </div>
+                                    <div class="row">
+                                        <section class="col col-3">
+                                            <label class="label">Confirmed By</label>
+                                            <label class="input">
+                                                <span class="form-control">
+                                                    <a ng-show="(data.confirmedBy!=null && data.confirmerName2!=null)" href="@Url.Action("Detail", "EmployeeMng", new { id = UrlParameter.Optional })/{{data.confirmedBy}}" da data-featherlight="iframe" data-featherlight-iframe-allowfullscreen="true" data-featherlight-iframe-width="800" data-featherlight-iframe-height="600">
+                                                        <i class="fa fa-user"></i> {{data.confirmerName2}}
+                                                    </a>
+                                                    <span ng-show="(data.confirmedBy!=null && data.confirmerName2==null && data.confirmerName!=null)">{{data.confirmerName}}</span>
+                                                </span>
+                                            </label>
+                                        </section>
+                                        <section class="col col-3">
+                                            <label class="label">Confirmed Date</label>
+                                            <label class="input">
+                                                <span class="form-control">{{data.confirmedDate}}</span>
+                                            </label>
+                                        </section>
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <ul class="nav nav-tabs pull-left in">
+                    <li class="active">
+                        <a data-toggle="tab" href="#tabProduct"> <span>Product</span> </a>
+                    </li>
+                    <li>
+                        <a data-toggle="tab" href="#tabSparepart"> <span>Sparepart</span> </a>
+                    </li>
+                    <li>
+                        <a data-toggle="tab" href="#tabSample"> <span>Sample</span> </a>
+                    </li>
+                </ul>
+            </header>
+            <div>
+                <div class="widget-body no-padding">
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="tabProduct">
+                            <div class="smart-form">
+                                <fieldset>
+                                    <section style="position: relative; margin-bottom: 0px;">
+                                        <label class="input" ng-show="data.loadingStatus == 'PENDING' || data.loadingStatus == null">
+                                            <input type="text" placeholder="Type at least 3 chars to search for products or press enter to search all products" autocomplete="off" ng-keyup="quicksearchProduct.event.searchBoxKeyUp($event)" id="txtProductSearchBox" />
+                                            <a ng-click="quicksearchProduct.event.searchClick($event)" href="javascript:void(0);"> <i class="icon-append fa fa-search"></i></a>
+                                        </label>
+                                        <div id="product-popup" class="popup-container-2">
+                                            <div style="float: left; margin-bottom: 8px;">
+                                                <i class="fa fa-fw fa-info-circle"></i> <i>Select item(s) which you want to add and hit OK button</i>
+                                            </div>
+                                            <div style="float: right; margin-bottom: 8px;">
+                                                <a ng-click="quicksearchProduct.event.ok($event)" class="btn btn-primary btn-xs" href="javascript:void(0);"><i class="fa fa-check"></i> OK</a>
+                                                <a ng-click="quicksearchProduct.event.close($event)" class="btn btn-warning btn-xs" href="javascript:void(0);"><i class="fa fa-remove"></i> Close</a>
+                                            </div>
+                                            <div class="clear"></div>
+                                            <div id="grdProductSearchResult" class="tilsoft-table-wrapper">
+                                                <div class="tilsoft-table">
+                                                    <div class="tilsoft-table-header" style="width: 900px;">
+                                                        <div style="width: 50px;">
+                                                            <label class="checkbox">
+                                                                <input type="checkbox" ng-model="quicksearchProduct.isSelectAll" ng-change="quicksearchProduct.event.selectAll()">
+                                                                <i style="margin-left:6px"></i>
+                                                            </label>
+                                                        </div>
+                                                        <div style="width: 100px;">Image</div>
+                                                        <div style="width: 70px;">PI</div>
+                                                        <div style="width: 80px;">LDS</div>
+                                                        <div style="width: 60px;">Client</div>
+                                                        <div style="width: 210px;">Art.Code</div>
+                                                        <div style="width: 70px;">Order Qnt</div>
+                                                        <div style="width: 70px;">Remain Qnt</div>
+                                                        <div style="width:80px">QNT IN 40HC</div>
+                                                        <div>Description</div>
+                                                    </div>
+
+                                                    <div class="tilsoft-table-body" style="width: 900px;height:300px">
+                                                        <table>
+                                                            <tr ng-repeat="item in quicksearchProduct.data">
+                                                                <td style="width: 50px; text-align: center;">
+                                                                    <label class="checkbox">
+                                                                        <input type="checkbox" ng-model="item.isSelected">
+                                                                        <i style="margin-left:10px"></i>
+                                                                    </label>
+                                                                </td>
+                                                                <td style="width: 100px;">
+                                                                    <a href="{{item.fileLocation}}" data-featherlight="image">
+                                                                        <img style="width: 95%;" ng-src="{{item.thumbnailLocation}}" />
+                                                                    </a>
+                                                                </td>
+                                                                <td style="width: 70px;">{{item.proformaInvoiceNo}}</td>
+                                                                <td style="width: 80px;">{{item.lds}}</td>
+                                                                <td style="width: 60px;">{{item.clientUD}}</td>
+                                                                <td style="width: 210px;">{{item.articleCode}}</td>
+                                                                <td style="width: 70px;text-align:center">{{item.orderQnt}}</td>
+                                                                <td style="width: 70px;text-align:center">{{item.remainQnt}}</td>
+                                                                <td style="width: 80px; text-align: center;">{{item.qnt40HC}}</td>
+                                                                <td>{{item.description}}</td>
+                                                            </tr>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+                                </fieldset>
+                                <div style="padding: 0 14px 10px;">
+                                    <div id="grdProduct" class="tilsoft-table-wrapper">
+                                        <div class="tilsoft-table">
+                                            <div class="tilsoft-table-header" style="width: 1800px;">
+                                                <div style="width: 90px;">&nbsp;</div>
+                                                <div style="width: 100px;">Image</div>
+                                                <div style="width: 70px;">PI</div>
+                                                <div style="width: 80px;">LDS</div>
+                                                <div style="width: 70px;">Client</div>
+                                                <div style="width: 90px;">Factory</div>
+                                                <div style="width: 300px;">Description</div>
+                                                <div style="width: 70px;">Qnt 40HC</div>
+                                                <div style="width: 70px;">Order Qnt</div>
+                                                <div style="width: 70px;">Load Remain</div>
+                                                <div style="width: 70px;">Load Qnt</div>
+                                                @*<div style="width: 60px;">Unit</div>*@
+                                                <div style="width: 80px;">CTNS</div>
+                                                <div style="width: 80px;">NW</div>
+                                                <div style="width: 80px;">GW</div>
+                                                <div style="width: 80px;">CBMs</div>
+                                                <div style="width: 120px;">HS Code</div>
+                                                <div>Remark</div>
+                                            </div>
+                                            <div class="tilsoft-table-body" style="width: 1800px;">
+                                                <table>
+                                                    <tr style="background-color:#cee9ff">
+                                                        <td colspan="6"></td>
+                                                        <td style="text-align:right"><b>TOTAL ORDER IN CONTAINER:</b></td>
+                                                        <td style="font-weight:700;text-align:right">{{data.details| sumFunc:'orderProductQnt40HC' | number: 3}}</td>
+                                                        <td colspan="2"></td>
+                                                        <td style="font-weight:700;text-align:right">{{data.details| sumFunc:'quantity' | number: 0}}</td>
+                                                        <td style="font-weight:700;text-align:right">{{data.details| sumFunc:'pkGs' | number: 0}}</td>
+                                                        <td style="font-weight:700;text-align:right">{{data.details| sumFunc:'nettWeight' | number: 3}}</td>
+                                                        <td style="font-weight:700;text-align:right">{{data.details| sumFunc:'kGs' | number: 3}}</td>
+                                                        <td style="font-weight:700;text-align:right">{{data.details| sumFunc:'cbMs' | number: 3}}</td>
+                                                        <td colspan="2"></td>
+                                                    </tr>
+                                                    <tr ng-repeat="item in data.details">
+                                                        <td style="width: 89px; text-align: left;">
+                                                            <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "FactoryPLCMng")/{{item.plcid}}" style="margin-bottom:5px" ng-if="item.isCreatedPLC==true" target="_blank"><i class="fa fa-folder-open"></i> Open PLC</a>
+                                                            <a class="btn btn-warning btn-xs font-11" href="@Url.Action("Edit", "FactoryPLCMng")/0?b={{data.bookingID}}&f={{item.factoryID}}&o={{item.offerLineID}}&os=-1" style="margin-bottom:5px" ng-if="item.isCreatedPLC==false" target="_blank"><i class="fa fa-check-square-o"></i> Make PLC</a>
+                                                            <a ng-click="event.printPS($event,item.factoryOrderDetailID)" class="btn btn-primary btn-xs font-11" href="javascript:void(0);" style="margin-bottom:5px"><i class="fa fa-print"></i> Print PS&nbsp;&nbsp;&nbsp;&nbsp;</a>
+                                                            <a ng-click="event.removeProduct(item.loadingPlanDetailID)" class="btn btn-danger btn-xs font-11 {{data.isCreatedInvoice==true?'disabled' : ''}}" href="javascript:void(0);"><i class="fa fa-times"></i> Del</a>
+                                                        </td>
+                                                        <td style="width: 100px;">
+                                                            <a href="{{item.fileLocation}}" data-featherlight="image">
+                                                                <img style="width: 95%;" ng-src="{{item.thumbnailLocation}}" />
+                                                            </a>
+                                                        </td>
+                                                        <td style="width: 70px;">
+                                                            {{item.proformaInvoiceNo}}
+                                                        </td>
+                                                        <td style="width: 80px;">{{item.lds}}</td>
+                                                        <td style="width: 70px;">{{item.clientUD}}</td>
+                                                        <td style="width: 90px;">{{item.factoryUD}}</td>
+                                                        <td style="width:300px;text-align:left;"><a href="@Url.Action("Edit", "Product")/{{item.productID}}" target="_blank"><span style="font-weight:bold;">{{item.articleCode}}</span></a><br />{{item.description}}</td>
+                                                        <td style="width: 70px; text-align: right; "><span class="form-control">{{item.qnt40HC | number:0}}</span></td>
+                                                        <td style="width: 70px; text-align:right"><span class="form-control">{{item.orderQnt}}</span></td>
+                                                        <td style="width: 70px; text-align:right"><span class="form-control">{{item.remainQnt}}</span></td>
+                                                        <td style="width: 70px;">
+                                                            <input type="text" ng-model="item.quantity" style="width: 100%;text-align:right" ng-keyup="event.loadedQntKeyUp($event,$index)" id="{{$index}}" class="loadedQnt" ng-disabled="data.isLoaded" />
+                                                        </td>
+                                                        @*<td style="width: 60px;"><input type="text" ng-model="item.unit" style=" text-align:right;" /></td>*@
+                                                        <td style="width: 80px; text-align:right"><input type="text" avs-number ng-decimal="0" ng-data-source="item.pkGs" style=" text-align:right;" /></td>
+                                                        <td style="width: 80px; text-align:right"><input type="text" avs-number ng-decimal="2" ng-data-source="item.nettWeight" style=" text-align:right;" /></td>
+                                                        <td style="width: 80px; text-align:right"><input type="text" avs-number ng-decimal="2" ng-data-source="item.kGs" style="text-align:right;" /></td>
+                                                        <td style="width: 80px; text-align:right"><input type="text" avs-number ng-decimal="6" ng-data-source="item.cbMs" style="text-align:right;" /></td>
+                                                        <td style="width: 120px"><input type="text" ng-model="item.hsCode" style="text-align:center;" /></td>
+                                                        <td><input type="text" ng-model="item.remark" style="width: 100%;" /></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td colspan="11"><b>Total Rows() : {{data.details.length}}</b></td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane" id="tabSparepart">
+                            <div class="smart-form">
+                                <fieldset>
+                                    <section style="position: relative; margin-bottom: 0px;">
+                                        <label class="input" ng-show="data.loadingStatus == 'PENDING' || data.loadingStatus == null">
+                                            <input type="text" placeholder="Type at least 3 chars to search sparepart or press enter to search all spareparts" autocomplete="off" ng-keyup="quicksearchSparepart.event.searchBoxKeyUp($event)" id="txtSparepartSearchBox" />
+                                            <a ng-click="quicksearchSparepart.event.searchClick($event)" href="javascript:void(0);"> <i class="icon-append fa fa-search"></i></a>
+                                        </label>
+                                        <div id="sparepart-popup" class="popup-container-2">
+                                            <div style="float: right; margin-bottom: 8px;">
+                                                <a ng-click="quicksearchSparepart.event.ok($event)" class="btn btn-primary btn-xs" href="javascript:void(0);"><i class="fa fa-check"></i> OK</a>
+                                                <a ng-click="quicksearchSparepart.event.close($event, true)" class="btn btn-primary btn-xs" href="javascript:void(0);"><i class="fa fa-remove"></i> Close</a>
+                                            </div>
+                                            <div class="clear"></div>
+
+                                            <div id="grdSparepartSearchResult" class="tilsoft-table-wrapper">
+                                                <div class="tilsoft-table">
+                                                    <div class="tilsoft-table-header" style="width: 900px;">
+                                                        <div style="width: 50px;">
+                                                            <label class="checkbox">
+                                                                <input type="checkbox" ng-model="quicksearchSparepart.isSelectAll" ng-change="quicksearchSparepart.event.selectAll()">
+                                                                <i style="margin-left:6px"></i>
+                                                            </label>
+                                                        </div>
+                                                        <div style="width: 70px;">PI</div>
+                                                        <div style="width: 80px;">LDS</div>
+                                                        <div style="width: 60px;">Client</div>
+                                                        <div style="width: 100px;">Art.Code</div>
+                                                        <div style="width: 50px;">Qnt</div>
+                                                        <div style="width:80px">QNT IN 40HC</div>
+                                                        <div>Description</div>
+                                                    </div>
+                                                    <div class="tilsoft-table-body" style="width: 900px;height:300px">
+                                                        <table>
+                                                            <tr ng-repeat="item in quicksearchSparepart.data">
+                                                                <td style="width: 49px; text-align: center;">
+                                                                    <label class="checkbox">
+                                                                        <input type="checkbox" ng-model="item.isSelected">
+                                                                        <i style="margin-left:10px"></i>
+                                                                    </label>
+                                                                </td>
+                                                                <td style="width: 70px;">{{item.proformaInvoiceNo}}</td>
+                                                                <td style="width: 80px;">{{item.lds}}</td>
+                                                                <td style="width: 60px;">{{item.clientUD}}</td>
+                                                                <td style="width: 100px; ">{{item.articleCode}}</td>
+                                                                <td style="width: 50px;text-align:center">{{item.orderQnt}}</td>
+                                                                <td style="width: 80px; text-align: center;">{{item.qnt40HC}}</td>
+                                                                <td>{{item.description}}</td>
+                                                            </tr>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </section>
+                                </fieldset>
+                                <div style="padding: 0 14px 10px;">
+
+                                    <div id="grdSparepart" class="tilsoft-table-wrapper">
+                                        <div class="tilsoft-table">
+                                            <div class="tilsoft-table-header" style="width: 1600px;">
+                                                <div style="width: 90px;">&nbsp;</div>
+                                                <div style="width: 70px;">PI</div>
+                                                <div style="width: 80px;">LDS</div>
+                                                <div style="width: 60px;">Client</div>
+                                                <div style="width: 90px;">Factory</div>
+                                                <div style="width: 300px;">Description</div>
+                                                <div style="width: 80px;">Qnt In 40HC</div>
+
+                                                <div style="width: 80px;">Order Qnt</div>
+                                                <div style="width: 80px;">Loaded Qnt</div>
+                                                <div style="width: 80px;">CTNS</div>
+                                                <div style="width: 80px;">NW</div>
+                                                <div style="width: 80px;">GW</div>
+                                                <div style="width: 80px;">CBMs</div>
+                                                <div style="width: 120px;">HS Code</div>
+
+                                                <div>Remark</div>
+
+                                            </div>
+                                            <div class="tilsoft-table-body" style="width: 1600px;">
+                                                <table>
+                                                    <tr style="background-color:#cee9ff">
+                                                        <td colspan="5"></td>
+                                                        <td style="text-align:right"><b>TOTAL ORDER IN CONTAINER:</b></td>
+                                                        <td style="font-weight:700;text-align:right">{{data.spareparts| sumFunc:'orderSparepartQnt40HC' | number: 2}}</td>
+
+                                                        <td style="font-weight:700;text-align:right">{{data.spareparts| sumFunc:'orderQnt' | number: 0}}</td>
+                                                        <td style="font-weight:700;text-align:right">{{data.spareparts| sumFunc:'quantity' | number: 0}}</td>
+                                                        <td style="font-weight:700;text-align:right">{{data.spareparts| sumFunc:'pkGs' | number: 0}}</td>
+                                                        <td style="font-weight:700;text-align:right">{{data.spareparts| sumFunc:'nettWeight' | number: 2}}</td>
+                                                        <td style="font-weight:700;text-align:right">{{data.spareparts| sumFunc:'kGs' | number: 2}}</td>
+                                                        <td style="font-weight:700;text-align:right">{{data.spareparts| sumFunc:'cbMs' | number: 2}}</td>
+                                                        <td></td>
+
+                                                        <td></td>
+                                                    </tr>
+                                                    <tr ng-repeat="item in data.spareparts">
+                                                        <td style="width: 89px; text-align: left">
+
+                                                            <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "FactoryPLCMng")/{{item.plcid}}" style="margin-bottom:5px" ng-if="item.isCreatedPLC==true" target="_blank"><i class=" fa fa-folder-open"></i> Open PLC</a>
+                                                            <a class="btn btn-warning btn-xs font-11" href="@Url.Action("Edit", "FactoryPLCMng")/0?b={{data.bookingID}}&f={{item.factoryID}}&o=-1&os={{item.offerLineSparePartID}}" style="margin-bottom:5px" ng-if="item.isCreatedPLC==false" target="_blank"><i class=" fa fa-check-square-o"></i> Make PLC</a>
+
+                                                            <a ng-click="event.removeSparepart(item.loadingPlanSparepartDetailID)" class="btn btn-danger btn-xs font-11 {{data.isCreatedInvoice==true?'disabled' : ''}}" href="javascript:void(0);"><i class=" fa fa-times"></i> Del</a>
+                                                        </td>
+                                                        <td style="width: 70px;">{{item.proformaInvoiceNo}}</td>
+                                                        <td style="width: 80px;">{{item.lds}}</td>
+                                                        <td style="width: 60px;">{{item.clientUD}}</td>
+                                                        <td style="width: 90px;">{{item.factoryUD}}</td>
+                                                        <td style="width:300px;text-align:left;"><span style="font-weight:bold;">{{item.articleCode}}</span><br />{{item.description}}</td>
+                                                        <td style="width: 80px; text-align: right; "><span class="form-control">{{item.qnt40HC | number:0}}</span></td>
+
+                                                        <td style="width: 80px; text-align:right"><span class="form-control">{{item.orderQnt}}</span></td>
+                                                        <td style="width: 80px;"><input type="text" ng-model="item.quantity" style="width: 100%;text-align:right" ng-disabled="data.isLoaded" /></td>
+                                                        <td style="width: 80px; text-align:right"><input type="text" ng-model="item.pkGs" style=" text-align:right;" /></td>
+                                                        <td style="width: 80px; text-align:right"><input type="text" ng-model="item.nettWeight" style=" text-align:right;" /></td>
+                                                        <td style="width: 80px; text-align:right"><input type="text" ng-model="item.kGs" style=" text-align:right;" /></td>
+                                                        <td style="width: 80px; text-align:right"><input type="text" ng-model="item.cbMs" style=" text-align:right;" /></td>
+                                                        <td style="width: 120px; text-align:right"><input type="text" ng-model="item.hsCode" /></td>
+
+                                                        <td><input type="text" ng-model="item.remark" style="width: 100%; text-align:right" /></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td colspan="12"><b>Total Rows() : {{data.spareparts.length}}</b></td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane" id="tabSample">
+                            <div class="smart-form">
+                                <fieldset>
+                                    <section style="position: relative; margin-bottom: 0px;">
+                                        <label class="input" ng-show="data.loadingStatus == 'PENDING' || data.loadingStatus == null">
+                                            <input type="text" placeholder="Type at least 3 chars to search for products or press enter to search all products" autocomplete="off" ng-keyup="quicksearchSampleProduct.event.searchBoxKeyUp($event)" id="txtSampleProductSearchBox" />
+                                            <a ng-click="quicksearchSampleProduct.event.searchClick($event)" href="javascript:void(0);"> <i class="icon-append fa fa-search"></i></a>
+                                        </label>
+                                        <div id="sample-product-popup" class="popup-container-2">
+                                            <div style="float: left; margin-bottom: 8px;">
+                                                <i class="fa fa-fw fa-info-circle"></i> <i>Select item(s) which you want to add and hit OK button</i>
+                                            </div>
+                                            <div style="float: right; margin-bottom: 8px;">
+                                                <a ng-click="quicksearchSampleProduct.event.ok($event)" class="btn btn-primary btn-xs" href="javascript:void(0);"><i class="fa fa-check"></i> OK</a>
+                                                <a ng-click="quicksearchSampleProduct.event.close($event)" class="btn btn-warning btn-xs" href="javascript:void(0);"><i class="fa fa-remove"></i> Close</a>
+                                            </div>
+                                            <div class="clear"></div>
+                                            <div id="grdSampleProductSearchResult" class="tilsoft-table-wrapper">
+                                                <div class="tilsoft-table">
+                                                    <div class="tilsoft-table-header" style="width: 900px;">
+                                                        <div style="width: 50px;">
+                                                            <label class="checkbox">
+                                                                <input type="checkbox" ng-model="quicksearchSampleProduct.isSelectAll" ng-change="quicksearchSampleProduct.event.selectAll()">
+                                                                <i style="margin-left:6px"></i>
+                                                            </label>
+                                                        </div>
+                                                        <div style="width: 100px;">Image</div>
+                                                        <div style="width: 70px;">PI</div>
+                                                        <div style="width: 80px;">LDS</div>
+                                                        <div style="width: 60px;">Client</div>
+                                                        <div style="width: 210px;">Art.Code</div>
+                                                        <div style="width: 70px;">Order Qnt</div>
+                                                        <div style="width: 70px;">Remain Qnt</div>
+                                                        <div style="width:80px">QNT IN 40HC</div>
+                                                        <div>Description</div>
+                                                    </div>
+
+                                                    <div class="tilsoft-table-body" style="width: 900px;height:300px">
+                                                        <table>
+                                                            <tr ng-repeat="item in quicksearchSampleProduct.data">
+                                                                <td style="width: 50px; text-align: center;">
+                                                                    <label class="checkbox">
+                                                                        <input type="checkbox" ng-model="item.isSelected">
+                                                                        <i style="margin-left:10px"></i>
+                                                                    </label>
+                                                                </td>
+                                                                <td style="width: 100px;">
+                                                                    <a href="{{item.fileLocation}}" data-featherlight="image">
+                                                                        <img style="width: 95%;" ng-src="{{item.thumbnailLocation}}" />
+                                                                    </a>
+                                                                </td>
+                                                                <td style="width: 70px;">{{item.proformaInvoiceNo}}</td>
+                                                                <td style="width: 80px;">{{item.lds}}</td>
+                                                                <td style="width: 60px;">{{item.clientUD}}</td>
+                                                                <td style="width: 210px;">{{item.articleCode}}</td>
+                                                                <td style="width: 70px;text-align:center">{{item.orderQnt}}</td>
+                                                                <td style="width: 70px;text-align:center">{{item.remainQnt}}</td>
+                                                                <td style="width: 80px; text-align: center;">{{item.qnt40HC}}</td>
+                                                                <td>{{item.description}}</td>
+                                                            </tr>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+                                </fieldset>
+                                <div style="padding: 0 14px 10px;">
+                                    <div id="grdProduct" class="tilsoft-table-wrapper">
+                                        <div class="tilsoft-table">
+                                            <div class="tilsoft-table-header" style="width: 1800px;">
+                                                <div style="width: 90px;">&nbsp;</div>
+                                                <div style="width: 100px;">Image</div>
+                                                <div style="width: 70px;">PI</div>
+                                                <div style="width: 80px;">LDS</div>
+                                                <div style="width: 70px;">Client</div>
+                                                <div style="width: 90px;">Factory</div>
+                                                <div style="width: 300px;">Description</div>
+                                                <div style="width: 70px;">Qnt 40HC</div>
+                                                <div style="width: 70px;">Order Qnt</div>
+                                                <div style="width: 70px;">Load Remain</div>
+                                                <div style="width: 70px;">Load Qnt</div>
+                                                @*<div style="width: 60px;">Unit</div>*@
+                                                <div style="width: 80px;">CTNS</div>
+                                                <div style="width: 80px;">NW</div>
+                                                <div style="width: 80px;">GW</div>
+                                                <div style="width: 80px;">CBMs</div>
+                                                <div style="width: 120px;">HS Code</div>
+                                                <div>Remark</div>
+                                            </div>
+                                            <div class="tilsoft-table-body" style="width: 1800px;">
+                                                <table>
+                                                    <tr style="background-color:#cee9ff">
+                                                        <td colspan="6"></td>
+                                                        <td style="text-align:right"><b>TOTAL ORDER IN CONTAINER:</b></td>
+                                                        <td style="font-weight:700;text-align:right">{{data.sampleProducts| sumFunc:'orderProductQnt40HC' | number: 3}}</td>
+                                                        <td colspan="2"></td>
+                                                        <td style="font-weight:700;text-align:right">{{data.sampleProducts| sumFunc:'quantity' | number: 0}}</td>
+                                                        <td style="font-weight:700;text-align:right">{{data.sampleProducts| sumFunc:'pkGs' | number: 0}}</td>
+                                                        <td style="font-weight:700;text-align:right">{{data.sampleProducts| sumFunc:'nettWeight' | number: 3}}</td>
+                                                        <td style="font-weight:700;text-align:right">{{data.sampleProducts| sumFunc:'kGs' | number: 3}}</td>
+                                                        <td style="font-weight:700;text-align:right">{{data.sampleProducts| sumFunc:'cbMs' | number: 3}}</td>
+                                                        <td colspan="2"></td>
+                                                    </tr>
+                                                    <tr ng-repeat="item in data.sampleProducts">
+                                                        <td style="width: 89px; text-align: left;">
+                                                            <a class="btn btn-primary btn-xs font-11" href="@Url.Action("Edit", "FactoryPLCMng")/{{item.plcid}}" style="margin-bottom:5px" ng-if="item.isCreatedPLC==true" target="_blank"><i class="fa fa-folder-open"></i> Open PLC</a>
+                                                            <a class="btn btn-warning btn-xs font-11" href="@Url.Action("Edit", "FactoryPLCMng")/0?b={{data.bookingID}}&f={{item.factoryID}}&o={{item.offerLineID}}&ofs={{item.offerLineSampleProductID}}&os=-1" style="margin-bottom:5px" ng-if="item.isCreatedPLC==false" target="_blank"><i class="fa fa-check-square-o"></i> Make PLC</a>
+                                                            <a ng-click="event.printPS($event,item.factoryOrderSampleDetailID)" class="btn btn-primary btn-xs font-11" href="javascript:void(0);" style="margin-bottom:5px" ng-hide="true"><i class="fa fa-print"></i> Print PS&nbsp;&nbsp;&nbsp;&nbsp;</a>
+                                                            <a ng-click="event.removeSampleProduct(item.loadingPlanSampleDetailID)" class="btn btn-danger btn-xs font-11 {{data.isCreatedInvoice==true?'disabled' : ''}}" href="javascript:void(0);"><i class="fa fa-times"></i> Del</a>
+                                                        </td>
+                                                        <td style="width: 100px;">
+                                                            <a href="{{item.fileLocation}}" data-featherlight="image">
+                                                                <img style="width: 95%;" ng-src="{{item.thumbnailLocation}}" />
+                                                            </a>
+                                                        </td>
+                                                        <td style="width: 70px;">
+                                                            {{item.proformaInvoiceNo}}
+                                                        </td>
+                                                        <td style="width: 80px;">{{item.lds}}</td>
+                                                        <td style="width: 70px;">{{item.clientUD}}</td>
+                                                        <td style="width: 90px;">{{item.factoryUD}}</td>
+                                                        <td style="width:300px;text-align:left;"><a href="@Url.Action("Edit", "Product")/{{item.productID}}" target="_blank"><span style="font-weight:bold;">{{item.articleCode}}</span></a><br />{{item.description}}</td>
+                                                        <td style="width: 70px; text-align: right; "><span class="form-control">{{item.qnt40HC | number:0}}</span></td>
+                                                        <td style="width: 70px; text-align:right"><span class="form-control">{{item.orderQnt}}</span></td>
+                                                        <td style="width: 70px; text-align:right"><span class="form-control">{{item.remainQnt}}</span></td>
+                                                        <td style="width: 70px;">
+                                                            <input type="text" ng-model="item.quantity" style="width: 100%;text-align:right" ng-keyup="event.loadedQntKeyUp($event,$index)" id="{{$index}}" class="loadedQnt" ng-disabled="data.isLoaded" />
+                                                        </td>
+                                                        @*<td style="width: 60px;"><input type="text" ng-model="item.unit" style=" text-align:right;" /></td>*@
+                                                        <td style="width: 80px; text-align:right"><input type="text" avs-number ng-decimal="0" ng-data-source="item.pkGs" style=" text-align:right;" /></td>
+                                                        <td style="width: 80px; text-align:right"><input type="text" avs-number ng-decimal="2" ng-data-source="item.nettWeight" style=" text-align:right;" /></td>
+                                                        <td style="width: 80px; text-align:right"><input type="text" avs-number ng-decimal="2" ng-data-source="item.kGs" style="text-align:right;" /></td>
+                                                        <td style="width: 80px; text-align:right"><input type="text" avs-number ng-decimal="6" ng-data-source="item.cbMs" style="text-align:right;" /></td>
+                                                        <td style="width: 120px"><input type="text" ng-model="item.hsCode" style="text-align:center;" /></td>
+                                                        <td><input type="text" ng-model="item.remark" style="width: 100%;" /></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td colspan="11"><b>Total Rows() : {{data.sampleProducts.length}}</b></td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </article>
+</form>
+
+<div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="frmPrintOption" class="modal fade" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button aria-hidden="true" data-dismiss="modal" class="close" type="button">
+                    ×
+                </button>
+                <h4 id="myModalLabel" class="modal-title">Print Option</h4>
+            </div>
+            <div class="modal-body smart-form">
+                <fieldset>
+                    <div class="row">
+                        <section class="col col-12">
+
+                            <ul style="list-style-type:none">
+                                <li><input type="radio" name="print_type" ng-model="print_type" value="1" />&nbsp;&nbsp;&nbsp;Loading Plan</li>
+                                <li><input type="radio" name="print_type" ng-model="print_type" value="2" />&nbsp;&nbsp;&nbsp;Loading Plan with client name</li>
+                                <li><input type="radio" name="print_type" ng-model="print_type" value="3" />&nbsp;&nbsp;&nbsp;Loading Plan with Client Art Code</li>
+                                <li><input type="radio" name="print_type" ng-model="print_type" value="4" />&nbsp;&nbsp;&nbsp;Loading Plan with client name (PDF Form)</li>
+                            </ul>
+
+                        </section>
+                    </div>
+                </fieldset>
+            </div>
+            <div class="modal-footer">
+                <button data-dismiss="modal" class="btn btn-default" type="button">
+                    CANCEL
+                </button>
+                <button class="btn btn-primary" type="button" ng-click="event.print($event, print_type)">
+                    PRINT
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section FormAction {
+<ul id="sparks">
+    <li class="sparks-info">
+        <a href="@Url.Action("Index", "LoadingPlan")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="event.update($event)"><i class="fa fa-save"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0)" class="btn btn-default@(ViewBag.ID==0?" disabled":"") @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="Delete" style="color: #ff0000;" ng-click="event.delete($event)"><i class="fa fa-times"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default@(ViewBag.ID==0?" disabled":"") @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Print, HttpContext.Current))" title="Print" ng-click="event.showPrintOption($event)"><i class="fa fa-print"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="@Url.Action("PrintOutHTML", "LoadingPlan")/{{data.loadingPlanID}}" class="btn btn-default@(ViewBag.ID==0?" disabled":"") @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Print, HttpContext.Current))" title="Print HTML" target="_blank"><i class="fa fa-print"></i> HTML</a>
+    </li>
+    @*<li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default" title="Approve"><i class="fa fa-thumbs-o-up"></i></a>
+        </li>*@
+
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default@(ViewBag.ID==0?" disabled":"") @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Approve, HttpContext.Current)) {{data.isLoaded==true?'disabled' : ''}}" title="Mark as Loaded" style="color: #0066ff; " ng-click="event.setLoadingPlanStatus(false,true,false)"><i class="fa fa-check"></i></a>
+    </li>
+
+    <li class="sparks-info">
+        <a href="javascript:void(0);" class="btn btn-default@(ViewBag.ID==0?" disabled":"") @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Approve, HttpContext.Current)) {{data.isShipped==true?'disabled' : ''}}" title="Mark as Shipped" style="color: #0066ff; " ng-click="event.setLoadingPlanStatus(false,false,true)"><i class="fa fa-check-square-o"></i></a>
+    </li>
+
+    <li class="sparks-info">
+        <a href="javascript:void(0)" class="btn btn-default@(ViewBag.ID==0?" disabled":"") @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Approve, HttpContext.Current)) {{data.isConfirmed==true?'disabled' : ''}}" title="Mark as Confirmed" style="color: #0066ff;" ng-click="event.setLoadingPlanStatus(true,false,false)"><i class="fa fa-thumbs-o-up"></i></a>
+    </li>
+
+    <li class="sparks-info">
+        <a ng-disabled="data.isBookingConfirmed == true" href="javascript:void(0)" class="btn btn-default@(ViewBag.ID==0?" disabled":"") @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Approve, HttpContext.Current))" title="Reset" style="color: #ff0000;" ng-click="event.setLoadingPlanStatus(false,false,false)"><i class="fa fa-undo"></i></a>
+    </li>
+    @if (!string.IsNullOrEmpty(userManualUrl))
+    {
+        <li class="sparks-info">
+            <a target="_blank" href="@userManualUrl" class="btn btn-default" title="Help"><i class="fa fa-info"></i></a>
+        </li>
+    }
+
+</ul>
+}
+
+@section pagejs {
+    <script src="~/Angular/app/jsonService.js"></script>
+    <script src="~/Angular/app/loadingPlan/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script type="text/javascript">
+
+        jQuery('#main-form').keypress(function(e){
+            if (e.keyCode == 13) {
+                e.preventDefault();
+                return false;
+            }
+        });
+       
+        var grdProductSearchResult = jQuery('#grdProductSearchResult').scrollableTable2(
+            'quicksearchProduct.filters.pageIndex',
+            'quicksearchProduct.totalPage',
+            function(currentPage){
+                var scope = angular.element(jQuery('body')).scope();
+                scope.$apply(function(){
+                    scope.quicksearchProduct.filters.pageIndex = currentPage;
+                    scope.quicksearchProduct.method.searchProduct();
+                });
+            },
+            function(sortedBy, sortedDirection){
+            }
+        );
+
+        var grdSampleProductSearchResult = jQuery('#grdSampleProductSearchResult').scrollableTable2(
+            'quicksearchSampleProduct.filters.pageIndex',
+            'quicksearchSampleProduct.totalPage',
+            function (currentPage) {
+                var scope = angular.element(jQuery('body')).scope();
+                scope.$apply(function () {
+                    scope.quicksearchSampleProduct.filters.pageIndex = currentPage;
+                    scope.quicksearchSampleProduct.method.searchProduct();
+                });
+            },
+            function (sortedBy, sortedDirection) {
+            }
+        );
+
+        var grdSparepartSearchResult = jQuery('#grdSparepartSearchResult').scrollableTable2(
+            'quicksearchSparepart.filters.pageIndex',
+            'quicksearchSparepart.totalPage',
+            function(currentPage){
+                var scope = angular.element(jQuery('body')).scope();
+                scope.$apply(function(){
+                    scope.quicksearchSparepart.filters.pageIndex = currentPage;
+                    scope.quicksearchSparepart.method.searchSparepart();
+                });
+            },
+            function(sortedBy, sortedDirection){
+            }
+        );
+
+        var quicksearchLoadingPlanGrid = jQuery('#quicksearchLoadingPlanGrid').scrollableTable2(
+            'quicksearchLoadingPlan.filters.pageIndex',
+            'quicksearchLoadingPlan.totalPage',
+            function (currentPage) {
+                var scope = angular.element(jQuery('body')).scope();
+                scope.$apply(function () {
+                    scope.quicksearchLoadingPlan.filters.pageIndex = currentPage;
+                    scope.quicksearchLoadingPlan.method.searchModel();
+                });
+            },
+            function (sortedBy, sortedDirection) {
+            }
+        );
+
+
+        jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/loadingplan/';
+        jsonService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+        var tilsoftApp = angular.module('tilsoftApp', ['avs-directives']);
+        tilsoftApp.filter('sumFunc', function () {
+            return function (data, key) {
+                if (angular.isUndefined(data) || angular.isUndefined(key))
+                    return 0;
+                var sum = parseFloat('0');
+                angular.forEach(data, function (v, k) {
+                    sum = sum + parseFloat(v[key] == null ? 0 : v[key]);
+                });
+                return sum;
+            }
+        });
+        tilsoftApp.controller('tilsoftController', ['$scope', function ($scope) {
+
+            $scope.data = null;
+            $scope.containerTypes=null;
+            $scope.users = null;
+            $scope.parentLoadingPlans = null;
+            $scope.newID = 0;
+
+            $scope.print_type = 1;
+
+            $scope.event = {
+                init:function(){
+                    jsonService.load(
+                        '@ViewBag.ID',
+                        '@fID',
+                        '@bID',
+                        '@pID',
+                        function (data) {
+                            $scope.data = data.data.data;
+                            $scope.containerTypes = data.data.containerTypes;
+                            $scope.users = data.data.users;
+                            $scope.parentLoadingPlans = data.data.parentLoadingPlans;
+                            console.log($scope.data);
+                            $scope.$apply();
+                            jQuery('#content').show();
+
+                            // monitor changes
+                            $scope.$watch('data', function() {
+                                jQuery('#changeNotification').html('<i class="fa fa-save blink_me"></i>');
+                            });
+
+                            if (data.message.type == 2)
+                            {
+                                jsHelper.processMessage(data.message);
+                            }
+                        },
+                        function (error) {
+                            jsHelper.showMessage('warning', error);
+
+                            $scope.data = null;
+                            $scope.containerTypes=null;
+                            $scope.users = null;
+                            $scope.$apply();
+                        }
+                    );
+                },
+                update: function($event){
+                    $event.preventDefault();
+
+                    if($scope.editForm.$valid)
+                    {
+                        jsonService.update(
+                            @ViewBag.ID,
+                            $scope.data,
+                            function (data) {
+                                jsHelper.processMessage(data.message);
+                                if(data.message.type == 0) {
+                                    $scope.method.refresh(data.data.loadingPlanID);
+                                }
+                            },
+                            function (error) {
+                                jsHelper.showMessage('warning', error);
+                            }
+                        );
+                    }
+                    else
+                    {
+                        jsHelper.showMessage('warning', '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED');
+                    }
+                },
+                delete: function($event){
+                    $event.preventDefault();
+
+                    if (confirm('Are you sure ?')) {
+                        jsonService.delete(
+                            @ViewBag.ID,
+                            function (data) {
+                                jsHelper.processMessage(data.message);
+                                if(data.message.type == 0) {
+                                    window.location = '@Url.Action("Index", "LoadingPlan")';
+                                }
+                            },
+                            function (error) {
+                                jsHelper.showMessage('warning', error);
+                            }
+                        );
+                    }
+                },
+
+                removeProduct: function(id){
+                    isExist = false;
+                    for(j=0; j< $scope.data.details.length; j++) {
+                        if($scope.data.details[j].loadingPlanDetailID == id) {
+                            isExist = true;
+                            break;
+                        }
+                    }
+                    if(isExist){
+                        $scope.data.details.splice(j, 1);
+                    }
+        },
+                removeSampleProduct: function(id){
+                    isExist = false;
+                    for (j = 0; j < $scope.data.sampleProducts.length; j++) {
+                        if ($scope.data.sampleProducts[j].loadingPlanSampleDetailID == id) {
+                            isExist = true;
+                            break;
+                        }
+                    }
+                    if(isExist){
+                        $scope.data.details.splice(j, 1);
+                    }
+                },
+
+                // change controller
+                changeController: function(){
+                    if($scope.data.controllerID){
+                        angular.forEach($scope.users, function(item){
+                            if(item.userID == $scope.data.controllerID){
+                                $scope.data.controllerName = item.employeeNM + ' (' + item.internalCompanyNM + ')';
+                            }
+                        });
+                    }
+                    else {
+                        $scope.data.controllerName = '';
+                    }
+                },
+
+                //product 1 image
+                changeProduct1Image: function ($event) {
+                    $event.preventDefault();
+                    masterUploader.multiSelect = true;
+                    masterUploader.imageOnly = true;
+                    masterUploader.callback = function () {
+                        var scope = angular.element(jQuery('body')).scope();
+                        scope.$apply(function () {
+                            angular.forEach(masterUploader.selectedFiles, function (img) {
+                                scope.data.productPicture1_DisplayUrl = img.fileURL;
+                                scope.data.productPicture1_NewFile = img.filename;
+                                scope.data.productPicture1_HasChange = true;
+                            }, null);
+                        });
+                    };
+                    masterUploader.open();
+                },
+                removeProduct1Image: function ($event) {
+                    $scope.data.productPicture1_DisplayUrl = '';
+                    $scope.data.productPicture1_NewFile = '';
+                    $scope.data.productPicture1_HasChange = true;
+                },
+
+                //product 2 image
+                changeProduct2Image: function ($event) {
+                    $event.preventDefault();
+                    masterUploader.multiSelect = true;
+                    masterUploader.imageOnly = true;
+                    masterUploader.callback = function () {
+                        var scope = angular.element(jQuery('body')).scope();
+                        scope.$apply(function () {
+                            angular.forEach(masterUploader.selectedFiles, function (img) {
+                                scope.data.productPicture2_DisplayUrl = img.fileURL;
+                                scope.data.productPicture2_NewFile = img.filename;
+                                scope.data.productPicture2_HasChange = true;
+                            }, null);
+                        });
+                    };
+                    masterUploader.open();
+                },
+                removeProduct2Image: function ($event) {
+                    $scope.data.productPicture2_DisplayUrl = '';
+                    $scope.data.productPicture2_NewFile = '';
+                    $scope.data.productPicture2_HasChange = true;
+                },
+                //container 1 image
+                changeContainer1Image: function ($event) {
+                    $event.preventDefault();
+                    masterUploader.multiSelect = true;
+                    masterUploader.imageOnly = true;
+                    masterUploader.callback = function () {
+                        var scope = angular.element(jQuery('body')).scope();
+                        scope.$apply(function () {
+                            angular.forEach(masterUploader.selectedFiles, function (img) {
+                                scope.data.containerPicture1_DisplayUrl = img.fileURL;
+                                scope.data.containerPicture1_NewFile = img.filename;
+                                scope.data.containerPicture1_HasChange = true;
+                            }, null);
+                        });
+                    };
+                    masterUploader.open();
+                },
+                removeContainer1Image: function ($event) {
+                    $scope.data.containerPicture1_DisplayUrl = '';
+                    $scope.data.containerPicture1_NewFile = '';
+                    $scope.data.containerPicture1_HasChange = true;
+                },
+
+                //container 2 image
+                changeContainer2Image: function ($event) {
+                    $event.preventDefault();
+                    masterUploader.multiSelect = true;
+                    masterUploader.imageOnly = true;
+                    masterUploader.callback = function () {
+                        var scope = angular.element(jQuery('body')).scope();
+                        scope.$apply(function () {
+                            angular.forEach(masterUploader.selectedFiles, function (img) {
+                                scope.data.containerPicture2_DisplayUrl = img.fileURL;
+                                scope.data.containerPicture2_NewFile = img.filename;
+                                scope.data.containerPicture2_HasChange = true;
+                            }, null);
+                        });
+                    };
+                    masterUploader.open();
+                },
+                removeContainer2Image: function ($event) {
+                    $scope.data.containerPicture2_DisplayUrl = '';
+                    $scope.data.containerPicture2_NewFile = '';
+                    $scope.data.containerPicture2_HasChange = true;
+                },
+
+                //container 3 image
+                changeContainer3Image: function ($event) {
+                    $event.preventDefault();
+                    masterUploader.multiSelect = true;
+                    masterUploader.imageOnly = true;
+                    masterUploader.callback = function () {
+                        var scope = angular.element(jQuery('body')).scope();
+                        scope.$apply(function () {
+                            angular.forEach(masterUploader.selectedFiles, function (img) {
+                                scope.data.containerPicture3_DisplayUrl = img.fileURL;
+                                scope.data.containerPicture3_NewFile = img.filename;
+                                scope.data.containerPicture3_HasChange = true;
+                            }, null);
+                        });
+                    };
+                    masterUploader.open();
+                },
+                removeContainer3Image: function ($event) {
+                    $scope.data.containerPicture3_DisplayUrl = '';
+                    $scope.data.containerPicture3_NewFile = '';
+                    $scope.data.containerPicture3_HasChange = true;
+                },
+
+                //container 4 image
+                changeContainer4Image: function ($event) {
+                    $event.preventDefault();
+                    masterUploader.multiSelect = true;
+                    masterUploader.imageOnly = true;
+                    masterUploader.callback = function () {
+                        var scope = angular.element(jQuery('body')).scope();
+                        scope.$apply(function () {
+                            angular.forEach(masterUploader.selectedFiles, function (img) {
+                                scope.data.containerPicture4_DisplayUrl = img.fileURL;
+                                scope.data.containerPicture4_NewFile = img.filename;
+                                scope.data.containerPicture4_HasChange = true;
+                            }, null);
+                        });
+                    };
+                    masterUploader.open();
+                },
+                removeContainer4Image: function ($event) {
+                    $scope.data.containerPicture4_DisplayUrl = '';
+                    $scope.data.containerPicture4_NewFile = '';
+                    $scope.data.containerPicture4_HasChange = true;
+                },
+
+                //container 5 image
+                changeContainer5Image: function ($event) {
+                    $event.preventDefault();
+                    masterUploader.multiSelect = true;
+                    masterUploader.imageOnly = true;
+                    masterUploader.callback = function () {
+                        var scope = angular.element(jQuery('body')).scope();
+                        scope.$apply(function () {
+                            angular.forEach(masterUploader.selectedFiles, function (img) {
+                                scope.data.containerPicture5_DisplayUrl = img.fileURL;
+                                scope.data.containerPicture5_NewFile = img.filename;
+                                scope.data.containerPicture5_HasChange = true;
+                            }, null);
+                        });
+                    };
+                    masterUploader.open();
+                },
+                removeContainer5Image: function ($event) {
+                    $scope.data.containerPicture5_DisplayUrl = '';
+                    $scope.data.containerPicture5_NewFile = '';
+                    $scope.data.containerPicture5_HasChange = true;
+                },
+
+                //container 6 image
+                changeContainer6Image: function ($event) {
+                    $event.preventDefault();
+                    masterUploader.multiSelect = true;
+                    masterUploader.imageOnly = true;
+                    masterUploader.callback = function () {
+                        var scope = angular.element(jQuery('body')).scope();
+                        scope.$apply(function () {
+                            angular.forEach(masterUploader.selectedFiles, function (img) {
+                                scope.data.containerPicture6_DisplayUrl = img.fileURL;
+                                scope.data.containerPicture6_NewFile = img.filename;
+                                scope.data.containerPicture6_HasChange = true;
+                            }, null);
+                        });
+                    };
+                    masterUploader.open();
+                },
+                removeContainer6Image: function ($event) {
+                    $scope.data.containerPicture6_DisplayUrl = '';
+                    $scope.data.containerPicture6_NewFile = '';
+                    $scope.data.containerPicture6_HasChange = true;
+                },
+
+                //MerchandisesInside1Per3ContImage
+                changeMerchandisesInside1Per3ContImage: function ($event) {
+                    $event.preventDefault();
+                    masterUploader.multiSelect = true;
+                    masterUploader.imageOnly = true;
+                    masterUploader.callback = function () {
+                        var scope = angular.element(jQuery('body')).scope();
+                        scope.$apply(function () {
+                            angular.forEach(masterUploader.selectedFiles, function (img) {
+                                scope.data.merchandisesInside1Per3ContImage_DisplayUrl = img.fileURL;
+                                scope.data.merchandisesInside1Per3ContImage_NewFile = img.filename;
+                                scope.data.merchandisesInside1Per3ContImage_HasChange = true;
+                            }, null);
+                        });
+                    };
+                    masterUploader.open();
+                },
+                removeMerchandisesInside1Per3ContImage: function ($event) {
+                    $scope.data.merchandisesInside1Per3ContImage_DisplayUrl = '';
+                    $scope.data.merchandisesInside1Per3ContImage_NewFile = '';
+                    $scope.data.merchandisesInside1Per3ContImage_HasChange = true;
+                },
+
+                //MerchandisesInside1Per2ContImage
+                changeMerchandisesInside1Per2ContImage: function ($event) {
+                    $event.preventDefault();
+                    masterUploader.multiSelect = true;
+                    masterUploader.imageOnly = true;
+                    masterUploader.callback = function () {
+                        var scope = angular.element(jQuery('body')).scope();
+                        scope.$apply(function () {
+                            angular.forEach(masterUploader.selectedFiles, function (img) {
+                                scope.data.merchandisesInside1Per2ContImage_DisplayUrl = img.fileURL;
+                                scope.data.merchandisesInside1Per2ContImage_NewFile = img.filename;
+                                scope.data.merchandisesInside1Per2ContImage_HasChange = true;
+                            }, null);
+                        });
+                    };
+                    masterUploader.open();
+                },
+                removeMerchandisesInside1Per2ContImage: function ($event) {
+                    $scope.data.merchandisesInside1Per2ContImage_DisplayUrl = '';
+                    $scope.data.merchandisesInside1Per2ContImage_NewFile = '';
+                    $scope.data.merchandisesInside1Per2ContImage_HasChange = true;
+                },
+
+                //MerchandisesInside1FullContImage
+                changeMerchandisesInsideFullContImage: function ($event) {
+                    $event.preventDefault();
+                    masterUploader.multiSelect = true;
+                    masterUploader.imageOnly = true;
+                    masterUploader.callback = function () {
+                        var scope = angular.element(jQuery('body')).scope();
+                        scope.$apply(function () {
+                            angular.forEach(masterUploader.selectedFiles, function (img) {
+                                scope.data.merchandisesInsideFullContImage_DisplayUrl = img.fileURL;
+                                scope.data.merchandisesInsideFullContImage_NewFile = img.filename;
+                                scope.data.merchandisesInsideFullContImage_HasChange = true;
+                            }, null);
+                        });
+                    };
+                    masterUploader.open();
+                },
+                removeMerchandisesInsideFullContImage: function ($event) {
+                    $scope.data.merchandisesInsideFullContImage_DisplayUrl = '';
+                    $scope.data.merchandisesInsideFullContImage_NewFile = '';
+                    $scope.data.merchandisesInsideFullContImage_HasChange = true;
+                },
+
+                //ContainerDoorAndLockImage
+                changeContainerDoorAndLockImage: function ($event) {
+                    $event.preventDefault();
+                    masterUploader.multiSelect = true;
+                    masterUploader.imageOnly = true;
+                    masterUploader.callback = function () {
+                        var scope = angular.element(jQuery('body')).scope();
+                        scope.$apply(function () {
+                            angular.forEach(masterUploader.selectedFiles, function (img) {
+                                scope.data.containerDoorAndLockImage_DisplayUrl = img.fileURL;
+                                scope.data.containerDoorAndLockImage_NewFile = img.filename;
+                                scope.data.containerDoorAndLockImage_HasChange = true;
+                            }, null);
+                        });
+                    };
+                    masterUploader.open();
+                },
+                removeContainerDoorAndLockImage: function ($event) {
+                    $scope.data.containerDoorAndLockImage_DisplayUrl = '';
+                    $scope.data.containerDoorAndLockImage_NewFile = '';
+                    $scope.data.containerDoorAndLockImage_HasChange = true;
+                },
+
+                //ContainerSealImage
+                changeContainerSealImage: function ($event) {
+                    $event.preventDefault();
+                    masterUploader.multiSelect = true;
+                    masterUploader.imageOnly = true;
+                    masterUploader.callback = function () {
+                        var scope = angular.element(jQuery('body')).scope();
+                        scope.$apply(function () {
+                            angular.forEach(masterUploader.selectedFiles, function (img) {
+                                scope.data.containerSealImage_DisplayUrl = img.fileURL;
+                                scope.data.containerSealImage_NewFile = img.filename;
+                                scope.data.containerSealImage_HasChange = true;
+                            }, null);
+                        });
+                    };
+                    masterUploader.open();
+                },
+                removeContainerSealImage: function ($event) {
+                    $scope.data.containerSealImage_DisplayUrl = '';
+                    $scope.data.containerSealImage_NewFile = '';
+                    $scope.data.containerSealImage_HasChange = true;
+                },
+
+                //dryPackImage
+                changeDryPackImage: function ($event) {
+                    $event.preventDefault();
+                    masterUploader.multiSelect = true;
+                    masterUploader.imageOnly = true;
+                    masterUploader.callback = function () {
+                        var scope = angular.element(jQuery('body')).scope();
+                        scope.$apply(function () {
+                            angular.forEach(masterUploader.selectedFiles, function (img) {
+                                scope.data.dryPackImage_DisplayUrl = img.fileURL;
+                                scope.data.dryPackImage_NewFile = img.filename;
+                                scope.data.dryPackImage_HasChange = true;
+                            }, null);
+                        });
+                    };
+                    masterUploader.open();
+                },
+                removeDryPackImage: function ($event) {
+                    $scope.data.dryPackImage_DisplayUrl = '';
+                    $scope.data.dryPackImage_NewFile = '';
+                    $scope.data.dryPackImage_HasChange = true;
+                },
+
+                //approvedImage
+                changeApprovedImage: function ($event) {
+                    $event.preventDefault();
+                    masterUploader.multiSelect = true;
+                    masterUploader.imageOnly = true;
+                    masterUploader.callback = function () {
+                        var scope = angular.element(jQuery('body')).scope();
+                        scope.$apply(function () {
+                            angular.forEach(masterUploader.selectedFiles, function (img) {
+                                scope.data.approvedImage_DisplayUrl = img.fileURL;
+                                scope.data.approvedImage_NewFile = img.filename;
+                                scope.data.approvedImage_HasChange = true;
+                            }, null);
+                        });
+                    };
+                    masterUploader.open();
+                },
+                removeApprovedImage: function ($event) {
+                    $scope.data.approvedImage_DisplayUrl = '';
+                    $scope.data.approvedImage_NewFile = '';
+                    $scope.data.approvedImage_HasChange = true;
+                },
+
+
+
+                ///////////
+                removeSparepart: function(id){
+                    isExist = false;
+                    for(j=0; j< $scope.data.spareparts.length; j++) {
+                        if($scope.data.spareparts[j].loadingPlanSparepartDetailID == id) {
+                            isExist = true;
+                            break;
+                        }
+                    }
+                    if(isExist){
+                        $scope.data.spareparts.splice(j, 1);
+                    }
+                },
+
+                setLoadingPlanStatus : function (isConfirmed,isLoaded,isShipped){
+                    jsonService.setLoadingPlanStatus(
+                        @ViewBag.ID,isConfirmed,isLoaded,isShipped,@userInfo.Data.BranchID,
+                        function (data) {
+                            jsHelper.processMessage(data.message);
+                            if(data.message.type == 0) {
+                                $scope.method.refresh('@ViewBag.ID');
+                            }
+                        },
+                        function (error) {
+                            jsHelper.showMessage('warning', error);
+                        }
+                    );
+                },
+
+                showPrintOption: function ($event) {
+                    $event.preventDefault();
+                    $('#frmPrintOption').modal('show');
+                },
+
+                print : function($event, print_type){
+                    $event.preventDefault();
+                    arr_ids = [];
+                    arr_ids.push('@ViewBag.ID');
+
+                    angular.forEach($scope.data.childLoadingPlans,function(item){
+                        arr_ids.push(item.loadingPlanID);
+                    });
+                    if (parseInt(print_type) === 4) {
+                        jsonService.printLoadingPlan(arr_ids, print_type,
+                            function (data) {
+                                jsHelper.processMessage(data.message);
+                                if (data.message.type != 2) {
+                                    window.open('@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]' + data.data);
+                                }
+                            },
+                            function (error) {
+                                jsHelper.showMessage('warning', error);
+                            }
+                        );
+                    }
+                    else {
+                        jsonService.printLoadingPlan(arr_ids, print_type,
+                            function (data) {
+                                jsHelper.processMessage(data.message);
+                                if (data.message.type != 2) {
+                                    window.location = '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]' + data.data + '.xlsm';
+                                }
+                            },
+                            function (error) {
+                                jsHelper.showMessage('warning', error);
+                            }
+                        );
+                    }
+                    $('#frmPrintOption').modal('hide');
+                    
+                },
+
+                openChildLoadingPlan : function(loadingPlanID){
+                    window.open('@Url.Action("Edit", "LoadingPlan", new { id = UrlParameter.Optional })/' + loadingPlanID);
+                },
+
+                removeSubLoadingPlan: function(loadingPlanID) {
+                    debugger;
+                    isExist = false;
+                    for (j = 0; j < $scope.data.childLoadingPlans.length; j++) {
+                        if ($scope.data.childLoadingPlans[j].loadingPlanID == loadingPlanID) {
+                            isExist = true;
+                            break;
+                        }
+                    }
+                    if (isExist) {
+                        $scope.data.childLoadingPlans.splice(j, 1);
+                    }
+                },
+
+                printPS : function ($event, factoryOrderDetailID) {
+                    $event.preventDefault();
+                    jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])';
+                    jsonService.printPS(factoryOrderDetailID,
+                        function (data) {
+                            jsHelper.processMessage(data.message);
+                            if (data.message.type != 2)
+                            {
+                                window.location = '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]' + data.data;
+                            }
+                        },
+                        function (error) {
+                            jsHelper.showMessage('warning', error);
+                        }
+                    );
+                    jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/loadingplan/';
+                },
+
+                loadedQntKeyUp : function($event,index){
+                    $event.preventDefault();
+                    if ($event.keyCode ==13) {
+                        $("#" + (index + 1)).focus();
+                        $("#" + (index + 1)).select();
+                    }
+                }
+            };
+
+            //
+            // method
+            //
+            $scope.method = {
+                refresh: function(id){
+                    jsHelper.loadingSwitch(true);
+                    window.location = '@Url.Action("Edit", "LoadingPlan", new { id = UrlParameter.Optional })/'+id+'?fID=0&bID=0';
+                },
+                getNewID: function(){
+                    $scope.newID--;
+                    return $scope.newID;
+                },
+                getTotal: function (data,val) {
+                    console.log(data);
+                    console.log(val);
+                    var result = 0;
+                    if (data != null) {
+                        for (i = 0; i < data.length; ++i) {
+                            if (data[i][val] <= 0 || data[i][val] == null){
+                                data[i][val] = 0;
+                            }
+                            result += parseFloat(data[i][val]);
+                        }
+                    }
+                    return result;
+                },
+            };
+
+            //
+            // child component
+            //
+            searchProductTimer = null;
+            $scope.quicksearchProduct = {
+                isSelectAll: false,
+                data: null,
+                filters: {
+                    filters: {
+                        SearchQuery: '',
+                        FactoryID: 0
+                    },
+                    sortedBy: 'Description',
+                    sortedDirection: 'ASC',
+                    pageSize: 20,
+                    pageIndex: 1
+                },
+                totalPage: 0,
+                method: {
+                    searchProduct : function(){
+                        jsonService.quicksearchProduct(
+                            $scope.quicksearchProduct.filters,
+                            function (data) {
+                                if (data.message.type == 0) {
+                                    $scope.quicksearchProduct.data = data.data;
+                                    $scope.quicksearchProduct.totalPage = Math.ceil(data.totalRows / $scope.quicksearchProduct.filters.pageSize);
+                                    grdProductSearchResult.updateLayout();
+
+                                    $scope.quicksearchProduct.isSelectAll = false;
+
+                                    $scope.$apply();
+                                    jQuery('#product-popup').show();
+                                }
+                            },
+                            function (error) {
+                                jsHelper.showMessage('warning', error);
+                            }
+                        );
+                    }
+                },
+                event: {
+                    selectAll: function (checkBox) {
+                        angular.forEach($scope.quicksearchProduct.data, function (item) {
+                            item.isSelected = $scope.quicksearchProduct.isSelectAll;
+                        });                         
+                    },
+
+                    searchBoxKeyUp: function ($event) {
+                        if ($event.keyCode == 13)
+                        {
+                            $scope.quicksearchProduct.filters.filters.SearchQuery = jQuery('#txtProductSearchBox').val();
+                            $scope.quicksearchProduct.filters.filters.FactoryID = $scope.data.factoryID;
+                            $scope.quicksearchProduct.filters.pageIndex = 1;
+                            $scope.quicksearchProduct.method.searchProduct();
+                        }
+                        else if (jQuery('#txtProductSearchBox').val().length >= 3) {
+                            clearTimeout(searchProductTimer);
+                            searchProductTimer = setTimeout(
+                                function () {
+                                    $scope.quicksearchProduct.filters.filters.SearchQuery = jQuery('#txtProductSearchBox').val();
+                                    $scope.quicksearchProduct.filters.filters.FactoryID = $scope.data.factoryID;
+                                    $scope.quicksearchProduct.filters.pageIndex = 1;
+                                    $scope.quicksearchProduct.method.searchProduct();
+                                },
+                                500);
+                        }
+                    },
+                    searchClick : function($event){
+                        $scope.quicksearchProduct.filters.filters.SearchQuery = jQuery('#txtProductSearchBox').val();
+                        $scope.quicksearchProduct.filters.filters.FactoryID = $scope.data.factoryID;
+                        $scope.quicksearchProduct.filters.pageIndex = 1;
+                        $scope.quicksearchProduct.method.searchProduct();
+                    },
+
+                    close: function ($event) {
+                        jQuery('#product-popup').hide();
+                        jQuery('#txtProductSearchBox').val('');
+                        $scope.quicksearchProduct.data = null;
+                        $event.preventDefault();
+                    },
+                    ok: function ($event, id) {
+                        jQuery.each($scope.quicksearchProduct.data, function () {
+                            if (this.isSelected) {
+                                $scope.data.details.push({
+                                    loadingPlanDetailID: $scope.method.getNewID(),
+                                    factoryOrderDetailID: this.factoryOrderDetailID,
+                                    quantity: this.quantity,
+                                    Remark: '',
+                                    proformaInvoiceNo: this.proformaInvoiceNo,
+                                    lds: this.lds,
+                                    clientUD: this.clientUD,
+                                    factoryUD: this.factoryUD,
+                                    articleCode: this.articleCode,
+                                    description: this.description,
+                                    qnt40HC: this.qnt40HC,
+                                    orderQnt: this.orderQnt,
+                                    remainQnt: this.remainQnt,
+                                    quotationSalePrice : this.quotationSalePrice,
+                                    factoryID : this.factoryID,
+                                    offerLineID : this.offerLineID,
+                                    isCreatedPLC: null,
+                                    fileLocation: this.fileLocation,
+                                    thumbnailLocation: this.thumbnailLocation,
+                                    productID: this.productID,
+                                    imageFile: this.imageFile
+                                });
+                            }
+                        });
+                        $scope.quicksearchProduct.event.close($event, false);
+                    }
+                }
+            }
+
+
+            //Search Sample
+            searchProductTimer = null;
+            $scope.quicksearchSampleProduct = {
+                isSelectAll: false,
+                data: null,
+                filters: {
+                    filters: {
+                        SearchQuery: '',
+                        FactoryID: 0
+                    },
+                    sortedBy: 'Description',
+                    sortedDirection: 'ASC',
+                    pageSize: 20,
+                    pageIndex: 1
+                },
+                totalPage: 0,
+                method: {
+                    searchProduct : function(){
+                        jsonService.quicksearchSampleProduct(
+                            $scope.quicksearchSampleProduct.filters,
+                            function (data) {
+                                if (data.message.type == 0) {
+                                    $scope.quicksearchSampleProduct.data = data.data;
+                                    $scope.quicksearchSampleProduct.totalPage = Math.ceil(data.totalRows / $scope.quicksearchSampleProduct.filters.pageSize);
+                                    grdProductSearchResult.updateLayout();
+
+                                    $scope.quicksearchSampleProduct.isSelectAll = false;
+
+                                    $scope.$apply();
+                                    jQuery('#sample-product-popup').show();
+                                }
+                            },
+                            function (error) {
+                                jsHelper.showMessage('warning', error);
+                            }
+                        );
+                    }
+                },
+                event: {
+                    selectAll: function (checkBox) {
+                        angular.forEach($scope.quicksearchSampleProduct.data, function (item) {
+                            item.isSelected = $scope.quicksearchSampleProduct.isSelectAll;
+                        });                         
+                    },
+
+                    searchBoxKeyUp: function ($event) {
+                        if ($event.keyCode == 13)
+                        {
+                            $scope.quicksearchSampleProduct.filters.filters.SearchQuery = jQuery('#txtProductSearchBox').val();
+                            $scope.quicksearchSampleProduct.filters.filters.FactoryID = $scope.data.factoryID;
+                            $scope.quicksearchSampleProduct.filters.pageIndex = 1;
+                            $scope.quicksearchSampleProduct.method.searchProduct();
+                        }
+                        else if (jQuery('#txtSampleProductSearchBox').val().length >= 3) {
+                            clearTimeout(searchProductTimer);
+                            searchProductTimer = setTimeout(
+                                function () {
+                                    $scope.quicksearchSampleProduct.filters.filters.SearchQuery = jQuery('#txtSampleProductSearchBox').val();
+                                    $scope.quicksearchSampleProduct.filters.filters.FactoryID = $scope.data.factoryID;
+                                    $scope.quicksearchSampleProduct.filters.pageIndex = 1;
+                                    $scope.quicksearchSampleProduct.method.searchProduct();
+                                },
+                                500);
+                        }
+                    },
+                    searchClick : function($event){
+                        $scope.quicksearchSampleProduct.filters.filters.SearchQuery = jQuery('#txtSampleProductSearchBox').val();
+                        $scope.quicksearchSampleProduct.filters.filters.FactoryID = $scope.data.factoryID;
+                        $scope.quicksearchSampleProduct.filters.pageIndex = 1;
+                        $scope.quicksearchSampleProduct.method.searchProduct();
+                    },
+
+                    close: function ($event) {
+                        jQuery('#sample-product-popup').hide();
+                        jQuery('#txtSampleProductSearchBox').val('');
+                        $scope.quicksearchSampleProduct.data = null;
+                        $event.preventDefault();
+                    },
+                    ok: function ($event, id) {
+                        jQuery.each($scope.quicksearchSampleProduct.data, function () {
+                            if (this.isSelected) {
+                                $scope.data.sampleProducts.push({
+                                    loadingPlanSampleDetailID: $scope.method.getNewID(),
+                                    factoryOrderSampleDetailID: this.factoryOrderSampleDetailID,
+                                    quantity: this.quantity,
+                                    Remark: '',
+                                    proformaInvoiceNo: this.proformaInvoiceNo,
+                                    lds: this.lds,
+                                    clientUD: this.clientUD,
+                                    factoryUD: this.factoryUD,
+                                    articleCode: this.articleCode,
+                                    description: this.description,
+                                    qnt40HC: this.qnt40HC,
+                                    orderQnt: this.orderQnt,
+                                    remainQnt: this.remainQnt,
+                                    quotationSalePrice : this.quotationSalePrice,
+                                    factoryID : this.factoryID,
+                                    offerLineSampleProductID: this.offerLineSampleProductID,
+                                    isCreatedPLC: null,
+                                    fileLocation: this.fileLocation,
+                                    thumbnailLocation: this.thumbnailLocation,
+                                    modelID: this.modelID,
+                                    imageFile: this.imageFile
+                                });
+                            }
+                        });
+                        $scope.quicksearchSampleProduct.event.close($event, false);
+                    }
+                }
+            }
+
+            //search sparepart
+
+            searchSparepartTimer = null;
+            $scope.quicksearchSparepart = {
+                isSelectAll: false,
+                data: null,
+                filters: {
+                    filters: {
+                        SearchQuery: '',
+                        FactoryID: 0
+                    },
+                    sortedBy: 'Description',
+                    sortedDirection: 'ASC',
+                    pageSize: 20,
+                    pageIndex: 1
+                },
+                totalPage: 0,
+
+                method: {
+                    searchSparepart : function(){
+                        jsonService.quicksearchSparepart(
+                            $scope.quicksearchSparepart.filters,
+                            function (data) {
+                                if (data.message.type == 0) {
+                                    $scope.quicksearchSparepart.data = data.data;
+                                    $scope.quicksearchSparepart.totalPage = Math.ceil(data.totalRows / $scope.quicksearchSparepart.filters.pageSize);
+                                    grdProductSearchResult.updateLayout();
+
+                                    $scope.quicksearchSparepart.isSelectAll = false;
+
+                                    $scope.$apply();
+                                    jQuery('#sparepart-popup').show();
+                                }
+                            },
+                            function (error) {
+                                jsHelper.showMessage('warning', error);
+                            }
+                        );
+                    }
+                },
+
+                event: {
+                    selectAll: function (checkBox) {
+                        angular.forEach($scope.quicksearchSparepart.data, function (item) {
+                            item.isSelected = $scope.quicksearchSparepart.isSelectAll;
+                        });
+                    },
+                    searchBoxKeyUp: function ($event) {
+                        if ($event.keyCode == 13)
+                        {
+                            $scope.quicksearchSparepart.filters.filters.SearchQuery = jQuery('#txtSparepartSearchBox').val();
+                            $scope.quicksearchSparepart.filters.filters.FactoryID = $scope.data.factoryID;
+                            $scope.quicksearchSparepart.filters.pageIndex = 1;
+                            $scope.quicksearchSparepart.method.searchSparepart();
+                        }
+                        else if (jQuery('#txtSparepartSearchBox').val().length >= 3) {
+                            clearTimeout(searchSparepartTimer);
+                            searchSparepartTimer = setTimeout(
+                                function () {
+                                    $scope.quicksearchSparepart.filters.filters.SearchQuery = jQuery('#txtSparepartSearchBox').val();
+                                    $scope.quicksearchSparepart.filters.filters.FactoryID = $scope.data.factoryID;
+                                    $scope.quicksearchSparepart.filters.pageIndex = 1;
+                                    $scope.quicksearchSparepart.method.searchSparepart();
+                                },
+                                500);
+                        }
+                    },
+
+                    searchClick : function($event){
+                        $scope.quicksearchSparepart.filters.filters.SearchQuery = jQuery('#txtSparepartSearchBox').val();
+                        $scope.quicksearchSparepart.filters.filters.FactoryID = $scope.data.factoryID;
+                        $scope.quicksearchSparepart.filters.pageIndex = 1;
+                        $scope.quicksearchSparepart.method.searchSparepart();
+                    },
+
+                    close: function ($event) {
+                        jQuery('#sparepart-popup').hide();
+                        jQuery('#txtSparepartSearchBox').val('');
+                        $scope.quicksearchSparepart.data = null;
+                        $event.preventDefault();
+                    },
+                    ok: function ($event, id) {
+                        jQuery.each($scope.quicksearchSparepart.data, function () {
+                            if (this.isSelected) {
+                                $scope.data.spareparts.push({
+                                    loadingPlanSparepartDetailID: $scope.method.getNewID(),
+                                    factoryOrderSparepartDetailID: this.factoryOrderSparepartDetailID,
+                                    quantity: this.quantity,
+                                    Remark: '',
+                                    proformaInvoiceNo: this.proformaInvoiceNo,
+                                    lds: this.lds,
+                                    clientUD: this.clientUD,
+                                    factoryUD: this.factoryUD,
+                                    articleCode: this.articleCode,
+                                    description: this.description,
+                                    qnt40HC: this.qnt40HC,
+                                    orderQnt: this.orderQnt,
+                                    quotationSalePrice : this.quotationSalePrice,
+                                    factoryID : this.factoryID,
+                                    offerLineSparePartID : this.offerLineSparePartID
+                                });
+                            }
+                        });
+                        $scope.quicksearchSparepart.event.close($event, false);
+                    }
+                }
+            }
+
+            searchLoadingPlanTimer = null;
+            $scope.quicksearchLoadingPlan = {
+                data: null,
+                filters: {
+                    filters: {
+                        searchQuery: '',
+                    },
+                    sortedBy: 'LoadingPlanUD',
+                    sortedDirection: 'ASC',
+                    pageSize: 20,
+                    pageIndex: 1
+                },
+
+                loadingPlanUD: '',
+                totalPage: 0,
+
+                method: {
+                    searchLoadingPlan: function () {
+                        jsonService.quicksearchLoadingPlan($scope.quicksearchLoadingPlan.filters,
+                            function (data) {
+                                $scope.quicksearchLoadingPlan.data = data.data;
+                                $scope.quicksearchLoadingPlan.totalPage = Math.ceil(data.totalRows / $scope.quicksearchLoadingPlan.filters.pageSize);
+                                quicksearchLoadingPlanGrid.updateLayout();
+                                $scope.$apply();
+
+                                jQuery('#loadingPlan-popup').show();
+                            },
+                            function (error) {
+                                $scope.quicksearchLoadingPlan.data = null;
+                                $scope.quicksearchLoadingPlan.filters.pageIndex = 1;
+                                $scope.quicksearchLoadingPlan.totalPage = 0;
+                                $scope.$apply();
+                            }
+                        );
+                    },
+                },
+
+                event: {
+                    searchBoxKeyUp: function ($event) {
+                        if ($event.keyCode == 13) {
+                            $scope.quicksearchLoadingPlan.filters.filters.searchQuery = jQuery('#txtLoadingPlanUD').val();
+                            $scope.quicksearchLoadingPlan.filters.pageIndex = 1;
+                            $scope.quicksearchLoadingPlan.method.searchLoadingPlan();
+                        }
+                        else if (jQuery('#txtLoadingPlanUD').val().length >= 3) {
+                            clearTimeout(searchLoadingPlanTimer);
+                            searchLoadingPlanTimer = setTimeout(
+                                function () {
+                                    $scope.quicksearchLoadingPlan.filters.filters.searchQuery = jQuery('#txtLoadingPlanUD').val();
+                                    $scope.quicksearchLoadingPlan.filters.pageIndex = 1;
+                                    $scope.quicksearchLoadingPlan.method.searchLoadingPlan();
+                                },
+                                500);
+                        }
+                    },
+
+                    clickSearch: function () {
+                        $scope.quicksearchLoadingPlan.filters.filters.searchQuery = jQuery('#txtLoadingPlanUD').val();
+                        $scope.quicksearchLoadingPlan.filters.pageIndex = 1;
+                        $scope.quicksearchLoadingPlan.method.searchLoadingPlan();
+                    },
+
+                    close: function ($event, clearSearchBox) {
+                        jQuery('#loadingPlan-popup').hide();
+                        if (clearSearchBox) {
+                            $scope.quicksearchLoadingPlan.loadingPlanUD = '';
+                            $scope.data.parentLoadingPlanID = 0;
+                        }
+                        $scope.quicksearchLoadingPlan.data = null;
+                        $event.preventDefault();
+                    },
+                    ok: function ($event, item) {
+
+                        $scope.data.parentID = item.loadingPlanID;
+                        $scope.data.bookingID = item.bookingID;
+                        $scope.data.containerNo = item.containerNo;
+                        $scope.data.sealNo = item.sealNo;
+                        $scope.data.containerTypeID = item.containerTypeID;
+
+                        $scope.data.parentLoadingPlanUD = item.loadingPlanUD;
+                        $scope.data.dataUD = item.dataUD;
+                        $scope.data.blNo = item.blNo;
+                        $scope.data.parentContainerNo = item.containerNo;
+                        $scope.data.parentSealNo = item.sealNo;
+                        $scope.data.parentContainerTypeNM = item.containerTypeNM
+
+                        $scope.quicksearchLoadingPlan.event.close($event, false);
+                        $scope.$apply();
+                    }
+                }
+
+            }
+
+            //
+            // init
+            //
+            $scope.event.init();
+        }]);
+    </script>
+}
+

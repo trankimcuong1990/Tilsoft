@@ -1,0 +1,239 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var pageSize = System.Configuration.ConfigurationManager.AppSettings["DefaultPageSize"];
+    var cookieID = HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString();
+    var backendReportUrl = System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"];
+}
+
+<div class="row">
+    <article class="col-xs-12 col-sm-12 col-lg-12 col-md-12">
+        <div class="jarviswidget" id="wid-id-1" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                <h2>Search Result</h2>
+            </header>
+            <div>
+                <div class="widget-body">
+                    <div class="smart-form">
+                        <fieldset>
+                            <div class="row">
+                                <section class="col col-2">
+                                    <label class="label">Season</label>
+                                    <label class="select">
+                                        <select class="form-control" ng-model="filters.season" ng-options="item.seasonValue as item.seasonText for item in supportSeason">
+                                            <option value=""></option>
+                                        </select>
+                                        <i></i>
+                                    </label>
+                                </section>
+                                <section class="col col-2">
+                                    <label class="label">Inv.No</label>
+                                    <label class="input">
+                                        <input class="form-control search-filter" style="width: 100%" ng-model="filters.commercialSaleInvoiceNr" />
+                                    </label>
+                                </section>
+                                <section class="col col-2">
+                                    <label class="label">Inv.Date From</label>
+                                    <label class="input">
+                                        <input type="text" class="form-control datepicker" data-dateformat="dd/mm/yy" ng-model="filters.commercialSaleInvoiceDate" />
+                                        <i class="icon-append fa fa-calendar"></i>
+                                    </label>
+                                </section>
+                                <section class="col col-2">
+                                    <label class="label">Inv.Date To</label>
+                                    <label class="input">
+                                        <input type="text" class="form-control datepicker" data-dateformat="dd/mm/yy" ng-model="filters.commercialSaleInvoiceDateTo" />
+                                        <i class="icon-append fa fa-calendar"></i>
+                                    </label>
+                                </section>
+                                <section class="col col-4">
+                                    <label class="label">&nbsp;</label>
+                                    <label class="input">
+                                        <a href="javascript:void(0)" class="btn btn-default btn-sm" ng-click="event.refresh()">
+                                            Refresh
+                                        </a>
+                                        <a href="javascript:void(0)" class="btn btn-default btn-sm" ng-click="event.clear()">
+                                            Clear Filter
+                                        </a>
+                                    </label>                                    
+                                </section>
+                            </div>
+                        </fieldset>
+                    </div>
+
+                    <div avs-scroll grid-handler="gridHandler" class="tilsoft-table-wrapper">
+                        <div class="tilsoft-table">
+                            <div class="tilsoft-table-header" style="width: 2340px">
+                                <div style="width: 80px">
+                                    Total<br /> <b style="color: #940505">{{totalRows | number}}</b>
+                                </div>
+                                <div style="width: 150px" class="sorting_asc" data-column="InvoiceNo">
+                                    Commercial Sale<br />Invoice Nr.
+                                </div>
+                                <div style="width: 150px" class="sorting" data-column="InvoiceDate">
+                                    Commercial Sale<br />Invoice Date
+                                </div>
+                                <div style="width: 120px" class="sorting" data-column="Currency">
+                                    Sale Invoice<br />Currency
+                                </div>
+                                <div style="width: 100px" class="sorting" data-column="ClientUD">
+                                    Customer<br />Code
+                                </div>
+                                <div style="width: 150px" class="sorting" data-column="ClientNM">
+                                    Customer<br />Name
+                                </div>
+                                <div style="width: 130px" class="sorting" data-column="SaleNM">
+                                    Sale Account<br />Manager
+                                </div>
+                                <div style="width: 150px" class="sorting" data-column="ArticleCode">
+                                    Art. Code
+                                </div>
+                                <div style="width: 250px" class="sorting" data-column="Description">
+                                    Description
+                                </div>
+                                <div style="width: 130px" class="sorting" data-column="SupplierArt">
+                                    Main Supplier<br />Art.
+                                </div>
+                                <div style="width: 100px">
+                                    Quantity
+                                </div>
+                                <div style="width: 140px">
+                                    Standard Cost<br />Price per Unit
+                                </div>
+                                <div style="width: 140px">
+                                    Standard Cost<br />Price Amount
+                                </div>
+                                <div style="width: 140px">
+                                    Sale price<br />per unit
+                                </div>
+                                <div style="width: 140px">
+                                    Sale price<br />Amount
+                                </div>
+                                <div style="width: 130px">
+                                    Gross Margin<br />Amount
+                                </div>
+                                <div style="width: 130px">
+                                    Gross Margin<br />%
+                                </div>
+                                <div></div>
+                            </div>
+                            <div class="tilsoft-table-totalrow" style="width: 2340px">
+                                <div style="width: 1410px">Total</div>
+                                <div style="width: 100px">
+                                    {{event.getTotalQnt() | number : 2}}
+                                </div>
+                                <div style="width: 140px">
+                                    {{event.getTotalStandardCostPricePerUnit() | number : 2}}
+                                </div>
+                                <div style="width: 140px">
+                                    {{event.getTotalStandardCostPriceAmount() | number : 2}}
+                                </div>
+                                <div style="width: 140px">
+                                    {{event.getTotalSalePricePerUnit() | number : 2}}
+                                </div>
+                                <div style="width: 140px">
+                                    {{event.getTotalSalePriceAmount() | number : 2}}
+                                </div>
+                                <div style="width: 130px">
+                                    {{event.getTotalGrossMarginAmount() | number : 2}}
+                                </div>
+                                <div style="width: 130px">
+                                    {{(event.getTotalGrossMarginAmount() / event.getTotalSalePriceAmount()) | number : 2}}
+                                </div>
+                                <div></div>
+                            </div>
+                            <div class="tilsoft-table-body" style="width: 2340px">
+                                <table>
+                                    <tbody>
+                                        <tr ng-repeat="item in data">
+                                            <td style="width: 80px; text-align: center">
+                                                {{($index + 1) | number}}
+                                            </td>
+                                            <td style="width: 150px; text-align: center">
+                                                {{item.invoiceNo}}
+                                            </td>
+                                            <td style="width: 150px; text-align: center">
+                                                {{item.invoiceDate}}
+                                            </td>
+                                            <td style="width: 120px; text-align: center">
+                                                {{item.currency}}
+                                            </td>
+                                            <td style="width: 100px; text-align: center">
+                                                {{item.clientUD}}
+                                            </td>
+                                            <td style="width: 150px">
+                                                {{item.clientNM}}
+                                            </td>
+                                            <td style="width: 130px">
+                                                {{item.saleNM}}
+                                            </td>
+                                            <td style="width: 150px">
+                                                {{item.articleCode}}
+                                            </td>
+                                            <td style="width: 250px">
+                                                {{item.description}}
+                                            </td>
+                                            <td style="width: 130px">
+                                                {{item.supplierArt}}
+                                            </td>
+                                            <td style="width: 100px; text-align: right">
+                                                {{item.quantity | number : 2}}
+                                            </td>
+                                            <td style="width: 140px; text-align: right">
+                                                {{item.purchasingPrice | number : 2}}
+                                            </td>
+                                            <td style="width: 140px; text-align: right">
+                                                {{item.purchasingAmount | number : 2}}
+                                            </td>
+                                            <td style="width: 140px; text-align: right">
+                                                {{item.unitPrice | number : 2}}
+                                            </td>
+                                            <td style="width: 140px; text-align: right">
+                                                {{item.saleAmount | number : 2}}
+                                            </td>
+                                            <td style="width: 130px; text-align: right">
+                                                {{item.grossMargin | number : 2}}
+                                            </td>
+                                            <td style="width: 130px; text-align: right">
+                                                {{event.getGrossMarginPercent(item) | number : 2}}
+                                            </td>
+                                            <td></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </div>
+        </div>
+    </article>
+</div>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default btn-sm" ng-click="event.refresh()" title="Search"><i class="fa fa-search"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default btn-sm" ng-click="event.exportExcel()"><i class="fa fa-file-excel-o"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(serviceRoot)/api/warehouseInvoiceGrossMarginRpt/',
+            token: '@token',
+            pageSize: '@pageSize',
+            cookieID: '@cookieID',
+            backendReportUrl: '@backendReportUrl',
+        }
+    </script>
+    <script type="text/javascript" src="~/Views/WarehouseInvoiceGrossMarginRpt/index.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Views/WarehouseInvoiceGrossMarginRpt/service.js?=@guid"></script>
+}

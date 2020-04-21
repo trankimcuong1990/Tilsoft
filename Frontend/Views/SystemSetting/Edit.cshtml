@@ -1,0 +1,170 @@
+﻿@{
+    if (ViewBag.ID == 0)
+    {
+        ViewBag.Title = "Create New System Setting";
+    }
+    else
+    {
+        ViewBag.Title = "Edit System Setting";
+    }
+
+    ViewBag.Module = "SystemSetting";
+}
+
+<form class="row" name="editForm" id="main-form">
+    <article class="col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-0" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>System Settings Information</h2>
+            </header>
+            <div>
+                <div class="widget-body">
+                    <div class="smart-form">
+                        <fieldset>
+                            <section class="col col-4">
+                                <label class="label">Setting Key</label>
+                                <label class="input">
+                                    <input type="text" ng-model="data.settingKey" required />
+                                </label>
+                            </section>
+                            <section class="col col-6">
+                                <label class="label">Setting Value</label>
+                                <label class="input">
+                                    <input type="text" ng-model="data.settingValue" required />
+                                </label>
+                            </section>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "SystemSetting")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="event.update($event)"><i class="fa fa-save"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default@(ViewBag.ID==0?" disabled":"") @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="Delete" style="color: #ff0000;" ng-click="event.delete($event)"><i class="fa fa-times"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default disabled" title="Print"><i class="fa fa-print"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default disabled" title="Approve"><i class="fa fa-thumbs-o-up"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0);" class="btn btn-default disabled" title="Reset Approval status"><i class="fa fa-thumbs-o-down"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script src="~/Angular/app/jsonService.js"></script>
+    <script src="~/Angular/app/systemsetting/service.js"></script>
+    <script type="text/javascript">
+            jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/systemsetting/';
+            jsonService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+            var tilsoftApp = angular.module('tilsoftApp', []);
+            tilsoftApp.controller('tilsoftController', ['$scope', function ($scope) {
+                //
+                // property
+                //
+                $scope.data = null;
+
+                //
+                // event
+                //
+                $scope.event = {
+                    init:function(){
+                        jsonService.load(
+                            @ViewBag.ID,
+                            function (data) {
+                                $scope.data = data.data.data;
+                                $scope.$apply();
+                                jQuery('#content').show();
+
+                                // monitor changes
+                                $scope.$watch('data', function() {
+                                    jQuery('#changeNotification').html('<i class="fa fa-save blink_me"></i>');
+                                });
+                            },
+                            function (error) {
+                                jsHelper.showMessage('warning', error);
+
+                                $scope.data = null;
+                                $scope.$apply();
+                            }
+                        );
+                    },
+                    update: function($event){
+                        $event.preventDefault();
+
+                        if($scope.editForm.$valid)
+                        {
+                            jsonService.update(
+                                @ViewBag.ID,
+                                $scope.data,
+                                function (data) {
+                                    jsHelper.processMessage(data.message);
+                                    if(data.message.type == 0) {
+                                        $scope.method.refresh(data.data.systemsettingID);
+                                    }
+                                },
+                                function (error) {
+                                    jsHelper.showMessage('warning', error);
+                                }
+                            );
+                        }
+                        else
+                        {
+                            jsHelper.showMessage('warning', '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED');
+                        }
+                    },
+                    delete: function($event){
+                        $event.preventDefault();
+
+                        if (confirm('Are you sure ?')) {
+                            jsonService.delete(
+                                @ViewBag.ID,
+                                function (data) {
+                                    jsHelper.processMessage(data.message);
+                                    if(data.message.type == 0) {
+                                        window.location = '@Url.Action("Index", "SystemSetting")';
+                                    }
+                                },
+                                    function (error) {
+                                        jsHelper.showMessage('warning', error);
+                                    }
+                                );
+                        }
+                    }
+                };
+
+                //
+                // method
+                //
+                $scope.method = {
+                    refresh: function(id){
+                        jsHelper.loadingSwitch(true);
+                        window.location = '@Url.Action("Edit", "SystemSetting", new { id = UrlParameter.Optional })/'+id;
+                    }
+                };
+
+                //
+                // init
+                //
+                $scope.event.init();
+            }]);
+    </script>
+}
+

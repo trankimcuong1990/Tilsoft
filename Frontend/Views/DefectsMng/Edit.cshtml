@@ -1,0 +1,157 @@
+﻿@{
+    var guid = Guid.NewGuid().ToString().Replace("-", "");
+    var serviceRoot = System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"];
+    var token = Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION];
+
+    ViewBag.Title = (ViewBag.ID == 0) ? "Create Defects" : "Edit Defects";
+    ViewBag.SubTitle = (ViewBag.ID == 0) ? "Create" : "Edit";
+    ViewBag.Module = "Defects";
+}
+
+<form name="editForm" class="row">
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+
+        <div class="jarviswidget jarviswidget-color-darken" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>@ViewBag.SubTitle General</h2>
+            </header>
+            <div>
+                <div class="jarviswidget-editbox"></div>
+                <div class="widget-body">
+                    <div class="smart-form">
+                        <div class="row">
+
+                            <section class="col col-lg-1">
+                                <label class="label">
+                                    <strong>Defects Code</strong>
+                                    <em class="note note-error" ng-show="editForm.defectUD.$error.required"> (Required)</em>
+                                </label>
+                                <label class="input" ng-class="{'state-error': editForm.defectUD.$error.required}">
+                                    <input type="text" class="form-control" name="defectUD" ng-model="data.defectUD">
+                                </label>
+                            </section>
+
+                            <section class="col col-lg-3">
+                                <label class="label">
+                                    <strong>Defects Name En</strong>
+                                    <em class="note note-error" ng-show="editForm.defectNM.$error.required"> (Required)</em>
+                                </label>
+                                <label class="input" ng-class="{'state-error': editForm.defectNM.$error.required}">
+                                    <input type="text" class="form-control" name="defectNM" ng-model="data.defectNM">
+                                </label>
+                            </section>
+
+                            <section class="col col-lg-3">
+                                <label class="label">
+                                    <strong>Defects Name Vi</strong>
+                                    <em class="note note-error" ng-show="editForm.defectViNM.$error.required"> (Required)</em>
+                                </label>
+                                <label class="input" ng-class="{'state-error': editForm.defectViNM.$error.required}">
+                                    <input type="text" class="form-control" name="defectViNM" ng-model="data.defectViNM">
+                                </label>
+                            </section>
+
+                            <section class="col col-lg-2">
+                                <label class="label">
+                                    <strong>Defect Group</strong>
+                                    <em class="note note-error" ng-show="editForm.defectGroupID.$error.required"> (Required)</em>
+                                </label>
+                                <select name="defectGroupID" class="form-control" ng-model="data.defectGroupID" ng-options="item.defectGroupID as item.defectGroupNM for item in defectsGroups">
+                                    <option value=""></option>
+                                </select>
+                            </section>
+                            <section class="col col-lg-1">
+                                <label class="label">
+                                    <strong>A</strong>
+                                    <em class="note note-error" ng-show="editForm.defectA.$error.required"> (Required)</em>
+                                </label>
+                                <select name="defectA" class="form-control" ng-model="data.defectA" ng-options="item.typeOfDefectID as item.typeOfDefectNM for item in typeOfDefectDTO">
+                                    <option value=""></option>
+                                </select>
+                            </section>
+                            <section class="col col-lg-1">
+                                <label class="label">
+                                    <strong>B</strong>
+                                    <em class="note note-error" ng-show="editForm.defectB.$error.required"> (Required)</em>
+                                </label>
+                                <select name="defectB" class="form-control" ng-model="data.defectB" ng-options="item.typeOfDefectID as item.typeOfDefectNM for item in typeOfDefectDTO">
+                                    <option value=""></option>
+                                </select>
+                            </section>
+                            <section class="col col-lg-1">
+                                <label class="label">
+                                    <strong>C</strong>
+                                    <em class="note note-error" ng-show="editForm.defectC.$error.required"> (Required)</em>
+                                </label>
+                                <select name="defectC" class="form-control" ng-model="data.defectC" ng-options="item.typeOfDefectID as item.typeOfDefectNM for item in typeOfDefectDTO">
+                                    <option value=""></option>
+                                </select>
+                            </section>
+                        </div>
+
+                        <fieldset>
+                            <div class="row">
+                                <section>
+                                    <label class="label">Images</label>
+                                    <div style="border: solid 1px #ddd;">
+                                        <div class="furnindo-gallery-item-2 float-img-list" ng-repeat="item in data.defectsImageDTOs">
+                                            <a href="{{item.fileLocation}}" data-featherlight="image">
+                                                <img ng-src="{{item.thumbnailLocation}}" />
+                                            </a>
+                                            <a class="btn btn-danger btn-xs font-11 gallery-button" href="javascript:void(0)" title="Remove" style="width: 63px; text-align: left;" ng-click="event.removeImage(item)"><i class="fa fa-times"></i> Remove</a>
+                                        </div>
+                                        <div class="furnindo-gallery-item-2" ng-show="data.defectsImageDTOs.length <= 4">
+                                            <a href="#" ng-click="event.addImage()" title="Add new image"><img src="~/img/add-img-button.jpg" /></a>
+                                        </div>
+                                        <div class="clear"></div>
+                                    </div>
+                                </section>
+                            </div>
+                        </fieldset>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+@section FormAction{
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "DefectsMng")" class="btn btn-default" title="Back">
+                <i class="fa fa-arrow-left"></i>
+            </a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default" title="Delete" ng-class="{'disabled': data.defectID == 0}" ng-click="event.deletedata(data.defectID)">
+                <i class="fa fa-times"></i>
+            </a>
+        </li>
+        <li class="sparks-info">
+            <a href="javascript:void(0)" class="btn btn-default" title="Save" ng-click="event.updatedata($event)">
+                <i class="fa fa-floppy-o"></i>
+            </a>
+        </li>
+    </ul>
+}
+
+@section pagejs{
+    <script type="text/javascript">
+        var context = {
+            id: @ViewBag.ID,
+            backUrl: '@Url.Action("Index", "DefectsMng")',
+            refreshUrl: '@Url.Action("Edit", "DefectsMng", new { id = UrlParameter.Optional })/',
+            serviceUrl: '@(serviceRoot)/api/defects/',
+            token: '@token',
+            msgValid: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED'
+        };
+    </script>
+    <script type="text/javascript" src="~/Views/DefectsMng/edit.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Angular/app/jsonService2.js?v=@guid"></script>
+    <script type="text/javascript" src="~/Views/DefectsMng/service.js?v=@guid"></script>
+}
+

@@ -1,0 +1,86 @@
+﻿@{
+    ViewBag.Title = "Offer All Season";
+    ViewBag.Module = "OfferSeason";
+
+    int typeID = 0;
+    if (!string.IsNullOrEmpty(Request.QueryString["typeID"]))
+    {
+        typeID = Convert.ToInt32(Request.QueryString["typeID"].ToString());
+    }
+    string userManualUrl = string.Empty;
+    if (System.IO.File.Exists(Server.MapPath("~/UserManual/" + ViewBag.ModuleCode + ".pdf")))
+    {
+        userManualUrl = "/UserManual/" + ViewBag.ModuleCode + ".pdf";
+    }
+}
+
+<style>
+    /*.smart-form .tilsoft-table .checkbox i {
+        position: absolute !important;
+        top: 1px !important;
+    }*/
+
+</style>
+
+<form class="row" name="editForm" id="main-form">
+    <div ng-view id="partial-content"></div>
+</form>
+
+@section FormAction {
+<ul id="sparks">
+    <li class="sparks-info">
+        <a href="@Url.Action("Index", "OfferSeasonMng")" class="btn btn-default" title="Back"><i class="fa fa-arrow-left"></i></a>
+    </li>
+    <li class="sparks-info">
+        <a href="@Url.Action("Edit", "OfferToClientMng")/0?clientID={{data.offerSeasonDTO.clientID}}&season={{data.offerSeasonDTO.season}}&currency={{data.offerSeasonDTO.currency}}" class="btn btn-default" title="Go to OTC" target="_blank"><i class="fa fa-arrow-right"></i></a>
+    </li>
+    @if (!string.IsNullOrEmpty(userManualUrl))
+    {
+        <li class="sparks-info">
+            <a target="_blank" href="@userManualUrl" class="btn btn-default" title="Help"><i class="fa fa-info"></i></a>
+        </li>
+    }
+</ul>
+}
+
+@section pagepopup2 {
+    @Html.Partial("~/Views/Shared/_Controls/_ProductAttributeWizard.cshtml")
+}
+
+@section pagejs {
+    <script src="~/Views/OfferSeasonMng/Edit.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/OfferSeasonMng/_Edit/_InitForm.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/OfferSeasonMng/_Edit/_EditFobProductForm.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/OfferSeasonMng/_Edit/_EditFobSparepartForm.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/OfferSeasonMng/_Edit/_EditWarehouseForm.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/OfferSeasonMng/_Edit/_SearchModelForm.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/OfferSeasonMng/_Edit/_SearchProductForm.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/OfferSeasonMng/_Edit/_SearchSparepartForm.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/OfferSeasonMng/_Edit/_OfferItemProperiesForm.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/OfferSeasonMng/_Edit/_OfferSparepartProperiesForm.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/OfferSeasonMng/_Edit/_PlanningPurchasingPriceForm.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/OfferSeasonMng/_Edit/_EditFobSampleForm.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>    
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/offer-season/',
+            token: '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]',
+            miDeltaByClientUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/mi-delta-by-client/gets',
+
+            backendReportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]',
+            refreshUrl: '@Url.Action("Edit", "OfferSeasonMng", new { id = UrlParameter.Optional })/',
+            indexUrl: '@Url.Action("Index", "OfferSeasonMng")',
+            reportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]',
+
+            id: @ViewBag.ID,
+            errMsg: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED',
+
+            typeID: '@typeID',
+            searchClientUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/offer-season/search-client',
+            randomID: '@System.Guid.NewGuid().ToString().Replace("-", "")',
+            canReadDeltaByClient: '@(Frontend.Helper.AuthHelper.GetActionButtonStatus("MIDeltaByClientRpt", Frontend.Helper.ActionEnum.Read, HttpContext.Current))' !== 'disabled',
+        };
+    </script>
+    <script src="~/Angular/app/jsonService2.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/OfferSeasonMng/Service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+
+}

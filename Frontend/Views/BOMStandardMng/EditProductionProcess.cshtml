@@ -1,0 +1,90 @@
+﻿@{
+    string title = "BOM Standard";
+    ViewBag.Title = title;
+    ViewBag.Module = title;    
+}
+
+<form class="row" name="editForm">
+
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>General</h2>
+            </header>
+            <div>
+                <div class="widget-body">
+                    <div class="smart-form">
+                        <div class="row">
+
+                            <section class="col col-lg-3">
+                                <label class="label">
+                                    <label>OP Sequence</label>
+                                    <em class="note note-error" ng-show="editForm.opSequenceID.$error.required"> (Required)</em>
+                                </label>
+                                <label class="input">
+                                    <select class="form-control" ng-model="data.opSequenceID" ng-options="opSequence.opSequenceID as opSequence.opSequenceNM for opSequence in opSequences" name="opSequenceID" required>
+                                        <option value=""></option>
+                                    </select>
+                                </label>
+                            </section>
+
+                            <section class="col col-lg-12">
+                                <label>Product</label>
+                                <input id="product" class="form-control" type="text" name="product" ng-model="data.productDescription">
+                            </section>
+                            
+                            <section class="col col-lg-12">
+                                <label>ArticleCode</label>
+                                <span class="form-control">{{data.productArticleCode}}</span>
+                            </section>
+                        </div>  
+                        <div class="row" ng-if="data.productionProcessID>0">
+                            <section class="col col-lg-12">
+                                <a  class="btn btn-primary btn-xs" href="@Url.Action("Edit", "BOMStandardMng")/0?productionProcessID={{data.productionProcessID}}">Create BOM</a>
+                            </section>
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+</form>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "BOMStandardMng")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="#" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="event.update()"><i class="fa fa-save"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="#" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="Delete" style="color: #ff0000;" ng-click="event.delete($event)"><i class="fa fa-times"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script src="~/Views/BOMStandardMng/editProductionProcess.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script type="text/javascript">
+        var context = {
+            serviceUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/bomstandard/',
+            supportServiceUrl: '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/support/',
+            token: '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]',
+
+            backendReportUrl: '@System.Configuration.ConfigurationManager.AppSettings["BackendReportUrl"]',
+            refreshUrl: '@Url.Action("EditProductionProcess", "BOMStandardMng", new { id = UrlParameter.Optional })/',
+            indexUrl: '@Url.Action("Index", "BOMStandardMng")',
+
+            id: @ViewBag.ID,
+            errMsg: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED',
+            getProductUrl:  '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/workOrder/getProduct',
+        }
+    </script>
+    <script src="~/Angular/app/jsonService2.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Views/BOMStandardMng/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}

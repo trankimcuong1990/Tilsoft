@@ -1,0 +1,125 @@
+﻿@{
+    if (ViewBag.ID == 0)
+    {
+        ViewBag.Title = "Create component";
+    }
+    else
+    {
+        ViewBag.Title = "Edit component";
+    }
+
+    ViewBag.Module = "Component";
+}
+
+<form class="row" name="editForm">
+
+    <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+
+        <div class="jarviswidget" id="wid-id-general" data-widget-editbutton="false" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-deletebutton="false">
+            <header>
+                <span class="widget-icon">
+                    <i class="fa fa-database"></i>
+                </span>
+                <h2>General</h2>
+            </header>
+            <div>
+                <div class="widget-body">
+                    <div class="smart-form">
+
+                        <div class="row">
+                            <div class="col col-lg-2 m-bottom-15">
+                                <label>Component Code</label>
+                                <input type="text" class="form-control" ng-model="data.factoryFinishedProductUD" />
+                            </div>
+                            <div class="col col-lg-10 m-bottom-15">
+                                <label>Component Name</label>
+                                <input type="text" class="form-control" ng-model="data.factoryFinishedProductNM" />
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col col-lg-12">
+                                <label>Price / <a class="btn btn-primary btn-xs" style="font-size:10px; margin-bottom:4px" ng-click="event.addComponentPrice($event)">Add price</a></label>
+                                <div id="grdPrice" class="tilsoft-table-wrapper">
+                                    <div class="tilsoft-table">
+                                        <div class="tilsoft-table-body" style="width: 100px;margin-top:0px">
+                                            <table>
+                                                <tr>
+                                                    <th style="width:120px"></th>
+                                                    <th>Team</th>
+                                                    <th style="width:300px">Step</th>
+                                                    <th style="width:150px">Price</th>
+                                                    <th style="width:150px">Haft round price</th>
+                                                    <th style="width:150px">Double round price</th>
+                                                </tr>
+                                                <tr ng-repeat="item in data.factoryFinishedProductPriceDTOs">
+                                                    <td style="text-align:center;vertical-align:middle">
+                                                        <a class="btn btn-danger btn-xs font-11" ng-click="event.deleteCoponentPrice($event,item.factoryFinishedProductPriceID)"><i class="fa fa-times"></i> Del</a>
+                                                        <a class="btn btn-primary btn-xs font-11" ng-click="event.createComponentPrice($event,data.factoryFinishedProductID,item)"><i class="fa fa-save"></i> Save</a>
+                                                    </td>
+                                                    <td>
+                                                        <select class="form-control" ng-model="item.factoryTeamID" ng-options="x.factoryTeamID as x.factoryTeamNM for x in factoryTeams | orderBy: 'factoryTeamNM'">
+                                                            <option value=""></option>
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <select class="form-control" ng-model="item.factoryStepID" ng-options="x.factoryStepID as x.factoryStepNM for x in factorySteps">
+                                                            <option value=""></option>
+                                                        </select>
+                                                    </td>
+
+                                                    <td><input type="text" ng-model="item.price" class="form-control" style="text-align:center"></td>
+                                                    <td><input type="text" ng-model="item.halfRoundPrice" class="form-control" style="text-align:center"></td>
+                                                    <td><input type="text" ng-model="item.doubleRoundPrice" class="form-control" style="text-align:center"></td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+
+</form>
+
+@section FormAction {
+    <ul id="sparks">
+        <li class="sparks-info">
+            <a href="@Url.Action("Index", "FactoryFinishedProduct")" class="btn btn-default" title="Go Back"><i class="fa fa-arrow-left"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="#" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Update, HttpContext.Current))" title="Save" ng-click="event.update($event)"><i class="fa fa-save"></i></a>
+        </li>
+        <li class="sparks-info">
+            <a href="#" class="btn btn-default @(Frontend.Helper.AuthHelper.GetActionButtonStatus(ViewBag.ModuleCode, Frontend.Helper.ActionEnum.Create, HttpContext.Current))" title="Delete" style="color: #ff0000;" ng-click="event.delete($event)"><i class="fa fa-times"></i></a>
+        </li>
+    </ul>
+}
+
+@section pagejs {
+    <script src="~/Angular/app/jsonService.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/support/service.js?c=@System.Guid.NewGuid().ToString().Replace("-","")"></script>
+    <script type="text/javascript">
+        jsonService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/factoryFinishedProduct/';
+        jsonService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+        supportService.serviceUrl = '@(System.Configuration.ConfigurationManager.AppSettings["BackendServiceUrl"])api/support/';
+        supportService.token = '@Session[Frontend.Customize.Common.ProjectDefinition.TOKEN_SESSION]';
+
+        var context = {
+            id: '@ViewBag.ID',
+            backUrl: '@Url.Action("Index", "FactoryFinishedProduct")',
+            refreshUrl: '@Url.Action("Edit", "FactoryFinishedProduct", new { id = UrlParameter.Optional })/',
+            errMsg: '@Frontend.Properties.Resources.INPUT_VALIDATION_FAILED',
+        }
+    </script>
+    <script src="~/Angular/app/factoryFinishedProduct/service.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+    <script src="~/Angular/app/factoryFinishedProduct/edit.js?c=@System.Guid.NewGuid().ToString().Replace("-", "")"></script>
+}
+
